@@ -3,7 +3,8 @@
 const { chromium } = require('/opt/node22/lib/node_modules/playwright');
 const RUNS = +process.argv[2] || 4, MINUTES = +process.argv[3] || 15, STYLE = process.argv[4] || 'normal';
 (async () => {
-  const browser = await chromium.launch(); const results = []; const errors = [];
+  const browser = await chromium.launch();
+  { const _nc = browser.newContext.bind(browser); browser.newContext = async o => { const c = await _nc(o); await c.addInitScript(() => { try { localStorage.setItem('stickhero_story', '1'); } catch (e) {} }); return c; }; } const results = []; const errors = [];
   for (let run = 0; run < RUNS; run++) {
     const page = await (await browser.newContext({ viewport: { width: 390, height: 844 } })).newPage();
     page.on('pageerror', e => errors.push(`run${run}: ${e.message}`));

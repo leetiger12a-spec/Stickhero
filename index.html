@@ -122,7 +122,7 @@ h2{margin:0 0 14px;font-size:clamp(30px,9vw,48px);color:#ffd23f;text-shadow:0 3p
 
 <script>
 'use strict';
-const BUILD = 21;
+const BUILD = 22;
 const BOSS_INTERVAL = 180;      // 보스 등장 간격(초)
 const WAVE_INTERVAL = 60;       // 대규모 몰이 이벤트 간격(초)
 const MAX_ENEMIES = 220;
@@ -426,13 +426,13 @@ function renderDiff() {
 }
 
 // ---------- 오프닝 이야기 (그림이 준비되면 STORY_FILES에 이름을 넣으면 켜짐) ----------
-const STORY_FILES = [];
+const STORY_FILES = ['op1', 'op2', 'op3'];
 const STORY = [
   { img: 'op1', cap: '평화로운 숲속 마을. 주황 영웅은 고양이 친구들과 나무를 베며 즐겁게 지냈어요.' },
   { img: 'op2', cap: '그런데 어느 날 밤, 왕관을 쓴 괴물과 빨간 막대 군단이 숲 너머에서 몰려왔어요!' },
   { img: 'op3', cap: '영웅은 머리띠를 질끈 묶고 칼을 들었어요. "우리 마을은 내가 지킨다!"' },
 ];
-const HAS_LOGO = false;   // img/logo.webp 가 생기면 true
+const HAS_LOGO = true;    // img/logo.webp 사용
 let storyI = 0, storyDone = null;
 function playStory(after) {
   const list = STORY.filter(s => STORY_FILES.includes(s.img));

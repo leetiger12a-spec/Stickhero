@@ -1,6 +1,7 @@
 const { chromium } = require('/opt/node22/lib/node_modules/playwright');
 (async () => {
-  const browser = await chromium.launch(); const errors = []; const check = (c, m) => { if (!c) errors.push(m); };
+  const browser = await chromium.launch();
+  { const _nc = browser.newContext.bind(browser); browser.newContext = async o => { const c = await _nc(o); await c.addInitScript(() => { try { localStorage.setItem('stickhero_story', '1'); } catch (e) {} }); return c; }; } const errors = []; const check = (c, m) => { if (!c) errors.push(m); };
   const ctx = await browser.newContext({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 2, hasTouch: true, isMobile: true });
   let page = await ctx.newPage();
   const hook = pg => { pg.on('pageerror', e => errors.push('pageerror: ' + e.message)); pg.on('console', m => { if (m.type() === 'error') errors.push('console: ' + m.text()); }); };

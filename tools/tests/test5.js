@@ -2,6 +2,7 @@ const { chromium } = require('/opt/node22/lib/node_modules/playwright');
 const OUT = process.argv[2];
 (async () => {
   const browser = await chromium.launch();
+  { const _nc = browser.newContext.bind(browser); browser.newContext = async o => { const c = await _nc(o); await c.addInitScript(() => { try { localStorage.setItem('stickhero_story', '1'); } catch (e) {} }); return c; }; }
   const errors = [];
   const check = (c, m) => { if (!c) errors.push(m); };
   const page = await (await browser.newContext({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 2, hasTouch: true, isMobile: true })).newPage();
