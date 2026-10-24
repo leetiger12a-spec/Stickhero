@@ -72,7 +72,7 @@ h2{margin:0 0 14px;font-size:clamp(30px,9vw,48px);color:#ffd23f;text-shadow:0 3p
 
 <script>
 'use strict';
-const BUILD = 7;
+const BUILD = 8;
 const BOSS_INTERVAL = 180;      // 보스 등장 간격(초)
 const WAVE_INTERVAL = 60;       // 대규모 몰이 이벤트 간격(초)
 const MAX_ENEMIES = 220;
@@ -109,7 +109,20 @@ const $ = id => document.getElementById(id);
 // ---------- 그림(스프라이트) ----------
 // img/이름.webp 가 있으면 그림으로, 없으면 코드 그림으로 그림
 const SPR = {};
-['hero'].forEach(n => { const im = new Image(); im.onload = () => { SPR[n] = im; }; im.src = `img/${n}.webp?b=${BUILD}`; });
+const SPR_WHITE = {};  // 맞았을 때 번쩍이는 흰 실루엣
+const SPR_INFO = {    // ax: 발 위치(그림 폭 대비), h: 화면 키(월드 단위)
+  hero: { ax: 0.42 }, grunt: { ax: 0.45, h: 50 }, runner: { ax: 0.5, h: 42 }, tank: { ax: 0.42, h: 62 },
+};
+Object.keys(SPR_INFO).forEach(n => {
+  const im = new Image();
+  im.onload = () => {
+    SPR[n] = im;
+    const c = document.createElement('canvas'); c.width = im.width; c.height = im.height;
+    const x = c.getContext('2d'); x.drawImage(im, 0, 0); x.globalCompositeOperation = 'source-atop'; x.fillStyle = '#fff'; x.fillRect(0, 0, c.width, c.height);
+    SPR_WHITE[n] = c;
+  };
+  im.src = `img/${n}.webp?b=${BUILD}`;
+});
 const rand = (a, b) => a + Math.random() * (b - a);
 const clamp = (v, a, b) => v < a ? a : v > b ? b : v;
 const fmtTime = s => { s = Math.floor(s); return String(Math.floor(s / 60)).padStart(2, '0') + ':' + String(s % 60).padStart(2, '0'); };
@@ -230,7 +243,7 @@ const xpNeed = l => Math.floor(5 + l * 4 + Math.pow(l, 1.6));
 const ETYPES = {
   grunt:  { r: 11, hp: 14, spd: 58,  dmg: 8,  color: '#e63946', xp: 1, gold: 1 },
   runner: { r: 9,  hp: 8,  spd: 100, dmg: 6,  color: '#ff4fa3', xp: 1, gold: 1 },
-  tank:   { r: 17, hp: 75, spd: 40,  dmg: 18, color: '#7b2cbf', xp: 5, gold: 4 },
+  tank:   { r: 17, hp: 75, spd: 40,  dmg: 18, color: '#2f6fd6', xp: 5, gold: 4 },
 };
 const BOSSES = [
   { name: '대왕 슬라임', color: '#e63946' },
@@ -1333,14 +1346,14 @@ function drawStick(p) {
   const hipY = -2 - bob, neckY = -18 - bob;
   if (SPR.hero) { // 그림 주인공: 통통 튀며 걷고, 도끼질 때는 몸을 기울임
     for (let i = 0; i < p.logs; i++) drawLog(-12 + (i % 2) * 1.5, -14 - bob - i * 4.6, 0.85);
-    const img = SPR.hero, h = 64, w = h * img.width / img.height;
+    const img = SPR.hero, h = 64, ax = SPR_INFO.hero.ax, w = h * img.width / img.height;
     const ch = p.chop > 0 ? Math.sin((1 - p.chop / 0.2) * Math.PI) : 0;
     const tilt = p.moving ? sw * 0.08 : 0;
     ctx.save(); ctx.translate(0, 14); ctx.rotate(tilt + ch * 0.35);
     const sq = p.moving ? 1 + Math.abs(Math.cos(p.walk)) * 0.04 : 1 + Math.sin(G.t * 3) * 0.015;
     ctx.scale(2 - sq, sq);
     if (blink) ctx.globalAlpha = 0.35;
-    ctx.drawImage(img, -w * 0.42, -h - bob, w, h); // 몸 중심이 발 위에 오도록 (칼 쪽이 더 넓음)
+    ctx.drawImage(img, -w * ax, -h - bob, w, h); // 몸 중심이 발 위에 오도록 (칼 쪽이 더 넓음)
     ctx.restore(); ctx.restore();
     return;
   }
@@ -1414,11 +1427,27 @@ function drawStickman(x, y, o) {
   }
   ctx.restore();
 }
+function drawSpriteMan(n, x, y, o) {
+  // 그림 적: 걸을 때 좌우로 흔들·통통, 맞으면 찌그러지며 하얗게 번쩍, 쓰러지면 빙글빙글
+  const img = SPR[n], inf = SPR_INFO[n], h = inf.h, w = h * img.width / img.height;
+  ctx.save(); ctx.translate(x, y); ctx.scale(1, IK);
+  if (!o.rot) { ctx.fillStyle = 'rgba(0,0,0,.18)'; ctx.beginPath(); ctx.ellipse(0, 2, h * 0.24, h * 0.08, 0, 0, 7); ctx.fill(); }
+  ctx.translate(Math.max(0, o.lunge || 0) * 24 * o.face, -(o.z || 0));
+  if (o.alpha !== undefined) ctx.globalAlpha = o.alpha;
+  if (o.rot) { ctx.translate(0, -h / 2); ctx.rotate(o.rot); ctx.translate(0, h / 2); }
+  else ctx.rotate(Math.sin(o.phase) * 0.09);
+  const sq = o.hit ? 1 + Math.sin(o.hitT * 40) * 0.12 : 1 + Math.abs(Math.cos(o.phase)) * 0.05;
+  ctx.scale(o.face * (2 - sq), sq);
+  ctx.drawImage(o.flash && SPR_WHITE[n] ? SPR_WHITE[n] : img, -w * inf.ax, -h - Math.abs(Math.sin(o.phase)) * 2, w, h);
+  ctx.restore();
+}
 function drawEnemy(e) {
-  drawStickman(e.x, e.y, { color: e.color, s: e.r / 11, face: e.face, phase: e.wob, hit: e.hitT > 0, flash: e.flash > 0, lunge: e.lunge, type: e.type });
+  if (SPR[e.type]) drawSpriteMan(e.type, e.x, e.y, { face: e.face, phase: e.wob, hit: e.hitT > 0, hitT: e.hitT, flash: e.flash > 0, lunge: e.lunge });
+  else drawStickman(e.x, e.y, { color: e.color, s: e.r / 11, face: e.face, phase: e.wob, hit: e.hitT > 0, flash: e.flash > 0, lunge: e.lunge, type: e.type });
   if (e.type === 'tank' && e.hp < e.maxHp) {
-    ctx.fillStyle = '#222'; ctx.fillRect(e.x - 16, e.y - e.r * 2.8, 32, 5);
-    ctx.fillStyle = '#e63946'; ctx.fillRect(e.x - 15, e.y - e.r * 2.8 + 1, 30 * Math.max(0, e.hp / e.maxHp), 3);
+    const by = e.y - (SPR.tank ? SPR_INFO.tank.h * IK + 6 : e.r * 2.8);
+    ctx.fillStyle = '#222'; ctx.fillRect(e.x - 16, by, 32, 5);
+    ctx.fillStyle = '#e63946'; ctx.fillRect(e.x - 15, by + 1, 30 * Math.max(0, e.hp / e.maxHp), 3);
   }
 }
 
@@ -1508,7 +1537,7 @@ function drawWorld() {
       ctx.restore();
     }
   }
-  for (const c of G.corpses) drawStickman(c.x, c.y, { color: c.color, s: c.s, face: 1, phase: 0, hit: true, flash: false, lunge: 0, type: c.type, rot: c.rot, z: c.z + 6, alpha: Math.min(1, c.life * 2) });
+  for (const c of G.corpses) if (SPR[c.type]) drawSpriteMan(c.type, c.x, c.y, { face: 1, phase: 0, hit: false, flash: false, lunge: 0, rot: c.rot, z: c.z + 6, alpha: Math.min(1, c.life * 2) }); else drawStickman(c.x, c.y, { color: c.color, s: c.s, face: 1, phase: 0, hit: true, flash: false, lunge: 0, type: c.type, rot: c.rot, z: c.z + 6, alpha: Math.min(1, c.life * 2) });
   // 회전 칼
   if (G.weapons.sword && G.deadT <= 0 && !p.dead) {
     const s = wStat('sword');
