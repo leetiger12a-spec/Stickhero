@@ -24,6 +24,18 @@ while q:
         ny, nx = y + dy, x + dx
         if 0 <= ny < H and 0 <= nx < W and not bg[ny, nx] and bgish[ny, nx]:
             bg[ny, nx] = True; q.append((ny, nx))
+if opts.get('holes'):  # 테두리에 갇힌 큰 흰 칸(예: 활 안쪽)도 배경으로 — 눈 흰자처럼 작은 칸은 남김
+    minA = int(opts['holes']); seen = bg.copy(); white = (mn > 238) & (mx - mn < 18)
+    for yy, xx in zip(*np.nonzero(white & ~seen)):
+        if seen[yy, xx]: continue
+        reg = [(yy, xx)]; seen[yy, xx] = True; dq = deque(reg)
+        while dq:
+            a1, b1 = dq.popleft()
+            for d1, d2 in ((1, 0), (-1, 0), (0, 1), (0, -1)):
+                c1, c2 = a1 + d1, b1 + d2
+                if 0 <= c1 < H and 0 <= c2 < W and not seen[c1, c2] and white[c1, c2]: seen[c1, c2] = True; dq.append((c1, c2)); reg.append((c1, c2))
+        if len(reg) >= minA:
+            for c1, c2 in reg: bg[c1, c2] = True
 alpha = np.where(bg, 0, 255).astype(np.uint8)
 # 가장자리 부드럽게
 a_img = Image.fromarray(alpha).filter(ImageFilter.MinFilter(3)).filter(ImageFilter.GaussianBlur(0.8))

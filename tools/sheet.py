@@ -22,6 +22,18 @@ while q:
     for dy, dx in ((1, 0), (-1, 0), (0, 1), (0, -1)):
         ny, nx = y + dy, x + dx
         if 0 <= ny < H and 0 <= nx < W and not bg[ny, nx] and bgish[ny, nx]: bg[ny, nx] = True; q.append((ny, nx))
+if opts.get('holes'):  # 테두리에 갇힌 큰 흰 칸(예: 활 안쪽)도 배경으로 — 눈 흰자처럼 작은 칸은 남김
+    minA = int(opts['holes']); seen = bg.copy(); white = (mn > 238) & (mx - mn < 18)
+    for yy, xx in zip(*np.nonzero(white & ~seen)):
+        if seen[yy, xx]: continue
+        reg = [(yy, xx)]; seen[yy, xx] = True; dq = deque(reg)
+        while dq:
+            a1, b1 = dq.popleft()
+            for d1, d2 in ((1, 0), (-1, 0), (0, 1), (0, -1)):
+                c1, c2 = a1 + d1, b1 + d2
+                if 0 <= c1 < H and 0 <= c2 < W and not seen[c1, c2] and white[c1, c2]: seen[c1, c2] = True; dq.append((c1, c2)); reg.append((c1, c2))
+        if len(reg) >= minA:
+            for c1, c2 in reg: bg[c1, c2] = True
 alpha = np.array(Image.fromarray(np.where(bg, 0, 255).astype(np.uint8)).filter(ImageFilter.MinFilter(3)).filter(ImageFilter.GaussianBlur(0.8)))
 solid = alpha > 40
 # 세로로 빈 줄을 기준으로 칸 나누기 (작은 조각은 가까운 칸에 합침)
@@ -90,7 +102,7 @@ for i, f in enumerate(frames):
     sheet.paste(cell.resize((cwS, chS), Image.LANCZOS), (i * cwS, 0))
 out = f'img/{name}.webp'
 sheet.save(out, 'WEBP', quality=90, method=6)
-info = dict(n=len(frames), cw=cwS, ch=chS, ax=round((pad + left) / cw, 4), ay=round((pad + up) / ch, 4), body=round(bodyH / ch, 4))
+info = dict(n=len(frames), cw=cwS, ch=chS, ax=round((pad + left) / cw, 4), ay=round((pad + up) / ch, 4), body=round(bodyH / ch, 4), f0=round((frames[0]['foot'] - frames[0]['y0']) / ch, 4))
 print(out, sheet.size, json.dumps(info))
 prev = Image.new('RGBA', sheet.size, (143, 209, 106, 255)); prev.alpha_composite(sheet)
 for i in range(len(frames)):  # 기준점 표시
