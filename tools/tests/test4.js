@@ -31,6 +31,7 @@ const URL = 'file:///home/user/Stickhero/index.html';
   await page.evaluate(() => { SH.G.p.y = -SH.G.st.L + 250; });
   await page.waitForTimeout(2500); await pick();
   check(await page.evaluate(() => !!SH.G.boss), 'stage boss not spawned');
+  await page.evaluate(() => SH.skipIntro());
   await page.screenshot({ path: `${process.env.OUT||OUT||'.'}/b4_04_stage_boss.png` });
   await page.evaluate(() => { SH.G.boss.hp = 1; });
   await page.waitForTimeout(2500); await pick();

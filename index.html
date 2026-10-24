@@ -74,7 +74,7 @@ h2{margin:0 0 14px;font-size:clamp(30px,9vw,48px);color:#ffd23f;text-shadow:0 3p
 
 <script>
 'use strict';
-const BUILD = 15;
+const BUILD = 16;
 const BOSS_INTERVAL = 180;      // 보스 등장 간격(초)
 const WAVE_INTERVAL = 60;       // 대규모 몰이 이벤트 간격(초)
 const MAX_ENEMIES = 220;
@@ -320,6 +320,7 @@ const keys = {};
 let joy = null;
 window.addEventListener('keydown', e => {
   keys[e.key.toLowerCase()] = true;
+  if (state === 'play' && G && G.intro && G.intro.t > 0.8 && (e.key === ' ' || e.key === 'Enter')) endIntro();
   if (state === 'levelup' && ['1', '2', '3'].includes(e.key)) chooseCard(+e.key - 1);
   if ((e.key === 'p' || e.key === 'P' || e.key === 'Escape') && (state === 'play' || state === 'paused')) togglePause();
   if (e.key === 'Enter' || e.key === ' ') {
@@ -330,6 +331,7 @@ window.addEventListener('keydown', e => {
 window.addEventListener('keyup', e => { keys[e.key.toLowerCase()] = false; });
 cv.addEventListener('pointerdown', e => {
   audioInit();
+  if (state === 'play' && G && G.intro) { if (G.intro.t > 0.8) endIntro(); return; }
   if (state !== 'play' || joy) return;
   joy = { id: e.pointerId, ox: e.clientX, oy: e.clientY, x: e.clientX, y: e.clientY };
   try { cv.setPointerCapture(e.pointerId); } catch (_) {}
@@ -603,8 +605,62 @@ function spawnBoss(bx, by) {
   const hp = inStage ? 450 * (1 + G.stageN * 0.8) : n === 0 ? 800 : 1200 * (n + 1) * (1 + n * 0.4);  // 첫 마을 보스는 연습용으로 약하게
   const b = { id: ++eid, type: 'boss', boss: true, name: B.name, x: bx, y: by, inside: false, atk: 0, lunge: 0, r: 58, hp, maxHp: hp, spd: 50 + n * 6, dmg: 25 + n * 8, color: B.color, xp: 0, flash: 0, hitT: 0, kx: 0, ky: 0, swordCd: 0, wob: 0, mode: 'walk', st: 3, rings: 0, ax: 0, ay: 0, lvl: n, spr: 'boss' + BOSSES.indexOf(B) };
   G.enemies.push(b); G.boss = b;
-  banner('⚠ 보스 등장! ⚠', B.name, '#ff3b3b', 3);
-  G.shake = 14; sfx('bossIn');
+  // 등장 컷신: 어두워짐 → 하늘에서 쿵! → 쿵쿵 발 구르기 → 이름표 쾅! (화면을 누르면 넘김)
+  G.intro = { t: 0, dur: 2.6, spr: b.spr, name: B.name, color: B.color, hits: 0 };
+  joy = null; G.banner = null; sfx('warn');
+}
+const INTRO_HITS = [0.55, 0.95, 1.3, 1.6];   // 떨어짐, 쿵, 쿵, 이름표 쾅
+function updIntro(dt) {
+  const I = G.intro; I.t += dt;
+  while (I.hits < INTRO_HITS.length && I.t >= INTRO_HITS[I.hits]) {
+    const k = I.hits++;
+    if (k === 0) { G.shake = 22; sfx('bigBoom'); }
+    else if (k < 3) { G.shake = 12; sfx('drum'); sfx('thud'); }
+    else { G.shake = 8; sfx('bossIn'); }
+  }
+  if (I.t >= I.dur) endIntro();
+}
+function endIntro() {
+  const I = G.intro; if (!I) return;
+  G.intro = null;
+  banner('⚠ 보스 등장! ⚠', I.name, '#ff3b3b', 2);
+}
+function drawIntro() {
+  const I = G.intro, t = I.t;
+  const fade = Math.min(1, t / 0.25) * Math.min(1, (I.dur - t) / 0.3);
+  const sx = G.shake ? rand(-G.shake, G.shake) : 0, sy = G.shake ? rand(-G.shake, G.shake) : 0;
+  ctx.save(); ctx.globalAlpha = Math.max(0, fade);
+  ctx.fillStyle = 'rgba(10,0,0,.72)'; ctx.fillRect(0, 0, W, H);
+  // 붉은 집중선
+  ctx.save(); ctx.translate(W / 2, H * 0.45); ctx.rotate(t * 0.4);
+  for (let i = 0; i < 18; i++) { ctx.rotate(Math.PI * 2 / 18); ctx.fillStyle = i % 2 ? 'rgba(255,40,40,.16)' : 'rgba(255,200,40,.08)'; ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(Math.max(W, H), -40); ctx.lineTo(Math.max(W, H), 40); ctx.fill(); }
+  ctx.restore();
+  // 보스: 위에서 떨어져 쿵, 발 구를 때마다 찌그러짐
+  const img = SPR_SRC[I.spr] || SPR[I.spr], size = Math.min(W * 0.72, H * 0.42);
+  const land = INTRO_HITS[0], cy = H * 0.47 + sy;
+  let y = cy, sq = 1;
+  if (t < land) { const k = t / land; y = -size + (cy + size) * k * k; }
+  for (const h of INTRO_HITS.slice(0, 3)) { const d = t - h; if (d >= 0 && d < 0.18) sq = 1 - Math.sin(d / 0.18 * Math.PI) * 0.18; }
+  ctx.save(); ctx.translate(W / 2 + sx, y); ctx.scale(2 - sq, sq);
+  if (img) { const w = size * img.width / img.height; ctx.drawImage(img, -w / 2, -size * 0.8, w, size); }
+  else { ctx.fillStyle = I.color; ctx.strokeStyle = '#222'; ctx.lineWidth = 6; ctx.beginPath(); ctx.arc(0, -size * 0.3, size * 0.4, 0, 7); ctx.fill(); ctx.stroke(); }
+  ctx.restore();
+  // 땅 갈라짐 먼지
+  if (t > land) { ctx.fillStyle = `rgba(160,120,80,${Math.max(0, 0.6 - (t - land))})`; ctx.beginPath(); ctx.ellipse(W / 2, cy + size * 0.22, size * (0.5 + (t - land)), size * 0.08, 0, 0, 7); ctx.fill(); }
+  // 경고 문구
+  if (t > 0.2) hudText('⚠ 보스 등장! ⚠', W / 2 + sx, H * 0.14 + sy, Math.min(40, W / 10), Math.floor(t * 6) % 2 ? '#ff3b3b' : '#ffd23f', 'center');
+  // 이름표 쾅!
+  const nt = t - INTRO_HITS[3];
+  if (nt >= 0) {
+    const k = nt < 0.15 ? 3 - 2 * (nt / 0.15) : 1;
+    ctx.save(); ctx.translate(W / 2 + sx, H * 0.8 + sy); ctx.scale(k, k); ctx.rotate(-0.04);
+    const tw = Math.min(W * 0.8, 320);
+    roundRect(-tw / 2, -30, tw, 60, 14); ctx.fillStyle = I.color; ctx.fill(); ctx.lineWidth = 5; ctx.strokeStyle = '#222'; ctx.stroke();
+    hudText('👑 ' + I.name, 0, 1, Math.min(32, W / 12), '#fff', 'center');
+    ctx.restore();
+  }
+  if (t > 0.8) hudText('화면을 누르면 시작', W / 2, H * 0.93, 13, 'rgba(255,255,255,.7)', 'center');
+  ctx.restore();
 }
 
 // ---------- 마을에서만 일어나는 일 ----------
@@ -1045,6 +1101,7 @@ function fireWeapons(dt) {
 function update(dt) {
   const p = G.p;
   if (G.slow > 0) { G.slow -= dt; dt *= 0.35; }
+  if (G.intro) { updIntro(dt); G.shake = Math.max(0, G.shake - dt * 30); return; }   // 컷신 동안 게임 멈춤
   if (G.deadT > 0) { G.deadT -= dt; if (G.deadT <= 0) { gameOver(); return; } dt *= 0.4; }
   G.t += dt;
 
@@ -1991,6 +2048,7 @@ function drawHUD() {
   }
   // 피격 붉은 화면
   if (p.inv > 0.45) { ctx.fillStyle = `rgba(255,0,0,${(p.inv - 0.45) * 0.6})`; ctx.fillRect(0, 0, W, H); }
+  if (G.intro) drawIntro();
   // 조이스틱
   if (joy) {
     ctx.globalAlpha = 0.5;
@@ -2035,6 +2093,7 @@ window.SH = {
   addXp(n) { G.xp += n; }, spawnBoss() { spawnBoss(); }, spawnWave() { spawnWave(); },
   give(id, l) { if (WEAP[id]) G.weapons[id] = l; else { G.passives[id] = l; recalcStats(); } },
   kill() { G.p.inv = 0; hurtPlayer(99999); },
+  skipIntro() { endIntro(); },
   killBase() { hurtBase(99999); },
   gold(n) { G.gold += n; },
   enterStage() { enterStage(); }, returnBase(w) { returnBase(w); }, raid() { startRaid(); },
