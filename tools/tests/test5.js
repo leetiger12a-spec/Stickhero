@@ -7,7 +7,7 @@ const OUT = process.argv[2];
   const page = await (await browser.newContext({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 2, hasTouch: true, isMobile: true })).newPage();
   page.on('pageerror', e => errors.push('pageerror: ' + e.message));
   page.on('console', m => { if (m.type() === 'error') errors.push('console: ' + m.text()); });
-  const pick = () => page.evaluate(() => { while (SH.state === 'levelup') SH.choose(0); });
+  const pick = () => page.evaluate(() => { while (SH.state === 'levelup' || SH.state === 'allypick') { if (SH.state === 'allypick') SH.chooseAlly(0); else SH.choose(0); } });
   const stand = async (i, ms) => { for (let k = 0; k < ms / 200; k++) { await pick(); await page.evaluate(i => { const G = SH.G, pd = G.pads[i]; G.p.logs = G.p.cap; G.gold = Math.max(G.gold, 200); G.p.x = pd.x; G.p.y = pd.y + (pd.kind === 'tower' && G.towers[pd.idx].lvl ? 40 : pd.kind === 'smith' && G.smith ? 30 : 0); }, i); await page.waitForTimeout(200); } };
   await page.goto('file:///home/user/Stickhero/index.html');
   await page.tap('#bStart');

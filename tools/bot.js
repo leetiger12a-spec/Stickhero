@@ -19,6 +19,7 @@ const RUNS = +process.argv[2] || 4, MINUTES = +process.argv[3] || 15, STYLE = pr
       let prevDead = false, prevMode = 'base', prevBossK = 0, prevRaid = false, steps = MINUTES * 60 * 30;
       for (let i = 0; i < steps; i++) {
         if (SH.state === 'levelup') SH.choose(Math.floor(Math.random() * 3));
+        if (SH.state === 'allypick') SH.chooseAlly(Math.floor(Math.random() * 2));
         if (SH.state === 'over') { ev('게임오버 (' + (G().baseDead ? '마을 붕괴' : '?') + ')'); break; }
         const g = G(), p = g.p;
         if (i % 3 === 0 && !p.dead) {

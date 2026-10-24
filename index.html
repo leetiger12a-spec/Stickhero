@@ -23,6 +23,7 @@ h2{margin:0 0 14px;font-size:clamp(30px,9vw,48px);color:#ffd23f;text-shadow:0 3p
 .card:nth-child(2){animation-delay:.07s}.card:nth-child(3){animation-delay:.14s}
 .card:active{transform:translateY(3px);box-shadow:0 2px 0 #333}
 .card .ic{font-size:40px;width:52px;text-align:center;flex:none}
+.card .ic img{width:56px;height:56px;object-fit:contain;display:block}
 .card .nm{font-size:19px;font-weight:800}
 .card .lv{font-size:13px;font-weight:700;color:#fff;background:#e63946;border-radius:8px;padding:1px 7px;margin-left:6px}
 .card .lv.new{background:#2a9d8f}
@@ -53,7 +54,7 @@ h2{margin:0 0 14px;font-size:clamp(30px,9vw,48px);color:#ffd23f;text-shadow:0 3p
 </div>
 
 <div class="ov" id="ovLevel">
-  <h2>레벨 업!</h2>
+  <h2 id="lvlTitle">레벨 업!</h2>
   <div class="sub" id="lvlSub">하나를 골라 강해지자</div>
   <div id="cards"></div>
 </div>
@@ -74,7 +75,7 @@ h2{margin:0 0 14px;font-size:clamp(30px,9vw,48px);color:#ffd23f;text-shadow:0 3p
 
 <script>
 'use strict';
-const BUILD = 16;
+const BUILD = 17;
 const BOSS_INTERVAL = 180;      // 보스 등장 간격(초)
 const WAVE_INTERVAL = 60;       // 대규모 몰이 이벤트 간격(초)
 const MAX_ENEMIES = 220;
@@ -92,8 +93,8 @@ const FORGE_MAX = 10;
 const TAVERN = { x: 122, y: -8 };  // 영웅 숙소(동료 고용) 자리
 const ALLY_MAX = 4, ALLY_COST = [60, 120, 200, 300];
 const ALLY_TYPES = {
-  sword:  { name: '검사', color: '#3fa9f5', hp: 120 },   // 가까이 붙어 칼로 베기
-  archer: { name: '궁수', color: '#2ecc71', hp: 80 },    // 멀리서 화살
+  sword:  { name: '고양이 검사', color: '#3fa9f5', hp: 120, icon: '🗡️', desc: '가까이 달려가 칼로 베어요 · 튼튼함' },
+  archer: { name: '고양이 궁수', color: '#2ecc71', hp: 80,  icon: '🏹', desc: '멀리서 화살을 쏴요 · 안전하게' },
 };
 const STAGE_HW = 200;           // 스테이지 길 반폭
 const THEMES = [
@@ -322,6 +323,7 @@ window.addEventListener('keydown', e => {
   keys[e.key.toLowerCase()] = true;
   if (state === 'play' && G && G.intro && G.intro.t > 0.8 && (e.key === ' ' || e.key === 'Enter')) endIntro();
   if (state === 'levelup' && ['1', '2', '3'].includes(e.key)) chooseCard(+e.key - 1);
+  if (state === 'allypick' && ['1', '2'].includes(e.key)) chooseAlly(+e.key - 1);
   if ((e.key === 'p' || e.key === 'P' || e.key === 'Escape') && (state === 'play' || state === 'paused')) togglePause();
   if (e.key === 'Enter' || e.key === ' ') {
     if (state === 'title') { if (readJSON(SAVE_KEY)) continueGame(); else startGame(); } else if (state === 'over') startGame();
@@ -475,6 +477,7 @@ function openLevelUp() {
     b.onclick = () => chooseCard(i);
     box.appendChild(b);
   });
+  $('lvlTitle').textContent = '레벨 업!';
   $('lvlSub').textContent = `레벨 ${G.lvl - G.pending + 1} 달성! 하나를 골라 강해지자`;
   showOv('ovLevel');
 }
@@ -486,6 +489,30 @@ function chooseCard(i) {
   else G.p.hp = Math.min(G.p.maxHp, G.p.hp + 50);
   sfx('pick');
   G.pending--;
+  if (G.pending > 0) openLevelUp(); else { state = 'play'; showOv(null); }
+}
+
+// 동료 고르기: 레벨업 카드와 같은 화면에 고양이 카드 2장
+function openAllyPick() {
+  state = 'allypick'; joy = null;
+  const box = $('cards'); box.innerHTML = '';
+  Object.keys(ALLY_TYPES).forEach((type, i) => {
+    const T = ALLY_TYPES[type], have = G.allies.filter(a => a.type === type).length;
+    const icon = SPR_SRC['ally_' + type] ? `<img src="img/ally_${type}.webp?b=${BUILD}" alt="">` : T.icon;
+    const b = document.createElement('button'); b.className = 'card';
+    b.innerHTML = `<div class="ic">${icon}</div><div><div class="nm">${T.name}<span class="lv new">${T.icon}</span></div><div class="ds">${T.desc}${have ? ` · 지금 ${have}마리` : ''}</div></div><div class="key">${i + 1}</div>`;
+    b.onclick = () => chooseAlly(i);
+    box.appendChild(b);
+  });
+  $('lvlTitle').textContent = '동료 고용!';
+  $('lvlSub').textContent = `함께 싸울 동료를 골라요 (${G.allies.length + 1}/${ALLY_MAX})`;
+  showOv('ovLevel');
+}
+function chooseAlly(i) {
+  if (state !== 'allypick') return;
+  const type = Object.keys(ALLY_TYPES)[i]; if (!type) return;
+  hireAlly(type); sfx('pick');
+  saveGame();
   if (G.pending > 0) openLevelUp(); else { state = 'play'; showOv(null); }
 }
 
@@ -541,7 +568,7 @@ const padOY = pd => pd.kind === 'tower' && G.towers[pd.idx].lvl > 0 ? 40 : (pd.k
 function padLabel(pd) {
   if (pd.kind === 'tower') { const l = G.towers[pd.idx].lvl; return l === 0 ? '망루 짓기' : l < 5 ? `망루 Lv${l + 1}` : '망루 MAX'; }
   if (pd.kind === 'smith') return G.smith ? `⚒ 강화 Lv${G.forge + 1}` : '대장간 짓기';
-  if (pd.kind === 'tavern') return G.tavern ? `👥 ${ALLY_TYPES[allyNext()].name} 고용` : '영웅 숙소 짓기';
+  if (pd.kind === 'tavern') return G.tavern ? `👥 동료 고용 ${G.allies.length + 1}/${ALLY_MAX}` : '영웅 숙소 짓기';
   return G.wallLvl < 5 ? `울타리 Lv${G.wallLvl + 1}` : '울타리 수리';
 }
 function padDone(pd) {
@@ -552,7 +579,7 @@ function padDone(pd) {
     burst(t.x, t.y - 20, '#ffd23f', 30, 220, 5, 0.6);
   } else if (pd.kind === 'tavern') {
     if (!G.tavern) { G.tavern = true; banner('영웅 숙소 완성!', '금화로 동료를 고용해요', '#7bed9f', 1.8); }
-    else hireAlly();
+    else openAllyPick();
     burst(TAVERN.x, TAVERN.y - 20, '#3fa9f5', 30, 220, 5, 0.6);
   } else if (pd.kind === 'smith') {
     if (!G.smith) { G.smith = true; banner('대장간 완성!', '금화로 무기를 강화해요', '#7bed9f', 1.8); }
@@ -774,11 +801,10 @@ function updBase(dt) {
 }
 
 // ---------- 동료 ----------
-const allyNext = () => G.allies.length % 2 ? 'archer' : 'sword';   // 검사 → 궁수 → 검사 → 궁수
-function hireAlly() {
-  const type = allyNext(), T = ALLY_TYPES[type];
+function hireAlly(type) {
+  const T = ALLY_TYPES[type];
   G.allies.push({ type, slot: G.allies.length, x: TAVERN.x, y: TAVERN.y + 34, hp: T.hp, maxHp: T.hp, cd: 0, inv: 0, face: 1, wob: 0, swing: 0, dead: false, reviveT: 0 });
-  banner(`${T.name} 동료 합류!`, '영웅을 따라다니며 함께 싸워요', '#3fa9f5', 1.8);
+  banner(`${T.name} 합류!`, '영웅을 따라다니며 함께 싸워요', '#3fa9f5', 1.8);
   sfx('level');
 }
 function placeAllies() { // 장소가 바뀔 때 영웅 곁으로
@@ -2094,6 +2120,7 @@ window.SH = {
   give(id, l) { if (WEAP[id]) G.weapons[id] = l; else { G.passives[id] = l; recalcStats(); } },
   kill() { G.p.inv = 0; hurtPlayer(99999); },
   skipIntro() { endIntro(); },
+  chooseAlly(i) { chooseAlly(i); },
   killBase() { hurtBase(99999); },
   gold(n) { G.gold += n; },
   enterStage() { enterStage(); }, returnBase(w) { returnBase(w); }, raid() { startRaid(); },

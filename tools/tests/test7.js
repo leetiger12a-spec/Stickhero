@@ -5,7 +5,7 @@ const { chromium } = require('/opt/node22/lib/node_modules/playwright');
   let page = await ctx.newPage();
   const hook = pg => { pg.on('pageerror', e => errors.push('pageerror: ' + e.message)); pg.on('console', m => { if (m.type() === 'error') errors.push('console: ' + m.text()); }); };
   hook(page);
-  const pick = () => page.evaluate(() => { while (SH.state === 'levelup') SH.choose(0); });
+  const pick = () => page.evaluate(() => { while (SH.state === 'levelup' || SH.state === 'allypick') { if (SH.state === 'allypick') SH.chooseAlly(0); else SH.choose(0); } });
   await page.goto('file:///home/user/Stickhero/index.html');
   check(await page.evaluate(() => getComputedStyle(document.getElementById('bContinue')).display === 'none'), 'continue shown without save');
   await page.tap('#bStart');
@@ -39,7 +39,7 @@ const { chromium } = require('/opt/node22/lib/node_modules/playwright');
   await page.screenshot({ path: (process.env.OUT||'.')+'/b15_continued.png' });
   // 마을 붕괴 → 저장 삭제, 대장간 강화 유지
   const forge = after.forge;
-  await page.evaluate(() => { while (SH.state === 'levelup') SH.choose(0); SH.killBase(); });
+  await page.evaluate(() => { while (SH.state === 'levelup' || SH.state === 'allypick') { if (SH.state === 'allypick') SH.chooseAlly(0); else SH.choose(0); } SH.killBase(); });
   await page.waitForTimeout(3000);
   check(await page.evaluate(() => SH.state === 'over' && !localStorage.getItem('stickhero_save')), 'save not cleared on game over');
   await page.screenshot({ path: (process.env.OUT||'.')+'/b15_over.png' });
