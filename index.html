@@ -72,7 +72,7 @@ h2{margin:0 0 14px;font-size:clamp(30px,9vw,48px);color:#ffd23f;text-shadow:0 3p
 
 <script>
 'use strict';
-const BUILD = 8;
+const BUILD = 9;
 const BOSS_INTERVAL = 180;      // 보스 등장 간격(초)
 const WAVE_INTERVAL = 60;       // 대규모 몰이 이벤트 간격(초)
 const MAX_ENEMIES = 220;
@@ -112,6 +112,7 @@ const SPR = {};
 const SPR_WHITE = {};  // 맞았을 때 번쩍이는 흰 실루엣
 const SPR_INFO = {    // ax: 발 위치(그림 폭 대비), h: 화면 키(월드 단위)
   hero: { ax: 0.42 }, grunt: { ax: 0.45, h: 50 }, runner: { ax: 0.5, h: 42 }, tank: { ax: 0.42, h: 62 },
+  boss0: { ax: 0.5, h: 140 }, boss1: { ax: 0.5, h: 140 }, boss2: { ax: 0.5, h: 150 },
 };
 Object.keys(SPR_INFO).forEach(n => {
   const im = new Image();
@@ -494,7 +495,7 @@ function spawnBoss(bx, by) {
   const a = Math.random() * Math.PI * 2, R = MAP_R - 60;
   if (bx === undefined) { bx = Math.cos(a) * R; by = Math.sin(a) * R; }
   const hp = 1400 * (n + 1) * (1 + n * 0.5);
-  const b = { id: ++eid, type: 'boss', boss: true, name: B.name, x: bx, y: by, inside: false, atk: 0, lunge: 0, r: 58, hp, maxHp: hp, spd: 50 + n * 6, dmg: 25 + n * 8, color: B.color, xp: 0, flash: 0, hitT: 0, kx: 0, ky: 0, swordCd: 0, wob: 0, mode: 'walk', st: 3, rings: 0, ax: 0, ay: 0, lvl: n };
+  const b = { id: ++eid, type: 'boss', boss: true, name: B.name, x: bx, y: by, inside: false, atk: 0, lunge: 0, r: 58, hp, maxHp: hp, spd: 50 + n * 6, dmg: 25 + n * 8, color: B.color, xp: 0, flash: 0, hitT: 0, kx: 0, ky: 0, swordCd: 0, wob: 0, mode: 'walk', st: 3, rings: 0, ax: 0, ay: 0, lvl: n, spr: 'boss' + (n % BOSSES.length) };
   G.enemies.push(b); G.boss = b;
   banner('⚠ 보스 등장! ⚠', B.name, '#ff3b3b', 3);
   G.shake = 14; sfx('bossIn');
@@ -1461,6 +1462,14 @@ function drawBoss(e) {
   ctx.fillStyle = 'rgba(0,0,0,.2)'; ctx.beginPath(); ctx.ellipse(0, e.r * 0.9, e.r, e.r * 0.3, 0, 0, 7); ctx.fill();
   const pulse = e.mode === 'aim' ? 1 + Math.sin(G.t * 40) * 0.05 : 1 + Math.sin(G.t * 5) * 0.04;
   ctx.scale(pulse, 2 - pulse);
+  if (SPR[e.spr]) { // 그림 보스: 바닥(발)이 e.y + r 근처, 돌진 준비 땐 하얗게 깜빡이며 부풀어 오름
+    const img = SPR[e.spr], h = SPR_INFO[e.spr].h, w = h * img.width / img.height, top = e.r * 0.95 - h;
+    ctx.drawImage(img, -w / 2, top, w, h);
+    const glow = e.mode === 'aim' ? 0.25 + 0.25 * Math.sin(G.t * 30) : e.flash > 0 ? 0.45 : 0; // 보스는 반투명하게만 번쩍
+    if (glow > 0 && SPR_WHITE[e.spr]) { ctx.globalAlpha = glow; ctx.drawImage(SPR_WHITE[e.spr], -w / 2, top, w, h); }
+    ctx.restore();
+    return;
+  }
   // 몸통 + 뿔
   ctx.fillStyle = e.flash > 0 ? '#fff' : e.color; ctx.strokeStyle = '#222'; ctx.lineWidth = 5;
   ctx.beginPath(); ctx.moveTo(-e.r * 0.6, -e.r * 0.7); ctx.lineTo(-e.r * 0.85, -e.r * 1.35); ctx.lineTo(-e.r * 0.2, -e.r * 0.95);
