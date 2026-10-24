@@ -34,7 +34,7 @@ const URL = 'file:///home/user/Stickhero/index.html';
   await page.evaluate(() => SH.skipIntro());
   await page.screenshot({ path: `${process.env.OUT||OUT||'.'}/b4_04_stage_boss.png` });
   await page.evaluate(() => { SH.G.boss.hp = 1; });
-  await page.waitForTimeout(2500); await pick();
+  for (let i = 0; i < 20 && !(await page.evaluate(() => !!SH.G.st.portal)); i++) { await pick(); await page.waitForTimeout(250); }
   check(await page.evaluate(() => !!SH.G.st.portal), 'portal missing');
   await page.screenshot({ path: `${process.env.OUT||OUT||'.'}/b4_05_portal.png` });
   for (let i = 0; i < 20 && await page.evaluate(() => SH.G.mode) === 'stage'; i++) { await pick(); await page.evaluate(() => { const pt = SH.G.st && SH.G.st.portal; if (pt) { SH.G.p.x = pt.x; SH.G.p.y = pt.y; } }); await page.waitForTimeout(300); }

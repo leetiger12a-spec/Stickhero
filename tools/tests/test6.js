@@ -12,7 +12,7 @@ const { chromium } = require('/opt/node22/lib/node_modules/playwright');
   await stand(ti, 2400);
   check(await page.evaluate(() => SH.G.tavern), 'tavern not built');
   // 고용할 때마다 카드 고르기: 검사, 궁수, 궁수, 검사 순으로 골라 봄
-  const order = [0, 1, 1, 0]; let shot = false;
+  const order = [0, 1, 2, 2]; let shot = false;
   for (let k = 0; k < 60 && (await page.evaluate(() => SH.G.allies.length)) < 4; k++) {
     await stand(ti, 200);
     if (await page.evaluate(() => SH.state) === 'allypick') {
@@ -22,7 +22,7 @@ const { chromium } = require('/opt/node22/lib/node_modules/playwright');
     }
   }
   const n = await page.evaluate(() => SH.G.allies.map(a => a.type).join(','));
-  console.log('allies', n); check(n === 'sword,archer,archer,sword', 'allies wrong: ' + n);
+  console.log('allies', n); check(n === 'sword,archer,bomber,bomber', 'allies wrong: ' + n);
   // 전투
   await page.evaluate(() => { const G = SH.G; G.p.x = 0; G.p.y = 250; G.p.hp = G.p.maxHp = 1e6; G.weapons = {}; for (let i = 0; i < 14; i++) G.enemies.push(makeEnemy('grunt', rand(-120, 120), 380 + rand(0, 80))); });
   await page.waitForTimeout(400); await pick();
