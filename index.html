@@ -72,7 +72,7 @@ h2{margin:0 0 14px;font-size:clamp(30px,9vw,48px);color:#ffd23f;text-shadow:0 3p
 
 <script>
 'use strict';
-const BUILD = 11;
+const BUILD = 12;
 const BOSS_INTERVAL = 180;      // 보스 등장 간격(초)
 const WAVE_INTERVAL = 60;       // 대규모 몰이 이벤트 간격(초)
 const MAX_ENEMIES = 220;
@@ -87,6 +87,12 @@ const REPAIR_W = 4;
 const GATE = { x: 0, y: 128 };  // 출격 문 자리
 const SMITH = { x: -122, y: -8 }; // 대장간 자리
 const FORGE_MAX = 10;
+const TAVERN = { x: 122, y: -8 };  // 영웅 숙소(동료 고용) 자리
+const ALLY_MAX = 4, ALLY_COST = [60, 120, 200, 300];
+const ALLY_TYPES = {
+  sword:  { name: '검사', color: '#3fa9f5', hp: 120 },   // 가까이 붙어 칼로 베기
+  archer: { name: '궁수', color: '#2ecc71', hp: 80 },    // 멀리서 화살
+};
 const STAGE_HW = 200;           // 스테이지 길 반폭
 const THEMES = [
   { name: '숲',   ground: '#8fd16a', check: 'rgba(255,255,255,.07)', edge: '#2d6a2e', deco: 'tree' },
@@ -115,6 +121,7 @@ const SPR_INFO = {    // ax: 발 위치(그림 폭 대비), h: 화면 키(월드
   boss0: { ax: 0.5, h: 140 }, boss1: { ax: 0.5, h: 140 }, boss2: { ax: 0.5, h: 150 },
   tree: { h: 78 }, stump: { h: 20 }, log: { h: 8 }, stake: { h: 26 }, tower: { h: 76 }, hall: { h: 92 },
   smith: { h: 72 }, pillar: { h: 70 }, torch: { h: 58 }, coin: { h: 12 },
+  ally_sword: { ax: 0.5, h: 52 }, ally_archer: { ax: 0.5, h: 52 }, tavern: { h: 72 },
 };
 const SPR_SRC = {};
 // 화면에 그릴 크기로 미리 줄여 둔 그림(매 프레임 큰 그림을 줄이면 느림). 화면 크기가 바뀌면 다시 만듦
@@ -127,7 +134,10 @@ function bakeSprite(n) {
   const wx = wc.getContext('2d'); wx.drawImage(c, 0, 0); wx.globalCompositeOperation = 'source-atop'; wx.fillStyle = '#fff'; wx.fillRect(0, 0, wc.width, wc.height);
   SPR[n] = c; SPR_WHITE[n] = wc;
 }
-Object.keys(SPR_INFO).forEach(n => {
+// img/ 폴더에 실제로 있는 그림만 불러옴 (없는 파일을 부르면 오류가 남)
+const SPR_FILES = ['hero', 'grunt', 'runner', 'tank', 'boss0', 'boss1', 'boss2', 'tree', 'stump', 'log', 'stake', 'tower', 'hall',
+  'smith', 'pillar', 'torch', 'coin', 'ally_sword'];
+SPR_FILES.forEach(n => {
   const im = new Image();
   im.onload = () => { SPR_SRC[n] = im; bakeSprite(n); };
   im.src = `img/${n}.webp?b=${BUILD}`;
@@ -271,7 +281,7 @@ function newGame() {
     weapons: { pistol: 1 }, passives: {}, timers: {},
     enemies: [], bullets: [], ebullets: [], booms: [], gems: [], hearts: [], parts: [], texts: [], coins: [], corpses: [],
     trees: [], flyers: [], hint: null, mode: 'base', bt: 0, stageN: 0, st: null, stash: null, gateT: 0,
-    smith: false, forge: 0, raid: null, raidIn: 0, raidCount: 0, drumT: 0,
+    smith: false, forge: 0, tavern: false, allies: [], raid: null, raidIn: 0, raidCount: 0, drumT: 0,
     gold: 0, base: { hp: 1500, maxHp: 1500, hitT: 0 }, respawnT: 0, squadAng: Math.random() * 7, squadT: 6,
     walls: Array.from({ length: WALL_SEGS }, () => ({ hp: 0, maxHp: 0, shake: 0 })), wallLvl: 0,
     towers: [], pads: [], baseDead: false,
@@ -287,6 +297,7 @@ function newGame() {
   });
   G.pads.push({ kind: 'wall', x: 0, y: -WALL_R + 52, pw: 0, pg: 0, acc: 0, order: 1, built: false });
   G.pads.push({ kind: 'smith', x: SMITH.x, y: SMITH.y, pw: 0, pg: 0, acc: 0, order: 2, built: false });
+  G.pads.push({ kind: 'tavern', x: TAVERN.x, y: TAVERN.y, pw: 0, pg: 0, acc: 0, order: 3, built: false });
   // 나무 숲 4곳 (첫 숲은 마을 가까이)
   const a0 = Math.random() * 7;
   for (let g = 0; g < 4; g++) {
@@ -443,14 +454,16 @@ function padVisible(pd) { return pd.order === 0 || G.pads.some(q => q.order === 
 function padCost(pd) {
   if (!padVisible(pd)) return null;
   if (pd.kind === 'tower') { const l = G.towers[pd.idx].lvl; return l < 5 ? { w: TOWER_W[l], g: TOWER_G[l] } : null; }
+  if (pd.kind === 'tavern') return !G.tavern ? { w: 12, g: 40 } : G.allies.length < ALLY_MAX ? { w: 0, g: ALLY_COST[G.allies.length] } : null;
   if (pd.kind === 'smith') return !G.smith ? { w: 10, g: 20 } : G.forge < FORGE_MAX ? { w: 0, g: 25 + 15 * G.forge } : null;
   if (G.wallLvl < 5) return { w: WALL_W[G.wallLvl], g: WALL_G[G.wallLvl] };
   return G.walls.some(w => w.hp < w.maxHp) ? { w: REPAIR_W, g: 0 } : null;
 }
-const padOY = pd => pd.kind === 'tower' && G.towers[pd.idx].lvl > 0 ? 40 : pd.kind === 'smith' && G.smith ? 30 : 0;
+const padOY = pd => pd.kind === 'tower' && G.towers[pd.idx].lvl > 0 ? 40 : (pd.kind === 'smith' && G.smith) || (pd.kind === 'tavern' && G.tavern) ? 30 : 0;
 function padLabel(pd) {
   if (pd.kind === 'tower') { const l = G.towers[pd.idx].lvl; return l === 0 ? '망루 짓기' : l < 5 ? `망루 Lv${l + 1}` : '망루 MAX'; }
   if (pd.kind === 'smith') return G.smith ? `⚒ 강화 Lv${G.forge + 1}` : '대장간 짓기';
+  if (pd.kind === 'tavern') return G.tavern ? `👥 ${ALLY_TYPES[allyNext()].name} 고용` : '영웅 숙소 짓기';
   return G.wallLvl < 5 ? `울타리 Lv${G.wallLvl + 1}` : '울타리 수리';
 }
 function padDone(pd) {
@@ -459,6 +472,10 @@ function padDone(pd) {
     const t = G.towers[pd.idx]; t.lvl++;
     banner(t.lvl === 1 ? '망루 완성!' : `망루 Lv ${t.lvl}!`, t.lvl === 1 ? '자동으로 화살을 쏴요' : '더 빠르고 강하게!', '#7bed9f', 1.6);
     burst(t.x, t.y - 20, '#ffd23f', 30, 220, 5, 0.6);
+  } else if (pd.kind === 'tavern') {
+    if (!G.tavern) { G.tavern = true; banner('영웅 숙소 완성!', '금화로 동료를 고용해요', '#7bed9f', 1.8); }
+    else hireAlly();
+    burst(TAVERN.x, TAVERN.y - 20, '#3fa9f5', 30, 220, 5, 0.6);
   } else if (pd.kind === 'smith') {
     if (!G.smith) { G.smith = true; banner('대장간 완성!', '금화로 무기를 강화해요', '#7bed9f', 1.8); }
     else { G.forge++; recalcStats(); banner(`무기 강화 Lv ${G.forge}!`, '모든 공격력 +10%', '#ffd23f', 1.6); sfx('swing'); }
@@ -556,7 +573,8 @@ function updBase(dt) {
         p.logs--; pd.pw++; sfx('pay');
         G.flyers.push({ x0: p.x, y0: p.y - 30 - p.logs * 2, x1: pd.x, y1: pd.y + oy, t: 0, dur: 0.25, kind: 'log' });
       } else if (pd.pg < c.g && G.gold > 0) {
-        const n = Math.min(3, c.g - pd.pg, G.gold); G.gold -= n; pd.pg += n; sfx('pay');
+        const n = Math.min(Math.max(3, Math.ceil(c.g / 25)), c.g - pd.pg, G.gold);   // 비싼 건 더 빨리 쏙쏙
+        G.gold -= n; pd.pg += n; sfx('pay');
         G.flyers.push({ x0: p.x, y0: p.y - 30, x1: pd.x, y1: pd.y + oy, t: 0, dur: 0.25, kind: 'coin' });
       } else { pd.acc = 0; break; }
     }
@@ -622,6 +640,59 @@ function updBase(dt) {
 
 }
 
+// ---------- 동료 ----------
+const allyNext = () => G.allies.length % 2 ? 'archer' : 'sword';   // 검사 → 궁수 → 검사 → 궁수
+function hireAlly() {
+  const type = allyNext(), T = ALLY_TYPES[type];
+  G.allies.push({ type, slot: G.allies.length, x: TAVERN.x, y: TAVERN.y + 34, hp: T.hp, maxHp: T.hp, cd: 0, inv: 0, face: 1, wob: 0, swing: 0, dead: false, reviveT: 0 });
+  banner(`${T.name} 동료 합류!`, '영웅을 따라다니며 함께 싸워요', '#3fa9f5', 1.8);
+  sfx('level');
+}
+function placeAllies() { // 장소가 바뀔 때 영웅 곁으로
+  const p = G.p;
+  for (const a of G.allies) { const an = a.slot * Math.PI / 2 + Math.PI / 4; a.x = p.x + Math.cos(an) * 34; a.y = p.y + Math.sin(an) * 34; }
+}
+function updAllies(dt) {
+  const p = G.p, fm = 1 + 0.1 * G.forge;
+  for (const a of G.allies) {
+    a.cd -= dt; a.inv -= dt; a.swing -= dt;
+    if (a.dead) {
+      a.reviveT -= dt;
+      if (a.reviveT <= 0 && G.mode === 'base') { a.dead = false; a.hp = a.maxHp; a.x = TAVERN.x; a.y = TAVERN.y + 34; a.inv = 2; burst(a.x, a.y - 12, '#7bed9f', 16, 140, 4, 0.5); }
+      continue;
+    }
+    // 자리: 영웅 주위 네 방향(영웅이 쓰러지면 마을 회관 곁)
+    const an = a.slot * Math.PI / 2 + Math.PI / 4, hx = p.dead ? 0 : p.x, hy = p.dead ? 50 : p.y;
+    let tx = hx + Math.cos(an) * 36, ty = hy + Math.sin(an) * 30;
+    // 가까운 적 찾기 (영웅 곁을 너무 벗어나지 않게)
+    let foe = null, fd = 1e12;
+    for (const e of G.enemies) { const d = (e.x - a.x) ** 2 + (e.y - a.y) ** 2; if (d < fd && (e.x - hx) ** 2 + (e.y - hy) ** 2 < 230 * 230) { fd = d; foe = e; } }
+    fd = Math.sqrt(fd);
+    if (a.type === 'sword' && foe && fd < 160) { tx = foe.x - Math.sign(foe.x - a.x || 1) * (foe.r + 8); ty = foe.y; }
+    const dx = tx - a.x, dy = ty - a.y, d = Math.hypot(dx, dy);
+    if (d > 4) { const sp = Math.min(d * 6, 165); a.x += dx / d * sp * dt; a.y += dy / d * sp * dt; a.wob += dt * 10; if (Math.abs(dx) > 2) a.face = dx > 0 ? 1 : -1; }
+    if (G.mode === 'stage') a.x = clamp(a.x, -STAGE_HW + 10, STAGE_HW - 10);
+    // 공격
+    if (foe && a.cd <= 0) {
+      const ux = (foe.x - a.x) / (fd || 1), uy = (foe.y - a.y) / (fd || 1);
+      if (a.type === 'sword' && fd < foe.r + 24) {
+        hurtEnemy(foe, 14 * fm, ux, uy, 180); a.cd = 0.55; a.swing = 0.2; a.face = ux > 0 ? 1 : -1; sfx('swing');
+      } else if (a.type === 'archer' && fd < 250) {
+        G.bullets.push({ x: a.x, y: a.y - 20, vx: ux * 480, vy: uy * 480, r: 4, dmg: 9 * fm, life: 0.8, pierce: 0, hits: [], kind: 'arrow' });
+        a.cd = 0.8; a.face = ux > 0 ? 1 : -1; sfx('arrow');
+      }
+    }
+    // 맞기
+    if (a.inv <= 0) for (const e of G.enemies) {
+      if ((e.x - a.x) ** 2 + (e.y - a.y) ** 2 < (e.r + 10) ** 2) {
+        a.hp -= e.dmg; a.inv = 0.8; burst(a.x, a.y - 12, '#e63946', 6, 100, 3, 0.3);
+        if (a.hp <= 0) { a.dead = true; a.reviveT = 12; burst(a.x, a.y - 12, ALLY_TYPES[a.type].color, 20, 180, 4, 0.6); floatText(a.x, a.y - 40, '으앙!', '#fff', 16, 1); }
+        break;
+      }
+    }
+  }
+}
+
 // ---------- 대습격 ----------
 function startRaid() {
   const a0 = Math.random() * 7, nd = G.raidCount >= 1 ? 4 : 3;
@@ -671,6 +742,7 @@ function enterStage() {
   for (let i = 0; i < L / 120; i++) st.rocks.push({ x: rand(-STAGE_HW + 20, STAGE_HW - 20), y: rand(-L, -60), s: rand(0.6, 1.3) });
   G.st = st; G.mode = 'stage';
   p.x = 0; p.y = -40; G.cam.x = 0; G.cam.y = -52; joy = null;
+  placeAllies();
   banner(`스테이지 ${n + 1} · ${th.name}`, '앞으로 나아가 보스를 물리쳐라!', '#ffd23f', 2.5);
   sfx('wave');
 }
@@ -680,6 +752,7 @@ function returnBase(win) {
   G.bullets = []; G.ebullets = []; G.booms = []; G.corpses = []; G.flyers = []; G.boss = null;
   G.mode = 'base'; G.st = null; G.stash = null; G.gateT = 0;
   p.x = GATE.x; p.y = GATE.y - 40; G.cam.x = p.x; G.cam.y = p.y - 12;
+  placeAllies();
   if (win) {
     G.stageN++; sfx('build');
     if (G.stageN % 2 === 0) { G.raidIn = 10; banner('마을로 귀환!', '적의 대군이 다가온다… 준비해!', '#ff9f1c', 3); }
@@ -932,6 +1005,7 @@ function update(dt) {
 
 
   if (G.deadT <= 0 && !p.dead) fireWeapons(dt);
+  updAllies(dt);
 
   // 회전 칼
   if (G.weapons.sword && !p.dead) {
@@ -1328,6 +1402,46 @@ function drawPads() {
   }
 }
 
+function drawTavern() {
+  if (!G.tavern) return;
+  ctx.save(); ctx.translate(TAVERN.x, TAVERN.y); ctx.scale(1, IK);
+  ctx.fillStyle = 'rgba(0,0,0,.2)'; ctx.beginPath(); ctx.ellipse(0, 8, 30, 8, 0, 0, 7); ctx.fill();
+  if (SPR.tavern) { ctx.translate(0, 12); spr('tavern', 72); }
+  else {
+    ctx.strokeStyle = '#2b1a0c'; ctx.lineWidth = 2.5;
+    ctx.fillStyle = '#e9c46a'; ctx.fillRect(-24, -28, 48, 34); ctx.strokeRect(-24, -28, 48, 34);
+    ctx.fillStyle = '#3a6ea5'; ctx.beginPath(); ctx.moveTo(-30, -26); ctx.lineTo(0, -48); ctx.lineTo(30, -26); ctx.closePath(); ctx.fill(); ctx.stroke();
+    ctx.fillStyle = '#8d5524'; ctx.fillRect(-7, -12, 14, 18); ctx.strokeRect(-7, -12, 14, 18);
+    ctx.fillStyle = '#fff'; ctx.fillRect(10, -22, 12, 10); ctx.strokeRect(10, -22, 12, 10);
+    ctx.font = '9px sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillStyle = '#000'; ctx.fillText('⚔', 16, -17);
+  }
+  ctx.font = '900 10px system-ui,sans-serif'; ctx.textAlign = 'center'; ctx.lineWidth = 3; ctx.strokeStyle = '#222';
+  const lb = `👥 ${G.allies.length}/${ALLY_MAX}`; ctx.strokeText(lb, 0, SPR.tavern ? -66 : -56); ctx.fillStyle = '#9fd8ff'; ctx.fillText(lb, 0, SPR.tavern ? -66 : -56);
+  ctx.restore();
+}
+function drawAlly(a) {
+  const T = ALLY_TYPES[a.type], n = 'ally_' + a.type, blink = a.inv > 0 && Math.floor(a.inv * 20) % 2 === 0;
+  if (blink) ctx.globalAlpha = 0.45;
+  if (SPR[n]) drawSpriteMan(n, a.x, a.y, { face: a.face, phase: a.wob, hit: false, flash: false, lunge: a.swing > 0 ? a.swing : 0 });
+  else {
+    drawStickman(a.x, a.y, { color: T.color, s: 1, face: a.face, phase: a.wob, hit: false, flash: false, lunge: a.swing > 0 ? a.swing : 0, type: 'ally' });
+    if (a.type === 'archer') { // 임시 활
+      ctx.save(); ctx.translate(a.x + a.face * 7, a.y - 9 * IK); ctx.scale(a.face, IK);
+      ctx.strokeStyle = '#6b4226'; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(0, 0, 8, -1.2, 1.2); ctx.stroke();
+      ctx.strokeStyle = '#ddd'; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(Math.cos(-1.2) * 8, Math.sin(-1.2) * 8); ctx.lineTo(Math.cos(1.2) * 8, Math.sin(1.2) * 8); ctx.stroke();
+      ctx.restore();
+    }
+  }
+  ctx.globalAlpha = 1;
+  // 동료 표시: 머리 위 파란 화살표 + 체력바
+  ctx.fillStyle = '#3fa9f5'; ctx.strokeStyle = '#222'; ctx.lineWidth = 1.5;
+  const hy = a.y - 46 * IK;
+  ctx.beginPath(); ctx.moveTo(a.x - 5, hy - 6); ctx.lineTo(a.x + 5, hy - 6); ctx.lineTo(a.x, hy); ctx.closePath(); ctx.fill(); ctx.stroke();
+  if (a.hp < a.maxHp) {
+    ctx.fillStyle = '#222'; ctx.fillRect(a.x - 13, a.y + 14, 26, 5);
+    ctx.fillStyle = '#3fa9f5'; ctx.fillRect(a.x - 12, a.y + 15, 24 * Math.max(0, a.hp / a.maxHp), 3);
+  }
+}
 function drawSmith() {
   if (!G.smith) return;
   ctx.save(); ctx.translate(SMITH.x, SMITH.y); ctx.scale(1, IK);
@@ -1586,8 +1700,10 @@ function drawWorld() {
     for (const t of G.trees) if (vis(t)) list.push({ y: t.y, draw: () => drawTree(t) });
     for (const t of G.towers) if (t.lvl) list.push({ y: t.y + 4, draw: () => drawTower(t) });
     if (G.smith) list.push({ y: SMITH.y + 6, draw: drawSmith });
+    if (G.tavern) list.push({ y: TAVERN.y + 6, draw: drawTavern });
   } else for (const d of G.st.deco) if (vis(d)) list.push({ y: d.y, draw: () => drawDeco(d) });
   if (!p.dead && G.deadT <= 0) list.push({ y: p.y, draw: () => drawStick(p) });
+  for (const a of G.allies) if (!a.dead) list.push({ y: a.y, draw: () => drawAlly(a) });
   list.sort((a, b) => a.y - b.y);
   for (const e of list) { if (e.draw) e.draw(); else if (e.boss) drawBoss(e); else drawEnemy(e); }
   for (const f of G.flyers) { // 날아가는 통나무·금화
