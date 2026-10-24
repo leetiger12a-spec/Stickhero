@@ -45,6 +45,8 @@ h2{margin:0 0 14px;font-size:clamp(30px,9vw,48px);color:#ffd23f;text-shadow:0 3p
 <div class="ov show" id="ovTitle">
   <h1>STICK HERO</h1>
   <div class="sub">나무를 베어 마을을 세우고, 빨간 막대 군단을 막아라!</div>
+  <button class="btn" id="bContinue" style="display:none">▶ 이어하기</button>
+  <div class="best" id="saveInfo" style="margin-top:0"></div>
   <button class="btn" id="bStart">시작!</button>
   <div class="best" id="bestTitle"></div>
   <div class="hint">📱 화면을 끌어서 이동 · 공격은 자동<br>🌳 나무 옆에 서면 통나무를 모아요 → 🪵 동그라미 위에 서면 건설!<br>⚔ 출격 문으로 모험 → 보스를 잡고 금화를 가져와요<br>💻 WASD / 방향키 이동 · P 일시정지</div>
@@ -72,7 +74,7 @@ h2{margin:0 0 14px;font-size:clamp(30px,9vw,48px);color:#ffd23f;text-shadow:0 3p
 
 <script>
 'use strict';
-const BUILD = 14;
+const BUILD = 15;
 const BOSS_INTERVAL = 180;      // 보스 등장 간격(초)
 const WAVE_INTERVAL = 60;       // 대규모 몰이 이벤트 간격(초)
 const MAX_ENEMIES = 220;
@@ -321,7 +323,7 @@ window.addEventListener('keydown', e => {
   if (state === 'levelup' && ['1', '2', '3'].includes(e.key)) chooseCard(+e.key - 1);
   if ((e.key === 'p' || e.key === 'P' || e.key === 'Escape') && (state === 'play' || state === 'paused')) togglePause();
   if (e.key === 'Enter' || e.key === ' ') {
-    if (state === 'title') startGame(); else if (state === 'over') startGame();
+    if (state === 'title') { if (readJSON(SAVE_KEY)) continueGame(); else startGame(); } else if (state === 'over') startGame();
   }
   if (e.key.startsWith('Arrow') || e.key === ' ') e.preventDefault();
 });
@@ -354,26 +356,99 @@ function inputDir() {
   return { x: 0, y: 0 };
 }
 
+// ---------- 이어하기 저장 ----------
+// 마을에 있을 때 10초마다·건설·귀환·앱 전환 때 자동 저장. 스테이지 안에서는 출격 직전 상태가 남음
+const SAVE_KEY = 'stickhero_save', META_KEY = 'stickhero_meta';
+function readJSON(k) { try { return JSON.parse(localStorage.getItem(k)); } catch (e) { return null; } }
+function writeJSON(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} }
+function clearSave() { try { localStorage.removeItem(SAVE_KEY); } catch (e) {} }
+function saveGame() {
+  if (!G || G.mode !== 'base' || G.baseDead || G.deadT > 0 || state === 'over' || state === 'title') return;
+  const p = G.p;
+  writeJSON(SAVE_KEY, {
+    v: 1, build: BUILD, at: Date.now(),
+    t: G.t, bt: G.bt, kills: G.kills, lvl: G.lvl, xp: G.xp, need: G.need, pending: G.pending,
+    weapons: G.weapons, passives: G.passives, gold: G.gold, logs: p.logs, hp: p.dead ? -1 : p.hp,
+    base: G.base.hp, wallLvl: G.wallLvl, walls: G.walls.map(w => w.hp), towers: G.towers.map(t => t.lvl),
+    pads: G.pads.map(q => [q.built, q.pw, q.pg]), smith: G.smith, forge: G.forge, tavern: G.tavern,
+    allies: G.allies.map(a => a.type), stageN: G.stageN, bossCount: G.bossCount - (G.boss ? 1 : 0), bossKills: G.bossKills || 0,
+    nextBoss: G.boss ? 15 : G.nextBoss, nextWave: G.nextWave, raidCount: G.raidCount - (G.raid ? 1 : 0), raidPending: !!(G.raid || G.raidIn > 0),
+  });
+  G.saveT = 10;
+}
+function loadGame(d) {
+  newGame();
+  const p = G.p;
+  Object.assign(G, { t: d.t, bt: d.bt, kills: d.kills, lvl: d.lvl, xp: d.xp, need: d.need, pending: d.pending || 0, weapons: d.weapons, passives: d.passives,
+    gold: d.gold, wallLvl: d.wallLvl, smith: d.smith, forge: d.forge, tavern: d.tavern, stageN: d.stageN, bossCount: d.bossCount,
+    bossKills: d.bossKills, nextBoss: d.nextBoss, nextWave: d.nextWave, raidCount: d.raidCount });
+  recalcStats();
+  p.logs = Math.min(d.logs, p.cap); p.hp = d.hp < 0 ? p.maxHp : Math.min(d.hp, p.maxHp);
+  G.base.hp = d.base;
+  const mh = 100 + 80 * G.wallLvl;
+  G.walls.forEach((w, i) => { w.maxHp = mh; w.hp = d.walls[i]; });
+  G.towers.forEach((t, i) => { t.lvl = d.towers[i]; });
+  G.pads.forEach((q, i) => { const s = d.pads[i]; if (s) { q.built = s[0]; q.pw = s[1]; q.pg = s[2]; } });
+  G.allies = [];
+  for (const type of d.allies) { const T = ALLY_TYPES[type]; G.allies.push({ type, slot: G.allies.length, x: TAVERN.x, y: TAVERN.y + 34, hp: T.hp, maxHp: T.hp, cd: 0, inv: 0, face: 1, wob: 0, swing: 0, dead: false, reviveT: 0 }); }
+  if (d.raidPending) G.raidIn = 10;
+  for (const t of G.weapons ? Object.keys(G.weapons) : []) G.timers[t] = 0.5;
+}
+function saveSummary(d) {
+  const ago = Math.max(0, Math.round((Date.now() - d.at) / 60000));
+  return `스테이지 ${d.stageN} 클리어 · 영웅 Lv ${d.lvl} · 동료 ${d.allies.length}명 · 🪙${d.gold}<br><span style="opacity:.7">${ago < 1 ? '방금' : ago < 60 ? ago + '분 전' : Math.round(ago / 60) + '시간 전'} 저장</span>`;
+}
+function refreshTitle() {
+  $('bestTitle').innerHTML = bestText(loadBest());
+  const d = readJSON(SAVE_KEY);
+  $('bContinue').style.display = d ? '' : 'none';
+  $('saveInfo').innerHTML = d ? saveSummary(d) : '';
+  $('bStart').textContent = d ? '새로 시작' : '시작!';
+  $('bStart').style.fontSize = d ? '17px' : '';
+  $('bStart').style.background = d ? 'linear-gradient(#ddd,#aaa)' : ''; $('bStart').style.boxShadow = d ? '0 5px 0 #666' : '';
+  newConfirm = 0;
+}
+
 // ---------- 화면 전환 ----------
 function showOv(id) { ['ovTitle', 'ovLevel', 'ovPause', 'ovOver'].forEach(o => $(o).classList.toggle('show', o === id)); }
 function startGame() {
-  audioInit(); newGame(); state = 'play'; joy = null; showOv(null);
+  audioInit(); clearSave(); newGame(); state = 'play'; joy = null; showOv(null);
   $('hudBtns').classList.add('show');
-  banner('마을을 지켜라!', '나무를 베어 망루를 짓자', '#ffd23f', 3);
+  const meta = readJSON(META_KEY);
+  if (meta && meta.forge > 0) { G.forge = meta.forge; recalcStats(); banner('마을을 지켜라!', `⚒ 무기 강화 Lv ${G.forge} 그대로 유지!`, '#ffd23f', 3); }
+  else banner('마을을 지켜라!', '나무를 베어 망루를 짓자', '#ffd23f', 3);
+}
+function continueGame() {
+  const d = readJSON(SAVE_KEY); if (!d) { startGame(); return; }
+  audioInit(); loadGame(d); state = 'play'; joy = null; showOv(null);
+  $('hudBtns').classList.add('show');
+  banner('이어하기!', `스테이지 ${G.stageN} 클리어한 마을로 돌아왔다`, '#7bed9f', 2.5);
+  if (G.pending > 0) openLevelUp();
 }
 function togglePause() {
   if (state === 'play') { state = 'paused'; joy = null; showOv('ovPause'); }
   else if (state === 'paused') { state = 'play'; showOv(null); }
 }
-function toTitle() { state = 'title'; $('hudBtns').classList.remove('show'); $('bestTitle').innerHTML = bestText(loadBest()); showOv('ovTitle'); }
-$('bStart').onclick = startGame;
+function toTitle() { saveGame(); state = 'title'; $('hudBtns').classList.remove('show'); refreshTitle(); showOv('ovTitle'); }
+// 저장이 있으면 '새로 시작'은 한 번 더 눌러야 함 (실수로 마을을 지우지 않게)
+let newConfirm = 0;
+$('bStart').onclick = () => {
+  if (readJSON(SAVE_KEY) && Date.now() - newConfirm > 3000) {
+    newConfirm = Date.now(); $('bStart').textContent = '정말 지울까요? 한 번 더 누르기';
+    setTimeout(() => { if (state === 'title' && Date.now() - newConfirm >= 3000) refreshTitle(); }, 3100);
+    return;
+  }
+  startGame();
+};
+$('bContinue').onclick = continueGame;
 $('bRetry').onclick = startGame;
 $('bResume').onclick = togglePause;
 $('bQuit').onclick = toTitle;
 $('bPause').onclick = () => { audioInit(); togglePause(); };
 $('bSound').onclick = () => { audioInit(); muted = !muted; $('bSound').textContent = muted ? '🔇' : '🔊'; };
-document.addEventListener('visibilitychange', () => { if (document.hidden && state === 'play') togglePause(); });
-$('bestTitle').innerHTML = bestText(loadBest());
+document.addEventListener('visibilitychange', () => { if (document.hidden) { saveGame(); if (state === 'play') togglePause(); } });
+window.addEventListener('pagehide', saveGame);
+refreshTitle();
 
 let choices = [];
 function openLevelUp() {
@@ -414,6 +489,7 @@ function chooseCard(i) {
 
 function gameOver() {
   state = 'over'; joy = null; G.banner = null;
+  clearSave(); writeJSON(META_KEY, { forge: G.forge });   // 마을은 처음부터, 대장간 강화만 남김
   const b = loadBest(); let rec = false;
   if (G.t > b.time) { b.time = G.t; rec = true; }
   if (G.kills > b.kills) { b.kills = G.kills; rec = true; }
@@ -421,7 +497,7 @@ function gameOver() {
   saveBest(b);
   $('ovOver').querySelector('h2').textContent = G.baseDead ? '마을이 무너졌다!' : '게임 오버';
   $('overStats').innerHTML = `⏱ 버틴 시간 <b>${fmtTime(G.t)}</b><br>💀 처치 <b>${G.kills}</b><br>⭐ 레벨 <b>${G.lvl}</b><br>👑 보스 처치 <b>${G.bossKills || 0}</b>`;
-  $('overRec').innerHTML = rec ? '<div class="newrec">🎉 새 기록! 🎉</div>' : '';
+  $('overRec').innerHTML = (rec ? '<div class="newrec">🎉 새 기록! 🎉</div>' : '') + (G.forge > 0 ? `<div class="hint" style="opacity:.9">⚒ 무기 강화 Lv ${G.forge}는 다음 판에도 유지돼요</div>` : '');
   $('bestOver').innerHTML = bestText(b);
   $('hudBtns').classList.remove('show');
   showOv('ovOver');
@@ -486,6 +562,7 @@ function padDone(pd) {
     for (let i = 0; i < WALL_SEGS; i++) { const a = (i + 0.5) / WALL_SEGS * Math.PI * 2; burst(Math.cos(a) * WALL_R, Math.sin(a) * WALL_R, '#c68642', 6, 100, 4, 0.5); }
   }
   G.shake = 6; sfx('build');
+  saveGame();
 }
 function attackTarget(e, dt, onHit) {
   e.atk -= dt;
@@ -728,6 +805,7 @@ function updRaid(dt) {
 
 // ---------- 출격(스테이지) ----------
 function enterStage() {
+  saveGame();   // 스테이지 안에서 앱을 꺼도 출격 직전 마을로 이어하기
   const p = G.p, n = G.stageN, th = THEMES[n % THEMES.length];
   G.stash = { enemies: G.enemies, coins: G.coins, gems: G.gems, hearts: G.hearts };
   G.enemies = []; G.coins = []; G.gems = []; G.hearts = []; G.bullets = []; G.ebullets = []; G.booms = []; G.corpses = []; G.flyers = [];
@@ -759,6 +837,7 @@ function returnBase(win) {
     else banner('마을로 귀환!', `스테이지 ${G.stageN} 클리어 · 금화로 마을을 키우자`, '#7bed9f', 2.5);
   }
   else banner('후퇴!', '마을에서 다시 준비하자', '#ff6b6b', 2.2);
+  saveGame();
 }
 function updStage(dt) {
   const p = G.p, st = G.st;
@@ -1006,6 +1085,7 @@ function update(dt) {
 
   if (G.deadT <= 0 && !p.dead) fireWeapons(dt);
   updAllies(dt);
+  if (G.mode === 'base') { G.saveT = (G.saveT === undefined ? 10 : G.saveT) - dt; if (G.saveT <= 0) saveGame(); }
 
   // 회전 칼
   if (G.weapons.sword && !p.dead) {
