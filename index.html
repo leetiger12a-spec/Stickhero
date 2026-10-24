@@ -49,6 +49,7 @@ canvas{display:block;position:fixed;inset:0;width:100%;height:100%}
 .sw.lock{opacity:.5}
 #ovMap{justify-content:flex-start;padding:max(12px,env(safe-area-inset-top)) 0 0;background:linear-gradient(#1d3557,#457b9d)}
 #mapHead{display:flex;align-items:center;justify-content:space-between;width:min(94vw,440px);margin-bottom:6px}
+#mapHead{gap:6px}#mapHead h2{font-size:22px;white-space:nowrap;flex:1}#mapHead .hb{white-space:nowrap;flex:none}
 #mapScroll{flex:1;width:100%;overflow-y:auto;-webkit-overflow-scrolling:touch;touch-action:pan-y}
 #mapInner{position:relative;width:min(94vw,440px);margin:0 auto}
 .mnode{position:absolute;width:66px;height:66px;margin:-33px 0 0 -33px;border-radius:50%;border:4px solid #222;font:inherit;font-size:24px;font-weight:900;color:#fff;cursor:pointer;box-shadow:0 5px 0 rgba(0,0,0,.45);display:flex;align-items:center;justify-content:center;flex-direction:column;line-height:1}
@@ -152,7 +153,7 @@ h2{margin:0 0 14px;font-size:clamp(30px,9vw,48px);color:#ffd23f;text-shadow:0 3p
 </div>
 
 <div class="ov" id="ovMap">
-  <div id="mapHead"><h2 style="margin:0">🗺 모험 지도</h2><button class="hb" id="bMapClose" style="width:auto;padding:0 12px;font-weight:800">✖ 닫기</button></div>
+  <div id="mapHead"><h2 style="margin:0">🗺 모험 지도</h2><button class="hb" id="bTower" style="width:auto;padding:0 10px;font-weight:800;background:#b5179e;color:#fff">🗼 무한 탑</button><button class="hb" id="bMapClose" style="width:auto;padding:0 12px;font-weight:800">✖ 닫기</button></div>
   <div id="mapScroll"><div id="mapInner"></div></div>
   <div id="mapCard"></div>
 </div>
@@ -188,7 +189,7 @@ h2{margin:0 0 14px;font-size:clamp(30px,9vw,48px);color:#ffd23f;text-shadow:0 3p
 
 <script>
 'use strict';
-const BUILD = 35;
+const BUILD = 36;
 const BOSS_INTERVAL = 180;      // 보스 등장 간격(초)
 const WAVE_INTERVAL = 60;       // 대규모 몰이 이벤트 간격(초)
 const MAX_ENEMIES = 220;
@@ -1434,16 +1435,27 @@ function renderMap() {
   $('bGo').onclick = () => { showOv(null); state = 'play'; enterStage(mapSel); };
 }
 const stageReward = (i, first) => first ? 60 + i * 35 : 20 + i * 8;
+function towerOpen() { return bestStage() >= 3; }
+$('bTower').onclick = () => {
+  if (!towerOpen()) { sfx('hurt'); $('mapCard').innerHTML = '<div class="t">🗼 무한 탑</div><div class="g">🔒 모험 지도 3칸을 깨면 열려요</div>'; return; }
+  const best = (readJSON(META_KEY) || {}).bestFloor || 0;
+  $('mapCard').innerHTML = `<div class="t">🗼 무한 탑</div><div class="g">층마다 버티기 · 5층마다 보스 · 위로 갈수록 강해져요</div>
+    <div class="r">🏆 최고 기록 <b>${best}층</b> · 층마다 금화, 보스 층은 더 많이!</div><div class="r">층을 깨면 🗼 다음 층 / 🏠 마을로 중에 골라요</div>
+    <button class="btn big" id="bGoTower" style="margin-top:6px">🗼 1층부터 도전!</button>`;
+  $('bGoTower').onclick = () => { showOv(null); state = 'play'; G.towerGold = 0; enterStage(0, 1); };
+  sfx('pick');
+};
 $('bMapClose').onclick = () => { sfx('pick'); closeMap(); };
 
-function enterStage(idx) {
+function enterStage(idx, tower) {
   if (idx === undefined) idx = Math.min(G.stageN, STAGES.length - 1);
-  saveGame();   // 스테이지 안에서 앱을 꺼도 출격 직전 마을로 이어하기
-  const p = G.p, def = STAGES[idx], n = idx, th = THEMES[def.th];
-  G.stash = { enemies: G.enemies, coins: G.coins, gems: G.gems, hearts: G.hearts };
-  G.enemies = []; G.coins = []; G.gems = []; G.hearts = []; G.bullets = []; G.ebullets = []; G.booms = []; G.bombs = []; G.corpses = []; G.flyers = []; G.plane = null; G.fists = []; G.hazards = [];
-  const surv = def.goal === 'survive', L = surv ? 600 : def.goal === 'final' ? 2600 : 1700 + 120 * n;
-  const st = { n, def, th, L, groups: [], deco: [], rocks: [], cages: [], bossOn: false, portal: null, clear: false, t: 0, hits: 0, acc: 0, timer: def.time || 0 };
+  if (G.mode === 'base') { saveGame(); G.stash = { enemies: G.enemies, coins: G.coins, gems: G.gems, hearts: G.hearts }; }   // 탑 다음 층은 마을을 다시 넣지 않음
+  // 무한 탑: 층마다 버티기, 5층마다 보스. 난이도 n = 2 + 층
+  const def = tower ? { name: `무한 탑 ${tower}층`, th: Math.floor((tower - 1) / 5) % THEMES.length, goal: tower % 5 === 0 ? 'tboss' : 'survive', time: Math.min(40, 22 + Math.floor(tower / 3)) } : STAGES[idx];
+  const p = G.p, n = tower ? 1 + tower : idx, th = THEMES[def.th];
+  G.enemies = []; G.coins = []; G.gems = []; G.hearts = []; G.bullets = []; G.ebullets = []; G.booms = []; G.bombs = []; G.corpses = []; G.flyers = []; G.plane = null; G.fists = []; G.hazards = []; G.boss = null; G.intro = null;
+  const surv = def.goal === 'survive' || def.goal === 'tboss', L = surv ? 600 : def.goal === 'final' ? 2600 : 1700 + 120 * n;
+  const st = { tower: tower || 0, n, def, th, L, groups: [], deco: [], rocks: [], cages: [], bossOn: false, portal: null, clear: false, t: 0, hits: 0, acc: 0, timer: def.time || 0 };
   if (!surv) for (let y = -380; y > -L + 520; y -= rand(240, 320)) st.groups.push({ y, done: false });
   if (def.goal === 'rescue') for (let k = 0; k < 3; k++) st.cages.push({ x: rand(-STAGE_HW + 60, STAGE_HW - 60), y: -L * (0.22 + k * 0.25), hold: 0, freed: false, cat: ['ally_sword', 'ally_archer', 'ally_bomber'][k], shake: 0 });
   // 길 가장자리(폰 화면 안쪽에 보이게)와 길 안쪽 군데군데에 테마 장식
@@ -1456,13 +1468,25 @@ function enterStage(idx) {
   G.st = st; G.mode = 'stage';
   p.x = 0; p.y = surv ? -L / 2 : -40; G.cam.x = 0; G.cam.y = p.y - 12; joy = null;
   placeAllies();
-  banner(`${n + 1}. ${def.name}`, def.goal === 'survive' ? `⏱ ${def.time}초 버텨라!` : GOAL_TXT[def.goal], '#ffd23f', 2.6);
+  if (tower) banner(`🗼 ${tower}층`, def.goal === 'tboss' ? '👑 보스 층! 보스를 물리쳐라' : `⏱ ${def.time}초 버텨라!`, tower % 5 === 0 ? '#ff6b6b' : '#9fd8ff', 2.2);
+  else banner(`${n + 1}. ${def.name}`, def.goal === 'survive' ? `⏱ ${def.time}초 버텨라!` : GOAL_TXT[def.goal], '#ffd23f', 2.6);
   sfx('wave');
 }
 // 목표 달성 → 별 계산하고 포털 열기
 function stageClear(x, y) {
   const st = G.st, p = G.p; if (st.clear) return;
   st.clear = true;
+  if (st.tower) {
+    const f = st.tower, prize = 15 + f * 6 + (f % 5 === 0 ? 60 + f * 4 : 0);
+    G.gold += prize; G.towerGold = (G.towerGold || 0) + prize;
+    const meta = readJSON(META_KEY) || {}; if (f > (meta.bestFloor || 0)) { meta.bestFloor = f; writeJSON(META_KEY, meta); floatText(p.x, p.y - 80, `🏆 최고 기록 ${f}층!`, '#ffd23f', 20, 1.6); }
+    floatText(p.x, p.y - 56, `+🪙${prize}`, '#ffd23f', 20, 1.4);
+    banner(`🗼 ${f}층 돌파!`, '🗼 위로 갈까, 🏠 마을로 갈까?', '#7bed9f', 2.2); sfx('cheer');
+    if (!p.dead) p.hp = Math.min(p.maxHp, p.hp + p.maxHp * 0.15);   // 층마다 조금 회복
+    st.portal = { x: p.x + 70, y: p.y - 80, t: 0, hold: 0, on: false };
+    st.portal2 = { x: p.x - 70, y: p.y - 80, t: 0, hold: 0, on: false };
+    return;
+  }
   let stars = 1;
   if (p.hp >= p.maxHp * 0.5) stars++;
   if (st.def.goal === 'survive' ? st.hits <= 4 : st.t <= st.par) stars++;
@@ -1476,6 +1500,11 @@ function returnBase(win) {
   G.mode = 'base'; G.st = null; G.stash = null; G.gateT = 0;
   p.x = GATE.x; p.y = GATE.y - 40; G.cam.x = p.x; G.cam.y = p.y - 12;
   placeAllies();
+  if (st && st.tower) {
+    const reached = st.clear ? st.tower : st.tower - 1;
+    banner(win ? '🏠 탑에서 귀환!' : '탑에서 쓰러졌다!', `🗼 ${reached}층까지 · 얻은 금화 🪙${G.towerGold || 0}`, win ? '#7bed9f' : '#ff6b6b', 3);
+    G.towerGold = 0; saveGame(); return;
+  }
   if (win && st) {
     const i = st.n, first = i >= G.stageN, prize = stageReward(i, first), old = G.stars[i] || 0;
     G.stars[i] = Math.max(old, st.stars);
@@ -1564,7 +1593,8 @@ function updStage(dt) {
     } } else c.hold = Math.max(0, c.hold - dt * 2);
   }
   // 끝에 도착하면 보스 등장 (구출 스테이지는 다 구해야)
-  if (!surv(def) && !st.bossOn && p.y < -st.L + 320) {
+  if (def.goal === 'tboss' && !st.bossOn && st.t > 1.5) { st.bossOn = true; spawnBoss(0, p.y - 260); }
+  if (def.goal !== 'tboss' && !surv(def) && !st.bossOn && p.y < -st.L + 320) {
     if (st.cages.some(c => !c.freed)) { if (p.fullMsg <= 0) { floatText(p.x, p.y - 50, '고양이를 다 구해야 해!', '#ffd23f', 16, 1.2); p.fullMsg = 2; } }
     else { st.bossOn = true; spawnBoss(0, -st.L - 120); }
   }
@@ -1573,7 +1603,12 @@ function updStage(dt) {
     st.portal.t += dt;
     const on = !p.dead && (p.x - st.portal.x) ** 2 + (p.y - st.portal.y) ** 2 < 30 * 30;
     st.portal.on = on;
-    if (on) { st.portal.hold += dt; if (st.portal.hold > 0.6) returnBase(true); } else st.portal.hold = 0;
+    if (on) { st.portal.hold += dt; if (st.portal.hold > 0.6) { if (st.tower) enterStage(0, st.tower + 1); else returnBase(true); return; } } else st.portal.hold = 0;
+  }
+  if (st.portal2) { // 탑: 마을로 돌아가는 포털
+    const on2 = !p.dead && (p.x - st.portal2.x) ** 2 + (p.y - st.portal2.y) ** 2 < 30 * 30;
+    st.portal2.on = on2;
+    if (on2) { st.portal2.hold += dt; if (st.portal2.hold > 0.6) { returnBase(true); return; } } else st.portal2.hold = 0;
   }
 }
 const surv = def => def.goal === 'survive';
@@ -1834,7 +1869,7 @@ function update(dt) {
   if (G.mode === 'stage') {
     updStage(dt);
     const st = G.st, cage = st && st.cages.find(c => !c.freed);
-    G.hint = !st ? null : st.portal ? { x: st.portal.x, y: st.portal.y, text: '🌀 포털에 서면 마을로 귀환!' }
+    G.hint = !st ? null : st.portal ? { x: st.portal.x, y: st.portal.y, text: st.tower ? '🗼 오른쪽은 다음 층, 🏠 왼쪽은 마을로!' : '🌀 포털에 서면 마을로 귀환!' }
       : cage && Math.abs(cage.y - p.y) < 500 ? { x: cage.x, y: cage.y, text: '🐱 우리 앞에 서서 고양이를 구해요' } : null;
   }
   else updBase(dt);
@@ -2741,7 +2776,10 @@ function drawWorld() {
   if (base) {
     drawPads();
     if (G.gateOpen) drawPortal(GATE.x, GATE.y, G.gateT > 0, G.gateT > 0 ? `출격 ${Math.ceil((1 - G.gateT) * 10) / 10}` : '⚔ 출격!', 'rgba(230,57,70,.35)');
-  } else if (G.st.portal) drawPortal(G.st.portal.x, G.st.portal.y, G.st.portal.on, '🌀 마을로', 'rgba(63,169,245,.45)');
+  } else {
+    if (G.st.portal) drawPortal(G.st.portal.x, G.st.portal.y, G.st.portal.on, G.st.tower ? '🗼 다음 층' : '🌀 마을로', G.st.tower ? 'rgba(181,23,158,.45)' : 'rgba(63,169,245,.45)');
+    if (G.st.portal2) drawPortal(G.st.portal2.x, G.st.portal2.y, G.st.portal2.on, '🏠 마을로', 'rgba(63,169,245,.45)');
+  }
   // 금화
   for (const c of G.coins) {
     const y = c.y - c.z, sq = Math.abs(Math.cos(c.age * 6 + c.x));
@@ -2951,7 +2989,7 @@ function drawHUD() {
     roundRect(bx, by, bw, 14, 7); ctx.fillStyle = '#222'; ctx.fill();
     roundRect(bx + 2, by + 2, (bw - 4) * k, 10, 5); ctx.fillStyle = sv ? '#7bed9f' : '#ffd23f'; ctx.fill();
     const extra = sv ? ` · ⏱ ${Math.max(0, Math.ceil(st.timer))}초` : st.cages.length ? ` · 🐱 ${st.cages.filter(c => c.freed).length}/${st.cages.length}` : '';
-    hudText(`🚩 ${st.n + 1}. ${st.def.name}${extra}`, W / 2, by + 26, 13, '#fff', 'center');
+    hudText(st.tower ? `🗼 ${st.def.name}${extra}` : `🚩 ${st.n + 1}. ${st.def.name}${extra}`, W / 2, by + 26, 13, '#fff', 'center');
     hudText(sv ? '🌀' : GOAL_ICON[st.def.goal === 'rescue' ? 'boss' : st.def.goal], bx + bw + 14, by + 7, 16, '#fff', 'center');
   }
   // 마을이 화면 밖이면 집 방향 표시
@@ -3146,7 +3184,7 @@ window.SH = {
   chooseAlly(i) { chooseAlly(i); },
   killBase() { hurtBase(99999); },
   gold(n) { G.gold += n; },
-  enterStage(i) { enterStage(i); }, openMap() { openMap(); }, returnBase(w) { returnBase(w); }, raid() { startRaid(); },
+  enterStage(i) { enterStage(i); }, tower(f) { G.towerGold = 0; enterStage(0, f); }, openMap() { openMap(); }, returnBase(w) { returnBase(w); }, raid() { startRaid(); },
 };
 </script>
 </body>
