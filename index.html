@@ -32,7 +32,7 @@ h2{margin:0 0 14px;font-size:clamp(30px,9vw,48px);color:#ffd23f;text-shadow:0 3p
 .stats{font-size:19px;line-height:1.7;margin-bottom:10px}
 .stats b{color:#ffd23f}
 .newrec{color:#ff6b6b;font-weight:900;font-size:22px;animation:pop .5s ease-out infinite alternate}
-#hudBtns{position:fixed;right:8px;top:118px;z-index:4;display:none;flex-direction:column;gap:8px}
+#hudBtns{position:fixed;right:8px;top:140px;z-index:4;display:none;flex-direction:column;gap:8px}
 #hudBtns.show{display:flex}
 .hb{width:40px;height:40px;border-radius:12px;border:3px solid #333;background:rgba(255,250,240,.85);font-size:18px;cursor:pointer;padding:0;color:#222}
 </style>
@@ -44,10 +44,10 @@ h2{margin:0 0 14px;font-size:clamp(30px,9vw,48px);color:#ffd23f;text-shadow:0 3p
 
 <div class="ov show" id="ovTitle">
   <h1>STICK HERO</h1>
-  <div class="sub">빨간 막대 군단으로부터 마을을 지켜라!</div>
+  <div class="sub">나무를 베어 마을을 세우고, 빨간 막대 군단을 막아라!</div>
   <button class="btn" id="bStart">시작!</button>
   <div class="best" id="bestTitle"></div>
-  <div class="hint">📱 화면을 끌어서 이동 · 공격은 자동<br>🪙 금화를 모아 동그라미 위에 서면 망루·울타리가 지어져요<br>💻 WASD / 방향키 이동 · P 일시정지</div>
+  <div class="hint">📱 화면을 끌어서 이동 · 공격은 자동<br>🌳 나무 옆에 서면 통나무를 모아요 → 🪵 동그라미 위에 서면 건설!<br>💻 WASD / 방향키 이동 · P 일시정지</div>
 </div>
 
 <div class="ov" id="ovLevel">
@@ -72,7 +72,7 @@ h2{margin:0 0 14px;font-size:clamp(30px,9vw,48px);color:#ffd23f;text-shadow:0 3p
 
 <script>
 'use strict';
-const BUILD = 2;
+const BUILD = 3;
 const BOSS_INTERVAL = 180;      // 보스 등장 간격(초)
 const WAVE_INTERVAL = 60;       // 대규모 몰이 이벤트 간격(초)
 const MAX_ENEMIES = 220;
@@ -80,9 +80,10 @@ const MAP_R = 720;              // 싸움터 반지름
 const WALL_R = 135;             // 울타리 반지름
 const BASE_R = 34;              // 마을 회관 크기
 const WALL_SEGS = 16;
-const TOWER_COST = [15, 35, 70, 110, 170];
-const WALL_COST = [20, 45, 80, 120, 180];
-const REPAIR_COST = 25;
+const K = 0.72, IK = 1 / K;      // 3/4 시점: 땅은 세로로 납작하게, 서 있는 물체는 그대로
+const TOWER_W = [6, 8, 10, 12, 15], TOWER_G = [0, 15, 30, 50, 80];   // 망루: 통나무·금화
+const WALL_W = [0, 8, 12, 16, 20], WALL_G = [0, 10, 25, 40, 60];     // 울타리: 현재 Lv 기준
+const REPAIR_W = 4;
 
 const cv = document.getElementById('cv'), ctx = cv.getContext('2d');
 let W = 0, H = 0, DPR = 1, SCALE = 1, VW = 0, VH = 0;
@@ -132,7 +133,7 @@ function noise(dur, vol, freq, delay) {
   g.gain.setValueAtTime(vol || 0.15, t); g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
   s.connect(f); f.connect(g); g.connect(master); s.start(t); s.stop(t + dur + 0.02);
 }
-const sfxGap = { hit: 0.045, shoot: 0.07, thud: 0.12, coin: 0.04, pay: 0.06, arrow: 0.08, shotgun: 0.1, gem: 0.035, pop: 0.05, swing: 0.25, boom: 0.15, hurt: 0.15 };
+const sfxGap = { hit: 0.045, shoot: 0.07, thud: 0.12, chop: 0.08, coin: 0.04, pay: 0.06, arrow: 0.08, shotgun: 0.1, gem: 0.035, pop: 0.05, swing: 0.25, boom: 0.15, hurt: 0.15 };
 const sfxLast = {};
 function sfx(n) {
   if (!AC || muted) return;
@@ -163,6 +164,7 @@ function sfx(n) {
     case 'pay': tone(900 + Math.random() * 200, 0.04, 'square', 0.025, 200); break;
     case 'build': [392, 523, 659, 784, 1047].forEach((f, i) => tone(f, 0.12, 'square', 0.06, 0, i * 0.06)); noise(0.2, 0.1, 800); break;
     case 'arrow': noise(0.06, 0.05, 4000); break;
+    case 'chop': noise(0.07, 0.15, 1500); tone(180, 0.08, 'square', 0.05, -60); break;
     case 'baseHit': tone(90, 0.25, 'square', 0.08, -30); break;
   }
 }
@@ -185,6 +187,7 @@ const PASS = {
   magnet: { name: '자석',     icon: '🧲', max: 5, desc: '구슬 끌어오는 범위 +40%' },
   power:  { name: '힘',       icon: '💪', max: 5, desc: '모든 공격력 +15%' },
   haste:  { name: '번개 손',   icon: '⚡', max: 5, desc: '공격 속도 +10%' },
+  bag:    { name: '큰 등짐',   icon: '🎒', max: 3, desc: '통나무를 6개 더 짊어질 수 있어요' },
 };
 const MAX_WLV = 5;
 function wStat(id) {
@@ -205,6 +208,7 @@ function recalcStats() {
   p.magnet = 70 * (1 + 0.4 * (ps.magnet || 0));
   p.dmgMul = 1 + 0.15 * (ps.power || 0);
   p.cdMul = Math.max(0.5, 1 - 0.1 * (ps.haste || 0));
+  p.cap = 12 + 6 * (ps.bag || 0);
 }
 const xpNeed = l => Math.floor(5 + l * 4 + Math.pow(l, 1.6));
 
@@ -226,23 +230,35 @@ let G = null, state = 'title', eid = 0;
 function newGame() {
   G = {
     t: 0, kills: 0, lvl: 1, xp: 0, need: xpNeed(1), pending: 0,
-    p: { x: 0, y: 0, r: 11, hp: 100, maxHp: 100, speed: 150, face: 1, ax: 1, ay: 0, inv: 0, walk: 0, moving: false, magnet: 70, dmgMul: 1, cdMul: 1 },
+    p: { x: 0, y: 0, r: 11, logs: 0, cap: 12, chopT: 0, chop: 0, fullMsg: 0, hp: 100, maxHp: 100, speed: 150, face: 1, ax: 1, ay: 0, inv: 0, walk: 0, moving: false, magnet: 70, dmgMul: 1, cdMul: 1 },
     weapons: { pistol: 1 }, passives: {}, timers: {},
     enemies: [], bullets: [], ebullets: [], booms: [], gems: [], hearts: [], parts: [], texts: [], coins: [], corpses: [],
-    gold: 15, base: { hp: 1000, maxHp: 1000, hitT: 0 }, respawnT: 0, squadAng: Math.random() * 7, squadT: 6,
+    trees: [], flyers: [], hint: null,
+    gold: 0, base: { hp: 1000, maxHp: 1000, hitT: 0 }, respawnT: 0, squadAng: Math.random() * 7, squadT: 6,
     walls: Array.from({ length: WALL_SEGS }, () => ({ hp: 0, maxHp: 0, shake: 0 })), wallLvl: 0,
     towers: [], pads: [], baseDead: false,
     spawnAcc: 0, nextBoss: BOSS_INTERVAL, nextWave: WAVE_INTERVAL, bossCount: 0, boss: null,
     shake: 0, swordAng: 0, slow: 0, banner: null, deadT: 0, cam: { x: 0, y: 0 }, lvlFlash: 0,
   };
   G.p.y = 70; G.cam.y = 58;
-  // 망루 자리 4곳 + 울타리 강화 자리 1곳
-  [-3, -1, 1, 3].forEach((k, i) => {
-    const a = k * Math.PI / 4, x = Math.cos(a) * 88, y = Math.sin(a) * 88;
+  // 망루 자리 4곳 + 울타리 강화 자리 1곳 (order 순서대로 하나씩 열림)
+  [1, 3, -3, -1].forEach((k, i) => {
+    const a = k * Math.PI / 4, x = Math.cos(a) * 92, y = Math.sin(a) * 92;
     G.towers.push({ x, y, lvl: 0, cd: 0 });
-    G.pads.push({ kind: 'tower', idx: i, x, y, paid: 0 });
+    G.pads.push({ kind: 'tower', idx: i, x, y, pw: 0, pg: 0, acc: 0, order: i === 0 ? 0 : i + 1, built: false });
   });
-  G.pads.push({ kind: 'wall', x: 0, y: -WALL_R + 48, paid: 0 });
+  G.pads.push({ kind: 'wall', x: 0, y: -WALL_R + 52, pw: 0, pg: 0, acc: 0, order: 1, built: false });
+  // 나무 숲 4곳 (첫 숲은 마을 가까이)
+  const a0 = Math.random() * 7;
+  for (let g = 0; g < 4; g++) {
+    const ga = a0 + g * Math.PI / 2 + rand(-0.3, 0.3), gr = g === 0 ? 235 : rand(300, 470);
+    const cx = Math.cos(ga) * gr, cy = Math.sin(ga) * gr;
+    for (let n = 0, tries = 0; n < (g === 0 ? 6 : 9) && tries < 200; tries++) {
+      const x = cx + rand(-110, 110), y = cy + rand(-90, 90), r = Math.hypot(x, y);
+      if (r < WALL_R + 60 || r > MAP_R - 50 || G.trees.some(t => (t.x - x) ** 2 + (t.y - y) ** 2 < 52 * 52)) continue;
+      G.trees.push({ x, y, logs: 4, max: 4, shake: 0, regrow: 0, sz: rand(0.9, 1.15) }); n++;
+    }
+  }
   upgradeWall(); // 기본 울타리 Lv 1로 시작
   recalcStats();
 }
@@ -293,7 +309,7 @@ function showOv(id) { ['ovTitle', 'ovLevel', 'ovPause', 'ovOver'].forEach(o => $
 function startGame() {
   audioInit(); newGame(); state = 'play'; joy = null; showOv(null);
   $('hudBtns').classList.add('show');
-  banner('마을을 지켜라!', '🪙 동그라미 위에 서면 망루를 지어요', '#ffd23f', 3);
+  banner('마을을 지켜라!', '나무를 베어 망루를 짓자', '#ffd23f', 3);
 }
 function togglePause() {
   if (state === 'play') { state = 'paused'; joy = null; showOv('ovPause'); }
@@ -384,16 +400,20 @@ function upgradeWall() {
   for (const w of G.walls) { w.maxHp = mh; w.hp = mh; }
 }
 function repairWall() { for (const w of G.walls) w.hp = w.maxHp; }
+function padVisible(pd) { return pd.order === 0 || G.pads.some(q => q.order === pd.order - 1 && q.built); }
 function padCost(pd) {
-  if (pd.kind === 'tower') { const l = G.towers[pd.idx].lvl; return l < 5 ? TOWER_COST[l] : 0; }
-  if (G.wallLvl < 5) return WALL_COST[G.wallLvl];
-  return G.walls.some(w => w.hp < w.maxHp) ? REPAIR_COST : 0;
+  if (!padVisible(pd)) return null;
+  if (pd.kind === 'tower') { const l = G.towers[pd.idx].lvl; return l < 5 ? { w: TOWER_W[l], g: TOWER_G[l] } : null; }
+  if (G.wallLvl < 5) return { w: WALL_W[G.wallLvl], g: WALL_G[G.wallLvl] };
+  return G.walls.some(w => w.hp < w.maxHp) ? { w: REPAIR_W, g: 0 } : null;
 }
+const padOY = pd => pd.kind === 'tower' && G.towers[pd.idx].lvl > 0 ? 40 : 0;
 function padLabel(pd) {
   if (pd.kind === 'tower') { const l = G.towers[pd.idx].lvl; return l === 0 ? '망루 짓기' : l < 5 ? `망루 Lv${l + 1}` : '망루 MAX'; }
   return G.wallLvl < 5 ? `울타리 Lv${G.wallLvl + 1}` : '울타리 수리';
 }
 function padDone(pd) {
+  pd.built = true;
   if (pd.kind === 'tower') {
     const t = G.towers[pd.idx]; t.lvl++;
     banner(t.lvl === 1 ? '망루 완성!' : `망루 Lv ${t.lvl}!`, t.lvl === 1 ? '자동으로 화살을 쏴요' : '더 빠르고 강하게!', '#7bed9f', 1.6);
@@ -591,19 +611,67 @@ function update(dt) {
   }
   G.base.hitT -= dt;
 
-  // 금화 자리(패드): 위에 서 있으면 금화가 쏙쏙 들어가 망루·울타리가 지어짐
-  for (const pd of G.pads) {
-    const cost = padCost(pd);
-    const oy = pd.kind === 'tower' && G.towers[pd.idx].lvl > 0 ? 34 : 0;
-    pd.on = !p.dead && (p.x - pd.x) ** 2 + (p.y - pd.y - oy) ** 2 < 24 * 24;
-    if (!pd.on || !cost || G.gold <= 0) continue;
-    pd.acc = (pd.acc || 0) + dt * Math.max(12, cost / 1.2);
-    while (pd.acc >= 1 && G.gold > 0 && pd.paid < cost) {
-      pd.acc--; G.gold--; pd.paid++;
-      if (G.parts.length < 700) G.parts.push({ x: p.x + rand(-6, 6), y: p.y - 30, vx: (pd.x - p.x) * 3, vy: (pd.y + oy - p.y + 30) * 3, life: 0.3, max: 0.3, color: '#ffd23f', size: 4 });
-      sfx('pay');
+  // 나무 베기: 나무 옆에 서 있으면 자동으로 쾅쾅 → 통나무가 등에 쌓임
+  p.chop = Math.max(0, p.chop - dt); p.fullMsg -= dt;
+  let tree = null, td = 34 * 34;
+  for (const t of G.trees) {
+    if (t.logs <= 0) { t.regrow -= dt; if (t.regrow <= 0) { t.logs = t.max; burst(t.x, t.y - 20, '#7bed9f', 10, 90, 4, 0.5); } continue; }
+    t.shake = Math.max(0, t.shake - dt);
+    const d = (t.x - p.x) ** 2 + (t.y - p.y) ** 2;
+    if (d < td) { td = d; tree = t; }
+  }
+  for (const t of G.trees) { // 나무는 통과할 수 없음
+    const dx = p.x - t.x, dy = p.y - t.y, d = Math.hypot(dx, dy) || 1;
+    if (t.logs > 0 && d < 14) { p.x = t.x + dx / d * 14; p.y = t.y + dy / d * 14; }
+  }
+  if (tree && !p.dead) {
+    if (p.logs >= p.cap) { if (p.fullMsg <= 0) { floatText(p.x, p.y - 50, '가득!', '#ffd23f', 18, 1); p.fullMsg = 2.5; } }
+    else {
+      p.chopT -= dt;
+      if (p.chopT <= 0) {
+        p.chopT = 0.32; p.chop = 0.2; p.face = tree.x > p.x ? 1 : -1;
+        tree.logs--; tree.shake = 0.25; p.logs++;
+        burst(tree.x - p.face * 4, tree.y - 10, '#c68642', 5, 120, 3, 0.35);
+        G.flyers.push({ x0: tree.x, y0: tree.y - 20, x1: p.x, y1: p.y - 30, t: 0, dur: 0.3, kind: 'log' });
+        sfx('chop');
+        if (tree.logs <= 0) { tree.regrow = 25; sfx('break'); floatText(tree.x, tree.y - 50, '쿵!', '#fff', 18, 0.8); }
+      }
     }
-    if (pd.paid >= cost) { pd.paid = 0; pd.acc = 0; padDone(pd); }
+  } else p.chopT = Math.min(p.chopT, 0.1);
+
+  // 건설 자리: 위에 서 있으면 통나무·금화가 쏙쏙 들어가 망루·울타리가 지어짐
+  for (const pd of G.pads) {
+    const c = padCost(pd), oy = padOY(pd);
+    pd.on = !p.dead && (p.x - pd.x) ** 2 + (p.y - pd.y - oy) ** 2 < 26 * 26;
+    if (!pd.on || !c) continue;
+    pd.acc += dt;
+    while (pd.acc >= 0.07) {
+      pd.acc -= 0.07;
+      if (pd.pw < c.w && p.logs > 0) {
+        p.logs--; pd.pw++; sfx('pay');
+        G.flyers.push({ x0: p.x, y0: p.y - 30 - p.logs * 2, x1: pd.x, y1: pd.y + oy, t: 0, dur: 0.25, kind: 'log' });
+      } else if (pd.pg < c.g && G.gold > 0) {
+        const n = Math.min(3, c.g - pd.pg, G.gold); G.gold -= n; pd.pg += n; sfx('pay');
+        G.flyers.push({ x0: p.x, y0: p.y - 30, x1: pd.x, y1: pd.y + oy, t: 0, dur: 0.25, kind: 'coin' });
+      } else { pd.acc = 0; break; }
+    }
+    if (pd.pw >= c.w && pd.pg >= c.g) { pd.pw = pd.pg = 0; padDone(pd); }
+  }
+  for (const f of G.flyers) f.t += dt;
+  G.flyers = G.flyers.filter(f => f.t < f.dur);
+
+  // 처음 하는 사람을 위한 안내 화살표
+  G.hint = null;
+  if (!p.dead) {
+    const first = G.pads.find(q => q.order === 0);
+    const near = (arr) => { let b = null, bd = 1e12; for (const o of arr) { const d = (o.x - p.x) ** 2 + (o.y - p.y) ** 2; if (d < bd) { bd = d; b = o; } } return b; };
+    if (!first.built) {
+      if (p.logs < TOWER_W[0]) { const t = near(G.trees.filter(t => t.logs > 0)); if (t) G.hint = { x: t.x, y: t.y, text: `🌳 나무 옆에 서면 나무를 베요 (🪵 ${p.logs}/${TOWER_W[0]})` }; }
+      else G.hint = { x: first.x, y: first.y, text: '🪵 통나무를 동그라미에 가져가 망루를 지어요!' };
+    } else if (p.logs >= p.cap) {
+      const pd = near(G.pads.filter(q => padCost(q) && padCost(q).w > 0).map(q => ({ x: q.x, y: q.y + padOY(q) })));
+      if (pd) G.hint = { x: pd.x, y: pd.y, text: '🎒 가득 찼어요! 동그라미로 가져가요' };
+    }
   }
 
   // 망루
@@ -870,7 +938,7 @@ function updBoss(e, dt, dx, dy, d) {
 // ---------- 그리기 ----------
 function drawGround() {
   const g = 64, x0 = Math.floor((G.cam.x - VW / 2) / g) - 1, x1 = Math.ceil((G.cam.x + VW / 2) / g) + 1;
-  const y0 = Math.floor((G.cam.y - VH / 2) / g) - 1, y1 = Math.ceil((G.cam.y + VH / 2) / g) + 1;
+  const y0 = Math.floor((G.cam.y - VH * IK / 2) / g) - 1, y1 = Math.ceil((G.cam.y + VH * IK / 2) / g) + 2;
   // 바깥 숲
   ctx.fillStyle = '#3f7d3a'; ctx.fillRect(x0 * g, y0 * g, (x1 - x0) * g, (y1 - y0) * g);
   // 풀밭
@@ -888,9 +956,10 @@ function drawGround() {
     const px = x * g + (h * 300) % g, py = y * g + (h * 700) % g, r = Math.hypot(px, py);
     if (r > MAP_R + 20) { // 숲 나무
       if (h < 0.7) {
-        ctx.fillStyle = 'rgba(0,0,0,.15)'; ctx.beginPath(); ctx.ellipse(px, py + 14, 20, 7, 0, 0, 7); ctx.fill();
-        ctx.fillStyle = h < 0.35 ? '#2d6a2e' : '#357a36'; ctx.beginPath(); ctx.arc(px, py, 22 + h * 10, 0, 7); ctx.fill();
-        ctx.fillStyle = 'rgba(255,255,255,.12)'; ctx.beginPath(); ctx.arc(px - 7, py - 8, 9, 0, 7); ctx.fill();
+        ctx.save(); ctx.translate(px, py); ctx.scale(1, IK);
+        ctx.fillStyle = h < 0.35 ? '#2d6a2e' : '#357a36'; ctx.beginPath(); ctx.arc(0, -10, 22 + h * 10, 0, 7); ctx.fill();
+        ctx.fillStyle = 'rgba(255,255,255,.12)'; ctx.beginPath(); ctx.arc(-7, -18, 9, 0, 7); ctx.fill();
+        ctx.restore();
       }
       continue;
     }
@@ -908,41 +977,70 @@ function drawGround() {
   }
 }
 
-function drawWalls() {
+function drawWallSeg(i) {
   const lvl = G.wallLvl, stone = lvl >= 4;
-  for (let i = 0; i < WALL_SEGS; i++) {
+  {
     const w = G.walls[i], a0 = i / WALL_SEGS * Math.PI * 2, a1 = (i + 1) / WALL_SEGS * Math.PI * 2;
     const n = 5, sh = w.shake > 0 ? rand(-1.5, 1.5) : 0;
     if (w.hp <= 0) { // 부서진 울타리 그루터기
       for (let k = 0; k < n; k++) {
         const a = a0 + (k + 0.5) / n * (a1 - a0), x = Math.cos(a) * WALL_R, y = Math.sin(a) * WALL_R;
-        ctx.fillStyle = '#7a4a22'; ctx.fillRect(x - 3, y - 4, 6, 5);
+        ctx.fillStyle = '#7a4a22'; ctx.fillRect(x - 3, y - 4, 6, 6);
       }
-      continue;
+      return;
     }
-    const dmg = 1 - w.hp / w.maxHp;
-    // 가로대
-    ctx.strokeStyle = stone ? '#6c757d' : '#8d5524'; ctx.lineWidth = 4;
-    ctx.beginPath(); ctx.arc(0, -8, WALL_R, a0, a1); ctx.stroke();
+    const dmg = 1 - w.hp / w.maxHp, hgt = 20 + lvl * 2;
+    // 가로대 (말뚝 높이의 중간)
+    ctx.strokeStyle = stone ? '#6c757d' : '#6b3e1a'; ctx.lineWidth = 4;
+    ctx.beginPath();
+    for (let k = 0; k <= 8; k++) { const a = a0 + k / 8 * (a1 - a0), x = Math.cos(a) * WALL_R + sh, y = Math.sin(a) * WALL_R - hgt * 0.5 * IK; k ? ctx.lineTo(x, y) : ctx.moveTo(x, y); }
+    ctx.stroke();
     for (let k = 0; k < n; k++) {
       const a = a0 + (k + 0.5) / n * (a1 - a0), x = Math.cos(a) * WALL_R + sh, y = Math.sin(a) * WALL_R;
-      const tilt = dmg > 0.5 && k % 2 ? 0.35 : 0, hgt = 18 + lvl * 2;
-      ctx.save(); ctx.translate(x, y); ctx.rotate(tilt);
+      const tilt = dmg > 0.5 && k % 2 ? 0.35 : 0;
+      ctx.save(); ctx.translate(x, y); ctx.scale(1, IK); ctx.rotate(tilt);
       ctx.fillStyle = stone ? '#adb5bd' : lvl >= 2 ? '#b5733a' : '#c68642'; ctx.strokeStyle = '#4a2c12'; ctx.lineWidth = 1.8;
-      ctx.beginPath(); ctx.moveTo(-4, 2); ctx.lineTo(-4, -hgt + 4); ctx.lineTo(0, -hgt); ctx.lineTo(4, -hgt + 4); ctx.lineTo(4, 2); ctx.closePath(); ctx.fill(); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(-4.5, 2); ctx.lineTo(-4.5, -hgt + 5); ctx.lineTo(0, -hgt); ctx.lineTo(4.5, -hgt + 5); ctx.lineTo(4.5, 2); ctx.closePath(); ctx.fill(); ctx.stroke();
+      ctx.fillStyle = 'rgba(0,0,0,.15)'; ctx.fillRect(1.5, -hgt + 5, 3, hgt - 3);
       ctx.restore();
     }
     if (w.hp < w.maxHp) {
       const am = (a0 + a1) / 2, x = Math.cos(am) * (WALL_R + 16), y = Math.sin(am) * (WALL_R + 16);
-      ctx.fillStyle = '#222'; ctx.fillRect(x - 13, y - 3, 26, 5);
-      ctx.fillStyle = w.hp / w.maxHp > 0.4 ? '#f4a261' : '#e63946'; ctx.fillRect(x - 12, y - 2, 24 * w.hp / w.maxHp, 3);
+      ctx.fillStyle = '#222'; ctx.fillRect(x - 13, y - 3, 26, 6);
+      ctx.fillStyle = w.hp / w.maxHp > 0.4 ? '#f4a261' : '#e63946'; ctx.fillRect(x - 12, y - 2, 24 * w.hp / w.maxHp, 4);
     }
   }
 }
 
+function drawTree(t) {
+  const sh = t.shake > 0 ? Math.sin(t.shake * 60) * 3 : 0;
+  ctx.save(); ctx.translate(t.x, t.y); ctx.scale(1, IK);
+  ctx.fillStyle = 'rgba(0,0,0,.18)'; ctx.beginPath(); ctx.ellipse(0, 3, 20 * t.sz, 7, 0, 0, 7); ctx.fill();
+  ctx.strokeStyle = '#3d2210'; ctx.lineWidth = 2.5;
+  if (t.logs <= 0) { // 그루터기
+    ctx.fillStyle = '#8d5524'; ctx.beginPath(); ctx.rect(-8, -8, 16, 10); ctx.fill(); ctx.stroke();
+    ctx.fillStyle = '#e3c58f'; ctx.beginPath(); ctx.ellipse(0, -8, 8, 3.5, 0, 0, 7); ctx.fill(); ctx.stroke();
+    ctx.restore(); return;
+  }
+  ctx.scale(t.sz, t.sz); ctx.translate(sh, 0);
+  ctx.fillStyle = '#8d5524'; ctx.beginPath(); ctx.moveTo(-6, 2); ctx.lineTo(-5, -26); ctx.lineTo(5, -26); ctx.lineTo(6, 2); ctx.closePath(); ctx.fill(); ctx.stroke();
+  const leaf = (x, y, r, c) => { ctx.fillStyle = c; ctx.beginPath(); ctx.arc(x, y, r, 0, 7); ctx.fill(); ctx.stroke(); };
+  leaf(-13, -30, 13, '#3a9d3a'); leaf(13, -30, 13, '#3a9d3a'); leaf(0, -44, 17, '#4cb84c'); leaf(-8, -33, 12, '#4cb84c'); leaf(8, -33, 12, '#4cb84c');
+  ctx.fillStyle = 'rgba(255,255,255,.25)'; ctx.beginPath(); ctx.arc(-5, -50, 6, 0, 7); ctx.fill();
+  ctx.restore();
+}
+
+function drawLog(x, y, s) {
+  ctx.save(); ctx.translate(x, y); ctx.scale(s, s);
+  ctx.fillStyle = '#b5733a'; ctx.strokeStyle = '#4a2c12'; ctx.lineWidth = 1.4;
+  ctx.beginPath(); ctx.rect(-8, -2.6, 14, 5.2); ctx.fill(); ctx.stroke();
+  ctx.fillStyle = '#e3c58f'; ctx.beginPath(); ctx.ellipse(6, 0, 2.2, 2.6, 0, 0, 7); ctx.fill(); ctx.stroke();
+  ctx.restore();
+}
+
 function drawBase() {
   const b = G.base, sh = b.hitT > 0 ? rand(-2, 2) : 0;
-  ctx.save(); ctx.translate(sh, 0);
+  ctx.save(); ctx.translate(sh, 0); ctx.scale(1, IK);
   ctx.fillStyle = 'rgba(0,0,0,.2)'; ctx.beginPath(); ctx.ellipse(0, 18, 38, 10, 0, 0, 7); ctx.fill();
   ctx.fillStyle = b.hitT > 0.2 ? '#fff' : '#f1e3c8'; ctx.strokeStyle = '#4a2c12'; ctx.lineWidth = 3;
   ctx.fillRect(-28, -22, 56, 40); ctx.strokeRect(-28, -22, 56, 40);
@@ -955,31 +1053,34 @@ function drawBase() {
   ctx.fillStyle = '#ffd23f'; ctx.beginPath(); ctx.moveTo(0, -74); ctx.quadraticCurveTo(12, -72 + f, 22, -68); ctx.lineTo(0, -62); ctx.closePath(); ctx.fill(); ctx.stroke();
   ctx.restore();
   if (b.hp < b.maxHp) {
-    ctx.fillStyle = '#222'; ctx.fillRect(-30, 24, 60, 7);
-    ctx.fillStyle = '#2ecc71'; ctx.fillRect(-29, 25, 58 * b.hp / b.maxHp, 5);
+    ctx.fillStyle = '#222'; ctx.fillRect(-30, 28, 60, 9);
+    ctx.fillStyle = '#2ecc71'; ctx.fillRect(-29, 29, 58 * b.hp / b.maxHp, 7);
   }
 }
 
 function drawPads() {
   for (const pd of G.pads) {
     const cost = padCost(pd);
-    if (pd.kind === 'tower' && G.towers[pd.idx].lvl > 0 && !cost) continue;
-    const r = 22, on = pd.on;
-    ctx.save(); ctx.translate(pd.x, pd.y + (pd.kind === 'tower' && G.towers[pd.idx].lvl > 0 ? 34 : 0));
-    ctx.fillStyle = on ? 'rgba(255,210,63,.45)' : 'rgba(255,255,255,.35)';
-    ctx.strokeStyle = cost ? '#fff' : 'rgba(255,255,255,.5)'; ctx.lineWidth = 3; ctx.setLineDash([6, 5]); ctx.lineDashOffset = -G.t * 15;
-    ctx.beginPath(); ctx.ellipse(0, 0, r, r * 0.6, 0, 0, 7); ctx.fill(); ctx.stroke(); ctx.setLineDash([]);
-    if (cost && pd.paid > 0) {
-      ctx.strokeStyle = '#ffd23f'; ctx.lineWidth = 5;
-      ctx.beginPath(); ctx.ellipse(0, 0, r + 4, r * 0.6 + 4, 0, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * pd.paid / cost); ctx.stroke();
+    if (!cost) continue;
+    const r = 24, on = pd.on;
+    ctx.save(); ctx.translate(pd.x, pd.y + padOY(pd));
+    ctx.fillStyle = on ? 'rgba(255,210,63,.5)' : 'rgba(255,255,255,.35)';
+    ctx.strokeStyle = '#fff'; ctx.lineWidth = 3; ctx.setLineDash([6, 5]); ctx.lineDashOffset = -G.t * 15;
+    ctx.beginPath(); ctx.arc(0, 0, r, 0, 7); ctx.fill(); ctx.stroke(); ctx.setLineDash([]);
+    const done = (pd.pw + pd.pg) / (cost.w + cost.g || 1);
+    if (done > 0) {
+      ctx.strokeStyle = '#ffd23f'; ctx.lineWidth = 6;
+      ctx.beginPath(); ctx.arc(0, 0, r + 4, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * done); ctx.stroke();
     }
-    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-    if (cost) {
-      ctx.font = '900 11px system-ui,sans-serif'; ctx.lineWidth = 3; ctx.strokeStyle = '#222';
-      const lb = padLabel(pd); ctx.strokeText(lb, 0, -r * 0.6 - 9); ctx.fillStyle = '#fff'; ctx.fillText(lb, 0, -r * 0.6 - 9);
-      const ct = '🪙' + (cost - pd.paid); ctx.font = '900 12px system-ui,sans-serif';
-      ctx.strokeText(ct, 0, 1); ctx.fillStyle = G.gold > 0 ? '#ffd23f' : '#ffb3b3'; ctx.fillText(ct, 0, 1);
-    }
+    ctx.scale(1, IK);
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.lineWidth = 3; ctx.strokeStyle = '#222';
+    ctx.font = '900 12px system-ui,sans-serif';
+    const lb = padLabel(pd); ctx.strokeText(lb, 0, -r * K - 12); ctx.fillStyle = '#fff'; ctx.fillText(lb, 0, -r * K - 12);
+    const parts = [];
+    if (cost.w) parts.push(['🪵' + (cost.w - pd.pw), '#ffe0b3']);
+    if (cost.g) parts.push(['🪙' + (cost.g - pd.pg), '#ffd23f']);
+    ctx.font = '900 12px system-ui,sans-serif';
+    parts.forEach((pt, i) => { const y = (i - (parts.length - 1) / 2) * 14; ctx.strokeText(pt[0], 0, y); ctx.fillStyle = pt[1]; ctx.fillText(pt[0], 0, y); });
     ctx.restore();
   }
 }
@@ -987,7 +1088,7 @@ function drawPads() {
 function drawTower(t) {
   if (!t.lvl) return;
   const h = 34 + t.lvl * 3;
-  ctx.save(); ctx.translate(t.x, t.y);
+  ctx.save(); ctx.translate(t.x, t.y); ctx.scale(1, IK);
   ctx.fillStyle = 'rgba(0,0,0,.2)'; ctx.beginPath(); ctx.ellipse(0, 6, 18, 6, 0, 0, 7); ctx.fill();
   ctx.strokeStyle = '#4a2c12'; ctx.lineWidth = 4;
   ctx.beginPath(); ctx.moveTo(-12, 6); ctx.lineTo(-8, -h + 8); ctx.moveTo(12, 6); ctx.lineTo(8, -h + 8);
@@ -1008,7 +1109,7 @@ function drawTower(t) {
 
 function drawStick(p) {
   const blink = p.inv > 0 && Math.floor(p.inv * 20) % 2 === 0;
-  ctx.save(); ctx.translate(p.x, p.y);
+  ctx.save(); ctx.translate(p.x, p.y); ctx.scale(1, IK);
   // 그림자
   ctx.fillStyle = 'rgba(0,0,0,.18)'; ctx.beginPath(); ctx.ellipse(0, 14, 13, 4, 0, 0, 7); ctx.fill();
   ctx.scale(p.face, 1);
@@ -1016,6 +1117,9 @@ function drawStick(p) {
   const sw = p.moving ? Math.sin(p.walk) : 0, bob = p.moving ? Math.abs(Math.cos(p.walk)) * 2 : Math.sin(G.t * 3) * 0.8;
   ctx.strokeStyle = col; ctx.lineWidth = 3.4; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
   const hipY = -2 - bob, neckY = -18 - bob;
+  // 등에 짊어진 통나무 더미
+  for (let i = 0; i < p.logs; i++) drawLog(-7 + (i % 2) * 1.5, neckY + 6 - i * 4.6, 0.85);
+  ctx.strokeStyle = col; ctx.lineWidth = 3.4;
   ctx.beginPath();
   // 다리
   ctx.moveTo(0, hipY); ctx.lineTo(-3 + sw * 7, 13);
@@ -1024,8 +1128,17 @@ function drawStick(p) {
   ctx.moveTo(0, hipY); ctx.lineTo(0, neckY);
   // 팔
   ctx.moveTo(0, neckY + 4); ctx.lineTo(-7 - sw * 4, neckY + 13);
-  ctx.moveTo(0, neckY + 4); ctx.lineTo(8 + sw * 3, neckY + 11);
+  const ch = p.chop > 0 ? Math.sin((1 - p.chop / 0.2) * Math.PI) : -1;
+  if (ch > -1) ctx.moveTo(0, neckY + 4), ctx.lineTo(7 + ch * 4, neckY + 2 + ch * 8);
+  else ctx.moveTo(0, neckY + 4), ctx.lineTo(8 + sw * 3, neckY + 11);
   ctx.stroke();
+  if (ch > -1) { // 도끼질
+    const hx = 7 + ch * 4, hy = neckY + 2 + ch * 8, a = -0.9 + ch * 1.8;
+    ctx.save(); ctx.translate(hx, hy); ctx.rotate(a);
+    ctx.strokeStyle = '#6b4226'; ctx.lineWidth = 2.5; ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(0, -14); ctx.stroke();
+    ctx.fillStyle = '#ced4da'; ctx.strokeStyle = '#333'; ctx.lineWidth = 1.2; ctx.beginPath(); ctx.moveTo(0, -14); ctx.lineTo(7, -16); ctx.lineTo(7, -8); ctx.lineTo(0, -10); ctx.closePath(); ctx.fill(); ctx.stroke();
+    ctx.restore();
+  }
   // 머리
   ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(0, neckY - 8, 7.5, 0, 7); ctx.fill(); ctx.stroke();
   // 영웅 머리띠
@@ -1040,7 +1153,7 @@ function drawStick(p) {
 
 function drawStickman(x, y, o) {
   // o: {color, s(크기), face, phase, hit, flash, lunge, type, rot, z, alpha}
-  ctx.save(); ctx.translate(x, y);
+  ctx.save(); ctx.translate(x, y); ctx.scale(1, IK);
   if (!o.rot) { ctx.fillStyle = 'rgba(0,0,0,.15)'; ctx.beginPath(); ctx.ellipse(0, 12 * o.s, 10 * o.s, 3.5 * o.s, 0, 0, 7); ctx.fill(); }
   ctx.translate(0, -(o.z || 0));
   if (o.alpha !== undefined) ctx.globalAlpha = o.alpha;
@@ -1088,7 +1201,7 @@ function drawBoss(e) {
     ctx.strokeStyle = `rgba(255,40,40,${0.35 + 0.35 * Math.sin(G.t * 30)})`; ctx.lineWidth = e.r * 1.6; ctx.lineCap = 'round';
     ctx.beginPath(); ctx.moveTo(e.x, e.y); ctx.lineTo(e.x + e.ax * 330, e.y + e.ay * 330); ctx.stroke();
   }
-  ctx.translate(e.x, e.y);
+  ctx.translate(e.x, e.y); ctx.scale(1, IK);
   ctx.fillStyle = 'rgba(0,0,0,.2)'; ctx.beginPath(); ctx.ellipse(0, e.r * 0.9, e.r, e.r * 0.3, 0, 0, 7); ctx.fill();
   const pulse = e.mode === 'aim' ? 1 + Math.sin(G.t * 40) * 0.05 : 1 + Math.sin(G.t * 5) * 0.04;
   ctx.scale(pulse, 2 - pulse);
@@ -1116,7 +1229,6 @@ function drawBoss(e) {
 
 function drawWorld() {
   const p = G.p;
-  drawWalls();
   drawPads();
   // 금화
   for (const c of G.coins) {
@@ -1134,15 +1246,34 @@ function drawWorld() {
   }
   for (const h of G.hearts) {
     ctx.font = '22px sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-    ctx.fillText('❤️', h.x, h.y + Math.sin(h.bob) * 3);
+    ctx.save(); ctx.translate(h.x, h.y + Math.sin(h.bob) * 3); ctx.scale(1, IK); ctx.fillText('❤️', 0, -8); ctx.restore();
   }
   // 마을·망루·적·영웅을 y 순서로
   const list = G.enemies.slice();
   if (!G.baseDead) list.push({ y: 14, draw: drawBase });
+  for (let i = 0; i < WALL_SEGS; i++) { const am = (i + 0.5) / WALL_SEGS * Math.PI * 2; list.push({ y: Math.sin(am) * WALL_R, draw: () => drawWallSeg(i) }); }
+  for (const t of G.trees) if (t.y > G.cam.y - VH * IK / 2 - 80 && t.y < G.cam.y + VH * IK / 2 + 40) list.push({ y: t.y, draw: () => drawTree(t) });
   for (const t of G.towers) if (t.lvl) list.push({ y: t.y + 4, draw: () => drawTower(t) });
   if (!p.dead && G.deadT <= 0) list.push({ y: p.y, draw: () => drawStick(p) });
   list.sort((a, b) => a.y - b.y);
   for (const e of list) { if (e.draw) e.draw(); else if (e.boss) drawBoss(e); else drawEnemy(e); }
+  for (const f of G.flyers) { // 날아가는 통나무·금화
+    const k = f.t / f.dur, x = f.x0 + (f.x1 - f.x0) * k, y = f.y0 + (f.y1 - f.y0) * k - Math.sin(k * Math.PI) * 30;
+    ctx.save(); ctx.translate(x, y); ctx.scale(1, IK);
+    if (f.kind === 'log') drawLog(0, 0, 1); else { ctx.fillStyle = '#ffd23f'; ctx.strokeStyle = '#b8860b'; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.arc(0, 0, 5, 0, 7); ctx.fill(); ctx.stroke(); }
+    ctx.restore();
+  }
+  // 안내 화살표
+  if (G.hint && !p.dead) {
+    const dx = G.hint.x - p.x, dy = G.hint.y - p.y, d = Math.hypot(dx, dy);
+    if (d > 45) {
+      const a = Math.atan2(dy, dx), r = 42 + Math.sin(G.t * 8) * 5;
+      ctx.save(); ctx.translate(p.x + Math.cos(a) * r, p.y - 12 + Math.sin(a) * r); ctx.rotate(a);
+      ctx.fillStyle = '#ffd23f'; ctx.strokeStyle = '#222'; ctx.lineWidth = 2.5;
+      ctx.beginPath(); ctx.moveTo(14, 0); ctx.lineTo(-6, -10); ctx.lineTo(-2, 0); ctx.lineTo(-6, 10); ctx.closePath(); ctx.fill(); ctx.stroke();
+      ctx.restore();
+    }
+  }
   for (const c of G.corpses) drawStickman(c.x, c.y, { color: c.color, s: c.s, face: 1, phase: 0, hit: true, flash: false, lunge: 0, type: c.type, rot: c.rot, z: c.z + 6, alpha: Math.min(1, c.life * 2) });
   // 회전 칼
   if (G.weapons.sword && G.deadT <= 0 && !p.dead) {
@@ -1202,9 +1333,11 @@ function drawWorld() {
   ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
   for (const t of G.texts) {
     ctx.globalAlpha = Math.min(1, t.life / t.max * 2);
+    ctx.save(); ctx.translate(t.x, t.y); ctx.scale(1, IK);
     ctx.font = `900 ${t.size}px system-ui,sans-serif`;
-    ctx.lineWidth = 3.5; ctx.strokeStyle = '#222'; ctx.strokeText(t.text, t.x, t.y);
-    ctx.fillStyle = t.color; ctx.fillText(t.text, t.x, t.y);
+    ctx.lineWidth = 3.5; ctx.strokeStyle = '#222'; ctx.strokeText(t.text, 0, 0);
+    ctx.fillStyle = t.color; ctx.fillText(t.text, 0, 0);
+    ctx.restore();
   }
   ctx.globalAlpha = 1;
   // 플레이어 체력바
@@ -1240,6 +1373,12 @@ function drawHUD() {
   roundRect(10, top + 50, (hw - 4) * Math.max(0, bb.hp / bb.maxHp), 14, 7); ctx.fillStyle = bb.hitT > 0 ? '#fff' : '#2ecc71'; ctx.fill();
   hudText(`🏠 ${Math.ceil(bb.hp)}`, 14, top + 57, 12, '#fff');
   hudText('🪙 ' + G.gold, W - 12, top + 60, 18, '#ffd23f', 'right');
+  hudText(`🪵 ${p.logs}/${p.cap}`, W - 12, top + 86, 16, p.logs >= p.cap ? '#ff6b6b' : '#ffe0b3', 'right');
+  if (G.hint) {
+    ctx.font = '900 15px system-ui,sans-serif'; const tw = ctx.measureText(G.hint.text).width;
+    roundRect(W / 2 - tw / 2 - 12, H - 92, tw + 24, 30, 15); ctx.fillStyle = 'rgba(0,0,0,.55)'; ctx.fill();
+    hudText(G.hint.text, W / 2, H - 77, 15, '#ffd23f', 'center');
+  }
   // 다음 보스
   if (!G.boss) {
     const left = G.nextBoss;
@@ -1249,7 +1388,7 @@ function drawHUD() {
   if (p.dead && G.deadT <= 0) hudText(`부활까지 ${Math.ceil(G.respawnT)}`, W / 2, H * 0.62, 26, '#ffd23f', 'center');
   // 마을이 화면 밖이면 집 방향 표시
   {
-    const sx = (0 - G.cam.x) * SCALE + W / 2, sy = (0 - G.cam.y) * SCALE + H / 2;
+    const sx = (0 - G.cam.x) * SCALE + W / 2, sy = (0 - G.cam.y) * SCALE * K + H / 2;
     if (sx < -20 || sx > W + 20 || sy < -20 || sy > H + 20) {
       const a = Math.atan2(sy - H / 2, sx - W / 2), m = 30;
       const ax = clamp(W / 2 + Math.cos(a) * W, m, W - m), ay = clamp(H / 2 + Math.sin(a) * H, m + 100, H - m - 50);
@@ -1267,7 +1406,7 @@ function drawHUD() {
     roundRect(bx + 2, by + 2, (bw - 4) * Math.max(0, b.hp / b.maxHp), 14, 7); ctx.fillStyle = b.color; ctx.fill();
     hudText('👑 ' + b.name, W / 2, by + 9, 12, '#fff', 'center');
     // 화면 밖 보스 화살표
-    const sx = (b.x - G.cam.x) * SCALE + W / 2, sy = (b.y - G.cam.y) * SCALE + H / 2;
+    const sx = (b.x - G.cam.x) * SCALE + W / 2, sy = (b.y - G.cam.y) * SCALE * K + H / 2;
     if (sx < 0 || sx > W || sy < 0 || sy > H) {
       const a = Math.atan2(sy - H / 2, sx - W / 2), m = 34;
       const ax = clamp(W / 2 + Math.cos(a) * W, m, W - m), ay = clamp(H / 2 + Math.sin(a) * H, m + 80, H - m);
@@ -1326,6 +1465,7 @@ function render() {
   }
   const sx = G.shake ? rand(-G.shake, G.shake) : 0, sy = G.shake ? rand(-G.shake, G.shake) : 0;
   ctx.setTransform(DPR * SCALE, 0, 0, DPR * SCALE, DPR * (W / 2 + sx), DPR * (H / 2 + sy));
+  ctx.scale(1, K);
   ctx.translate(-G.cam.x, -G.cam.y);
   drawGround();
   drawWorld();
