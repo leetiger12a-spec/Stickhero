@@ -25,13 +25,20 @@ canvas{display:block;position:fixed;inset:0;width:100%;height:100%}
 .btn.big::after{content:'';position:absolute;top:0;left:-60%;width:40%;height:100%;background:linear-gradient(100deg,transparent,rgba(255,255,255,.7),transparent);transform:skewX(-20deg);animation:shine 2.6s infinite}
 @keyframes shine{0%,55%{left:-60%}100%{left:130%}}
 .mrow{display:flex;gap:8px;margin-top:6px}
-.mrow .hb{width:auto;padding:0 12px;font-size:13px;font-weight:800}
+.mrow .hb{width:auto;padding:0 9px;font-size:12px;font-weight:800;white-space:nowrap}
+.mrow{flex-wrap:wrap;justify-content:center}
 #logoImg{width:min(88vw,460px);filter:drop-shadow(0 6px 10px rgba(0,0,0,.55));animation:titleBob 2.4s ease-in-out infinite}
 #ovStory{background:#000;z-index:8;padding:0;justify-content:center}
 #ovStory img{width:100%;max-width:720px;border-radius:0;animation:storyIn .6s ease-out}
 #storyCap{font-size:18px;font-weight:700;line-height:1.5;margin:18px 22px;min-height:54px;max-width:640px}
 #storyNext{position:absolute;bottom:max(18px,env(safe-area-inset-bottom));right:18px;font-size:14px;opacity:.75}
 #bStorySkip{position:absolute;top:max(14px,env(safe-area-inset-top));right:14px}
+#wardPrev{position:static;inset:auto;display:block}
+#wardGrid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;width:min(92vw,360px);margin:10px 0}
+.sw{font:inherit;border:3px solid #222;border-radius:14px;padding:8px 2px 6px;background:#fffaf0;color:#222;font-size:12px;font-weight:800;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:4px}
+.sw i{width:34px;height:14px;border-radius:7px;border:2px solid #222;display:block}
+.sw.on{outline:4px solid #ffd23f;transform:scale(1.06)}
+.sw.lock{opacity:.5}
 #ovMap{justify-content:flex-start;padding:max(12px,env(safe-area-inset-top)) 0 0;background:linear-gradient(#1d3557,#457b9d)}
 #mapHead{display:flex;align-items:center;justify-content:space-between;width:min(94vw,440px);margin-bottom:6px}
 #mapScroll{flex:1;width:100%;overflow-y:auto;-webkit-overflow-scrolling:touch;touch-action:pan-y}
@@ -108,7 +115,7 @@ h2{margin:0 0 14px;font-size:clamp(30px,9vw,48px);color:#ffd23f;text-shadow:0 3p
    <button class="btn big" id="bStart">⚔ 출전!</button>
   </div>
   <div class="best" id="bestTitle"></div>
-  <div class="mrow"><button class="hb" id="bHelp">❓ 조작법</button><button class="hb" id="bStory" style="display:none">📖 이야기</button><button class="hb" id="bMusicT">🎵 음악</button></div>
+  <div class="mrow"><button class="hb" id="bHelp">❓ 조작법</button><button class="hb" id="bStory" style="display:none">📖 이야기</button><button class="hb" id="bMusicT">🎵 음악</button><button class="hb" id="bWard">🎨 꾸미기</button></div>
   <div class="hint" id="helpBox" style="display:none">📱 화면을 끌어서 이동 · 공격은 자동<br>🌳 나무 옆에 서면 통나무를 모아요 → 🪵 동그라미 위에 서면 건설!<br>⚔ 출격 문으로 모험 → 보스를 잡고 금화를 가져와요<br>💻 WASD / 방향키 이동 · P 일시정지</div>
  </div>
 </div>
@@ -118,6 +125,14 @@ h2{margin:0 0 14px;font-size:clamp(30px,9vw,48px);color:#ffd23f;text-shadow:0 3p
   <img id="storyImg" alt="">
   <div id="storyCap"></div>
   <div id="storyNext">화면을 누르면 다음 ▶</div>
+</div>
+
+<div class="ov" id="ovWard">
+  <h2 style="margin-bottom:4px">🎨 영웅 꾸미기</h2>
+  <div class="sub" id="wardSub" style="margin-bottom:8px"></div>
+  <canvas id="wardPrev" width="240" height="240" style="width:150px;height:150px"></canvas>
+  <div id="wardGrid"></div>
+  <button class="btn" id="bWardOk">완료</button>
 </div>
 
 <div class="ov" id="ovMap">
@@ -156,7 +171,7 @@ h2{margin:0 0 14px;font-size:clamp(30px,9vw,48px);color:#ffd23f;text-shadow:0 3p
 
 <script>
 'use strict';
-const BUILD = 32;
+const BUILD = 33;
 const BOSS_INTERVAL = 180;      // 보스 등장 간격(초)
 const WAVE_INTERVAL = 60;       // 대규모 몰이 이벤트 간격(초)
 const MAX_ENEMIES = 220;
@@ -226,7 +241,61 @@ const SPR_INFO = {    // ax: 발 위치(그림 폭 대비), h: 화면 키(월드
   smith: { h: 72 }, pillar: { h: 70 }, torch: { h: 58 }, coin: { h: 12 },
   ally_sword: { ax: 0.5, h: 52 }, ally_archer: { ax: 0.5, h: 52 }, ally_bomber: { ax: 0.45, h: 52 }, ally_shield: { ax: 0.5, h: 54 }, hero_slash: { h: 72 }, hero_walk: { h: 72 }, ally_archer_shoot: { h: 60 }, ally_bomber_toss: { h: 60 }, ally_shield_bash: { h: 60 }, ally_sword_slash: { h: 60 }, ally_sword_walk: { h: 60 }, ally_archer_walk: { h: 60 }, ally_bomber_walk: { h: 60 }, ally_shield_walk: { h: 60 }, sf_plane0: { h: 80 }, sf_plane1: { h: 80 }, sf_plane2: { h: 80 }, sf_plane3: { h: 80 }, sf_plane4: { h: 80 }, sf_pilot0: { h: 70 }, sf_pilot1: { h: 70 }, sf_pilot2: { h: 70 }, sf_pilot3: { h: 70 }, sf_pilot4: { h: 70 }, tavern: { h: 72 }, skyfang_plane: { h: 80 },
 };
-const SPR_SRC = {};
+const SPR_SRC = {}, SPR_ORIG = {};
+// ---------- 영웅 꾸미기: 머리띠 색 (모은 별 수로 열림) ----------
+const HEADBANDS = [
+  { name: '빨강', col: null, need: 0 },
+  { name: '파랑', col: [40, 110, 230], need: 3 },
+  { name: '초록', col: [40, 170, 70], need: 6 },
+  { name: '보라', col: [150, 60, 210], need: 9 },
+  { name: '분홍', col: [255, 90, 170], need: 12 },
+  { name: '검정', col: [45, 45, 55], need: 16 },
+  { name: '하늘', col: [80, 210, 255], need: 20 },
+  { name: '황금', col: [255, 200, 40], need: 25, shine: true },
+];
+const HERO_SPR = ['hero', 'hero_walk', 'hero_slash'];
+let bandSel = 0;
+try { bandSel = +(localStorage.getItem('stickhero_band') || 0) || 0; } catch (e) {}
+// 머리띠의 빨간 부분만 골라 새 색으로 (명암 유지). 주황 몸은 빨강 기준에서 벗어나 그대로 남음
+function recolorHero(im) {
+  const B = HEADBANDS[bandSel]; if (!B || !B.col) return im;
+  const c = document.createElement('canvas'); c.width = im.width; c.height = im.height;
+  const x = c.getContext('2d'); x.drawImage(im, 0, 0);
+  let d; try { d = x.getImageData(0, 0, c.width, c.height); } catch (e) { return im; }   // file://에서 막히면 원래 색
+  const a = d.data, [tr, tg, tb] = B.col;
+  for (let i = 0; i < a.length; i += 4) {
+    const r = a[i], g = a[i + 1], b = a[i + 2];
+    if (a[i + 3] > 20 && r > 90 && r > g * 2.4 && r > b * 2.0) {
+      const L = Math.min(1.3, (r + g + b) / 3 / 75);   // 밝기 비율
+      a[i] = Math.min(255, tr * L); a[i + 1] = Math.min(255, tg * L); a[i + 2] = Math.min(255, tb * L);
+    }
+  }
+  x.putImageData(d, 0, 0); return c;
+}
+function applyHeadband() { for (const n of HERO_SPR) if (SPR_ORIG[n]) { SPR_SRC[n] = recolorHero(SPR_ORIG[n]); bakeSprite(n); } }
+const totalStars = () => { const m = (readJSON('stickhero_meta') || {}).bestStars || 0; const now = G && G.stars ? G.stars.reduce((s, v) => s + (v || 0), 0) : 0; return Math.max(m, now); };
+function openWard() {
+  const back = state; state = 'ward'; showOv('ovWard'); renderWard();
+  $('bWardOk').onclick = () => { sfx('pick'); if (back === 'title' || !G) { state = 'title'; refreshTitle(); showOv('ovTitle'); } else { state = back; showOv(back === 'paused' ? 'ovPause' : null); } };
+}
+function renderWard() {
+  const have = totalStars();
+  $('wardSub').textContent = `모은 별 ⭐ ${have}개 · 별을 모으면 새 색이 열려요`;
+  const g = $('wardGrid'); g.innerHTML = '';
+  HEADBANDS.forEach((h, i) => {
+    const lock = have < h.need, b = document.createElement('button');
+    const css = h.col ? `rgb(${h.col.join(',')})` : '#d62828';
+    b.className = 'sw' + (i === bandSel ? ' on' : '') + (lock ? ' lock' : '');
+    b.innerHTML = `<i style="background:${css}${h.shine ? ';box-shadow:0 0 8px #ffd23f' : ''}"></i>${lock ? '🔒⭐' + h.need : h.name}`;
+    b.onclick = () => { if (lock) { sfx('hurt'); return; } bandSel = i; try { localStorage.setItem('stickhero_band', i); } catch (e) {} applyHeadband(); sfx('pick'); renderWard(); };
+    g.appendChild(b);
+  });
+  // 미리보기
+  const c = $('wardPrev'), x = c.getContext('2d'), im = SPR_SRC.hero;
+  x.clearRect(0, 0, c.width, c.height); x.fillStyle = '#8fd16a'; x.beginPath(); x.arc(120, 120, 116, 0, 7); x.fill();
+  if (im) { const h = 200, w = h * im.width / im.height; x.drawImage(im, 120 - w * 0.42, 220 - h, w, h); }
+}
+$('bWard').onclick = () => { audioInit(); sfx('pick'); openWard(); };
 // 화면에 그릴 크기로 미리 줄여 둔 그림(매 프레임 큰 그림을 줄이면 느림). 화면 크기가 바뀌면 다시 만듦
 function bakeSprite(n) {
   const im = SPR_SRC[n]; if (!im) return;
@@ -242,7 +311,7 @@ const SPR_FILES = ['hero', 'grunt', 'runner', 'tank', 'boss0', 'boss1', 'boss2',
   'smith', 'pillar', 'torch', 'coin', 'ally_sword', 'ally_archer', 'tavern', 'ally_bomber', 'skyfang_plane', 'ally_shield', 'hero_slash', 'hero_walk', 'ally_archer_shoot', 'ally_bomber_toss', 'ally_shield_bash', 'ally_sword_slash', 'ally_sword_walk', 'ally_archer_walk', 'ally_bomber_walk', 'ally_shield_walk', 'sf_plane0', 'sf_plane1', 'sf_plane2', 'sf_plane3', 'sf_plane4', 'sf_pilot0', 'sf_pilot1', 'sf_pilot2', 'sf_pilot3', 'sf_pilot4'];
 SPR_FILES.forEach(n => {
   const im = new Image();
-  im.onload = () => { SPR_SRC[n] = im; bakeSprite(n); };
+  im.onload = () => { SPR_ORIG[n] = im; SPR_SRC[n] = HERO_SPR.includes(n) ? recolorHero(im) : im; bakeSprite(n); };
   im.src = `img/${n}.webp?b=${BUILD}`;
 });
 window.addEventListener('resize', () => Object.keys(SPR_SRC).forEach(bakeSprite));
@@ -686,7 +755,7 @@ function refreshTitle() {
 }
 
 // ---------- 화면 전환 ----------
-function showOv(id) { ['ovTitle', 'ovLevel', 'ovPause', 'ovOver', 'ovStory', 'ovMap', 'ovClear'].forEach(o => $(o).classList.toggle('show', o === id)); }
+function showOv(id) { ['ovTitle', 'ovLevel', 'ovPause', 'ovOver', 'ovStory', 'ovMap', 'ovClear', 'ovWard'].forEach(o => $(o).classList.toggle('show', o === id)); }
 function startGame() {
   audioInit(); clearSave(); newGame(); state = 'play'; joy = null; showOv(null);
   $('hudBtns').classList.add('show');
@@ -1352,6 +1421,10 @@ function returnBase(win) {
   if (win && st) {
     const i = st.n, first = i >= G.stageN, prize = stageReward(i, first), old = G.stars[i] || 0;
     G.stars[i] = Math.max(old, st.stars);
+    { // 별을 모으면 머리띠 색이 열림 (게임오버 뒤에도 유지)
+      const tot = G.stars.reduce((s, v) => s + (v || 0), 0), meta = readJSON(META_KEY) || {}, before = meta.bestStars || 0;
+      if (tot > before) { meta.bestStars = tot; writeJSON(META_KEY, meta); }
+      st.newBand = HEADBANDS.find(h => h.need > before && h.need <= tot) || null; }
     G.gold += prize;
     if (first) {
       const before = bestStage();
@@ -1376,6 +1449,7 @@ function showClear(st, prize, first, old) {
   $('clrInfo').innerHTML = `⏱ 걸린 시간 <b>${tm}</b><br>🪙 보상 <b>+${prize}</b>${first ? ' (첫 클리어)' : ''}${st.stars > old && old > 0 ? '<br>✨ 별 기록 갱신!' : ''}` +
     (all ? '<br><br>왕관 괴물 대왕을 물리쳤다!<br>마을에 평화가 찾아왔어요 🎉' : first && G.stageN < STAGES.length ? `<br>🔓 다음 스테이지 <b>${STAGES[G.stageN].name}</b> 열림!` : '') +
     (st.newUnlock ? `<div class="unlock">🎁 새로 열림! <b>${st.newUnlock.name}</b><br><small>${st.newUnlock.desc}</small></div>` : '') +
+    (st.newBand ? `<div class="unlock">🎨 새 머리띠! <b>${st.newBand.name}</b><br><small>시작 화면 '꾸미기'에서 바꿀 수 있어요</small></div>` : '') +
     (G.raidIn > 0 ? '<br><span style="color:#ff9f1c">⚠ 적의 대군이 다가온다… 마을을 지켜라!</span>' : '');
   if (st.newUnlock) setTimeout(() => sfx('unlock'), 900);
   $('bClrOk').textContent = all ? '엔딩 보기 ▶' : '마을로 ▶';
