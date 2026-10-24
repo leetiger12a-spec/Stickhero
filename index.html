@@ -47,6 +47,8 @@ canvas{display:block;position:fixed;inset:0;width:100%;height:100%}
 #mapCard .t{font-size:20px;font-weight:900;color:#ffd23f}
 #mapCard .g{font-size:14px}
 #mapCard .r{font-size:13px;opacity:.85}
+.unlock{margin-top:10px;padding:10px 14px;border:3px solid #ffd23f;border-radius:14px;background:rgba(255,210,63,.15);animation:pop .5s ease-out .8s backwards}
+.unlock small{font-size:13px;opacity:.85}
 #clrStars{font-size:56px;letter-spacing:6px;margin:4px 0 8px}
 #clrStars span{display:inline-block;animation:pop .4s ease-out backwards}
 #clrStars .off{filter:grayscale(1) brightness(.5)}
@@ -154,7 +156,7 @@ h2{margin:0 0 14px;font-size:clamp(30px,9vw,48px);color:#ffd23f;text-shadow:0 3p
 
 <script>
 'use strict';
-const BUILD = 24;
+const BUILD = 25;
 const BOSS_INTERVAL = 180;      // 보스 등장 간격(초)
 const WAVE_INTERVAL = 60;       // 대규모 몰이 이벤트 간격(초)
 const MAX_ENEMIES = 220;
@@ -175,6 +177,7 @@ const ALLY_TYPES = {
   sword:  { name: '고양이 검사', color: '#3fa9f5', hp: 120, icon: '🗡️', desc: '가까이 달려가 칼로 베어요 · 튼튼함' },
   archer: { name: '고양이 궁수', color: '#2ecc71', hp: 80,  icon: '🏹', desc: '멀리서 화살을 쏴요 · 안전하게' },
   bomber: { name: '고양이 폭탄병', color: '#ffd23f', hp: 90, icon: '💣', desc: '느리지만 폭탄 펑! 여러 마리를 한꺼번에' },
+  shield: { name: '강아지 방패병', color: '#c68642', hp: 260, icon: '🛡️', desc: '아주 튼튼! 영웅 앞을 막고 방패로 밀쳐내요' },
 };
 const STAGE_HW = 200;           // 스테이지 길 반폭
 const THEMES = [
@@ -221,7 +224,7 @@ const SPR_INFO = {    // ax: 발 위치(그림 폭 대비), h: 화면 키(월드
   boss0: { ax: 0.5, h: 140 }, boss1: { ax: 0.5, h: 140 }, boss2: { ax: 0.5, h: 150 },
   tree: { h: 78 }, stump: { h: 20 }, log: { h: 8 }, stake: { h: 26 }, tower: { h: 76 }, hall: { h: 92 },
   smith: { h: 72 }, pillar: { h: 70 }, torch: { h: 58 }, coin: { h: 12 },
-  ally_sword: { ax: 0.5, h: 52 }, ally_archer: { ax: 0.5, h: 52 }, ally_bomber: { ax: 0.45, h: 52 }, tavern: { h: 72 }, skyfang_plane: { h: 80 },
+  ally_sword: { ax: 0.5, h: 52 }, ally_archer: { ax: 0.5, h: 52 }, ally_bomber: { ax: 0.45, h: 52 }, ally_shield: { ax: 0.5, h: 54 }, tavern: { h: 72 }, skyfang_plane: { h: 80 },
 };
 const SPR_SRC = {};
 // 화면에 그릴 크기로 미리 줄여 둔 그림(매 프레임 큰 그림을 줄이면 느림). 화면 크기가 바뀌면 다시 만듦
@@ -338,7 +341,7 @@ function noise(dur, vol, freq, delay) {
   g.gain.setValueAtTime(vol || 0.15, t); g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
   s.connect(f); f.connect(g); g.connect(master); s.start(t); s.stop(t + dur + 0.02);
 }
-const sfxGap = { meow: 0.3, stack: 0.05, coinCombo: 0.04, bombBoom: 0.08, toss: 0.15, hit: 0.045, shoot: 0.07, thud: 0.12, chop: 0.08, coin: 0.04, pay: 0.06, arrow: 0.08, shotgun: 0.1, gem: 0.035, pop: 0.05, swing: 0.25, boom: 0.15, hurt: 0.15 };
+const sfxGap = { zap: 0.06, bark: 0.4, meow: 0.3, stack: 0.05, coinCombo: 0.04, bombBoom: 0.08, toss: 0.15, hit: 0.045, shoot: 0.07, thud: 0.12, chop: 0.08, coin: 0.04, pay: 0.06, arrow: 0.08, shotgun: 0.1, gem: 0.035, pop: 0.05, swing: 0.25, boom: 0.15, hurt: 0.15 };
 const sfxLast = {};
 // SKYFANG 효과음으로 바꿔 낼 소리들 (없으면 false → 아래 합성음)
 function sampFor(n) {
@@ -411,6 +414,10 @@ function sfx(n) {
     case 'bombBoom': noise(0.35, 0.22, 500); tone(110, 0.25, 'sawtooth', 0.07, -60); break;
     case 'toss': tone(300, 0.15, 'triangle', 0.05, 400); break;
     case 'plane': tone(90, 1.6, 'sawtooth', 0.05, 30); noise(1.2, 0.06, 700); break;
+    case 'zap': noise(0.12, 0.12, 6000); tone(1400, 0.1, 'sawtooth', 0.04, -900); break;
+    case 'slam': noise(0.3, 0.25, 350); tone(70, 0.3, 'sine', 0.2, -30); tone(140, 0.2, 'square', 0.05, -80); break;
+    case 'bark': tone(520, 0.06, 'square', 0.07, -200); tone(460, 0.08, 'square', 0.07, -200, 0.1); break;
+    case 'unlock': [659, 784, 988, 1319, 1568].forEach((f, i) => tone(f, 0.18, 'square', 0.05, 0, i * 0.08)); noise(0.6, 0.06, 7000, 0.3); break;
     case 'woosh': noise(0.6, 0.12, 900); noise(0.4, 0.08, 2400, 0.2); break;
     case 'baseHit': tone(90, 0.25, 'square', 0.08, -30); break;
   }
@@ -427,7 +434,17 @@ const WEAP = {
   pistol:    { name: '권총',     icon: '🔫', desc: l => l === 0 ? '가장 가까운 적을 자동 조준' : ['', '공격력·연사 증가', '2연발!', '총알이 적을 관통', '3연발!'][l] || '강화' },
   shotgun:   { name: '산탄총',   icon: '💥', desc: l => l === 0 ? '부채꼴로 탄환을 퍼뜨린다' : '탄환 +2, 공격력 증가' },
   boomerang: { name: '부메랑',   icon: '🪃', desc: l => l === 0 ? '날아갔다 돌아오며 모두 관통' : l === 2 || l === 4 ? '부메랑 +1개!' : '공격력·사거리 증가' },
+  bolt:      { name: '번개 지팡이', icon: '⚡', desc: l => l === 0 ? '번개가 적에서 적으로 튀어요!' : '번개가 한 마리 더 튀고 더 세짐' },
+  hammer:    { name: '불꽃 망치',   icon: '🔨', desc: l => l === 0 ? '쾅! 땅을 내려쳐 주변을 불태워요' : '더 넓고 더 뜨겁게!' },
 };
+// 스테이지를 깨면 열리는 것들 (깬 칸 수 기준, 게임오버 뒤에도 유지)
+const UNLOCKS = [
+  { at: 3, kind: 'w', id: 'bolt',   name: '⚡ 번개 지팡이', desc: '레벨업 카드에 새 무기가 나와요' },
+  { at: 5, kind: 'a', id: 'shield', name: '🐶 강아지 방패병', desc: '영웅 숙소에서 고용할 수 있어요' },
+  { at: 7, kind: 'w', id: 'hammer', name: '🔨 불꽃 망치',   desc: '레벨업 카드에 새 무기가 나와요' },
+];
+const bestStage = () => Math.max(G ? G.stageN : 0, (readJSON(META_KEY) || {}).maxStage || 0);
+const isUnlocked = (kind, id) => { const u = UNLOCKS.find(u => u.kind === kind && u.id === id); return !u || bestStage() >= u.at; };
 const PASS = {
   hp:     { name: '튼튼한 몸', icon: '❤️', max: 5, desc: '최대 체력 +25, 체력 회복' },
   speed:  { name: '날쌘 신발', icon: '👟', max: 5, desc: '이동 속도 +10%' },
@@ -444,6 +461,8 @@ function wStat(id) {
     case 'pistol': return { cd: 0.6 - 0.05 * l, dmg: 10 + 4 * l, shots: l >= 5 ? 3 : l >= 3 ? 2 : 1, pierce: l >= 4 ? 1 : 0 };
     case 'shotgun': return { cd: 1.35 - 0.08 * l, pellets: 3 + 2 * l, dmg: 6 + 2 * l, spread: 0.5 + 0.06 * l };
     case 'boomerang': return { cd: 1.8 - 0.1 * l, count: l >= 5 ? 3 : l >= 3 ? 2 : 1, dmg: 14 + 5 * l, range: 170 + 15 * l };
+    case 'bolt': return { cd: 1.5 - 0.1 * l, dmg: 16 + 6 * l, chain: 2 + l, reach: 130 };
+    case 'hammer': return { cd: 2.8 - 0.2 * l, dmg: 26 + 10 * l, rad: 70 + 12 * l };
   }
 }
 function recalcStats() {
@@ -479,7 +498,7 @@ function newGame() {
     t: 0, kills: 0, lvl: 1, xp: 0, need: xpNeed(1), pending: 0,
     p: { x: 0, y: 0, r: 11, logs: 0, cap: 12, chopT: 0, chop: 0, fullMsg: 0, hp: 100, maxHp: 100, speed: 150, face: 1, ax: 1, ay: 0, inv: 0, walk: 0, moving: false, magnet: 70, dmgMul: 1, cdMul: 1 },
     weapons: { pistol: 1 }, passives: {}, timers: {},
-    enemies: [], bullets: [], ebullets: [], booms: [], bombs: [], gems: [], hearts: [], parts: [], texts: [], coins: [], corpses: [],
+    enemies: [], bullets: [], ebullets: [], booms: [], bombs: [], zaps: [], rings: [], gems: [], hearts: [], parts: [], texts: [], coins: [], corpses: [],
     trees: [], flyers: [], hint: null, mode: 'base', bt: 0, diff: diffSel, stageN: 0, stars: [], st: null, stash: null, gateT: 0,
     smith: false, forge: 0, tavern: false, allies: [], raid: null, raidIn: 0, raidCount: 0, drumT: 0,
     gold: 0, base: { hp: 1500, maxHp: 1500, hitT: 0 }, respawnT: 0, squadAng: Math.random() * 7, squadT: 6,
@@ -520,7 +539,7 @@ window.addEventListener('keydown', e => {
   keys[e.key.toLowerCase()] = true;
   if (state === 'play' && G && G.intro && G.intro.t > 0.8 && (e.key === ' ' || e.key === 'Enter')) endIntro();
   if (state === 'levelup' && ['1', '2', '3'].includes(e.key)) chooseCard(+e.key - 1);
-  if (state === 'allypick' && ['1', '2', '3'].includes(e.key)) chooseAlly(+e.key - 1);
+  if (state === 'allypick' && ['1', '2', '3', '4'].includes(e.key)) chooseAlly(+e.key - 1);
   if ((e.key === 'p' || e.key === 'P' || e.key === 'Escape') && (state === 'play' || state === 'paused')) togglePause();
   if (e.key === 'Enter' || e.key === ' ') {
     if (state === 'title') { if (readJSON(SAVE_KEY)) continueGame(); else startGame(); } else if (state === 'over') startGame();
@@ -576,23 +595,31 @@ function renderDiff() {
 }
 
 // ---------- 오프닝 이야기 (그림이 준비되면 STORY_FILES에 이름을 넣으면 켜짐) ----------
-const STORY_FILES = ['op1', 'op2', 'op3'];
+const STORY_FILES = ['op1', 'op2', 'op3'];   // 있는 그림 (없는 그림의 장면은 글만 나옴)
 const STORY = [
   { img: 'op1', cap: '평화로운 숲속 마을. 주황 영웅은 고양이 친구들과 나무를 베며 즐겁게 지냈어요.' },
   { img: 'op2', cap: '그런데 어느 날 밤, 왕관을 쓴 괴물과 빨간 막대 군단이 숲 너머에서 몰려왔어요!' },
   { img: 'op3', cap: '영웅은 머리띠를 질끈 묶고 칼을 들었어요. "우리 마을은 내가 지킨다!"' },
 ];
 const HAS_LOGO = true;    // img/logo.webp 사용
-let storyI = 0, storyDone = null;
-function playStory(after) {
-  const list = STORY.filter(s => STORY_FILES.includes(s.img));
-  if (!list.length) { after(); return; }
-  storyI = 0; storyDone = after; state = 'story'; showOv('ovStory'); showStory(list);
+const ENDING = [
+  { img: 'end1', cap: '쿵!! 왕관 괴물 대왕이 쓰러지자, 빨간 막대 군단은 모두 숲 너머로 도망쳤어요.' },
+  { img: 'end2', cap: '마을에 다시 평화가 찾아왔어요. 영웅과 고양이 친구들은 밤새 축제를 열었답니다.' },
+  { img: 'end3', cap: '레전드 히어로의 이야기는 끝이 아니에요. 별 ⭐을 모두 모아 진짜 전설이 되어 보세요!' },
+];
+let storyI = 0, storyDone = null, storyList = [];
+function playStory(after, list) {
+  storyList = list ? list : STORY.filter(s => STORY_FILES.includes(s.img));
+  if (!storyList.length) { after(); return; }
+  storyI = 0; storyDone = after; state = 'story'; showOv('ovStory'); showStory();
+  if (list === ENDING) { sfx('cheer'); }
 }
-function showStory(list) {
-  list = list || STORY.filter(s => STORY_FILES.includes(s.img));
-  if (storyI >= list.length) { try { localStorage.setItem('stickhero_story', '1'); } catch (e) {} const f = storyDone; storyDone = null; f && f(); return; }
-  const s = list[storyI]; $('storyImg').src = `img/${s.img}.webp?b=${BUILD}`; $('storyImg').style.animation = 'none'; void $('storyImg').offsetWidth; $('storyImg').style.animation = '';
+function showStory() {
+  const list = storyList;
+  if (storyI >= list.length) { if (list !== ENDING) try { localStorage.setItem('stickhero_story', '1'); } catch (e) {} const f = storyDone; storyDone = null; f && f(); return; }
+  const s = list[storyI], has = STORY_FILES.includes(s.img);
+  $('storyImg').style.display = has ? '' : 'none';
+  if (has) { $('storyImg').src = `img/${s.img}.webp?b=${BUILD}`; $('storyImg').style.animation = 'none'; void $('storyImg').offsetWidth; $('storyImg').style.animation = ''; }
   $('storyCap').textContent = s.cap; sfx('pick');
 }
 $('ovStory').onclick = e => { if (e.target.id === 'bStorySkip') return; storyI++; showStory(); };
@@ -715,7 +742,7 @@ let choices = [];
 function openLevelUp() {
   state = 'levelup'; joy = null;
   const pool = [];
-  for (const id in WEAP) { const l = G.weapons[id] || 0; if (l < MAX_WLV) pool.push({ kind: 'w', id, l, w: l === 0 ? 1.3 : 1 }); }
+  for (const id in WEAP) { const l = G.weapons[id] || 0; if (l < MAX_WLV && (l > 0 || isUnlocked('w', id))) pool.push({ kind: 'w', id, l, w: l === 0 ? 1.3 : 1 }); }
   for (const id in PASS) { const l = G.passives[id] || 0; if (l < PASS[id].max) pool.push({ kind: 'p', id, l, w: 0.8 }); }
   choices = [];
   while (choices.length < 3 && pool.length) {
@@ -753,7 +780,7 @@ function chooseCard(i) {
 function openAllyPick() {
   state = 'allypick'; joy = null;
   const box = $('cards'); box.innerHTML = '';
-  Object.keys(ALLY_TYPES).forEach((type, i) => {
+  Object.keys(ALLY_TYPES).filter(t => isUnlocked('a', t)).forEach((type, i) => {
     const T = ALLY_TYPES[type], have = G.allies.filter(a => a.type === type).length;
     const icon = SPR_SRC['ally_' + type] ? `<img src="img/ally_${type}.webp?b=${BUILD}" alt="">` : T.icon;
     const b = document.createElement('button'); b.className = 'card';
@@ -767,7 +794,7 @@ function openAllyPick() {
 }
 function chooseAlly(i) {
   if (state !== 'allypick') return;
-  const type = Object.keys(ALLY_TYPES)[i]; if (!type) return;
+  const type = Object.keys(ALLY_TYPES).filter(t => isUnlocked('a', t))[i]; if (!type) return;
   hireAlly(type); sfx('pick');
   saveGame();
   if (G.pending > 0) openLevelUp(); else { state = 'play'; showOv(null); }
@@ -775,7 +802,7 @@ function chooseAlly(i) {
 
 function gameOver() {
   state = 'over'; joy = null; G.banner = null;
-  clearSave(); writeJSON(META_KEY, { forge: G.forge });   // 마을은 처음부터, 대장간 강화만 남김
+  clearSave(); writeJSON(META_KEY, Object.assign(readJSON(META_KEY) || {}, { forge: G.forge, maxStage: bestStage() }));   // 마을은 처음부터, 대장간 강화만 남김
   const b = loadBest(); let rec = false;
   if (G.t > b.time) { b.time = G.t; rec = true; }
   if (G.kills > b.kills) { b.kills = G.kills; rec = true; }
@@ -1068,7 +1095,7 @@ function hireAlly(type) {
   const T = ALLY_TYPES[type];
   G.allies.push({ type, slot: G.allies.length, x: TAVERN.x, y: TAVERN.y + 34, hp: T.hp, maxHp: T.hp, cd: 0, inv: 0, face: 1, wob: 0, swing: 0, dead: false, reviveT: 0 });
   banner(`${T.name} 합류!`, '영웅을 따라다니며 함께 싸워요', '#3fa9f5', 1.8);
-  setTimeout(() => sfx('meow'), 250);
+  setTimeout(() => sfx(type === 'shield' ? 'bark' : 'meow'), 250);
   sfx('level');
 }
 function placeAllies() { // 장소가 바뀔 때 영웅 곁으로
@@ -1091,6 +1118,7 @@ function updAllies(dt) {
     let foe = null, fd = 1e12;
     for (const e of G.enemies) { const d = (e.x - a.x) ** 2 + (e.y - a.y) ** 2; if (d < fd && (e.x - hx) ** 2 + (e.y - hy) ** 2 < 230 * 230) { fd = d; foe = e; } }
     fd = Math.sqrt(fd);
+    if (a.type === 'shield' && foe && fd < 110) { tx = foe.x - Math.sign(foe.x - a.x || 1) * (foe.r + 10); ty = foe.y; }
     if (a.type === 'sword' && foe && fd < 160) { tx = foe.x - Math.sign(foe.x - a.x || 1) * (foe.r + 8); ty = foe.y; }
     const dx = tx - a.x, dy = ty - a.y, d = Math.hypot(dx, dy);
     if (d > 4) { const sp = Math.min(d * 6, 165); a.x += dx / d * sp * dt; a.y += dy / d * sp * dt; a.wob += dt * 10; if (Math.abs(dx) > 2) a.face = dx > 0 ? 1 : -1; }
@@ -1103,6 +1131,8 @@ function updAllies(dt) {
       } else if (a.type === 'archer' && fd < 250) {
         G.bullets.push({ x: a.x, y: a.y - 20, vx: ux * 480, vy: uy * 480, r: 4, dmg: 9 * fm, life: 0.8, pierce: 0, hits: [], kind: 'arrow' });
         a.cd = 0.8; a.face = ux > 0 ? 1 : -1; sfx('arrow');
+      } else if (a.type === 'shield' && fd < foe.r + 26) { // 방패로 쾅! 크게 밀쳐냄
+        hurtEnemy(foe, 10 * fm, ux, uy, 520); a.cd = 0.9; a.swing = 0.25; a.face = ux > 0 ? 1 : -1; sfx('thud'); if (Math.random() < 0.15) sfx('bark');
       } else if (a.type === 'bomber' && fd < 230) { // 적이 있던 자리로 포물선 폭탄
         G.bombs.push({ x0: a.x, y0: a.y - 22, x1: foe.x, y1: foe.y, t: 0, dur: 0.65, dmg: 30 * fm });
         a.cd = 2.2; a.swing = 0.25; a.face = ux > 0 ? 1 : -1; sfx('toss');
@@ -1111,7 +1141,7 @@ function updAllies(dt) {
     // 맞기
     if (a.inv <= 0) for (const e of G.enemies) {
       if ((e.x - a.x) ** 2 + (e.y - a.y) ** 2 < (e.r + 10) ** 2) {
-        a.hp -= e.dmg; a.inv = 0.8; burst(a.x, a.y - 12, '#e63946', 6, 100, 3, 0.3);
+        a.hp -= e.dmg * (a.type === 'shield' ? 0.5 : 1); a.inv = 0.8; burst(a.x, a.y - 12, '#e63946', 6, 100, 3, 0.3);
         if (a.hp <= 0) { a.dead = true; a.reviveT = 12; burst(a.x, a.y - 12, ALLY_TYPES[a.type].color, 20, 180, 4, 0.6); floatText(a.x, a.y - 40, '으앙!', '#fff', 16, 1); }
         break;
       }
@@ -1231,7 +1261,8 @@ function renderMap() {
     const col = d.goal === 'final' ? '#b5179e' : d.goal === 'survive' ? '#e76f51' : d.goal === 'rescue' ? '#2a9d8f' : '#e63946';
     h += `<button class="mnode${lock ? ' lock' : ''}${cur ? ' cur' : ''}${i === mapSel ? ' sel' : ''}" data-i="${i}" style="left:${q.x}px;top:${q.y}px;background:${col}">${lock ? '🔒' : GOAL_ICON[d.goal]}<small>${i + 1}</small></button>`;
     h += `<div class="mstars" style="left:${q.x}px;top:${q.y + 36}px">${lock ? '' : '⭐'.repeat(st) + '<span style="opacity:.35">' + '⭐'.repeat(3 - st) + '</span>'}</div>`;
-    h += `<div class="mname" style="left:${q.x}px;top:${q.y - 54}px">${d.name}</div>`;
+    const gift = UNLOCKS.find(u => u.at === i + 1);
+    h += `<div class="mname" style="left:${q.x}px;top:${q.y - 54}px">${gift && bestStage() < gift.at ? '🎁 ' : ''}${d.name}</div>`;
   });
   box.innerHTML = h;
   box.querySelectorAll('.mnode').forEach(b => b.onclick = () => { const i = +b.dataset.i; if (i > G.stageN) { sfx('hurt'); return; } mapSel = i; sfx('pick'); renderMap(); });
@@ -1241,7 +1272,7 @@ function renderMap() {
   $('mapCard').innerHTML = `<div class="t">${mapSel + 1}. ${d.name} <span style="font-size:13px;color:#fff;opacity:.7">· ${THEMES[d.th].name}</span></div>
     <div class="g">${goal}</div>
     <div class="r">${'⭐'.repeat(st)}${'☆'.repeat(3 - st)} · ⭐1 클리어 ⭐2 체력 절반 이상 ⭐3 ${d.goal === 'survive' ? '거의 안 맞기' : '빨리 깨기'}</div>
-    <div class="r">보상 🪙${stageReward(mapSel, first)}${first ? ' (첫 클리어)' : ''}</div>
+    <div class="r">보상 🪙${stageReward(mapSel, first)}${first ? ' (첫 클리어)' : ''}${(u => u && bestStage() < u.at ? ` + 🎁 ${u.name}` : '')(UNLOCKS.find(u => u.at === mapSel + 1))}</div>
     <button class="btn big" id="bGo" style="margin-top:6px">⚔ 출격!</button>`;
   $('bGo').onclick = () => { showOv(null); state = 'play'; enterStage(mapSel); };
 }
@@ -1292,7 +1323,12 @@ function returnBase(win) {
     const i = st.n, first = i >= G.stageN, prize = stageReward(i, first), old = G.stars[i] || 0;
     G.stars[i] = Math.max(old, st.stars);
     G.gold += prize;
-    if (first) G.stageN = i + 1;
+    if (first) {
+      const before = bestStage();
+      G.stageN = i + 1;
+      st.newUnlock = UNLOCKS.find(u => u.at === G.stageN && before < u.at);
+      writeJSON(META_KEY, Object.assign(readJSON(META_KEY) || {}, { maxStage: Math.max(before, G.stageN) }));
+    }
     sfx('build'); sfx('cheer');
     showClear(st, prize, first, old);
     if (first && G.stageN % 2 === 0 && G.stageN < STAGES.length) G.raidIn = 12;
@@ -1309,10 +1345,17 @@ function showClear(st, prize, first, old) {
   const tm = fmtTime(st.t);
   $('clrInfo').innerHTML = `⏱ 걸린 시간 <b>${tm}</b><br>🪙 보상 <b>+${prize}</b>${first ? ' (첫 클리어)' : ''}${st.stars > old && old > 0 ? '<br>✨ 별 기록 갱신!' : ''}` +
     (all ? '<br><br>왕관 괴물 대왕을 물리쳤다!<br>마을에 평화가 찾아왔어요 🎉' : first && G.stageN < STAGES.length ? `<br>🔓 다음 스테이지 <b>${STAGES[G.stageN].name}</b> 열림!` : '') +
+    (st.newUnlock ? `<div class="unlock">🎁 새로 열림! <b>${st.newUnlock.name}</b><br><small>${st.newUnlock.desc}</small></div>` : '') +
     (G.raidIn > 0 ? '<br><span style="color:#ff9f1c">⚠ 적의 대군이 다가온다… 마을을 지켜라!</span>' : '');
+  if (st.newUnlock) setTimeout(() => sfx('unlock'), 900);
+  $('bClrOk').textContent = all ? '엔딩 보기 ▶' : '마을로 ▶';
   showOv('ovClear');
 }
-$('bClrOk').onclick = () => { sfx('pick'); state = 'play'; showOv(null); if (G.pending > 0) openLevelUp(); };
+$('bClrOk').onclick = () => {
+  sfx('pick');
+  const back = () => { state = 'play'; showOv(null); if (G.pending > 0) openLevelUp(); };
+  if ($('bClrOk').textContent.startsWith('엔딩')) playStory(back, ENDING); else back();
+};
 
 function updStage(dt) {
   const p = G.p, st = G.st, def = st.def;
@@ -1536,7 +1579,7 @@ function fireWeapons(dt) {
     G.timers[id] = (G.timers[id] || 0) - dt;
     if (G.timers[id] > 0) continue;
     const s = wStat(id);
-    const tgt = nearest(p.x, p.y, id === 'shotgun' ? 260 : 420);
+    const tgt = nearest(p.x, p.y, id === 'shotgun' ? 260 : id === 'hammer' ? wStat('hammer').rad + 10 : 420);
     if (!tgt && id !== 'boomerang') { G.timers[id] = 0.1; continue; }
     let ang = tgt ? Math.atan2(tgt.y - (p.y - 12), tgt.x - p.x) : Math.atan2(p.ay, p.ax);
     const ox = p.x, oy = p.y - 12;
@@ -1559,9 +1602,32 @@ function fireWeapons(dt) {
         G.booms.push({ x: ox, y: oy, dx: Math.cos(a), dy: Math.sin(a), spd: 380, dist: 0, range: s.range, back: false, dmg: s.dmg, rot: 0, hits: new Map(), life: 4 });
       }
       sfx('boom');
+    } else if (id === 'bolt') { // 첫 적에서 가까운 적으로 지그재그 번개
+      let cur = tgt, from = { x: ox, y: oy - 10 }; const hit = new Set();
+      for (let k = 0; k <= s.chain && cur; k++) {
+        hit.add(cur); zap(from.x, from.y, cur.x, cur.y - 14);
+        hurtEnemy(cur, s.dmg, (cur.x - from.x) / 100, (cur.y - from.y) / 100, 60);
+        from = { x: cur.x, y: cur.y - 14 };
+        let nx = null, nd = s.reach * s.reach;
+        for (const e of G.enemies) { if (e.dead || hit.has(e)) continue; const d = (e.x - from.x) ** 2 + (e.y - from.y) ** 2; if (d < nd) { nd = d; nx = e; } }
+        cur = nx;
+      }
+      sfx('zap');
+    } else if (id === 'hammer') { // 내려찍기: 원 안의 적 모두 + 크게 밀쳐냄
+      for (const e of G.enemies) { const dx = e.x - p.x, dy = e.y - p.y, d = Math.hypot(dx, dy) || 1; if (d < s.rad + e.r) hurtEnemy(e, s.dmg, dx / d, dy / d, 420); }
+      G.rings.push({ x: p.x, y: p.y, r: s.rad, life: 0.45, max: 0.45 });
+      burst(p.x, p.y, '#ff7b00', 26, s.rad * 3, 6, 0.5); burst(p.x, p.y, '#ffd23f', 14, s.rad * 2, 5, 0.4);
+      G.shake = Math.max(G.shake, 7); p.slam = 0.25; sfx('slam'); vib(30);
     }
     G.timers[id] = s.cd * p.cdMul;
   }
+}
+
+function zap(x0, y0, x1, y1) {
+  const pts = [[x0, y0]], n = 6;
+  for (let i = 1; i < n; i++) { const k = i / n; pts.push([x0 + (x1 - x0) * k + rand(-12, 12), y0 + (y1 - y0) * k + rand(-12, 12)]); }
+  pts.push([x1, y1]); G.zaps.push({ pts, life: 0.18, max: 0.18 });
+  burst(x1, y1, '#9fe8ff', 5, 120, 3, 0.25);
 }
 
 // ---------- 업데이트 ----------
@@ -1614,6 +1680,9 @@ function update(dt) {
 
   if (G.deadT <= 0 && !p.dead) fireWeapons(dt);
   updAllies(dt); updBombs(dt); updPlane(dt);
+  for (const z of G.zaps) z.life -= dt; G.zaps = G.zaps.filter(z => z.life > 0);
+  for (const r of G.rings) r.life -= dt; G.rings = G.rings.filter(r => r.life > 0);
+  if (p.slam > 0) p.slam -= dt;
   if (G.mode === 'base') { G.saveT = (G.saveT === undefined ? 10 : G.saveT) - dt; if (G.saveT <= 0) saveGame(); }
 
   // 회전 칼
@@ -2123,9 +2192,9 @@ function drawStick(p) {
     for (let i = 0; i < p.logs; i++) drawLog(-12 + (i % 2) * 1.5, -14 - bob - i * 4.6, 0.85);
     const img = SPR.hero, h = 64, ax = SPR_INFO.hero.ax, w = h * img.width / img.height;
     const ch = p.chop > 0 ? Math.sin((1 - p.chop / 0.2) * Math.PI) : 0;
-    const tilt = p.moving ? sw * 0.08 : 0;
+    const tilt = p.moving ? sw * 0.08 : 0, sl = p.slam > 0 ? Math.sin(p.slam / 0.25 * Math.PI) : 0;
     ctx.save(); ctx.translate(0, 14); ctx.rotate(tilt + ch * 0.35);
-    const sq = p.moving ? 1 + Math.abs(Math.cos(p.walk)) * 0.04 : 1 + Math.sin(G.t * 3) * 0.015;
+    const sq = (p.moving ? 1 + Math.abs(Math.cos(p.walk)) * 0.04 : 1 + Math.sin(G.t * 3) * 0.015) - sl * 0.18;
     ctx.scale(2 - sq, sq);
     if (blink) ctx.globalAlpha = 0.35;
     ctx.drawImage(img, -w * ax, -h - bob, w, h); // 몸 중심이 발 위에 오도록 (칼 쪽이 더 넓음)
@@ -2389,6 +2458,20 @@ function drawWorld() {
     ctx.fillStyle = Math.floor(G.t * 20) % 2 ? '#ffd23f' : '#ff6b00'; ctx.beginPath(); ctx.arc(4, -7, 2.5, 0, 7); ctx.fill();
     ctx.restore();
   }
+  // 불꽃 망치 고리
+  for (const r of G.rings) {
+    const k = 1 - r.life / r.max;
+    ctx.globalAlpha = r.life / r.max; ctx.strokeStyle = '#ff7b00'; ctx.lineWidth = 10 * (1 - k) + 2;
+    ctx.beginPath(); ctx.arc(r.x, r.y, r.r * (0.4 + 0.6 * k), 0, 7); ctx.stroke();
+    ctx.fillStyle = 'rgba(255,190,60,.25)'; ctx.beginPath(); ctx.arc(r.x, r.y, r.r * (0.4 + 0.6 * k), 0, 7); ctx.fill();
+  }
+  ctx.globalAlpha = 1;
+  // 번개
+  for (const z of G.zaps) {
+    ctx.globalAlpha = z.life / z.max; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+    for (const [w, c] of [[8, 'rgba(120,200,255,.5)'], [3, '#fff']]) { ctx.strokeStyle = c; ctx.lineWidth = w; ctx.beginPath(); z.pts.forEach(([x, y], i) => i ? ctx.lineTo(x, y) : ctx.moveTo(x, y)); ctx.stroke(); }
+  }
+  ctx.globalAlpha = 1;
   drawPlane();
   // 파티클
   for (const q of G.parts) {
@@ -2635,7 +2718,7 @@ window.SH = {
   give(id, l) { if (WEAP[id]) G.weapons[id] = l; else { G.passives[id] = l; recalcStats(); } },
   kill() { G.p.inv = 0; hurtPlayer(99999); },
   ok() { if (state === 'result') $('bClrOk').click(); else if (state === 'map') closeMap(); },
-  plane() { callPlane(); },
+  plane() { callPlane(); }, showClear() {},
   skipIntro() { endIntro(); },
   chooseAlly(i) { chooseAlly(i); },
   killBase() { hurtBase(99999); },
