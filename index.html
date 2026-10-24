@@ -72,7 +72,7 @@ h2{margin:0 0 14px;font-size:clamp(30px,9vw,48px);color:#ffd23f;text-shadow:0 3p
 
 <script>
 'use strict';
-const BUILD = 5;
+const BUILD = 6;
 const BOSS_INTERVAL = 180;      // 보스 등장 간격(초)
 const WAVE_INTERVAL = 60;       // 대규모 몰이 이벤트 간격(초)
 const MAX_ENEMIES = 220;
@@ -106,6 +106,10 @@ function resize() {
 window.addEventListener('resize', resize); resize();
 
 const $ = id => document.getElementById(id);
+// ---------- 그림(스프라이트) ----------
+// img/이름.webp 가 있으면 그림으로, 없으면 코드 그림으로 그림
+const SPR = {};
+['hero'].forEach(n => { const im = new Image(); im.onload = () => { SPR[n] = im; }; im.src = `img/${n}.webp?b=${BUILD}`; });
 const rand = (a, b) => a + Math.random() * (b - a);
 const clamp = (v, a, b) => v < a ? a : v > b ? b : v;
 const fmtTime = s => { s = Math.floor(s); return String(Math.floor(s / 60)).padStart(2, '0') + ':' + String(s % 60).padStart(2, '0'); };
@@ -225,7 +229,7 @@ const xpNeed = l => Math.floor(5 + l * 4 + Math.pow(l, 1.6));
 // ---------- 적 ----------
 const ETYPES = {
   grunt:  { r: 11, hp: 14, spd: 58,  dmg: 8,  color: '#e63946', xp: 1, gold: 1 },
-  runner: { r: 9,  hp: 8,  spd: 100, dmg: 6,  color: '#ff8c1a', xp: 1, gold: 1 },
+  runner: { r: 9,  hp: 8,  spd: 100, dmg: 6,  color: '#ff4fa3', xp: 1, gold: 1 },
   tank:   { r: 17, hp: 75, spd: 40,  dmg: 18, color: '#7b2cbf', xp: 5, gold: 4 },
 };
 const BOSSES = [
@@ -1327,6 +1331,19 @@ function drawStick(p) {
   const sw = p.moving ? Math.sin(p.walk) : 0, bob = p.moving ? Math.abs(Math.cos(p.walk)) * 2 : Math.sin(G.t * 3) * 0.8;
   ctx.strokeStyle = col; ctx.lineWidth = 3.4; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
   const hipY = -2 - bob, neckY = -18 - bob;
+  if (SPR.hero) { // 그림 주인공: 통통 튀며 걷고, 도끼질 때는 몸을 기울임
+    for (let i = 0; i < p.logs; i++) drawLog(-12 + (i % 2) * 1.5, -14 - bob - i * 4.6, 0.85);
+    const img = SPR.hero, h = 64, w = h * img.width / img.height;
+    const ch = p.chop > 0 ? Math.sin((1 - p.chop / 0.2) * Math.PI) : 0;
+    const tilt = p.moving ? sw * 0.08 : 0;
+    ctx.save(); ctx.translate(0, 14); ctx.rotate(tilt + ch * 0.35);
+    const sq = p.moving ? 1 + Math.abs(Math.cos(p.walk)) * 0.04 : 1 + Math.sin(G.t * 3) * 0.015;
+    ctx.scale(2 - sq, sq);
+    if (blink) ctx.globalAlpha = 0.35;
+    ctx.drawImage(img, -w / 2, -h - bob, w, h);
+    ctx.restore(); ctx.restore();
+    return;
+  }
   // 등에 짊어진 통나무 더미
   for (let i = 0; i < p.logs; i++) drawLog(-7 + (i % 2) * 1.5, neckY + 6 - i * 4.6, 0.85);
   ctx.strokeStyle = col; ctx.lineWidth = 3.4;
