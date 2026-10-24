@@ -1,3 +1,4 @@
+// 주의: http로 열어야 함 (python3 -m http.server 8765). file://로 새로고침하면 크롬이 가끔 저장소 전체를 비움
 const { chromium } = require('/opt/node22/lib/node_modules/playwright');
 (async () => {
   const browser = await chromium.launch();
@@ -7,7 +8,7 @@ const { chromium } = require('/opt/node22/lib/node_modules/playwright');
   const hook = pg => { pg.on('pageerror', e => errors.push('pageerror: ' + e.message)); pg.on('console', m => { if (m.type() === 'error') errors.push('console: ' + m.text()); }); };
   hook(page);
   const pick = () => page.evaluate(() => { while (SH.state === 'levelup' || SH.state === 'allypick' || SH.state === 'result' || SH.state === 'map') { if (SH.state === 'result' || SH.state === 'map') { SH.ok(); continue; } if (SH.state === 'allypick') SH.chooseAlly(0); else SH.choose(0); } });
-  await page.goto('file:///home/user/Stickhero/index.html');
+  await page.goto('http://localhost:8765/index.html');
   check(await page.evaluate(() => getComputedStyle(document.getElementById('bContinue')).display === 'none'), 'continue shown without save');
   await page.tap('#bStart');
   // 진행 상황 만들기 (게임 함수로 직접)
@@ -22,6 +23,7 @@ const { chromium } = require('/opt/node22/lib/node_modules/playwright');
   });
   console.log('before', JSON.stringify(before));
   // 새로고침 → 제목 화면에 이어하기
+  await page.waitForTimeout(1200);   // 저장이 디스크에 반영될 시간 (바로 새로고침하면 크롬이 아직 안 써서 저장이 없는 것처럼 보임)
   await page.reload();
   await page.waitForTimeout(300);
   check(await page.evaluate(() => getComputedStyle(document.getElementById('bContinue')).display !== 'none'), 'continue button missing');
