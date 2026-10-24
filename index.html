@@ -72,7 +72,7 @@ h2{margin:0 0 14px;font-size:clamp(30px,9vw,48px);color:#ffd23f;text-shadow:0 3p
 
 <script>
 'use strict';
-const BUILD = 13;
+const BUILD = 14;
 const BOSS_INTERVAL = 180;      // 보스 등장 간격(초)
 const WAVE_INTERVAL = 60;       // 대규모 몰이 이벤트 간격(초)
 const MAX_ENEMIES = 220;
@@ -136,7 +136,7 @@ function bakeSprite(n) {
 }
 // img/ 폴더에 실제로 있는 그림만 불러옴 (없는 파일을 부르면 오류가 남)
 const SPR_FILES = ['hero', 'grunt', 'runner', 'tank', 'boss0', 'boss1', 'boss2', 'tree', 'stump', 'log', 'stake', 'tower', 'hall',
-  'smith', 'pillar', 'torch', 'coin', 'ally_sword'];
+  'smith', 'pillar', 'torch', 'coin', 'ally_sword', 'ally_archer', 'tavern'];
 SPR_FILES.forEach(n => {
   const im = new Image();
   im.onload = () => { SPR_SRC[n] = im; bakeSprite(n); };
@@ -1425,7 +1425,7 @@ function drawAlly(a) {
   if (SPR[n]) drawSpriteMan(n, a.x, a.y, { face: a.face, phase: a.wob, hit: false, flash: false, lunge: a.swing > 0 ? a.swing : 0 });
   else {
     drawStickman(a.x, a.y, { color: T.color, s: 1, face: a.face, phase: a.wob, hit: false, flash: false, lunge: a.swing > 0 ? a.swing : 0, type: 'ally' });
-    if (a.type === 'archer') { // 임시 활
+    if (a.type === 'archer' && !SPR.ally_archer) { // 임시 활
       ctx.save(); ctx.translate(a.x + a.face * 7, a.y - 9 * IK); ctx.scale(a.face, IK);
       ctx.strokeStyle = '#6b4226'; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(0, 0, 8, -1.2, 1.2); ctx.stroke();
       ctx.strokeStyle = '#ddd'; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(Math.cos(-1.2) * 8, Math.sin(-1.2) * 8); ctx.lineTo(Math.cos(1.2) * 8, Math.sin(1.2) * 8); ctx.stroke();
