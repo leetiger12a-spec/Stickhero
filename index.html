@@ -156,7 +156,7 @@ h2{margin:0 0 14px;font-size:clamp(30px,9vw,48px);color:#ffd23f;text-shadow:0 3p
 
 <script>
 'use strict';
-const BUILD = 28;
+const BUILD = 29;
 const BOSS_INTERVAL = 180;      // 보스 등장 간격(초)
 const WAVE_INTERVAL = 60;       // 대규모 몰이 이벤트 간격(초)
 const MAX_ENEMIES = 220;
@@ -224,7 +224,7 @@ const SPR_INFO = {    // ax: 발 위치(그림 폭 대비), h: 화면 키(월드
   boss0: { ax: 0.5, h: 140 }, boss1: { ax: 0.5, h: 140 }, boss2: { ax: 0.5, h: 150 },
   tree: { h: 78 }, stump: { h: 20 }, log: { h: 8 }, stake: { h: 26 }, tower: { h: 76 }, hall: { h: 92 },
   smith: { h: 72 }, pillar: { h: 70 }, torch: { h: 58 }, coin: { h: 12 },
-  ally_sword: { ax: 0.5, h: 52 }, ally_archer: { ax: 0.5, h: 52 }, ally_bomber: { ax: 0.45, h: 52 }, ally_shield: { ax: 0.5, h: 54 }, hero_slash: { h: 72 }, hero_walk: { h: 72 }, ally_archer_shoot: { h: 60 }, ally_bomber_toss: { h: 60 }, ally_shield_bash: { h: 60 }, tavern: { h: 72 }, skyfang_plane: { h: 80 },
+  ally_sword: { ax: 0.5, h: 52 }, ally_archer: { ax: 0.5, h: 52 }, ally_bomber: { ax: 0.45, h: 52 }, ally_shield: { ax: 0.5, h: 54 }, hero_slash: { h: 72 }, hero_walk: { h: 72 }, ally_archer_shoot: { h: 60 }, ally_bomber_toss: { h: 60 }, ally_shield_bash: { h: 60 }, sf_plane0: { h: 80 }, sf_plane1: { h: 80 }, sf_plane2: { h: 80 }, sf_plane3: { h: 80 }, sf_plane4: { h: 80 }, sf_pilot0: { h: 70 }, sf_pilot1: { h: 70 }, sf_pilot2: { h: 70 }, sf_pilot3: { h: 70 }, sf_pilot4: { h: 70 }, tavern: { h: 72 }, skyfang_plane: { h: 80 },
 };
 const SPR_SRC = {};
 // 화면에 그릴 크기로 미리 줄여 둔 그림(매 프레임 큰 그림을 줄이면 느림). 화면 크기가 바뀌면 다시 만듦
@@ -239,7 +239,7 @@ function bakeSprite(n) {
 }
 // img/ 폴더에 실제로 있는 그림만 불러옴 (없는 파일을 부르면 오류가 남)
 const SPR_FILES = ['hero', 'grunt', 'runner', 'tank', 'boss0', 'boss1', 'boss2', 'tree', 'stump', 'log', 'stake', 'tower', 'hall',
-  'smith', 'pillar', 'torch', 'coin', 'ally_sword', 'ally_archer', 'tavern', 'ally_bomber', 'skyfang_plane', 'ally_shield', 'hero_slash', 'hero_walk', 'ally_archer_shoot', 'ally_bomber_toss', 'ally_shield_bash'];
+  'smith', 'pillar', 'torch', 'coin', 'ally_sword', 'ally_archer', 'tavern', 'ally_bomber', 'skyfang_plane', 'ally_shield', 'hero_slash', 'hero_walk', 'ally_archer_shoot', 'ally_bomber_toss', 'ally_shield_bash', 'sf_plane0', 'sf_plane1', 'sf_plane2', 'sf_plane3', 'sf_plane4', 'sf_pilot0', 'sf_pilot1', 'sf_pilot2', 'sf_pilot3', 'sf_pilot4'];
 SPR_FILES.forEach(n => {
   const im = new Image();
   im.onload = () => { SPR_SRC[n] = im; bakeSprite(n); };
@@ -1166,7 +1166,7 @@ function updBombs(dt) {
       const R = 62;
       for (const e of G.enemies) {
         const dx = e.x - b.x1, dy = e.y - b.y1, d = Math.hypot(dx, dy);
-        if (d < R + e.r) hurtEnemy(e, b.dmg, dx / (d || 1), dy / (d || 1), 320);
+        if (d < R * (b.big ? 1.4 : 1) + e.r) hurtEnemy(e, b.dmg, dx / (d || 1), dy / (d || 1), 320);
       }
       burst(b.x1, b.y1 - 6, '#ff9f1c', 26, 260, 6, 0.5); burst(b.x1, b.y1 - 6, '#ffd23f', 14, 160, 5, 0.4); burst(b.x1, b.y1, '#555', 10, 120, 6, 0.6);
       G.texts.push({ x: b.x1, y: b.y1 - 30, text: '펑!', color: '#ff9f1c', size: 22, life: 0.6, max: 0.6 });
@@ -1177,36 +1177,51 @@ function updBombs(dt) {
 }
 
 // ---------- SKYFANG 오마쥬: 지원 비행기 ----------
+// SKYFANG 비행대 5명 (조종사·기체·무전·폭격 특징) — 무작위로 돌아가며 출동
+const SKY_SQUAD = [
+  { call: '청천', pilot: '강하늘 대위', col: '#3fa9f5', size: 120, spd: 430, gap: 0.09, dmg: 45, spread: 30, line: '청천 비행대, 지원 나왔다! 레전드 히어로, 엄호한다!' },
+  { call: '질풍', pilot: '이지율 중위', col: '#9fd8ff', size: 105, spd: 620, gap: 0.05, dmg: 32, spread: 22, line: '질풍 등장~! 눈 깜짝할 새에 쓸어버릴게!' },
+  { call: '철벽', pilot: '마철수 소령', col: '#8d9b6a', size: 128, spd: 340, gap: 0.16, dmg: 80, spread: 40, line: '철벽이다. 마을은 우리가 지킨다. 큰 폭탄 간다!' },
+  { call: '천둥', pilot: '이지후 소위', col: '#ff6b4a', size: 120, spd: 450, gap: 0.06, dmg: 40, spread: 55, line: '천둥 출격! 폭탄 비가 쏟아진다~ 고개 숙여!' },
+  { call: '백운', pilot: '한누리 중위', col: '#ffffff', size: 115, spd: 480, gap: 0.08, dmg: 42, spread: 34, heal: true, line: '백운 지원 왔어요! 영웅님 체력도 채워 드릴게요!' },
+];
+let lastSquad = -1;
 function callPlane() {
+  let k = Math.floor(Math.random() * SKY_SQUAD.length); if (k === lastSquad) k = (k + 1 + Math.floor(Math.random() * 4)) % SKY_SQUAD.length; lastSquad = k;
+  const Q = SKY_SQUAD[k];
   // 적이 가장 많이 모인 곳을 지나가도록
   let best = G.enemies[0], bn = -1;
   for (let i = 0; i < G.enemies.length; i += 3) { const e = G.enemies[i]; let n = 0; for (const f of G.enemies) if ((f.x - e.x) ** 2 + (f.y - e.y) ** 2 < 120 * 120) n++; if (n > bn) { bn = n; best = e; } }
   if (!best) return;
   const a = Math.random() * Math.PI * 2, dx = Math.cos(a), dy = Math.sin(a), L = 700;
-  G.plane = { x: best.x - dx * L, y: best.y - dy * L, dx, dy, cx: best.x, cy: best.y, t: 0, dur: (L * 2) / 430, drop: 0 };
-  banner('✈ SKYFANG 지원 폭격!', '하늘에서 친구가 도와주러 왔다', '#7fe3ff', 2);
+  G.plane = { k, x: best.x - dx * L, y: best.y - dy * L, dx, dy, cx: best.x, cy: best.y, t: 0, dur: (L * 2) / Q.spd, drop: 0 };
+  G.radio = { k, t: 0, dur: 3.4 };   // 조종사 무전 (화면 아래)
+  banner(`✈ SKYFANG ${Q.call} 지원!`, Q.pilot, Q.col === '#ffffff' ? '#cfefff' : Q.col, 1.8);
+  if (Q.heal && !G.p.dead) { G.p.hp = Math.min(G.p.maxHp, G.p.hp + G.p.maxHp * 0.3); floatText(G.p.x, G.p.y - 50, '체력 회복!', '#7bed9f', 18, 1.2); }
   sfx('plane'); sfx('woosh'); vib([40, 30, 40]);
 }
 function updPlane(dt) {
   const P = G.plane; if (!P) return;
-  P.t += dt; P.x += P.dx * 430 * dt; P.y += P.dy * 430 * dt;
+  const Q = SKY_SQUAD[P.k || 0];
+  P.t += dt; P.x += P.dx * Q.spd * dt; P.y += P.dy * Q.spd * dt;
   const d = Math.hypot(P.x - P.cx, P.y - P.cy);
   P.drop -= dt;
   if (d < 230 && P.drop <= 0) {
-    P.drop = 0.09;
-    G.bombs.push({ x0: P.x, y0: P.y, x1: P.x + rand(-30, 30), y1: P.y + rand(-30, 30), t: 0, dur: 0.45, dmg: 45 * (1 + 0.1 * G.forge), drop: true });
+    P.drop = Q.gap;
+    G.bombs.push({ x0: P.x, y0: P.y, x1: P.x + rand(-Q.spread, Q.spread), y1: P.y + rand(-Q.spread, Q.spread), t: 0, dur: 0.45, dmg: Q.dmg * (1 + 0.1 * G.forge), drop: true, big: Q.dmg >= 80 });
   }
   if (P.t >= P.dur) G.plane = null;
 }
 function drawPlane() {
   const P = G.plane; if (!P) return;
-  const ang = Math.atan2(P.dy, P.dx) + Math.PI / 2, w = 120, h = SPR.skyfang_plane ? w * SPR.skyfang_plane.height / SPR.skyfang_plane.width : 70;
+  const pl = SPR['sf_plane' + (P.k || 0)] || SPR.skyfang_plane, Q = SKY_SQUAD[P.k || 0];
+  const ang = Math.atan2(P.dy, P.dx) + Math.PI / 2, w = Q.size, h = pl ? w * pl.height / pl.width : 70;
   // 땅 그림자
   ctx.save(); ctx.translate(P.x, P.y); ctx.rotate(ang); ctx.globalAlpha = 0.25; ctx.fillStyle = '#000';
   ctx.beginPath(); ctx.ellipse(0, 0, w * 0.45, h * 0.3, 0, 0, 7); ctx.fill(); ctx.restore();
   // 하늘 위 비행기 (그림 위쪽이 기수)
   ctx.save(); ctx.translate(P.x, P.y - 140); ctx.scale(1, IK); ctx.rotate(ang);
-  if (SPR.skyfang_plane) ctx.drawImage(SPR.skyfang_plane, -w / 2, -h / 2, w, h);
+  if (pl) ctx.drawImage(pl, -w / 2, -h / 2, w, h);
   else { ctx.fillStyle = '#3fa9f5'; ctx.fillRect(-w / 2, -8, w, 16); ctx.fillRect(-8, -h / 2, 16, h); }
   ctx.restore();
 }
@@ -1709,6 +1724,7 @@ function update(dt) {
     for (const e of G.enemies) { const dx = e.x - p.x, dy = e.y - p.y, d = Math.hypot(dx, dy) || 1; if (d < 66 + e.r && dx * p.face > -12) hurtEnemy(e, 12, dx / d, dy / d, 240); }
   } }
   updAllies(dt); updBombs(dt); updPlane(dt);
+  if (G.radio) { G.radio.t += dt; if (G.radio.t >= G.radio.dur) G.radio = null; else if (Math.floor(G.radio.t * 26) !== Math.floor((G.radio.t - dt) * 26) && G.radio.t * 26 < SKY_SQUAD[G.radio.k].line.length && Math.floor(G.radio.t * 26) % 3 === 0) tone(1300 + Math.random() * 300, 0.025, 'square', 0.015, 0); }
   for (const z of G.zaps) z.life -= dt; G.zaps = G.zaps.filter(z => z.life > 0);
   for (const r of G.rings) r.life -= dt; G.rings = G.rings.filter(r => r.life > 0);
   if (p.slam > 0) p.slam -= dt;
@@ -2646,7 +2662,7 @@ function drawHUD() {
   hudText(`🏠 ${Math.ceil(bb.hp)}`, 14, top + 57, 12, '#fff');
   hudText('🪙 ' + G.gold, W - 12, top + 60, 18, '#ffd23f', 'right');
   if (G.mode === 'base') hudText(`🪵 ${p.logs}/${p.cap}`, W - 12, top + 86, 16, p.logs >= p.cap ? '#ff6b6b' : '#ffe0b3', 'right');
-  if (G.hint) {
+  if (G.hint && !G.radio) {
     ctx.font = '900 15px system-ui,sans-serif'; const tw = ctx.measureText(G.hint.text).width;
     roundRect(W / 2 - tw / 2 - 12, H - 92, tw + 24, 30, 15); ctx.fillStyle = 'rgba(0,0,0,.55)'; ctx.fill();
     hudText(G.hint.text, W / 2, H - 77, 15, '#ffd23f', 'center');
@@ -2733,6 +2749,32 @@ function drawHUD() {
   if (bn && bn.text.includes('보스 등장')) {
     ctx.strokeStyle = `rgba(255,0,0,${0.35 + 0.3 * Math.sin(G.t * 18)})`; ctx.lineWidth = 18; ctx.strokeRect(0, 0, W, H);
   }
+  // SKYFANG 조종사 무전: 얼굴 + 말풍선 (아래에서 쑥 올라왔다 내려감)
+  if (G.radio) {
+    const R = G.radio, Q = SKY_SQUAD[R.k], pi = SPR['sf_pilot' + R.k];
+    const k = R.t < 0.25 ? R.t / 0.25 : R.t > R.dur - 0.3 ? (R.dur - R.t) / 0.3 : 1, off = (1 - ease(Math.max(0, k))) * 140;
+    const by = H - 150 + off, size = 78;
+    ctx.save(); ctx.globalAlpha = Math.max(0, k);
+    // 얼굴 동그라미
+    ctx.fillStyle = '#1d3557'; ctx.beginPath(); ctx.arc(14 + size / 2, by + size / 2, size / 2 + 4, 0, 7); ctx.fill();
+    ctx.strokeStyle = Q.col; ctx.lineWidth = 4; ctx.stroke();
+    if (pi) { ctx.save(); ctx.beginPath(); ctx.arc(14 + size / 2, by + size / 2, size / 2, 0, 7); ctx.clip();
+      const ph = size * 1.15, pw = ph * pi.width / pi.height; ctx.drawImage(pi, 14 + size / 2 - pw / 2, by + size - ph + 4 + Math.sin(R.t * 18) * (R.t < 2 ? 1.2 : 0), pw, ph); ctx.restore(); }
+    // 이름표
+    roundRect(10, by + size - 6, size + 8, 20, 10); ctx.fillStyle = Q.col === '#ffffff' ? '#e9f6ff' : Q.col; ctx.fill(); ctx.strokeStyle = '#222'; ctx.lineWidth = 2; ctx.stroke();
+    hudText(Q.call, 14 + size / 2, by + size + 4, 12, '#fff', 'center');
+    // 말풍선 (글자가 한 자씩 나타남)
+    const bx = size + 30, bw = Math.min(W - bx - 12, 270), shown = Q.line.slice(0, Math.floor(R.t * 26));
+    ctx.font = '800 14px system-ui,sans-serif';
+    const words = shown.split(' '), lines = ['']; for (const wd of words) { const tl = lines[lines.length - 1] ? lines[lines.length - 1] + ' ' + wd : wd; if (ctx.measureText(tl).width > bw - 20) lines.push(wd); else lines[lines.length - 1] = tl; }
+    const bh = 30 + 19 * Math.max(2, lines.length);
+    roundRect(bx, by + 6, bw, bh, 14); ctx.fillStyle = 'rgba(255,255,255,.95)'; ctx.fill(); ctx.strokeStyle = '#222'; ctx.lineWidth = 2.5; ctx.stroke();
+    ctx.fillStyle = 'rgba(255,255,255,.95)'; ctx.beginPath(); ctx.moveTo(bx + 1, by + 30); ctx.lineTo(bx - 12, by + 38); ctx.lineTo(bx + 1, by + 44); ctx.fill();
+    ctx.fillStyle = '#e63946'; ctx.font = '900 11px system-ui,sans-serif'; ctx.textAlign = 'left'; ctx.textBaseline = 'top'; ctx.fillText(`📻 ${Q.pilot}`, bx + 10, by + 13);
+    ctx.fillStyle = '#222'; ctx.font = '800 14px system-ui,sans-serif';
+    lines.forEach((ln, i) => ctx.fillText(ln, bx + 10, by + 31 + i * 19));
+    ctx.restore();
+  }
   // 피격 붉은 화면
   if (p.inv > 0.45) { ctx.fillStyle = `rgba(255,0,0,${(p.inv - 0.45) * 0.6})`; ctx.fillRect(0, 0, W, H); }
   if (G.intro) drawIntro();
@@ -2791,7 +2833,7 @@ function drawTitleScene() {
   put('ally_sword', W / 2 + 38 * S, base - 6 * S - Math.abs(Math.sin(t * 3 + 3)) * 4 * S, 64 * S);
   put('hero', W / 2 - 14 * S, base - hop, 96 * S);
   // SKYFANG 비행기가 가끔 하늘을 가로지름
-  { const pk = (t % 9) / 2.6, pl = img('skyfang_plane');
+  { const pk = (t % 9) / 2.6, pl = img('sf_plane' + (Math.floor(t / 9) % 5)) || img('skyfang_plane');
     if (pk < 1 && pl) { const x = -80 + (W + 160) * pk, y = topB + (horizon - topB) * (0.75 - pk * 0.5), w = Math.min(110, W * 0.26), h = w * pl.height / pl.width;
       ctx.save(); ctx.translate(x, y); ctx.rotate(Math.atan2(-(horizon - topB) * 0.5, W + 160) + Math.PI / 2); ctx.drawImage(pl, -w / 2, -h / 2, w, h); ctx.restore(); } }
   // 반짝이 가루
@@ -2835,7 +2877,7 @@ window.SH = {
   give(id, l) { if (WEAP[id]) G.weapons[id] = l; else { G.passives[id] = l; recalcStats(); } },
   kill() { G.p.inv = 0; hurtPlayer(99999); },
   ok() { if (state === 'result') $('bClrOk').click(); else if (state === 'map') closeMap(); },
-  plane() { callPlane(); }, showClear() {},
+  plane(k) { if (k !== undefined) lastSquad = (k + 4) % 5; callPlane(); if (k !== undefined) { G.plane.k = k; G.radio.k = k; } }, showClear() {},
   skipIntro() { endIntro(); },
   chooseAlly(i) { chooseAlly(i); },
   killBase() { hurtBase(99999); },
