@@ -6,7 +6,7 @@ const { chromium } = require('/opt/node22/lib/node_modules/playwright');
   await ctx.addInitScript(() => { try { localStorage.setItem('stickhero_story', '1'); } catch (e) {} });
   const page = await ctx.newPage();
   page.on('pageerror', e => errors.push('pageerror: ' + e.message)); page.on('console', m => { if (m.type() === 'error') errors.push('console: ' + m.text()); });
-  const pick = () => page.evaluate(() => { while (SH.state === 'levelup' || SH.state === 'allypick') { if (SH.state === 'allypick') SH.chooseAlly(0); else SH.choose(0); } });
+  const pick = () => page.evaluate(() => { while (SH.state === 'levelup' || SH.state === 'allypick' || SH.state === 'result' || SH.state === 'map') { if (SH.state === 'result' || SH.state === 'map') { SH.ok(); continue; } if (SH.state === 'allypick') SH.chooseAlly(0); else SH.choose(0); } });
   await page.goto('http://localhost:8765/index.html');
   await page.tap('#bHelp');   // 첫 터치 → 오디오 시작
   for (let i = 0; i < 30 && !(await page.evaluate(() => bgmCur && bgmCur.key === 'title')); i++) await page.waitForTimeout(300);

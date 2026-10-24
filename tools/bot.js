@@ -1,5 +1,5 @@
 // 치트 없는 자동 플레이 봇: 키보드 입력(keys)만 조작, 레벨업 카드는 무작위 선택
-// 사용: node tools/bot.js [판 수] [분] — 결과·사건 기록 출력
+// 사용: node tools/bot.js [판 수] [분] — 결과·사건 기록 출력 (음악까지 쓰려면 http로 열 것)
 const { chromium } = require('/opt/node22/lib/node_modules/playwright');
 const RUNS = +process.argv[2] || 4, MINUTES = +process.argv[3] || 15, STYLE = process.argv[4] || 'normal';
 (async () => {
@@ -20,6 +20,7 @@ const RUNS = +process.argv[2] || 4, MINUTES = +process.argv[3] || 15, STYLE = pr
       let prevDead = false, prevMode = 'base', prevBossK = 0, prevRaid = false, steps = MINUTES * 60 * 30;
       for (let i = 0; i < steps; i++) {
         if (SH.state === 'levelup') SH.choose(Math.floor(Math.random() * 3));
+        if (SH.state === 'result') SH.ok(); if (SH.state === 'map') document.getElementById('bGo').click();
         if (SH.state === 'allypick') SH.chooseAlly(Math.floor(Math.random() * 2));
         if (SH.state === 'over') { ev('게임오버 (' + (G().baseDead ? '마을 붕괴' : '?') + ')'); break; }
         const g = G(), p = g.p;
@@ -28,9 +29,12 @@ const RUNS = +process.argv[2] || 4, MINUTES = +process.argv[3] || 15, STYLE = pr
           let tx = p.x, ty = p.y;
           const lowHp = p.hp < p.maxHp * 0.35;
           if (g.mode === 'stage') {
+            const cg = g.st && g.st.cages.find(c => !c.freed);
             if (g.st && g.st.portal) { tx = g.st.portal.x; ty = g.st.portal.y; }
+            else if (cg && p.y < cg.y + 600) { tx = cg.x; ty = cg.y + 8; }
+            else if (g.st && g.st.def.goal === 'survive') { tx = 0; ty = p.y; }
             else { tx = 0; ty = p.y - 120; }
-            if (foe && fd < (foe.boss ? 150 : 55)) { tx = p.x - (foe.x - p.x); ty = p.y - (foe.y - p.y); }   // 너무 가까우면 피하기
+            if (foe && fd < (foe.boss ? 150 : 55) && !(cg && Math.hypot(cg.x - p.x, cg.y - p.y) < 40)) { tx = p.x - (foe.x - p.x); ty = p.y - (foe.y - p.y); }   // 너무 가까우면 피하기
           } else {
             const threat = g.enemies.filter(e => Math.hypot(e.x, e.y) < 330);
             const pads = g.pads.map(q => ({ q, c: padCost(q) })).filter(o => o.c && p.logs >= Math.min(o.c.w - o.q.pw, p.logs) && (o.c.w - o.q.pw <= p.logs || p.logs >= p.cap) && (o.c.g - o.q.pg <= g.gold || o.c.g === 0) && (o.c.w > 0 || o.c.g > 0) && !(o.c.w - o.q.pw > 0 && p.logs === 0));

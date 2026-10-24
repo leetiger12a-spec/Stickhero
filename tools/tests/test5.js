@@ -8,7 +8,7 @@ const OUT = process.argv[2];
   const page = await (await browser.newContext({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 2, hasTouch: true, isMobile: true })).newPage();
   page.on('pageerror', e => errors.push('pageerror: ' + e.message));
   page.on('console', m => { if (m.type() === 'error') errors.push('console: ' + m.text()); });
-  const pick = () => page.evaluate(() => { while (SH.state === 'levelup' || SH.state === 'allypick') { if (SH.state === 'allypick') SH.chooseAlly(0); else SH.choose(0); } });
+  const pick = () => page.evaluate(() => { while (SH.state === 'levelup' || SH.state === 'allypick' || SH.state === 'result' || SH.state === 'map') { if (SH.state === 'result' || SH.state === 'map') { SH.ok(); continue; } if (SH.state === 'allypick') SH.chooseAlly(0); else SH.choose(0); } });
   const stand = async (i, ms) => { for (let k = 0; k < ms / 200; k++) { await pick(); await page.evaluate(i => { const G = SH.G, pd = G.pads[i]; G.p.logs = G.p.cap; G.gold = Math.max(G.gold, 200); G.p.x = pd.x; G.p.y = pd.y + (pd.kind === 'tower' && G.towers[pd.idx].lvl ? 40 : pd.kind === 'smith' && G.smith ? 30 : 0); }, i); await page.waitForTimeout(200); } };
   await page.goto('file:///home/user/Stickhero/index.html');
   await page.tap('#bStart');
@@ -33,7 +33,7 @@ const OUT = process.argv[2];
   const r = await page.evaluate(() => {
     const G = SH.G; G.base.maxHp = G.base.hp = 1e6;
     for (let i = 0; i < 30 * 200 && G.raid; i++) {
-      if (SH.state === 'levelup') SH.choose(0);
+      if (SH.state === 'levelup') SH.choose(0); if (SH.state === 'result' || SH.state === 'map') SH.ok();
       for (const e of G.enemies) if (e.raid && G.raid.t > G.raid.dur) e.hp = 0, e.dead = true, G.kills++;
       if (G.boss && G.raid && G.raid.t > G.raid.dur) G.boss.hp = 1;
       update(1 / 30);

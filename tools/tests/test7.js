@@ -6,17 +6,17 @@ const { chromium } = require('/opt/node22/lib/node_modules/playwright');
   let page = await ctx.newPage();
   const hook = pg => { pg.on('pageerror', e => errors.push('pageerror: ' + e.message)); pg.on('console', m => { if (m.type() === 'error') errors.push('console: ' + m.text()); }); };
   hook(page);
-  const pick = () => page.evaluate(() => { while (SH.state === 'levelup' || SH.state === 'allypick') { if (SH.state === 'allypick') SH.chooseAlly(0); else SH.choose(0); } });
+  const pick = () => page.evaluate(() => { while (SH.state === 'levelup' || SH.state === 'allypick' || SH.state === 'result' || SH.state === 'map') { if (SH.state === 'result' || SH.state === 'map') { SH.ok(); continue; } if (SH.state === 'allypick') SH.chooseAlly(0); else SH.choose(0); } });
   await page.goto('file:///home/user/Stickhero/index.html');
   check(await page.evaluate(() => getComputedStyle(document.getElementById('bContinue')).display === 'none'), 'continue shown without save');
   await page.tap('#bStart');
   // 진행 상황 만들기 (게임 함수로 직접)
   const before = await page.evaluate(() => {
     const G = SH.G;
-    const stand = (i, steps) => { for (let k = 0; k < steps; k++) { if (SH.state === 'levelup') SH.choose(0); const pd = G.pads[i]; G.p.logs = G.p.cap; G.gold = Math.max(G.gold, 2000); G.p.x = pd.x; G.p.y = pd.y + padOY(pd); update(1 / 30); } };
+    const stand = (i, steps) => { for (let k = 0; k < steps; k++) { if (SH.state === 'levelup') SH.choose(0); if (SH.state === 'result' || SH.state === 'map') SH.ok(); const pd = G.pads[i]; G.p.logs = G.p.cap; G.gold = Math.max(G.gold, 2000); G.p.x = pd.x; G.p.y = pd.y + padOY(pd); update(1 / 30); } };
     stand(0, 60); stand(4, 90); stand(1, 90); stand(5, 120); const ti = G.pads.findIndex(p => p.kind === 'tavern'); stand(ti, 200);
     SH.give('sword', 3); G.stageN = 3; G.p.logs = 7; G.gold = 777; G.walls[2].hp = 5;
-    if (SH.state === 'levelup') SH.choose(0);
+    if (SH.state === 'levelup') SH.choose(0); if (SH.state === 'result' || SH.state === 'map') SH.ok();
     saveGame();
     return { towers: G.towers.map(t => t.lvl).join(''), wall: G.wallLvl, smith: G.smith, forge: G.forge, tavern: G.tavern, allies: G.allies.length, stageN: G.stageN, gold: G.gold, lvl: G.lvl, sword: G.weapons.sword };
   });
@@ -40,7 +40,7 @@ const { chromium } = require('/opt/node22/lib/node_modules/playwright');
   await page.screenshot({ path: (process.env.OUT||'.')+'/b15_continued.png' });
   // 마을 붕괴 → 저장 삭제, 대장간 강화 유지
   const forge = after.forge;
-  await page.evaluate(() => { while (SH.state === 'levelup' || SH.state === 'allypick') { if (SH.state === 'allypick') SH.chooseAlly(0); else SH.choose(0); } SH.killBase(); });
+  await page.evaluate(() => { while (SH.state === 'levelup' || SH.state === 'allypick' || SH.state === 'result' || SH.state === 'map') { if (SH.state === 'result' || SH.state === 'map') { SH.ok(); continue; } if (SH.state === 'allypick') SH.chooseAlly(0); else SH.choose(0); } SH.killBase(); });
   await page.waitForTimeout(3000);
   check(await page.evaluate(() => SH.state === 'over' && !localStorage.getItem('stickhero_save')), 'save not cleared on game over');
   await page.screenshot({ path: (process.env.OUT||'.')+'/b15_over.png' });

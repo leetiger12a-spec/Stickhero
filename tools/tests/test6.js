@@ -4,7 +4,7 @@ const { chromium } = require('/opt/node22/lib/node_modules/playwright');
   { const _nc = browser.newContext.bind(browser); browser.newContext = async o => { const c = await _nc(o); await c.addInitScript(() => { try { localStorage.setItem('stickhero_story', '1'); } catch (e) {} }); return c; }; } const errors = []; const check = (c, m) => { if (!c) errors.push(m); };
   const page = await (await browser.newContext({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 2, hasTouch: true, isMobile: true })).newPage();
   page.on('pageerror', e => errors.push('pageerror: ' + e.message)); page.on('console', m => { if (m.type() === 'error') errors.push('console: ' + m.text()); });
-  const pick = () => page.evaluate(() => { while (SH.state === 'levelup') SH.choose(0); });
+  const pick = () => page.evaluate(() => { while (SH.state === 'levelup' || SH.state === 'result') { if (SH.state === 'result') SH.ok(); else SH.choose(0); } });
   const stand = async (i, ms) => { for (let k = 0; k < ms / 200; k++) { await pick(); await page.evaluate(i => { const G = SH.G, pd = G.pads[i]; G.p.logs = G.p.cap; G.gold = Math.max(G.gold, 900); G.p.x = pd.x; G.p.y = pd.y + padOY(pd); }, i); await page.waitForTimeout(200); } };
   await page.goto('file:///home/user/Stickhero/index.html'); await page.tap('#bStart');
   await stand(0, 1000); await stand(4, 1600); await stand(1, 1000);   // 망루0 → 울타리 → 망루1 (순서대로 열림)
@@ -45,7 +45,7 @@ const { chromium } = require('/opt/node22/lib/node_modules/playwright');
   await page.evaluate(() => { const a = SH.G.allies[0]; a.hp = 1; a.inv = 0; SH.G.enemies.push(makeEnemy('tank', a.x, a.y)); });
   await page.waitForTimeout(500); await pick();
   check(await page.evaluate(() => SH.G.allies[0].dead), 'ally did not get knocked out');
-  await page.evaluate(() => { SH.returnBase(true); SH.G.allies[0].reviveT = 0.1; }); await page.waitForTimeout(500); await pick();
+  await page.evaluate(() => { SH.returnBase(true); SH.ok(); SH.G.allies[0].reviveT = 0.1; }); await page.waitForTimeout(500); await pick();
   check(await page.evaluate(() => !SH.G.allies[0].dead), 'ally did not revive');
   await browser.close(); console.log('ERRORS:', errors.length); errors.forEach(e => console.log(e)); process.exit(errors.length ? 1 : 0);
 })();

@@ -9,7 +9,7 @@ const URL = 'file:///home/user/Stickhero/index.html';
   const page = await (await browser.newContext({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 2, hasTouch: true, isMobile: true })).newPage();
   page.on('pageerror', e => errors.push('pageerror: ' + e.message));
   page.on('console', m => { if (m.type() === 'error') errors.push('console: ' + m.text()); });
-  const pick = () => page.evaluate(() => { while (SH.state === 'levelup' || SH.state === 'allypick') { if (SH.state === 'allypick') SH.chooseAlly(0); else SH.choose(0); } });
+  const pick = () => page.evaluate(() => { while (SH.state === 'levelup' || SH.state === 'allypick' || SH.state === 'result' || SH.state === 'map') { if (SH.state === 'result' || SH.state === 'map') { SH.ok(); continue; } if (SH.state === 'allypick') SH.chooseAlly(0); else SH.choose(0); } });
   await page.goto(URL);
   await page.tap('#bStart');
   await page.waitForTimeout(500);
@@ -22,6 +22,9 @@ const URL = 'file:///home/user/Stickhero/index.html';
   await page.screenshot({ path: `${process.env.OUT||OUT||'.'}/b4_01_gate.png` });
   await page.evaluate(() => { SH.G.p.x = 0; SH.G.p.y = 128; });
   await page.waitForTimeout(1500);
+  check(await page.evaluate(() => SH.state) === 'map', 'map not opened');
+  await page.screenshot({ path: `${process.env.OUT||OUT||'.'}/b24_map.png` });
+  await page.tap('#bGo'); await page.waitForTimeout(400);
   check(await page.evaluate(() => SH.G.mode) === 'stage', 'did not enter stage');
   await page.screenshot({ path: `${process.env.OUT||OUT||'.'}/b4_02_stage_start.png` });
   // 첫 무리 근처로
@@ -57,7 +60,7 @@ const URL = 'file:///home/user/Stickhero/index.html';
   await page.waitForTimeout(1200); await pick();
   await page.screenshot({ path: `${process.env.OUT||OUT||'.'}/b4_08_dungeon.png` });
   // 가속 시뮬레이션: 스테이지 안에서 60초
-  const sim = await page.evaluate(() => { for (let i = 0; i < 1800; i++) { if (SH.state === 'levelup') SH.choose(0); SH.G.p.y -= 2; update(1 / 30); } return { mode: SH.G.mode, e: SH.G.enemies.length, y: Math.round(SH.G.p.y) }; });
+  const sim = await page.evaluate(() => { for (let i = 0; i < 1800; i++) { if (SH.state === 'levelup') SH.choose(0); if (SH.state === 'result' || SH.state === 'map') SH.ok(); SH.G.p.y -= 2; update(1 / 30); } return { mode: SH.G.mode, e: SH.G.enemies.length, y: Math.round(SH.G.p.y) }; });
   console.log('sim', JSON.stringify(sim));
   await browser.close();
   console.log('ERRORS:', errors.length); errors.forEach(e => console.log(e));

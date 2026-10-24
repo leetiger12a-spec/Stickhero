@@ -46,27 +46,27 @@ const URL = 'file:///home/user/Stickhero/index.html';
     // 시간을 진행시켜 적이 울타리를 공격하게
     await page.evaluate(() => { SH.G.p.x = 0; SH.G.p.y = 70; SH.G.t = 80; SH.G.p.hp = SH.G.p.maxHp = 5000; SH.G.towers.forEach(t => t.lvl = Math.max(t.lvl, 1)); SH.spawnWave(); });
     await page.waitForTimeout(9000);
-    await page.evaluate(() => { while (SH.state === 'levelup' || SH.state === 'allypick') { if (SH.state === 'allypick') SH.chooseAlly(0); else SH.choose(0); } });
+    await page.evaluate(() => { while (SH.state === 'levelup' || SH.state === 'allypick' || SH.state === 'result' || SH.state === 'map') { if (SH.state === 'result' || SH.state === 'map') { SH.ok(); continue; } if (SH.state === 'allypick') SH.chooseAlly(0); else SH.choose(0); } });
     const st = await page.evaluate(() => ({ dmgWalls: SH.G.walls.filter(w => w.hp < w.maxHp).length, kills: SH.G.kills, gold: SH.G.gold, coins: SH.G.coins.length }));
     console.log('after wave', JSON.stringify(st));
     await page.screenshot({ path: `${process.env.OUT||OUT||'.'}/b3_04_wave.png` });
     // 영웅 쓰러짐 → 부활
-    await page.evaluate(() => { while (SH.state === 'levelup' || SH.state === 'allypick') { if (SH.state === 'allypick') SH.chooseAlly(0); else SH.choose(0); } SH.kill(); });
+    await page.evaluate(() => { while (SH.state === 'levelup' || SH.state === 'allypick' || SH.state === 'result' || SH.state === 'map') { if (SH.state === 'result' || SH.state === 'map') { SH.ok(); continue; } if (SH.state === 'allypick') SH.chooseAlly(0); else SH.choose(0); } SH.kill(); });
     await page.waitForTimeout(1000);
     await page.screenshot({ path: `${process.env.OUT||OUT||'.'}/b3_05_dead.png` });
     await page.evaluate(() => { SH.G.respawnT = 0.2; });
     await page.waitForTimeout(600);
-    await page.evaluate(() => { while (SH.state === 'levelup' || SH.state === 'allypick') { if (SH.state === 'allypick') SH.chooseAlly(0); else SH.choose(0); } });
+    await page.evaluate(() => { while (SH.state === 'levelup' || SH.state === 'allypick' || SH.state === 'result' || SH.state === 'map') { if (SH.state === 'result' || SH.state === 'map') { SH.ok(); continue; } if (SH.state === 'allypick') SH.chooseAlly(0); else SH.choose(0); } });
     check(await page.evaluate(() => !SH.G.p.dead), 'respawn failed');
     // 보스
     await page.evaluate(() => { SH.G.nextBoss = 0.01; SH.G.p.hp = SH.G.p.maxHp = 9999; });
     await page.waitForTimeout(1200);
-    await page.evaluate(() => { while (SH.state === 'levelup' || SH.state === 'allypick') { if (SH.state === 'allypick') SH.chooseAlly(0); else SH.choose(0); } const b = SH.G.boss; b.x = 0; b.y = -230; });
+    await page.evaluate(() => { while (SH.state === 'levelup' || SH.state === 'allypick' || SH.state === 'result' || SH.state === 'map') { if (SH.state === 'result' || SH.state === 'map') { SH.ok(); continue; } if (SH.state === 'allypick') SH.chooseAlly(0); else SH.choose(0); } const b = SH.G.boss; b.x = 0; b.y = -230; });
     await page.waitForTimeout(3500);
-    await page.evaluate(() => { while (SH.state === 'levelup' || SH.state === 'allypick') { if (SH.state === 'allypick') SH.chooseAlly(0); else SH.choose(0); } });
+    await page.evaluate(() => { while (SH.state === 'levelup' || SH.state === 'allypick' || SH.state === 'result' || SH.state === 'map') { if (SH.state === 'result' || SH.state === 'map') { SH.ok(); continue; } if (SH.state === 'allypick') SH.chooseAlly(0); else SH.choose(0); } });
     await page.screenshot({ path: `${process.env.OUT||OUT||'.'}/b3_06_boss.png` });
     // 마을 파괴 → 게임오버
-    await page.evaluate(() => { while (SH.state === 'levelup' || SH.state === 'allypick') { if (SH.state === 'allypick') SH.chooseAlly(0); else SH.choose(0); } SH.killBase(); });
+    await page.evaluate(() => { while (SH.state === 'levelup' || SH.state === 'allypick' || SH.state === 'result' || SH.state === 'map') { if (SH.state === 'result' || SH.state === 'map') { SH.ok(); continue; } if (SH.state === 'allypick') SH.chooseAlly(0); else SH.choose(0); } SH.killBase(); });
     await page.waitForTimeout(3500);
     const s2 = await page.evaluate(() => SH.state);
     check(s2 === 'over', 'game over not reached: ' + s2);
@@ -83,6 +83,7 @@ const URL = 'file:///home/user/Stickhero/index.html';
       const G = SH.G; let maxE = 0, pi = 0;
       for (let i = 0; i < 600 * 30; i++) {
         if (SH.state === 'levelup') SH.choose(Math.floor(Math.random() * 3));
+        if (SH.state === 'result' || SH.state === 'map') SH.ok();
         if (SH.state === 'allypick') SH.chooseAlly(Math.floor(Math.random() * 2));
         if (SH.state === 'over') break;
         if (i % 90 === 0 && !G.p.dead) { G.p.logs = G.p.cap; const pd = G.pads[pi++ % G.pads.length]; G.p.x = pd.x; G.p.y = pd.y + (pd.kind === "tower" && G.towers[pd.idx].lvl ? 40 : 0); }
