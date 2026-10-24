@@ -72,7 +72,7 @@ h2{margin:0 0 14px;font-size:clamp(30px,9vw,48px);color:#ffd23f;text-shadow:0 3p
 
 <script>
 'use strict';
-const BUILD = 6;
+const BUILD = 7;
 const BOSS_INTERVAL = 180;      // 보스 등장 간격(초)
 const WAVE_INTERVAL = 60;       // 대규모 몰이 이벤트 간격(초)
 const MAX_ENEMIES = 220;
@@ -1340,7 +1340,7 @@ function drawStick(p) {
     const sq = p.moving ? 1 + Math.abs(Math.cos(p.walk)) * 0.04 : 1 + Math.sin(G.t * 3) * 0.015;
     ctx.scale(2 - sq, sq);
     if (blink) ctx.globalAlpha = 0.35;
-    ctx.drawImage(img, -w / 2, -h - bob, w, h);
+    ctx.drawImage(img, -w * 0.42, -h - bob, w, h); // 몸 중심이 발 위에 오도록 (칼 쪽이 더 넓음)
     ctx.restore(); ctx.restore();
     return;
   }
