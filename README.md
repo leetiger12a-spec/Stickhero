@@ -4,12 +4,18 @@
 
 막대 영웅 서바이벌 게임 — 아빠와 아들이 함께 만드는 HTML5 게임.
 
-- **현재 빌드: Build 26** (화면 오른쪽 아래에도 표시)
+- **현재 빌드: Build 27** (화면 오른쪽 아래에도 표시)
 - 플레이: https://leetiger12a-spec.github.io/Stickhero/ (GitHub Pages를 켠 뒤)
 
 ## 조작
 - 📱 폰: 화면 아무 곳이나 끌면 가상 조이스틱으로 이동, 공격은 자동
 - 💻 PC: WASD / 방향키 이동, P·Esc 일시정지, 레벨업 카드는 1·2·3 키
+
+## Build 27 내용 — 연속 동작 그림(스프라이트 시트) 첫 적용
+- 영웅 칼 베기: Gemini 4컷 시트(준비 → 휘두르기 → 내려 베기 → 마무리)를 칸마다 잘라 발 위치·몸 중심을 맞춰 넘겨 보이기
+- 도구 `tools/sheet.py`: 가로 N컷 시트 → 배경 제거 → 칸 나누기(n=칸 수) → 옆 칸 조각 제거 → 정렬된 webp + 정보
+  사용 예: `python3 tools/sheet.py art/hero_slash_src.png hero_slash 200 n=4` → 출력된 정보를 index.html의 SHEETS에 넣기
+- 동작 GIF 확인용 tools/tests/gifshot.js
 
 ## Build 26 내용 — 캐릭터 동작 · 강아지 · 엔딩 그림
 - 한 장 그림을 젖히고·내밀고·찌그러뜨리는 동작 + 효과, 실제 공격은 '휘두르는 순간'에 맞춤

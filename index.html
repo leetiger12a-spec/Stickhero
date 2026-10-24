@@ -156,7 +156,7 @@ h2{margin:0 0 14px;font-size:clamp(30px,9vw,48px);color:#ffd23f;text-shadow:0 3p
 
 <script>
 'use strict';
-const BUILD = 26;
+const BUILD = 27;
 const BOSS_INTERVAL = 180;      // 보스 등장 간격(초)
 const WAVE_INTERVAL = 60;       // 대규모 몰이 이벤트 간격(초)
 const MAX_ENEMIES = 220;
@@ -224,7 +224,7 @@ const SPR_INFO = {    // ax: 발 위치(그림 폭 대비), h: 화면 키(월드
   boss0: { ax: 0.5, h: 140 }, boss1: { ax: 0.5, h: 140 }, boss2: { ax: 0.5, h: 150 },
   tree: { h: 78 }, stump: { h: 20 }, log: { h: 8 }, stake: { h: 26 }, tower: { h: 76 }, hall: { h: 92 },
   smith: { h: 72 }, pillar: { h: 70 }, torch: { h: 58 }, coin: { h: 12 },
-  ally_sword: { ax: 0.5, h: 52 }, ally_archer: { ax: 0.5, h: 52 }, ally_bomber: { ax: 0.45, h: 52 }, ally_shield: { ax: 0.5, h: 54 }, tavern: { h: 72 }, skyfang_plane: { h: 80 },
+  ally_sword: { ax: 0.5, h: 52 }, ally_archer: { ax: 0.5, h: 52 }, ally_bomber: { ax: 0.45, h: 52 }, ally_shield: { ax: 0.5, h: 54 }, hero_slash: { h: 72 }, tavern: { h: 72 }, skyfang_plane: { h: 80 },
 };
 const SPR_SRC = {};
 // 화면에 그릴 크기로 미리 줄여 둔 그림(매 프레임 큰 그림을 줄이면 느림). 화면 크기가 바뀌면 다시 만듦
@@ -239,7 +239,7 @@ function bakeSprite(n) {
 }
 // img/ 폴더에 실제로 있는 그림만 불러옴 (없는 파일을 부르면 오류가 남)
 const SPR_FILES = ['hero', 'grunt', 'runner', 'tank', 'boss0', 'boss1', 'boss2', 'tree', 'stump', 'log', 'stake', 'tower', 'hall',
-  'smith', 'pillar', 'torch', 'coin', 'ally_sword', 'ally_archer', 'tavern', 'ally_bomber', 'skyfang_plane', 'ally_shield'];
+  'smith', 'pillar', 'torch', 'coin', 'ally_sword', 'ally_archer', 'tavern', 'ally_bomber', 'skyfang_plane', 'ally_shield', 'hero_slash'];
 SPR_FILES.forEach(n => {
   const im = new Image();
   im.onload = () => { SPR_SRC[n] = im; bakeSprite(n); };
@@ -2223,13 +2223,18 @@ function drawStick(p) {
     const img = SPR.hero, h = 64, ax = SPR_INFO.hero.ax, w = h * img.width / img.height;
     const ch = p.chop > 0 ? Math.sin((1 - p.chop / 0.2) * Math.PI) : 0;
     const tilt = p.moving ? sw * 0.08 : 0, sl = p.slam > 0 ? Math.sin(p.slam / 0.25 * Math.PI) : 0;
-    const P = actPose(p.act, p.actT);
+    const sheet = p.act === 'slash' && SPR.hero_slash;   // 베기는 연속 동작 그림으로
+    const P = actPose(sheet ? null : p.act, p.actT);
+    if (sheet) P.dx = Math.sin(Math.min(1, p.actT / ACTS.slash) * Math.PI) * 6;
     ctx.save(); ctx.translate(P.dx, 14 + P.dy); ctx.rotate(tilt + ch * 0.35 + P.rot);
     const sq = (p.moving ? 1 + Math.abs(Math.cos(p.walk)) * 0.04 : 1 + Math.sin(G.t * 3) * 0.015) - sl * 0.18;
     ctx.scale((2 - sq) * P.sx, sq * P.sy);
     if (blink) ctx.globalAlpha = 0.35;
-    ctx.drawImage(img, -w * ax, -h - bob, w, h); // 몸 중심이 발 위에 오도록 (칼 쪽이 더 넓음)
-    if (p.act) drawActFx(p.act, p.actT, w * 0.9, h);
+    if (sheet) drawSheet('hero_slash', p.actT / ACTS.slash, h * 0.925);
+    else {
+      ctx.drawImage(img, -w * ax, -h - bob, w, h); // 몸 중심이 발 위에 오도록 (칼 쪽이 더 넓음)
+      if (p.act) drawActFx(p.act, p.actT, w * 0.9, h);
+    }
     ctx.restore(); ctx.restore();
     return;
   }
@@ -2310,6 +2315,15 @@ function spr(n, h, white) {
   return w;
 }
 // ---------- 캐릭터 동작: 한 장 그림을 젖히고·내밀고·찌그러뜨려 움직임 + 칼 궤적 등 효과 ----------
+// 연속 동작 그림(가로 N컷): tools/sheet.py 로 만들고 정보를 여기에. body = 칸 높이 대비 몸 키
+const SHEETS = { hero_slash: { n: 4, ax: 0.4421, ay: 0.9807, body: 0.8199 } };
+// 시트의 k(0~1) 시점 칸을, 발이 원점에 오도록 그림. bodyPx = 화면에서의 몸 키
+function drawSheet(name, k, bodyPx) {
+  const img = SPR[name], S = SHEETS[name]; if (!img) return false;
+  const f = Math.min(S.n - 1, Math.floor(k * S.n)), cwI = img.width / S.n, ch = bodyPx / S.body, cw = ch * cwI / img.height;
+  ctx.drawImage(img, f * cwI, 0, cwI, img.height, -cw * S.ax, -ch * S.ay, cw, ch);
+  return true;
+}
 const ACTS = { slash: 0.32, shoot: 0.45, toss: 0.5, bash: 0.36, cheer: 0.6 };
 const ease = k => k * k * (3 - 2 * k);
 function startAct(o, type) { o.act = type; o.actT = 0; }
