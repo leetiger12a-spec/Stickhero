@@ -88,7 +88,7 @@ h2{margin:0 0 14px;font-size:clamp(30px,9vw,48px);color:#ffd23f;text-shadow:0 3p
    <button class="btn big" id="bStart">⚔ 출전!</button>
   </div>
   <div class="best" id="bestTitle"></div>
-  <div class="mrow"><button class="hb" id="bHelp">❓ 조작법</button><button class="hb" id="bStory" style="display:none">📖 이야기</button></div>
+  <div class="mrow"><button class="hb" id="bHelp">❓ 조작법</button><button class="hb" id="bStory" style="display:none">📖 이야기</button><button class="hb" id="bMusicT">🎵 음악</button></div>
   <div class="hint" id="helpBox" style="display:none">📱 화면을 끌어서 이동 · 공격은 자동<br>🌳 나무 옆에 서면 통나무를 모아요 → 🪵 동그라미 위에 서면 건설!<br>⚔ 출격 문으로 모험 → 보스를 잡고 금화를 가져와요<br>💻 WASD / 방향키 이동 · P 일시정지</div>
  </div>
 </div>
@@ -109,6 +109,7 @@ h2{margin:0 0 14px;font-size:clamp(30px,9vw,48px);color:#ffd23f;text-shadow:0 3p
 <div class="ov" id="ovPause">
   <h2>일시정지</h2>
   <button class="btn" id="bResume">계속하기</button>
+  <div class="mrow" style="margin:6px 0 10px"><button class="hb" id="bMusicP" style="width:auto;padding:0 14px;font-weight:800">🎵 음악</button><button class="hb" id="bVibP" style="width:auto;padding:0 14px;font-weight:800">📳 진동</button></div>
   <button class="btn" id="bQuit" style="background:linear-gradient(#ddd,#aaa);box-shadow:0 5px 0 #666">처음으로</button>
 </div>
 
@@ -122,7 +123,7 @@ h2{margin:0 0 14px;font-size:clamp(30px,9vw,48px);color:#ffd23f;text-shadow:0 3p
 
 <script>
 'use strict';
-const BUILD = 22;
+const BUILD = 23;
 const BOSS_INTERVAL = 180;      // 보스 등장 간격(초)
 const WAVE_INTERVAL = 60;       // 대규모 몰이 이벤트 간격(초)
 const MAX_ENEMIES = 220;
@@ -172,7 +173,7 @@ const SPR_INFO = {    // ax: 발 위치(그림 폭 대비), h: 화면 키(월드
   boss0: { ax: 0.5, h: 140 }, boss1: { ax: 0.5, h: 140 }, boss2: { ax: 0.5, h: 150 },
   tree: { h: 78 }, stump: { h: 20 }, log: { h: 8 }, stake: { h: 26 }, tower: { h: 76 }, hall: { h: 92 },
   smith: { h: 72 }, pillar: { h: 70 }, torch: { h: 58 }, coin: { h: 12 },
-  ally_sword: { ax: 0.5, h: 52 }, ally_archer: { ax: 0.5, h: 52 }, ally_bomber: { ax: 0.45, h: 52 }, tavern: { h: 72 },
+  ally_sword: { ax: 0.5, h: 52 }, ally_archer: { ax: 0.5, h: 52 }, ally_bomber: { ax: 0.45, h: 52 }, tavern: { h: 72 }, skyfang_plane: { h: 80 },
 };
 const SPR_SRC = {};
 // 화면에 그릴 크기로 미리 줄여 둔 그림(매 프레임 큰 그림을 줄이면 느림). 화면 크기가 바뀌면 다시 만듦
@@ -187,7 +188,7 @@ function bakeSprite(n) {
 }
 // img/ 폴더에 실제로 있는 그림만 불러옴 (없는 파일을 부르면 오류가 남)
 const SPR_FILES = ['hero', 'grunt', 'runner', 'tank', 'boss0', 'boss1', 'boss2', 'tree', 'stump', 'log', 'stake', 'tower', 'hall',
-  'smith', 'pillar', 'torch', 'coin', 'ally_sword', 'ally_archer', 'tavern', 'ally_bomber'];
+  'smith', 'pillar', 'torch', 'coin', 'ally_sword', 'ally_archer', 'tavern', 'ally_bomber', 'skyfang_plane'];
 SPR_FILES.forEach(n => {
   const im = new Image();
   im.onload = () => { SPR_SRC[n] = im; bakeSprite(n); };
@@ -200,11 +201,70 @@ const fmtTime = s => { s = Math.floor(s); return String(Math.floor(s / 60)).padS
 
 // ---------- 소리 (WebAudio 합성) ----------
 let AC = null, master = null, muted = false;
+// 설정: 소리·음악·진동 (기억됨)
+let musicOn = true, vibOn = true;
+try { musicOn = localStorage.getItem('stickhero_music') !== '0'; vibOn = localStorage.getItem('stickhero_vib') !== '0'; muted = localStorage.getItem('stickhero_mute') === '1'; } catch (e) {}
+let musicBus = null;
 function audioInit() {
   if (!AC) {
-    try { AC = new (window.AudioContext || window.webkitAudioContext)(); master = AC.createGain(); master.gain.value = 0.6; master.connect(AC.destination); } catch (e) { AC = null; }
+    try {
+      AC = new (window.AudioContext || window.webkitAudioContext)(); master = AC.createGain(); master.gain.value = 0.6; master.connect(AC.destination);
+      musicBus = AC.createGain(); musicBus.gain.value = 0.32; musicBus.connect(AC.destination);
+      loadAudio();
+    } catch (e) { AC = null; }
   }
   if (AC && AC.state === 'suspended') AC.resume();
+  if (AC && bgmWant && !bgmCur) playBgm(bgmWant);
+}
+// ---------- SKYFANG 음악·효과음 (오마쥬) ----------
+// 파일은 SKYFANG 저장소에서 가져옴. 웹 주소(https)로 열었을 때만 불러오고, 없으면 합성음으로 대신함
+const AUD = {}, AUD_OK = location.protocol !== 'file:';
+const BGM_LOOP = { title: [19.39, 83.36], a: [16.88, 98.87], b: [36.78, 100.8], c: [27.38, 105.81], d: [2.76, 83.94], boss: [14.47, 79.55] };
+const SFX_FILES = ['hit_0', 'boomS_0', 'boomS_1', 'boomM_0', 'boomM_1', 'boomM_2', 'boomL_0', 'cannon_1', 'oneup_0', 'click_0', 'warn_0', 'rocket_0', 'thud_0', 'die_0', 'item_0', 'bombGet_0', 'launch_0', 'engine_0'];
+function loadOne(name, url) {
+  return fetch(url).then(r => r.ok ? r.arrayBuffer() : Promise.reject()).then(a => new Promise((ok, no) => AC.decodeAudioData(a, ok, no))).then(b => { AUD[name] = b; if (name === 'bgm_' + bgmWant && !bgmCur) playBgm(bgmWant); }).catch(() => {});
+}
+function loadAudio() {
+  if (!AUD_OK) return;
+  SFX_FILES.forEach(n => loadOne(n, `sfx/${n}.mp3`));
+  // 지금 필요한 음악 먼저, 나머지는 천천히
+  const order = ['title', 'a', 'boss', 'b', 'c', 'd'].sort((x, y) => (y === bgmWant) - (x === bgmWant));
+  order.forEach((n, i) => setTimeout(() => loadOne('bgm_' + n, `bgm/${n}.mp3`), i * 400));
+}
+function samp(n, vol, rate, delay) {
+  if (!AC || muted || !AUD[n]) return false;
+  const s = AC.createBufferSource(), g = AC.createGain();
+  s.buffer = AUD[n]; s.playbackRate.value = rate || 1; g.gain.value = vol === undefined ? 0.5 : vol;
+  s.connect(g); g.connect(master); s.start(AC.currentTime + (delay || 0));
+  return true;
+}
+let bgmWant = 'title', bgmCur = null;
+function playBgm(key) {
+  bgmWant = key;
+  if (!AC || !musicBus) return;
+  if (bgmCur && bgmCur.key === key) return;
+  if (bgmCur) { const old = bgmCur; old.g.gain.setTargetAtTime(0, AC.currentTime, 0.25); setTimeout(() => { try { old.s.stop(); } catch (e) {} }, 1200); bgmCur = null; }
+  const b = AUD['bgm_' + key]; if (!b || !musicOn) return;
+  const s = AC.createBufferSource(), g = AC.createGain(), L = BGM_LOOP[key];
+  s.buffer = b; s.loop = true; if (L) { s.loopStart = L[0]; s.loopEnd = Math.min(L[1], b.duration - 0.05); }
+  g.gain.setValueAtTime(0, AC.currentTime); g.gain.setTargetAtTime(1, AC.currentTime, 0.4);
+  s.connect(g); g.connect(musicBus); s.start();
+  bgmCur = { key, s, g };
+}
+function stopBgm() { if (bgmCur) { const k = bgmCur.key; playBgm('__none'); bgmWant = k; } }
+// 지금 상황에 맞는 음악: 시작 화면 / 마을 / 스테이지(숲·폐허·던전) / 보스·대습격
+function bgmFor() {
+  if (state === 'title' || !G) return 'title';
+  if (G.boss || G.raid) return 'boss';
+  if (G.mode === 'stage') return ['b', 'c', 'd'][G.stageN % 3];
+  return 'a';
+}
+// 진동 (SKYFANG처럼 중요한 순간만)
+let lastVib = 0;
+function vib(p, force) {
+  if (!vibOn || !navigator.vibrate) return;
+  const n = performance.now(); if (!force && n - lastVib < 70) return; lastVib = n;
+  try { navigator.vibrate(p); } catch (e) {}
 }
 function tone(freq, dur, type, vol, slide, delay) {
   if (!AC || muted) return;
@@ -230,13 +290,38 @@ function noise(dur, vol, freq, delay) {
   g.gain.setValueAtTime(vol || 0.15, t); g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
   s.connect(f); f.connect(g); g.connect(master); s.start(t); s.stop(t + dur + 0.02);
 }
-const sfxGap = { hit: 0.045, shoot: 0.07, thud: 0.12, chop: 0.08, coin: 0.04, pay: 0.06, arrow: 0.08, shotgun: 0.1, gem: 0.035, pop: 0.05, swing: 0.25, boom: 0.15, hurt: 0.15 };
+const sfxGap = { meow: 0.3, stack: 0.05, coinCombo: 0.04, bombBoom: 0.08, toss: 0.15, hit: 0.045, shoot: 0.07, thud: 0.12, chop: 0.08, coin: 0.04, pay: 0.06, arrow: 0.08, shotgun: 0.1, gem: 0.035, pop: 0.05, swing: 0.25, boom: 0.15, hurt: 0.15 };
 const sfxLast = {};
+// SKYFANG 효과음으로 바꿔 낼 소리들 (없으면 false → 아래 합성음)
+function sampFor(n) {
+  const r = (a, b) => a + Math.random() * (b - a);
+  switch (n) {
+    case 'hit': return samp('hit_0', 0.18, r(0.9, 1.3));
+    case 'pop': return samp(Math.random() < 0.5 ? 'boomS_0' : 'boomS_1', 0.22, r(1.2, 1.6));
+    case 'shotgun': return samp('cannon_1', 0.3, r(1, 1.15));
+    case 'level': return samp('oneup_0', 0.5);
+    case 'pick': return samp('click_0', 0.5);
+    case 'warn': return samp('warn_0', 0.45);
+    case 'bossIn': return samp('warn_0', 0.5) && samp('boomL_0', 0.5, 0.8, 0.3);
+    case 'bigBoom': return samp('boomL_0', 0.7) && (tone(784, 0.2, 'square', 0.05, 0, 0.6), tone(1047, 0.3, 'square', 0.05, 0, 0.75), true);
+    case 'dash': return samp('rocket_0', 0.4);
+    case 'thud': return samp('thud_0', 0.35, r(0.9, 1.1));
+    case 'drum': return samp('thud_0', 0.6, 0.6);
+    case 'break': return samp('boomM_0', 0.35, 1.2);
+    case 'over': return samp('die_0', 0.6);
+    case 'build': return samp('bombGet_0', 0.5) && (tone(784, 0.1, 'square', 0.04, 0, 0.12), tone(1047, 0.16, 'square', 0.04, 0, 0.2), true);
+    case 'bombBoom': return samp(['boomM_0', 'boomM_1', 'boomM_2'][Math.floor(Math.random() * 3)], 0.35, r(0.95, 1.15));
+    case 'toss': return samp('launch_0', 0.25, 1.3);
+    case 'plane': return samp('engine_0', 0.5);
+  }
+  return false;
+}
 function sfx(n) {
   if (!AC || muted) return;
   const now = AC.currentTime;
   if (sfxGap[n] && sfxLast[n] && now - sfxLast[n] < sfxGap[n]) return;
   sfxLast[n] = now;
+  if (sampFor(n)) return;
   switch (n) {
     case 'shoot': tone(880, 0.06, 'square', 0.04, -400); break;
     case 'shotgun': noise(0.15, 0.18, 1800); tone(180, 0.12, 'square', 0.05, -100); break;
@@ -263,6 +348,22 @@ function sfx(n) {
     case 'arrow': noise(0.06, 0.05, 4000); break;
     case 'chop': noise(0.07, 0.15, 1500); tone(180, 0.08, 'square', 0.05, -60); break;
     case 'drum': noise(0.25, 0.3, 220); tone(70, 0.25, 'sine', 0.2, -20); break;
+    case 'meow': { // 고양이 '야옹~': 올라갔다 내려가는 목소리
+      if (!AC || muted) break;
+      const t = AC.currentTime, o = AC.createOscillator(), f = AC.createBiquadFilter(), g = AC.createGain(), p = 1 + Math.random() * 0.3;
+      o.type = 'sawtooth'; o.frequency.setValueAtTime(420 * p, t); o.frequency.linearRampToValueAtTime(820 * p, t + 0.12); o.frequency.linearRampToValueAtTime(520 * p, t + 0.38);
+      f.type = 'bandpass'; f.Q.value = 4; f.frequency.setValueAtTime(900, t); f.frequency.linearRampToValueAtTime(1800, t + 0.12); f.frequency.linearRampToValueAtTime(1000, t + 0.38);
+      g.gain.setValueAtTime(0.0001, t); g.gain.linearRampToValueAtTime(0.16, t + 0.05); g.gain.exponentialRampToValueAtTime(0.0001, t + 0.42);
+      o.connect(f); f.connect(g); g.connect(master); o.start(t); o.stop(t + 0.45);
+      break;
+    }
+    case 'stack': tone(260 + (G ? G.p.logs : 0) * 45, 0.07, 'triangle', 0.08, 60); noise(0.04, 0.06, 2500); break;   // 통나무 쌓일수록 높아지는 '톡'
+    case 'coinCombo': { const k = Math.min(12, coinCombo); tone(988 * Math.pow(1.06, k), 0.06, 'square', 0.03, 0); tone(1319 * Math.pow(1.06, k), 0.08, 'square', 0.03, 0, 0.04); break; }   // 연속으로 주우면 음이 올라감
+    case 'cheer': [523, 659, 784, 1047, 1319].forEach((f, i) => tone(f, 0.12, 'triangle', 0.06, 0, i * 0.06)); noise(0.5, 0.06, 6000, 0.1); break;
+    case 'bombBoom': noise(0.35, 0.22, 500); tone(110, 0.25, 'sawtooth', 0.07, -60); break;
+    case 'toss': tone(300, 0.15, 'triangle', 0.05, 400); break;
+    case 'plane': tone(90, 1.6, 'sawtooth', 0.05, 30); noise(1.2, 0.06, 700); break;
+    case 'woosh': noise(0.6, 0.12, 900); noise(0.4, 0.08, 2400, 0.2); break;
     case 'baseHit': tone(90, 0.25, 'square', 0.08, -30); break;
   }
 }
@@ -324,7 +425,7 @@ const BOSSES = [
 const DEATH_WORDS = ['뿅!', '으악!', '꽥!', '펑!', '히잉~', '아야!'];
 
 // ---------- 게임 상태 ----------
-let G = null, state = 'title', eid = 0;
+let G = null, state = 'title', eid = 0, coinCombo = 0, coinComboT = 0;
 function newGame() {
   G = {
     t: 0, kills: 0, lvl: 1, xp: 0, need: xpNeed(1), pending: 0,
@@ -379,6 +480,7 @@ window.addEventListener('keydown', e => {
   if (e.key.startsWith('Arrow') || e.key === ' ') e.preventDefault();
 });
 window.addEventListener('keyup', e => { keys[e.key.toLowerCase()] = false; });
+document.addEventListener('pointerdown', () => audioInit(), { capture: true });
 cv.addEventListener('pointerdown', e => {
   audioInit();
   if (state === 'play' && G && G.intro) { if (G.intro.t > 0.8) endIntro(); return; }
@@ -545,7 +647,16 @@ $('bRetry').onclick = startGame;
 $('bResume').onclick = togglePause;
 $('bQuit').onclick = toTitle;
 $('bPause').onclick = () => { audioInit(); togglePause(); };
-$('bSound').onclick = () => { audioInit(); muted = !muted; $('bSound').textContent = muted ? '🔇' : '🔊'; };
+$('bSound').onclick = () => { audioInit(); muted = !muted; try { localStorage.setItem('stickhero_mute', muted ? '1' : '0'); } catch (e) {} refreshSettings(); };
+function refreshSettings() {
+  $('bSound').textContent = muted ? '🔇' : '🔊';
+  for (const id of ['bMusicT', 'bMusicP']) { $(id).textContent = musicOn ? '🎵 음악 켬' : '🎵 음악 끔'; $(id).style.opacity = musicOn ? 1 : 0.55; }
+  $('bVibP').textContent = vibOn ? '📳 진동 켬' : '📳 진동 끔'; $('bVibP').style.opacity = vibOn ? 1 : 0.55;
+}
+const toggleMusic = () => { audioInit(); musicOn = !musicOn; try { localStorage.setItem('stickhero_music', musicOn ? '1' : '0'); } catch (e) {} if (!musicOn && bgmCur) { const k = bgmCur.key; playBgm('__none'); bgmWant = k; } refreshSettings(); };
+$('bMusicT').onclick = toggleMusic; $('bMusicP').onclick = toggleMusic;
+$('bVibP').onclick = () => { vibOn = !vibOn; try { localStorage.setItem('stickhero_vib', vibOn ? '1' : '0'); } catch (e) {} if (vibOn) vib(40, true); refreshSettings(); };
+refreshSettings();
 document.addEventListener('visibilitychange', () => { if (document.hidden) { saveGame(); if (state === 'play') togglePause(); } });
 window.addEventListener('pagehide', saveGame);
 refreshTitle();
@@ -686,7 +797,7 @@ function padDone(pd) {
     else { repairWall(); banner('울타리 수리 완료!', '', '#7bed9f', 1.4); }
     for (let i = 0; i < WALL_SEGS; i++) { const a = (i + 0.5) / WALL_SEGS * Math.PI * 2; burst(Math.cos(a) * WALL_R, Math.sin(a) * WALL_R, '#c68642', 6, 100, 4, 0.5); }
   }
-  G.shake = 6; sfx('build');
+  G.shake = 6; sfx('build'); vib([30, 30, 30]);
   saveGame();
 }
 function attackTarget(e, dt, onHit) {
@@ -737,7 +848,7 @@ function updIntro(dt) {
   const I = G.intro; I.t += dt;
   while (I.hits < INTRO_HITS.length && I.t >= INTRO_HITS[I.hits]) {
     const k = I.hits++;
-    if (k === 0) { G.shake = 22; sfx('bigBoom'); }
+    if (k === 0) { G.shake = 22; sfx('bigBoom'); vib([60, 40, 60]); }
     else if (k < 3) { G.shake = 12; sfx('drum'); sfx('thud'); }
     else { G.shake = 8; sfx('bossIn'); }
   }
@@ -790,6 +901,10 @@ function drawIntro() {
 function updBase(dt) {
   const p = G.p;
   G.bt += dt;
+  // SKYFANG 지원 폭격: 적이 많이 몰려오면 가끔 하늘에서 날아와 폭탄을 떨굼
+  if (G.planeT === undefined) G.planeT = 70;
+  G.planeT -= dt;
+  if (G.planeT <= 0 && !G.plane && G.enemies.length >= 8) { G.planeT = rand(70, 100); callPlane(); }
   // 나무 베기: 나무 옆에 서 있으면 자동으로 쾅쾅 → 통나무가 등에 쌓임
   let tree = null, td = 34 * 34;
   for (const t of G.trees) {
@@ -808,7 +923,7 @@ function updBase(dt) {
       p.chopT -= dt;
       if (p.chopT <= 0) {
         p.chopT = 0.32; p.chop = 0.2; p.face = tree.x > p.x ? 1 : -1;
-        tree.logs--; tree.shake = 0.25; p.logs++;
+        tree.logs--; tree.shake = 0.25; p.logs++; sfx('stack');
         burst(tree.x - p.face * 4, tree.y - 10, '#c68642', 5, 120, 3, 0.35);
         G.flyers.push({ x0: tree.x, y0: tree.y - 20, x1: p.x, y1: p.y - 30, t: 0, dur: 0.3, kind: 'log' });
         sfx('chop');
@@ -901,6 +1016,7 @@ function hireAlly(type) {
   const T = ALLY_TYPES[type];
   G.allies.push({ type, slot: G.allies.length, x: TAVERN.x, y: TAVERN.y + 34, hp: T.hp, maxHp: T.hp, cd: 0, inv: 0, face: 1, wob: 0, swing: 0, dead: false, reviveT: 0 });
   banner(`${T.name} 합류!`, '영웅을 따라다니며 함께 싸워요', '#3fa9f5', 1.8);
+  setTimeout(() => sfx('meow'), 250);
   sfx('level');
 }
 function placeAllies() { // 장소가 바뀔 때 영웅 곁으로
@@ -931,13 +1047,13 @@ function updAllies(dt) {
     if (foe && a.cd <= 0) {
       const ux = (foe.x - a.x) / (fd || 1), uy = (foe.y - a.y) / (fd || 1);
       if (a.type === 'sword' && fd < foe.r + 24) {
-        hurtEnemy(foe, 14 * fm, ux, uy, 180); a.cd = 0.55; a.swing = 0.2; a.face = ux > 0 ? 1 : -1; sfx('swing');
+        hurtEnemy(foe, 14 * fm, ux, uy, 180); a.cd = 0.55; a.swing = 0.2; a.face = ux > 0 ? 1 : -1; sfx('swing'); if (Math.random() < 0.06) sfx('meow');
       } else if (a.type === 'archer' && fd < 250) {
         G.bullets.push({ x: a.x, y: a.y - 20, vx: ux * 480, vy: uy * 480, r: 4, dmg: 9 * fm, life: 0.8, pierce: 0, hits: [], kind: 'arrow' });
         a.cd = 0.8; a.face = ux > 0 ? 1 : -1; sfx('arrow');
       } else if (a.type === 'bomber' && fd < 230) { // 적이 있던 자리로 포물선 폭탄
         G.bombs.push({ x0: a.x, y0: a.y - 22, x1: foe.x, y1: foe.y, t: 0, dur: 0.65, dmg: 30 * fm });
-        a.cd = 2.2; a.swing = 0.25; a.face = ux > 0 ? 1 : -1; sfx('boom');
+        a.cd = 2.2; a.swing = 0.25; a.face = ux > 0 ? 1 : -1; sfx('toss');
       }
     }
     // 맞기
@@ -963,15 +1079,51 @@ function updBombs(dt) {
       }
       burst(b.x1, b.y1 - 6, '#ff9f1c', 26, 260, 6, 0.5); burst(b.x1, b.y1 - 6, '#ffd23f', 14, 160, 5, 0.4); burst(b.x1, b.y1, '#555', 10, 120, 6, 0.6);
       G.texts.push({ x: b.x1, y: b.y1 - 30, text: '펑!', color: '#ff9f1c', size: 22, life: 0.6, max: 0.6 });
-      G.shake = Math.max(G.shake, 4); sfx('shotgun'); noise(0.35, 0.2, 400);
+      G.shake = Math.max(G.shake, 4); sfx('bombBoom');
     }
   }
   G.bombs = G.bombs.filter(b => !b.done);
 }
 
+// ---------- SKYFANG 오마쥬: 지원 비행기 ----------
+function callPlane() {
+  // 적이 가장 많이 모인 곳을 지나가도록
+  let best = G.enemies[0], bn = -1;
+  for (let i = 0; i < G.enemies.length; i += 3) { const e = G.enemies[i]; let n = 0; for (const f of G.enemies) if ((f.x - e.x) ** 2 + (f.y - e.y) ** 2 < 120 * 120) n++; if (n > bn) { bn = n; best = e; } }
+  if (!best) return;
+  const a = Math.random() * Math.PI * 2, dx = Math.cos(a), dy = Math.sin(a), L = 700;
+  G.plane = { x: best.x - dx * L, y: best.y - dy * L, dx, dy, cx: best.x, cy: best.y, t: 0, dur: (L * 2) / 430, drop: 0 };
+  banner('✈ SKYFANG 지원 폭격!', '하늘에서 친구가 도와주러 왔다', '#7fe3ff', 2);
+  sfx('plane'); sfx('woosh'); vib([40, 30, 40]);
+}
+function updPlane(dt) {
+  const P = G.plane; if (!P) return;
+  P.t += dt; P.x += P.dx * 430 * dt; P.y += P.dy * 430 * dt;
+  const d = Math.hypot(P.x - P.cx, P.y - P.cy);
+  P.drop -= dt;
+  if (d < 230 && P.drop <= 0) {
+    P.drop = 0.09;
+    G.bombs.push({ x0: P.x, y0: P.y, x1: P.x + rand(-30, 30), y1: P.y + rand(-30, 30), t: 0, dur: 0.45, dmg: 45 * (1 + 0.1 * G.forge), drop: true });
+  }
+  if (P.t >= P.dur) G.plane = null;
+}
+function drawPlane() {
+  const P = G.plane; if (!P) return;
+  const ang = Math.atan2(P.dy, P.dx) + Math.PI / 2, w = 120, h = SPR.skyfang_plane ? w * SPR.skyfang_plane.height / SPR.skyfang_plane.width : 70;
+  // 땅 그림자
+  ctx.save(); ctx.translate(P.x, P.y); ctx.rotate(ang); ctx.globalAlpha = 0.25; ctx.fillStyle = '#000';
+  ctx.beginPath(); ctx.ellipse(0, 0, w * 0.45, h * 0.3, 0, 0, 7); ctx.fill(); ctx.restore();
+  // 하늘 위 비행기 (그림 위쪽이 기수)
+  ctx.save(); ctx.translate(P.x, P.y - 140); ctx.scale(1, IK); ctx.rotate(ang);
+  if (SPR.skyfang_plane) ctx.drawImage(SPR.skyfang_plane, -w / 2, -h / 2, w, h);
+  else { ctx.fillStyle = '#3fa9f5'; ctx.fillRect(-w / 2, -8, w, 16); ctx.fillRect(-8, -h / 2, 16, h); }
+  ctx.restore();
+}
+
 // ---------- 대습격 ----------
 function startRaid() {
   const a0 = Math.random() * 7, nd = G.raidCount >= 1 ? 4 : 3;
+  G.planeT = 8;   // 대습격 때는 SKYFANG 지원이 꼭 옴
   G.raid = { t: 0, dur: 30, n: G.raidCount++, dirs: Array.from({ length: nd }, (_, i) => a0 + i / nd * Math.PI * 2), acc: 0, bossDone: false };
   banner('⚠ 대습격! ⚠', '사방에서 쳐들어온다! 마을을 지켜라!', '#ff3b3b', 3);
   G.shake = 14; sfx('bossIn');
@@ -998,7 +1150,7 @@ function updRaid(dt) {
     G.gold += prize; G.raid = null;
     G.base.hp = Math.min(G.base.maxHp, G.base.hp + 300);
     banner('방어 성공!', `보상 🪙${prize} · 마을 체력 회복`, '#7bed9f', 3);
-    burst(0, -20, '#ffd23f', 60, 320, 6, 1); sfx('bigBoom'); sfx('level');
+    burst(0, -20, '#ffd23f', 60, 320, 6, 1); sfx('bigBoom'); sfx('cheer'); vib([60, 40, 120], true);
   }
 }
 
@@ -1007,7 +1159,7 @@ function enterStage() {
   saveGame();   // 스테이지 안에서 앱을 꺼도 출격 직전 마을로 이어하기
   const p = G.p, n = G.stageN, th = THEMES[n % THEMES.length];
   G.stash = { enemies: G.enemies, coins: G.coins, gems: G.gems, hearts: G.hearts };
-  G.enemies = []; G.coins = []; G.gems = []; G.hearts = []; G.bullets = []; G.ebullets = []; G.booms = []; G.bombs = []; G.corpses = []; G.flyers = [];
+  G.enemies = []; G.coins = []; G.gems = []; G.hearts = []; G.bullets = []; G.ebullets = []; G.booms = []; G.bombs = []; G.corpses = []; G.flyers = []; G.plane = null;
   const L = 2000 + 300 * Math.min(n, 6);
   const st = { n, th, L, groups: [], deco: [], rocks: [], bossOn: false, portal: null, clear: false };
   for (let y = -380; y > -L + 520; y -= rand(240, 320)) st.groups.push({ y, done: false });
@@ -1026,12 +1178,12 @@ function enterStage() {
 function returnBase(win) {
   const p = G.p, s = G.stash;
   G.enemies = s.enemies; G.coins = s.coins; G.gems = s.gems; G.hearts = s.hearts;
-  G.bullets = []; G.ebullets = []; G.booms = []; G.bombs = []; G.corpses = []; G.flyers = []; G.boss = null;
+  G.bullets = []; G.ebullets = []; G.booms = []; G.bombs = []; G.corpses = []; G.flyers = []; G.boss = null; G.plane = null;
   G.mode = 'base'; G.st = null; G.stash = null; G.gateT = 0;
   p.x = GATE.x; p.y = GATE.y - 40; G.cam.x = p.x; G.cam.y = p.y - 12;
   placeAllies();
   if (win) {
-    G.stageN++; sfx('build');
+    G.stageN++; sfx('build'); sfx('cheer');
     if (G.stageN % 2 === 0) { G.raidIn = 10; banner('마을로 귀환!', '적의 대군이 다가온다… 준비해!', '#ff9f1c', 3); }
     else banner('마을로 귀환!', `스테이지 ${G.stageN} 클리어 · 금화로 마을을 키우자`, '#7bed9f', 2.5);
   }
@@ -1172,7 +1324,7 @@ function bossDie(e) {
   for (let i = 0; i < 30; i++) { const a = Math.random() * Math.PI * 2, d = rand(10, 90); dropGem(e.x + Math.cos(a) * d, e.y + Math.sin(a) * d, 5); }
   for (let i = 0; i < 40 + e.lvl * 20; i++) dropCoin(e.x + rand(-40, 40), e.y + rand(-40, 40));
   G.hearts.push({ x: e.x, y: e.y, bob: 0 });
-  G.shake = 25; G.slow = 1.3;
+  G.shake = 25; G.slow = 1.3; vib([80, 40, 80, 40, 160], true);
   G.ebullets.length = 0;
   banner('보스 처치!', e.name + ' 쓰러뜨렸다!', '#ffd23f', 3);
   if (G.mode === 'stage') { G.st.portal = { x: e.x, y: e.y + 60, t: 0, hold: 0, on: false }; G.st.clear = true; }
@@ -1181,11 +1333,11 @@ function bossDie(e) {
 function hurtPlayer(dmg) {
   const p = G.p;
   if (p.inv > 0 || G.deadT > 0 || p.dead) return;
-  p.hp -= dmg; p.inv = 0.7; G.shake = Math.max(G.shake, 8);
+  p.hp -= dmg; p.inv = 0.7; G.shake = Math.max(G.shake, 8); vib(35);
   burst(p.x, p.y - 12, '#e63946', 10, 140, 4, 0.4);
   sfx('hurt');
   if (p.hp <= 0) { // 영웅은 쓰러져도 마을에서 다시 일어남. 마을이 무너지면 게임오버
-    p.hp = 0; p.dead = true; G.respawnT = 4; joy = null;
+    p.hp = 0; p.dead = true; G.respawnT = 4; joy = null; vib([180, 60, 120], true);
     burst(p.x, p.y - 12, '#222', 30, 220, 5, 1);
     banner('영웅이 쓰러졌다!', '곧 마을에서 다시 일어나요', '#ff6b6b', 2.2);
     sfx('over');
@@ -1284,7 +1436,7 @@ function update(dt) {
 
 
   if (G.deadT <= 0 && !p.dead) fireWeapons(dt);
-  updAllies(dt); updBombs(dt);
+  updAllies(dt); updBombs(dt); updPlane(dt);
   if (G.mode === 'base') { G.saveT = (G.saveT === undefined ? 10 : G.saveT) - dt; if (G.saveT <= 0) saveGame(); }
 
   // 회전 칼
@@ -1426,7 +1578,7 @@ function update(dt) {
       c.pull = true; const sp = 300 + Math.max(0, 200 - d) * 3;
       c.x += dx / d * sp * dt; c.y += dy / d * sp * dt;
     }
-    if (d < 16) { c.dead = true; G.gold++; sfx('coin'); }
+    if (d < 16) { c.dead = true; G.gold++; coinCombo = G.t - coinComboT < 0.6 ? coinCombo + 1 : 0; coinComboT = G.t; sfx('coinCombo'); }
   }
   G.coins = G.coins.filter(c => !c.dead);
 
@@ -2049,7 +2201,7 @@ function drawWorld() {
   }
   // 폭탄 (그림자 + 포물선 + 반짝이는 심지)
   for (const b of G.bombs) {
-    const k = Math.min(1, b.t / b.dur), x = b.x0 + (b.x1 - b.x0) * k, y = b.y0 + (b.y1 - b.y0) * k, z = Math.sin(k * Math.PI) * 70;
+    const k = Math.min(1, b.t / b.dur), x = b.x0 + (b.x1 - b.x0) * k, y = b.y0 + (b.y1 - b.y0) * k, z = b.drop ? (1 - k) * 140 : Math.sin(k * Math.PI) * 70;
     ctx.fillStyle = 'rgba(0,0,0,.2)'; ctx.beginPath(); ctx.ellipse(x, y + 4, 6, 3, 0, 0, 7); ctx.fill();
     ctx.save(); ctx.translate(x, y - z); ctx.scale(1, IK);
     ctx.fillStyle = '#222'; ctx.beginPath(); ctx.arc(0, 0, 6, 0, 7); ctx.fill();
@@ -2057,6 +2209,7 @@ function drawWorld() {
     ctx.fillStyle = Math.floor(G.t * 20) % 2 ? '#ffd23f' : '#ff6b00'; ctx.beginPath(); ctx.arc(4, -7, 2.5, 0, 7); ctx.fill();
     ctx.restore();
   }
+  drawPlane();
   // 파티클
   for (const q of G.parts) {
     ctx.globalAlpha = Math.max(0, q.life / q.max); ctx.fillStyle = q.color;
@@ -2256,6 +2409,10 @@ function drawTitleScene() {
   put('ally_bomber', W / 2 + 74 * S, base - 22 * S - Math.abs(Math.sin(t * 3 + 2)) * 4 * S, 62 * S);
   put('ally_sword', W / 2 + 38 * S, base - 6 * S - Math.abs(Math.sin(t * 3 + 3)) * 4 * S, 64 * S);
   put('hero', W / 2 - 14 * S, base - hop, 96 * S);
+  // SKYFANG 비행기가 가끔 하늘을 가로지름
+  { const pk = (t % 9) / 2.6, pl = img('skyfang_plane');
+    if (pk < 1 && pl) { const x = -80 + (W + 160) * pk, y = topB + (horizon - topB) * (0.75 - pk * 0.5), w = Math.min(110, W * 0.26), h = w * pl.height / pl.width;
+      ctx.save(); ctx.translate(x, y); ctx.rotate(Math.atan2(-(horizon - topB) * 0.5, W + 160) + Math.PI / 2); ctx.drawImage(pl, -w / 2, -h / 2, w, h); ctx.restore(); } }
   // 반짝이 가루
   for (let i = 0; i < 14; i++) {
     const k = (t * 0.15 + i / 14) % 1, x = (Math.sin(i * 12.9) * 0.5 + 0.5) * W, y = H * (0.95 - k * 0.7);
@@ -2282,6 +2439,7 @@ let last = performance.now();
 function frame(now) {
   const dt = Math.min(0.05, (now - last) / 1000); last = now;
   if (state === 'play') update(dt);
+  if (AC) { const k = bgmFor(); if (!bgmCur || bgmCur.key !== k) playBgm(k); }
   render();
   requestAnimationFrame(frame);
 }
@@ -2295,6 +2453,7 @@ window.SH = {
   addXp(n) { G.xp += n; }, spawnBoss() { spawnBoss(); }, spawnWave() { spawnWave(); },
   give(id, l) { if (WEAP[id]) G.weapons[id] = l; else { G.passives[id] = l; recalcStats(); } },
   kill() { G.p.inv = 0; hurtPlayer(99999); },
+  plane() { callPlane(); },
   skipIntro() { endIntro(); },
   chooseAlly(i) { chooseAlly(i); },
   killBase() { hurtBase(99999); },
