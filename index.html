@@ -72,7 +72,7 @@ h2{margin:0 0 14px;font-size:clamp(30px,9vw,48px);color:#ffd23f;text-shadow:0 3p
 
 <script>
 'use strict';
-const BUILD = 9;
+const BUILD = 10;
 const BOSS_INTERVAL = 180;      // 보스 등장 간격(초)
 const WAVE_INTERVAL = 60;       // 대규모 몰이 이벤트 간격(초)
 const MAX_ENEMIES = 220;
@@ -81,7 +81,7 @@ const WALL_R = 165;             // 울타리 반지름
 const BASE_R = 34;              // 마을 회관 크기
 const WALL_SEGS = 16;
 const K = 0.72, IK = 1 / K;      // 3/4 시점: 땅은 세로로 납작하게, 서 있는 물체는 그대로
-const TOWER_W = [6, 8, 10, 12, 15], TOWER_G = [0, 15, 30, 50, 80];   // 망루: 통나무·금화
+const TOWER_W = [6, 0, 0, 0, 0], TOWER_G = [0, 20, 40, 70, 110];    // 망루: 처음엔 통나무, 강화는 금화만
 const WALL_W = [0, 8, 12, 16, 20], WALL_G = [0, 10, 25, 40, 60];     // 울타리: 현재 Lv 기준
 const REPAIR_W = 4;
 const GATE = { x: 0, y: 128 };  // 출격 문 자리
@@ -114,16 +114,23 @@ const SPR_INFO = {    // ax: 발 위치(그림 폭 대비), h: 화면 키(월드
   hero: { ax: 0.42 }, grunt: { ax: 0.45, h: 50 }, runner: { ax: 0.5, h: 42 }, tank: { ax: 0.42, h: 62 },
   boss0: { ax: 0.5, h: 140 }, boss1: { ax: 0.5, h: 140 }, boss2: { ax: 0.5, h: 150 },
 };
+const SPR_SRC = {};
+// 화면에 그릴 크기로 미리 줄여 둔 그림(매 프레임 큰 그림을 줄이면 느림). 화면 크기가 바뀌면 다시 만듦
+function bakeSprite(n) {
+  const im = SPR_SRC[n]; if (!im) return;
+  const hh = SPR_INFO[n].h || 64, px = Math.max(16, Math.round(hh * SCALE * DPR * 1.15));
+  const c = document.createElement('canvas'); c.height = px; c.width = Math.round(px * im.width / im.height);
+  const x = c.getContext('2d'); x.imageSmoothingQuality = 'high'; x.drawImage(im, 0, 0, c.width, c.height);
+  const wc = document.createElement('canvas'); wc.width = c.width; wc.height = c.height;
+  const wx = wc.getContext('2d'); wx.drawImage(c, 0, 0); wx.globalCompositeOperation = 'source-atop'; wx.fillStyle = '#fff'; wx.fillRect(0, 0, wc.width, wc.height);
+  SPR[n] = c; SPR_WHITE[n] = wc;
+}
 Object.keys(SPR_INFO).forEach(n => {
   const im = new Image();
-  im.onload = () => {
-    SPR[n] = im;
-    const c = document.createElement('canvas'); c.width = im.width; c.height = im.height;
-    const x = c.getContext('2d'); x.drawImage(im, 0, 0); x.globalCompositeOperation = 'source-atop'; x.fillStyle = '#fff'; x.fillRect(0, 0, c.width, c.height);
-    SPR_WHITE[n] = c;
-  };
+  im.onload = () => { SPR_SRC[n] = im; bakeSprite(n); };
   im.src = `img/${n}.webp?b=${BUILD}`;
 });
+window.addEventListener('resize', () => Object.keys(SPR_SRC).forEach(bakeSprite));
 const rand = (a, b) => a + Math.random() * (b - a);
 const clamp = (v, a, b) => v < a ? a : v > b ? b : v;
 const fmtTime = s => { s = Math.floor(s); return String(Math.floor(s / 60)).padStart(2, '0') + ':' + String(s % 60).padStart(2, '0'); };
@@ -261,9 +268,9 @@ function newGame() {
     p: { x: 0, y: 0, r: 11, logs: 0, cap: 12, chopT: 0, chop: 0, fullMsg: 0, hp: 100, maxHp: 100, speed: 150, face: 1, ax: 1, ay: 0, inv: 0, walk: 0, moving: false, magnet: 70, dmgMul: 1, cdMul: 1 },
     weapons: { pistol: 1 }, passives: {}, timers: {},
     enemies: [], bullets: [], ebullets: [], booms: [], gems: [], hearts: [], parts: [], texts: [], coins: [], corpses: [],
-    trees: [], flyers: [], hint: null, mode: 'base', stageN: 0, st: null, stash: null, gateT: 0,
+    trees: [], flyers: [], hint: null, mode: 'base', bt: 0, stageN: 0, st: null, stash: null, gateT: 0,
     smith: false, forge: 0, raid: null, raidIn: 0, raidCount: 0, drumT: 0,
-    gold: 0, base: { hp: 1000, maxHp: 1000, hitT: 0 }, respawnT: 0, squadAng: Math.random() * 7, squadT: 6,
+    gold: 0, base: { hp: 1500, maxHp: 1500, hitT: 0 }, respawnT: 0, squadAng: Math.random() * 7, squadT: 6,
     walls: Array.from({ length: WALL_SEGS }, () => ({ hp: 0, maxHp: 0, shake: 0 })), wallLvl: 0,
     towers: [], pads: [], baseDead: false,
     spawnAcc: 0, nextBoss: BOSS_INTERVAL, nextWave: WAVE_INTERVAL, bossCount: 0, boss: null,
@@ -466,8 +473,8 @@ function attackTarget(e, dt, onHit) {
   if (e.atk <= 0) { e.atk = e.boss ? 1.4 : 1.2; e.lunge = 0.25; onHit(); }
 }
 function makeEnemy(type, x, y) {
-  const T = ETYPES[type], hm = 1 + G.t / 70;
-  return { id: ++eid, type, x, y, r: T.r, hp: T.hp * hm, maxHp: T.hp * hm, spd: T.spd * (1 + Math.min(0.35, G.t / 900)) * rand(0.9, 1.1), dmg: T.dmg, color: T.color, xp: T.xp, gold: T.gold, flash: 0, hitT: 0, kx: 0, ky: 0, swordCd: 0, wob: Math.random() * 6, inside: Math.hypot(x, y) < WALL_R, atk: 0.5, lunge: 0, face: 1 };
+  const T = ETYPES[type], hm = 1 + G.bt / 90;   // 난이도는 '마을에서 보낸 시간' 기준
+  return { id: ++eid, type, x, y, r: T.r, hp: T.hp * hm, maxHp: T.hp * hm, spd: T.spd * (1 + Math.min(0.35, G.bt / 900)) * rand(0.9, 1.1), dmg: T.dmg, color: T.color, xp: T.xp, gold: T.gold, flash: 0, hitT: 0, kx: 0, ky: 0, swordCd: 0, wob: Math.random() * 6, inside: Math.hypot(x, y) < WALL_R, atk: 0.5, lunge: 0, face: 1 };
 }
 function spawnEnemy(type) {
   if (G.enemies.length >= MAX_ENEMIES) return;
@@ -476,26 +483,29 @@ function spawnEnemy(type) {
   G.enemies.push(makeEnemy(type, Math.cos(a) * R, Math.sin(a) * R));
 }
 function pickType() {
-  const r = Math.random(), t = G.t;
+  const r = Math.random(), t = G.bt;
   if (t > 90 && r < 0.1 + Math.min(0.1, t / 3000)) return 'tank';
   if (t > 35 && r < 0.38) return 'runner';
   return 'grunt';
 }
 function spawnWave() {
-  const n = 20 + Math.floor(G.t / 15), dirs = G.t > 120 ? 3 : 2, a0 = Math.random() * 7;
+  const n = 20 + Math.floor(G.bt / 15), dirs = G.bt > 120 ? 3 : 2, a0 = Math.random() * 7;
   for (let i = 0; i < n && G.enemies.length < MAX_ENEMIES + 40; i++) {
     const a = a0 + (i % dirs) / dirs * Math.PI * 2 + rand(-0.25, 0.25), R = MAP_R - rand(0, 60);
-    G.enemies.push(makeEnemy(i % 4 === 0 && G.t > 90 ? 'runner' : 'grunt', Math.cos(a) * R, Math.sin(a) * R));
+    G.enemies.push(makeEnemy(i % 4 === 0 && G.bt > 90 ? 'runner' : 'grunt', Math.cos(a) * R, Math.sin(a) * R));
   }
   banner('적군이 몰려온다!', dirs + '방향에서 쳐들어와!', '#ff6b6b', 2);
   sfx('wave');
 }
 function spawnBoss(bx, by) {
-  const n = G.bossCount++, B = BOSSES[n % BOSSES.length];
+  // 마을 보스와 스테이지 보스는 따로 센다 (스테이지를 깬다고 마을 보스가 갑자기 세지지 않게)
+  const inStage = G.mode === 'stage', n = inStage ? Math.min(G.stageN, 4) : G.bossCount++;
+  const B = BOSSES[(inStage ? G.stageN : n) % BOSSES.length];
   const a = Math.random() * Math.PI * 2, R = MAP_R - 60;
   if (bx === undefined) { bx = Math.cos(a) * R; by = Math.sin(a) * R; }
-  const hp = 1400 * (n + 1) * (1 + n * 0.5);
-  const b = { id: ++eid, type: 'boss', boss: true, name: B.name, x: bx, y: by, inside: false, atk: 0, lunge: 0, r: 58, hp, maxHp: hp, spd: 50 + n * 6, dmg: 25 + n * 8, color: B.color, xp: 0, flash: 0, hitT: 0, kx: 0, ky: 0, swordCd: 0, wob: 0, mode: 'walk', st: 3, rings: 0, ax: 0, ay: 0, lvl: n, spr: 'boss' + (n % BOSSES.length) };
+  // 스테이지 보스는 스테이지 번호로, 마을 보스는 등장 횟수로 체력이 정해짐
+  const hp = inStage ? 450 * (1 + G.stageN * 0.8) : n === 0 ? 800 : 1200 * (n + 1) * (1 + n * 0.4);  // 첫 마을 보스는 연습용으로 약하게
+  const b = { id: ++eid, type: 'boss', boss: true, name: B.name, x: bx, y: by, inside: false, atk: 0, lunge: 0, r: 58, hp, maxHp: hp, spd: 50 + n * 6, dmg: 25 + n * 8, color: B.color, xp: 0, flash: 0, hitT: 0, kx: 0, ky: 0, swordCd: 0, wob: 0, mode: 'walk', st: 3, rings: 0, ax: 0, ay: 0, lvl: n, spr: 'boss' + BOSSES.indexOf(B) };
   G.enemies.push(b); G.boss = b;
   banner('⚠ 보스 등장! ⚠', B.name, '#ff3b3b', 3);
   G.shake = 14; sfx('bossIn');
@@ -504,6 +514,7 @@ function spawnBoss(bx, by) {
 // ---------- 마을에서만 일어나는 일 ----------
 function updBase(dt) {
   const p = G.p;
+  G.bt += dt;
   // 나무 베기: 나무 옆에 서 있으면 자동으로 쾅쾅 → 통나무가 등에 쌓임
   let tree = null, td = 34 * 34;
   for (const t of G.trees) {
@@ -576,9 +587,9 @@ function updBase(dt) {
     const n = t.lvl >= 5 ? 3 : t.lvl >= 3 ? 2 : 1, a = Math.atan2(tgt.y - (t.y - 34), tgt.x - t.x);
     for (let k = 0; k < n; k++) {
       const aa = a + (k - (n - 1) / 2) * 0.1;
-      G.bullets.push({ x: t.x, y: t.y - 34, vx: Math.cos(aa) * 520, vy: Math.sin(aa) * 520, r: 4, dmg: 7 + 5 * t.lvl, life: 0.8, pierce: t.lvl >= 4 ? 1 : 0, hits: [], kind: 'arrow', tower: true });
+      G.bullets.push({ x: t.x, y: t.y - 34, vx: Math.cos(aa) * 520, vy: Math.sin(aa) * 520, r: 4, dmg: 10 + 6 * t.lvl, life: 0.8, pierce: t.lvl >= 4 ? 1 : 0, hits: [], kind: 'arrow', tower: true });
     }
-    t.cd = Math.max(0.35, 1.1 - 0.13 * t.lvl); t.shot = 0.15;
+    t.cd = Math.max(0.3, 1.0 - 0.13 * t.lvl); t.shot = 0.15;
     sfx('arrow');
   }
   for (const w of G.walls) w.shake = Math.max(0, w.shake - dt);
@@ -602,7 +613,7 @@ function updBase(dt) {
   if (G.nextWave <= 0) { G.nextWave = WAVE_INTERVAL; if (!G.boss) spawnWave(); }
   G.squadT -= dt;
   if (G.squadT <= 0) { G.squadT = rand(5, 9); G.squadAng = Math.random() * Math.PI * 2; }
-  let rate = (G.t < 10 ? 0.35 : 0.6) + G.t * 0.022;
+  let rate = (G.bt < 10 ? 0.35 : 0.5) + G.bt * 0.016;
   if (G.boss) rate *= 0.35;
   G.spawnAcc += rate * dt;
   while (G.spawnAcc >= 1) { G.spawnAcc--; spawnEnemy(pickType()); }
@@ -612,7 +623,7 @@ function updBase(dt) {
 // ---------- 대습격 ----------
 function startRaid() {
   const a0 = Math.random() * 7, nd = G.raidCount >= 1 ? 4 : 3;
-  G.raid = { t: 0, dur: 35, n: G.raidCount++, dirs: Array.from({ length: nd }, (_, i) => a0 + i / nd * Math.PI * 2), acc: 0, bossDone: false };
+  G.raid = { t: 0, dur: 30, n: G.raidCount++, dirs: Array.from({ length: nd }, (_, i) => a0 + i / nd * Math.PI * 2), acc: 0, bossDone: false };
   banner('⚠ 대습격! ⚠', '사방에서 쳐들어온다! 마을을 지켜라!', '#ff3b3b', 3);
   G.shake = 14; sfx('bossIn');
 }
@@ -622,7 +633,7 @@ function updRaid(dt) {
   if (r.t < r.dur) {
     G.drumT -= dt;
     if (G.drumT <= 0) { G.drumT = 0.6; sfx('drum'); }
-    r.acc += (3 + r.n * 1.2) * dt;
+    r.acc += (2.5 + r.n * 1.0) * dt;
     while (r.acc >= 1) {
       r.acc--;
       if (G.enemies.length >= MAX_ENEMIES + 60) break;
@@ -678,7 +689,7 @@ function updStage(dt) {
   for (const g of st.groups) {
     if (g.done || p.y - g.y > 430) continue;
     g.done = true;
-    const n = 5 + Math.min(10, st.n * 2) + Math.floor(rand(0, 4));
+    const n = 4 + Math.min(10, st.n * 2) + Math.floor(rand(0, 3));
     for (let i = 0; i < n; i++) {
       const r = Math.random(), type = st.n >= 2 && r < 0.15 ? 'tank' : st.n >= 1 && r < 0.45 ? 'runner' : 'grunt';
       const e = makeEnemy(type, rand(-STAGE_HW + 25, STAGE_HW - 25), g.y + rand(-70, 70));
@@ -1017,7 +1028,7 @@ function update(dt) {
     if (blocked) {
       if (e.boss && e.mode === 'dash') { e.mode = 'walk'; e.st = 1.5; w.hp -= 120; G.shake = 12; }
       attackTarget(e, dt, () => {
-        w.hp -= e.dmg * (e.boss ? 3 : 1); w.shake = 0.2; sfx('thud');
+        w.hp -= e.dmg * (e.boss ? 2 : 1); w.shake = 0.2; sfx('thud');
         burst(e.x * WALL_R / dB, e.y * WALL_R / dB, '#c68642', 3, 90, 3, 0.3);
         if (w.hp <= 0) {
           w.hp = 0; sfx('break'); G.shake = Math.max(G.shake, 6);
@@ -1028,7 +1039,7 @@ function update(dt) {
     }
     if (dB < BASE_R + e.r) {
       const k = (BASE_R + e.r) / dB; e.x *= k; e.y *= k;
-      attackTarget(e, dt, () => hurtBase(e.dmg * (e.boss ? 2 : 1)));
+      attackTarget(e, dt, () => hurtBase(e.dmg));
     }
   }
   G.enemies = G.enemies.filter(e => !e.dead);
@@ -1436,10 +1447,10 @@ function drawSpriteMan(n, x, y, o) {
   ctx.translate(Math.max(0, o.lunge || 0) * 24 * o.face, -(o.z || 0));
   if (o.alpha !== undefined) ctx.globalAlpha = o.alpha;
   if (o.rot) { ctx.translate(0, -h / 2); ctx.rotate(o.rot); ctx.translate(0, h / 2); }
-  else ctx.rotate(Math.sin(o.phase) * 0.09);
+  // (걸을 때 회전은 많이 그리면 느려서 빼고, 통통 튀기·찌그러짐으로만 표현)
   const sq = o.hit ? 1 + Math.sin(o.hitT * 40) * 0.12 : 1 + Math.abs(Math.cos(o.phase)) * 0.05;
   ctx.scale(o.face * (2 - sq), sq);
-  ctx.drawImage(o.flash && SPR_WHITE[n] ? SPR_WHITE[n] : img, -w * inf.ax, -h - Math.abs(Math.sin(o.phase)) * 2, w, h);
+  ctx.drawImage(o.flash && SPR_WHITE[n] ? SPR_WHITE[n] : img, -w * inf.ax, -h - Math.abs(Math.sin(o.phase)) * 3, w, h);
   ctx.restore();
 }
 function drawEnemy(e) {
