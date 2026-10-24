@@ -72,7 +72,7 @@ h2{margin:0 0 14px;font-size:clamp(30px,9vw,48px);color:#ffd23f;text-shadow:0 3p
 
 <script>
 'use strict';
-const BUILD = 10;
+const BUILD = 11;
 const BOSS_INTERVAL = 180;      // 보스 등장 간격(초)
 const WAVE_INTERVAL = 60;       // 대규모 몰이 이벤트 간격(초)
 const MAX_ENEMIES = 220;
@@ -113,6 +113,8 @@ const SPR_WHITE = {};  // 맞았을 때 번쩍이는 흰 실루엣
 const SPR_INFO = {    // ax: 발 위치(그림 폭 대비), h: 화면 키(월드 단위)
   hero: { ax: 0.42 }, grunt: { ax: 0.45, h: 50 }, runner: { ax: 0.5, h: 42 }, tank: { ax: 0.42, h: 62 },
   boss0: { ax: 0.5, h: 140 }, boss1: { ax: 0.5, h: 140 }, boss2: { ax: 0.5, h: 150 },
+  tree: { h: 78 }, stump: { h: 20 }, log: { h: 8 }, stake: { h: 26 }, tower: { h: 76 }, hall: { h: 92 },
+  smith: { h: 72 }, pillar: { h: 70 }, torch: { h: 58 }, coin: { h: 12 },
 };
 const SPR_SRC = {};
 // 화면에 그릴 크기로 미리 줄여 둔 그림(매 프레임 큰 그림을 줄이면 느림). 화면 크기가 바뀌면 다시 만듦
@@ -661,9 +663,11 @@ function enterStage() {
   const L = 2000 + 300 * Math.min(n, 6);
   const st = { n, th, L, groups: [], deco: [], rocks: [], bossOn: false, portal: null, clear: false };
   for (let y = -380; y > -L + 520; y -= rand(240, 320)) st.groups.push({ y, done: false });
-  for (let y = 120; y > -L - 420; y -= rand(55, 85)) for (const side of [-1, 1]) {
-    st.deco.push({ x: side * (STAGE_HW + rand(25, 90)), y: y + rand(-20, 20), kind: th.deco, logs: 1, max: 1, shake: 0, sz: rand(0.9, 1.25), ph: Math.random() * 7 });
+  // 길 가장자리(폰 화면 안쪽에 보이게)와 길 안쪽 군데군데에 테마 장식
+  for (let y = 120; y > -L - 420; y -= rand(70, 110)) for (const side of [-1, 1]) {
+    st.deco.push({ x: side * (STAGE_HW - rand(0, 25)), y: y + rand(-20, 20), kind: th.deco, logs: 1, max: 1, shake: 0, sz: rand(0.85, 1.15), ph: Math.random() * 7 });
   }
+  for (let i = 0; i < L / 260; i++) st.deco.push({ x: rand(-STAGE_HW + 50, STAGE_HW - 50), y: rand(-L + 200, -150), kind: th.deco, logs: 1, max: 1, shake: 0, sz: rand(0.8, 1.05), ph: Math.random() * 7 });
   for (let i = 0; i < L / 120; i++) st.rocks.push({ x: rand(-STAGE_HW + 20, STAGE_HW - 20), y: rand(-L, -60), s: rand(0.6, 1.3) });
   G.st = st; G.mode = 'stage';
   p.x = 0; p.y = -40; G.cam.x = 0; G.cam.y = -52; joy = null;
@@ -731,6 +735,15 @@ function drawDeco(d) {
   if (d.kind === 'tree') { drawTree(d); return; }
   ctx.save(); ctx.translate(d.x, d.y); ctx.scale(1, IK); ctx.scale(d.sz, d.sz);
   ctx.fillStyle = 'rgba(0,0,0,.2)'; ctx.beginPath(); ctx.ellipse(0, 3, 16, 6, 0, 0, 7); ctx.fill();
+  if (d.kind === 'pillar' && SPR.pillar) { spr('pillar', 50 + (d.ph % 1) * 30); ctx.restore(); return; }
+  if (d.kind === 'torch' && SPR.torch) { // 횃불 받침은 그림, 불꽃은 코드로 일렁임
+    const h = 58; spr('torch', h);
+    const f = Math.sin(G.t * 12 + d.ph) * 2, fy = -h * 0.9;
+    ctx.fillStyle = 'rgba(255,170,40,.25)'; ctx.beginPath(); ctx.arc(0, fy - 6, 22 + f, 0, 7); ctx.fill();
+    ctx.fillStyle = '#ff9f1c'; ctx.beginPath(); ctx.moveTo(-7, fy); ctx.quadraticCurveTo(0, fy - 22 - f, 7, fy); ctx.closePath(); ctx.fill();
+    ctx.fillStyle = '#ffd23f'; ctx.beginPath(); ctx.moveTo(-3.5, fy - 1); ctx.quadraticCurveTo(0, fy - 13 - f, 3.5, fy - 1); ctx.closePath(); ctx.fill();
+    ctx.restore(); return;
+  }
   ctx.strokeStyle = '#222'; ctx.lineWidth = 2;
   if (d.kind === 'pillar') { // 무너진 돌기둥
     const h = 30 + (d.ph % 1) * 40;
@@ -1198,7 +1211,7 @@ function drawWallSeg(i) {
   const lvl = G.wallLvl, stone = lvl >= 4;
   {
     const w = G.walls[i], a0 = i / WALL_SEGS * Math.PI * 2, a1 = (i + 1) / WALL_SEGS * Math.PI * 2;
-    const n = 5, sh = w.shake > 0 ? rand(-1.5, 1.5) : 0;
+    const n = SPR.stake ? 9 : 5, sh = w.shake > 0 ? rand(-1.5, 1.5) : 0;   // 그림 말뚝은 촘촘하게
     if (w.hp <= 0) { // 부서진 울타리 그루터기
       for (let k = 0; k < n; k++) {
         const a = a0 + (k + 0.5) / n * (a1 - a0), x = Math.cos(a) * WALL_R, y = Math.sin(a) * WALL_R;
@@ -1216,6 +1229,7 @@ function drawWallSeg(i) {
       const a = a0 + (k + 0.5) / n * (a1 - a0), x = Math.cos(a) * WALL_R + sh, y = Math.sin(a) * WALL_R;
       const tilt = dmg > 0.5 && k % 2 ? 0.35 : 0;
       ctx.save(); ctx.translate(x, y); ctx.scale(1, IK); ctx.rotate(tilt);
+      if (SPR.stake) { ctx.translate(0, 3); spr('stake', hgt + 10); if (stone) { ctx.globalAlpha = 0.35; spr('stake', hgt + 10, true); } ctx.restore(); continue; }
       ctx.fillStyle = stone ? '#adb5bd' : lvl >= 2 ? '#b5733a' : '#c68642'; ctx.strokeStyle = '#4a2c12'; ctx.lineWidth = 1.8;
       ctx.beginPath(); ctx.moveTo(-4.5, 2); ctx.lineTo(-4.5, -hgt + 5); ctx.lineTo(0, -hgt); ctx.lineTo(4.5, -hgt + 5); ctx.lineTo(4.5, 2); ctx.closePath(); ctx.fill(); ctx.stroke();
       ctx.fillStyle = 'rgba(0,0,0,.15)'; ctx.fillRect(1.5, -hgt + 5, 3, hgt - 3);
@@ -1233,6 +1247,11 @@ function drawTree(t) {
   const sh = t.shake > 0 ? Math.sin(t.shake * 60) * 3 : 0;
   ctx.save(); ctx.translate(t.x, t.y); ctx.scale(1, IK);
   ctx.fillStyle = 'rgba(0,0,0,.18)'; ctx.beginPath(); ctx.ellipse(0, 3, 20 * t.sz, 7, 0, 0, 7); ctx.fill();
+  if (SPR.tree && SPR.stump) {
+    if (t.logs <= 0) spr('stump', 20 * t.sz);
+    else { ctx.translate(sh, 0); spr('tree', 78 * t.sz); }
+    ctx.restore(); return;
+  }
   ctx.strokeStyle = '#3d2210'; ctx.lineWidth = 2.5;
   if (t.logs <= 0) { // 그루터기
     ctx.fillStyle = '#8d5524'; ctx.beginPath(); ctx.rect(-8, -8, 16, 10); ctx.fill(); ctx.stroke();
@@ -1249,6 +1268,7 @@ function drawTree(t) {
 
 function drawLog(x, y, s) {
   ctx.save(); ctx.translate(x, y); ctx.scale(s, s);
+  if (SPR.log) { ctx.translate(-1, 4); spr('log', 8); ctx.restore(); return; }
   ctx.fillStyle = '#b5733a'; ctx.strokeStyle = '#4a2c12'; ctx.lineWidth = 1.4;
   ctx.beginPath(); ctx.rect(-8, -2.6, 14, 5.2); ctx.fill(); ctx.stroke();
   ctx.fillStyle = '#e3c58f'; ctx.beginPath(); ctx.ellipse(6, 0, 2.2, 2.6, 0, 0, 7); ctx.fill(); ctx.stroke();
@@ -1259,6 +1279,11 @@ function drawBase() {
   const b = G.base, sh = b.hitT > 0 ? rand(-2, 2) : 0;
   ctx.save(); ctx.translate(sh, 0); ctx.scale(1, IK);
   ctx.fillStyle = 'rgba(0,0,0,.2)'; ctx.beginPath(); ctx.ellipse(0, 18, 38, 10, 0, 0, 7); ctx.fill();
+  if (SPR.hall) {
+    ctx.translate(0, 22); spr('hall', 92);
+    if (b.hitT > 0.15 && SPR_WHITE.hall) { ctx.globalAlpha = 0.5; spr('hall', 92, true); }
+    ctx.restore();
+  } else {
   ctx.fillStyle = b.hitT > 0.2 ? '#fff' : '#f1e3c8'; ctx.strokeStyle = '#4a2c12'; ctx.lineWidth = 3;
   ctx.fillRect(-28, -22, 56, 40); ctx.strokeRect(-28, -22, 56, 40);
   ctx.fillStyle = '#c0392b'; ctx.beginPath(); ctx.moveTo(-36, -20); ctx.lineTo(0, -48); ctx.lineTo(36, -20); ctx.closePath(); ctx.fill(); ctx.stroke();
@@ -1269,6 +1294,7 @@ function drawBase() {
   const f = Math.sin(G.t * 8) * 3;
   ctx.fillStyle = '#ffd23f'; ctx.beginPath(); ctx.moveTo(0, -74); ctx.quadraticCurveTo(12, -72 + f, 22, -68); ctx.lineTo(0, -62); ctx.closePath(); ctx.fill(); ctx.stroke();
   ctx.restore();
+  }
   if (b.hp < b.maxHp) {
     ctx.fillStyle = '#222'; ctx.fillRect(-30, 28, 60, 9);
     ctx.fillStyle = '#2ecc71'; ctx.fillRect(-29, 29, 58 * b.hp / b.maxHp, 7);
@@ -1306,6 +1332,12 @@ function drawSmith() {
   if (!G.smith) return;
   ctx.save(); ctx.translate(SMITH.x, SMITH.y); ctx.scale(1, IK);
   ctx.fillStyle = 'rgba(0,0,0,.2)'; ctx.beginPath(); ctx.ellipse(0, 8, 30, 8, 0, 0, 7); ctx.fill();
+  if (SPR.smith) {
+    ctx.translate(0, 12); spr('smith', 72);
+    ctx.font = '900 10px system-ui,sans-serif'; ctx.textAlign = 'center'; ctx.lineWidth = 3; ctx.strokeStyle = '#222';
+    const lb = G.forge ? `⚒ Lv ${G.forge}` : '⚒ 대장간'; ctx.strokeText(lb, 0, -78); ctx.fillStyle = '#ffd23f'; ctx.fillText(lb, 0, -78);
+    ctx.restore(); return;
+  }
   ctx.strokeStyle = '#2b1a0c'; ctx.lineWidth = 2.5;
   ctx.fillStyle = '#8d939a'; ctx.fillRect(14, -48, 9, 26); ctx.strokeRect(14, -48, 9, 26);   // 굴뚝
   ctx.fillStyle = '#a0623a'; ctx.fillRect(-24, -26, 48, 32); ctx.strokeRect(-24, -26, 48, 32);
@@ -1329,6 +1361,14 @@ function drawTower(t) {
   const h = 34 + t.lvl * 3;
   ctx.save(); ctx.translate(t.x, t.y); ctx.scale(1, IK);
   ctx.fillStyle = 'rgba(0,0,0,.2)'; ctx.beginPath(); ctx.ellipse(0, 6, 18, 6, 0, 0, 7); ctx.fill();
+  if (SPR.tower) { // 레벨이 오를수록 조금씩 커지고, 지붕 옆 깃발 색으로 레벨 표시
+    const th = 66 + t.lvl * 4; ctx.translate(0, 8); spr('tower', th);
+    const cols = ['#fff', '#7bed9f', '#3fa9f5', '#b5179e', '#ffd23f'], fy = -th * 0.93;
+    ctx.strokeStyle = '#333'; ctx.lineWidth = 1.8; ctx.beginPath(); ctx.moveTo(0, fy); ctx.lineTo(0, fy - 16); ctx.stroke();
+    ctx.fillStyle = cols[t.lvl - 1]; ctx.strokeStyle = '#222'; ctx.lineWidth = 1.2;
+    ctx.beginPath(); ctx.moveTo(0, fy - 16); ctx.lineTo(12, fy - 12 + Math.sin(G.t * 8) * 1.5); ctx.lineTo(0, fy - 8); ctx.closePath(); ctx.fill(); ctx.stroke();
+    ctx.restore(); return;
+  }
   ctx.strokeStyle = '#4a2c12'; ctx.lineWidth = 4;
   ctx.beginPath(); ctx.moveTo(-12, 6); ctx.lineTo(-8, -h + 8); ctx.moveTo(12, 6); ctx.lineTo(8, -h + 8);
   ctx.moveTo(-11, -4); ctx.lineTo(10, -h * 0.5); ctx.moveTo(11, -4); ctx.lineTo(-10, -h * 0.5); ctx.stroke();
@@ -1439,6 +1479,12 @@ function drawStickman(x, y, o) {
   }
   ctx.restore();
 }
+// 현재 원점(바닥 가운데)에 그림을 세워 그림. 높이 h, 폭은 그림 비율대로
+function spr(n, h, white) {
+  const img = SPR[n], w = h * img.width / img.height;
+  ctx.drawImage(white && SPR_WHITE[n] ? SPR_WHITE[n] : img, -w / 2, -h, w, h);
+  return w;
+}
 function drawSpriteMan(n, x, y, o) {
   // 그림 적: 걸을 때 좌우로 흔들·통통, 맞으면 찌그러지며 하얗게 번쩍, 쓰러지면 빙글빙글
   const img = SPR[n], inf = SPR_INFO[n], h = inf.h, w = h * img.width / img.height;
@@ -1513,8 +1559,12 @@ function drawWorld() {
   for (const c of G.coins) {
     const y = c.y - c.z, sq = Math.abs(Math.cos(c.age * 6 + c.x));
     ctx.fillStyle = 'rgba(0,0,0,.15)'; ctx.beginPath(); ctx.ellipse(c.x, c.y + 4, 5, 2, 0, 0, 7); ctx.fill();
-    ctx.fillStyle = '#ffd23f'; ctx.strokeStyle = '#b8860b'; ctx.lineWidth = 1.6;
-    ctx.beginPath(); ctx.ellipse(c.x, y, 5.5 * (0.35 + 0.65 * sq), 5.5, 0, 0, 7); ctx.fill(); ctx.stroke();
+    if (SPR.coin) { // 빙글빙글 도는 금화
+      ctx.save(); ctx.translate(c.x, y + 6); ctx.scale((0.35 + 0.65 * sq), IK); spr('coin', 12); ctx.restore();
+    } else {
+      ctx.fillStyle = '#ffd23f'; ctx.strokeStyle = '#b8860b'; ctx.lineWidth = 1.6;
+      ctx.beginPath(); ctx.ellipse(c.x, y, 5.5 * (0.35 + 0.65 * sq), 5.5, 0, 0, 7); ctx.fill(); ctx.stroke();
+    }
   }
   // 구슬
   for (const g of G.gems) {
@@ -1543,7 +1593,7 @@ function drawWorld() {
   for (const f of G.flyers) { // 날아가는 통나무·금화
     const k = f.t / f.dur, x = f.x0 + (f.x1 - f.x0) * k, y = f.y0 + (f.y1 - f.y0) * k - Math.sin(k * Math.PI) * 30;
     ctx.save(); ctx.translate(x, y); ctx.scale(1, IK);
-    if (f.kind === 'log') drawLog(0, 0, 1); else { ctx.fillStyle = '#ffd23f'; ctx.strokeStyle = '#b8860b'; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.arc(0, 0, 5, 0, 7); ctx.fill(); ctx.stroke(); }
+    if (f.kind === 'log') drawLog(0, 0, 1); else if (SPR.coin) { ctx.translate(0, 6); spr('coin', 12); } else { ctx.fillStyle = '#ffd23f'; ctx.strokeStyle = '#b8860b'; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.arc(0, 0, 5, 0, 7); ctx.fill(); ctx.stroke(); }
     ctx.restore();
   }
   // 안내 화살표
