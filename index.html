@@ -33,6 +33,14 @@ canvas{display:block;position:fixed;inset:0;width:100%;height:100%}
 #storyCap{font-size:18px;font-weight:700;line-height:1.5;margin:18px 22px;min-height:54px;max-width:640px}
 #storyNext{position:absolute;bottom:max(18px,env(safe-area-inset-bottom));right:18px;font-size:14px;opacity:.75}
 #bStorySkip{position:absolute;top:max(14px,env(safe-area-inset-top));right:14px}
+#shopList{display:flex;flex-direction:column;gap:8px;width:min(94vw,400px);max-height:58vh;overflow-y:auto}
+.srow{display:flex;align-items:center;gap:10px;background:#fffaf0;color:#222;border:3px solid #222;border-radius:14px;padding:8px 10px;text-align:left}
+.srow .ic{font-size:28px;width:36px;text-align:center}
+.srow .tx{flex:1;font-size:15px;line-height:1.3}
+.srow .lv{font-size:12px;color:#fff;background:#3fa9f5;border-radius:8px;padding:1px 6px}
+.srow small{font-size:12px;color:#555}
+.sbuy{font:inherit;font-weight:900;font-size:14px;border:none;border-radius:12px;padding:10px 12px;background:linear-gradient(#ffe27a,#ffb703);color:#3a1a00;box-shadow:0 3px 0 #b56b00;cursor:pointer;white-space:nowrap}
+.sbuy.off{filter:grayscale(1);opacity:.6}
 #wardPrev{position:static;inset:auto;display:block}
 #wardGrid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;width:min(92vw,360px);margin:10px 0}
 .sw{font:inherit;border:3px solid #222;border-radius:14px;padding:8px 2px 6px;background:#fffaf0;color:#222;font-size:12px;font-weight:800;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:4px}
@@ -115,7 +123,7 @@ h2{margin:0 0 14px;font-size:clamp(30px,9vw,48px);color:#ffd23f;text-shadow:0 3p
    <button class="btn big" id="bStart">⚔ 출전!</button>
   </div>
   <div class="best" id="bestTitle"></div>
-  <div class="mrow"><button class="hb" id="bHelp">❓ 조작법</button><button class="hb" id="bStory" style="display:none">📖 이야기</button><button class="hb" id="bMusicT">🎵 음악</button><button class="hb" id="bWard">🎨 꾸미기</button></div>
+  <div class="mrow"><button class="hb" id="bHelp">❓ 조작법</button><button class="hb" id="bStory" style="display:none">📖 이야기</button><button class="hb" id="bMusicT">🎵 음악</button><button class="hb" id="bWard">🎨 꾸미기</button><button class="hb" id="bShopT">💪 강화</button></div>
   <div class="hint" id="helpBox" style="display:none">📱 화면을 끌어서 이동 · 공격은 자동<br>🌳 나무 옆에 서면 통나무를 모아요 → 🪵 동그라미 위에 서면 건설!<br>⚔ 출격 문으로 모험 → 보스를 잡고 금화를 가져와요<br>💻 WASD / 방향키 이동 · P 일시정지</div>
  </div>
 </div>
@@ -125,6 +133,14 @@ h2{margin:0 0 14px;font-size:clamp(30px,9vw,48px);color:#ffd23f;text-shadow:0 3p
   <img id="storyImg" alt="">
   <div id="storyCap"></div>
   <div id="storyNext">화면을 누르면 다음 ▶</div>
+</div>
+
+<div class="ov" id="ovShop">
+  <h2 style="margin-bottom:2px">💪 영웅 영구 강화</h2>
+  <div class="sub" style="margin-bottom:4px;font-size:13px">한 번 올리면 게임오버가 되어도 계속 유지돼요</div>
+  <div id="shopWallet" style="margin-bottom:8px"></div>
+  <div id="shopList"></div>
+  <button class="btn" id="bShopOk">완료</button>
 </div>
 
 <div class="ov" id="ovWard">
@@ -157,6 +173,7 @@ h2{margin:0 0 14px;font-size:clamp(30px,9vw,48px);color:#ffd23f;text-shadow:0 3p
 <div class="ov" id="ovPause">
   <h2>일시정지</h2>
   <button class="btn" id="bResume">계속하기</button>
+  <button class="btn" id="bShopP" style="background:linear-gradient(#9fe8ff,#3fa9f5);box-shadow:0 5px 0 #1d6fa5">💪 영웅 강화</button>
   <div class="mrow" style="margin:6px 0 10px"><button class="hb" id="bMusicP" style="width:auto;padding:0 14px;font-weight:800">🎵 음악</button><button class="hb" id="bVibP" style="width:auto;padding:0 14px;font-weight:800">📳 진동</button></div>
   <button class="btn" id="bQuit" style="background:linear-gradient(#ddd,#aaa);box-shadow:0 5px 0 #666">처음으로</button>
 </div>
@@ -171,7 +188,7 @@ h2{margin:0 0 14px;font-size:clamp(30px,9vw,48px);color:#ffd23f;text-shadow:0 3p
 
 <script>
 'use strict';
-const BUILD = 34;
+const BUILD = 35;
 const BOSS_INTERVAL = 180;      // 보스 등장 간격(초)
 const WAVE_INTERVAL = 60;       // 대규모 몰이 이벤트 간격(초)
 const MAX_ENEMIES = 220;
@@ -295,6 +312,9 @@ function renderWard() {
   x.clearRect(0, 0, c.width, c.height); x.fillStyle = '#8fd16a'; x.beginPath(); x.arc(120, 120, 116, 0, 7); x.fill();
   if (im) { const h = 200, w = h * im.width / im.height; x.drawImage(im, 120 - w * 0.42, 220 - h, w, h); }
 }
+$('bShopT').onclick = () => { audioInit(); sfx('pick'); openShop(); };
+$('bShopP').onclick = () => { sfx('pick'); openShop(); };
+$('bShopOk').onclick = () => { sfx('pick'); if (shopBack === 'title' || !G) { state = 'title'; refreshTitle(); showOv('ovTitle'); } else { state = 'paused'; showOv('ovPause'); } };
 $('bWard').onclick = () => { audioInit(); sfx('pick'); openWard(); };
 // 화면에 그릴 크기로 미리 줄여 둔 그림(매 프레임 큰 그림을 줄이면 느림). 화면 크기가 바뀌면 다시 만듦
 function bakeSprite(n) {
@@ -537,13 +557,48 @@ function wStat(id) {
 function recalcStats() {
   const p = G.p, ps = G.passives;
   const oldMax = p.maxHp;
-  p.maxHp = 100 + 25 * (ps.hp || 0);
+  const U = upLv;   // 영구 강화
+  p.maxHp = Math.round((100 + 25 * (ps.hp || 0)) * (1 + 0.1 * U('hp')));
   if (p.maxHp > oldMax) p.hp += p.maxHp - oldMax;
-  p.speed = 150 * (1 + 0.1 * (ps.speed || 0));
-  p.magnet = 70 * (1 + 0.4 * (ps.magnet || 0));
-  p.dmgMul = (1 + 0.15 * (ps.power || 0)) * (1 + 0.1 * (G.forge || 0));
+  p.speed = 150 * (1 + 0.1 * (ps.speed || 0)) * (1 + 0.04 * U('spd'));
+  p.magnet = 70 * (1 + 0.4 * (ps.magnet || 0)) * (1 + 0.12 * U('mag'));
+  p.dmgMul = (1 + 0.15 * (ps.power || 0)) * (1 + 0.1 * (G.forge || 0)) * (1 + 0.06 * U('atk'));
   p.cdMul = Math.max(0.5, 1 - 0.1 * (ps.haste || 0));
   p.cap = 12 + 6 * (ps.bag || 0);
+}
+// ---------- 영구 강화 (게임오버 뒤에도 유지) ----------
+const UPGRADES = [
+  { id: 'hp',   icon: '❤️', name: '강철 체력',   max: 10, base: 40, desc: l => `최대 체력 +${l * 10}%` },
+  { id: 'atk',  icon: '⚔️', name: '전설의 힘',   max: 10, base: 50, desc: l => `모든 공격력 +${l * 6}%` },
+  { id: 'spd',  icon: '👟', name: '바람 발걸음', max: 8,  base: 35, desc: l => `이동 속도 +${l * 4}%` },
+  { id: 'mag',  icon: '🧲', name: '금빛 자석',   max: 6,  base: 30, desc: l => `줍는 범위 +${l * 12}%` },
+  { id: 'luck', icon: '🍀', name: '행운',        max: 8,  base: 45, desc: l => `금화가 더 나올 확률 +${l * 8}%` },
+  { id: 'start',icon: '💰', name: '든든한 시작', max: 5,  base: 60, desc: l => `새 판 시작 금화 +${l * 25}` },
+];
+function upLv(id) { const m = readJSON('stickhero_meta') || {}; return (m.up && m.up[id]) || 0; }
+const upCost = (u, l) => Math.round(u.base * Math.pow(l + 1, 1.45));
+function bankGold() { return (readJSON('stickhero_meta') || {}).bank || 0; }
+let shopBack = null;
+function openShop() {
+  shopBack = state; state = 'shop'; renderShop(); showOv('ovShop');
+}
+function renderShop() {
+  const inGame = shopBack !== 'title' && G, wallet = inGame ? G.gold : bankGold();
+  $('shopWallet').innerHTML = inGame ? `🪙 지금 가진 금화 <b>${wallet}</b>` : `🏦 금고 <b>${wallet}</b> <small style="opacity:.75">(게임오버 때 남은 금화의 절반이 모여요)</small>`;
+  const box = $('shopList'); box.innerHTML = '';
+  UPGRADES.forEach(u => {
+    const l = upLv(u.id), max = l >= u.max, cost = upCost(u, l), can = !max && wallet >= cost;
+    const row = document.createElement('div'); row.className = 'srow';
+    row.innerHTML = `<div class="ic">${u.icon}</div><div class="tx"><b>${u.name}</b> <span class="lv">Lv ${l}/${u.max}</span><br><small>${u.desc(l)}${max ? '' : ' → ' + u.desc(l + 1).replace(/^[^+]*/, '')}</small></div>`;
+    const bt = document.createElement('button'); bt.className = 'sbuy' + (can ? '' : ' off'); bt.textContent = max ? 'MAX' : `🪙${cost}`;
+    bt.onclick = () => {
+      if (!can) { sfx('hurt'); return; }
+      const m = readJSON('stickhero_meta') || {}; m.up = m.up || {}; m.up[u.id] = l + 1;
+      if (inGame) G.gold -= cost; else m.bank = (m.bank || 0) - cost;
+      writeJSON('stickhero_meta', m); if (G) recalcStats(); sfx('build'); vib(30); renderShop();
+    };
+    row.appendChild(bt); box.appendChild(row);
+  });
 }
 const xpNeed = l => Math.floor(5 + l * 4 + Math.pow(l, 1.6));
 
@@ -755,11 +810,12 @@ function refreshTitle() {
 }
 
 // ---------- 화면 전환 ----------
-function showOv(id) { ['ovTitle', 'ovLevel', 'ovPause', 'ovOver', 'ovStory', 'ovMap', 'ovClear', 'ovWard'].forEach(o => $(o).classList.toggle('show', o === id)); }
+function showOv(id) { ['ovTitle', 'ovLevel', 'ovPause', 'ovOver', 'ovStory', 'ovMap', 'ovClear', 'ovWard', 'ovShop'].forEach(o => $(o).classList.toggle('show', o === id)); }
 function startGame() {
   audioInit(); clearSave(); newGame(); state = 'play'; joy = null; showOv(null);
   $('hudBtns').classList.add('show');
   const meta = readJSON(META_KEY);
+  G.gold += 25 * upLv('start');
   if (meta && meta.forge > 0) { G.forge = meta.forge; recalcStats(); banner('마을을 지켜라!', `⚒ 무기 강화 Lv ${G.forge} 그대로 유지!`, '#ffd23f', 3); }
   else banner('마을을 지켜라!', '나무를 베어 망루를 짓자', '#ffd23f', 3);
 }
@@ -871,7 +927,9 @@ function chooseAlly(i) {
 
 function gameOver() {
   state = 'over'; joy = null; G.banner = null;
-  clearSave(); writeJSON(META_KEY, Object.assign(readJSON(META_KEY) || {}, { forge: G.forge, maxStage: bestStage() }));   // 마을은 처음부터, 대장간 강화만 남김
+  const toBank = Math.floor(G.gold / 2);
+  { const m = readJSON(META_KEY) || {}; G.bankAdd = toBank; writeJSON(META_KEY, Object.assign(m, { forge: G.forge, maxStage: bestStage(), bank: (m.bank || 0) + toBank })); }
+  clearSave();   // 마을은 처음부터, 대장간 강화만 남김
   const b = loadBest(); let rec = false;
   if (G.t > b.time) { b.time = G.t; rec = true; }
   if (G.kills > b.kills) { b.kills = G.kills; rec = true; }
@@ -880,7 +938,7 @@ function gameOver() {
   $('ovOver').querySelector('h2').textContent = G.baseDead ? '마을이 무너졌다!' : '게임 오버';
   $('overStats').innerHTML = `⏱ 버틴 시간 <b>${fmtTime(G.t)}</b><br>💀 처치 <b>${G.kills}</b><br>⭐ 레벨 <b>${G.lvl}</b><br>👑 보스 처치 <b>${G.bossKills || 0}</b>`;
   $('overRec').innerHTML = (rec ? '<div class="newrec">🎉 새 기록! 🎉</div>' : '') + (G.forge > 0 ? `<div class="hint" style="opacity:.9">⚒ 무기 강화 Lv ${G.forge}는 다음 판에도 유지돼요</div>` : '');
-  $('bestOver').innerHTML = bestText(b);
+  $('bestOver').innerHTML = bestText(b) + (G.bankAdd > 0 ? `<br>🏦 금고에 금화 <b>${G.bankAdd}</b> 저장 → 시작 화면 '💪 강화'에서 써요` : '');
   $('hudBtns').classList.remove('show');
   showOv('ovOver');
 }
@@ -1633,6 +1691,7 @@ function killEnemy(e) {
   if (Math.random() < 0.13) floatText(e.x, e.y - 18, DEATH_WORDS[Math.floor(Math.random() * DEATH_WORDS.length)], e.color, 17, 0.9);
   sfx('pop');
   dropGem(e.x, e.y, e.xp);
+  if (Math.random() < 0.08 * upLv('luck')) dropCoin(e.x, e.y);   // 행운 강화: 금화 하나 더
   for (let i = 0; i < e.gold; i++) if (i > 0 || Math.random() < 0.7) dropCoin(e.x + rand(-8, 8), e.y + rand(-8, 8));
   if (Math.random() < 0.012) G.hearts.push({ x: e.x, y: e.y, bob: 0 });
 }
