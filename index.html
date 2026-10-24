@@ -47,7 +47,7 @@ h2{margin:0 0 14px;font-size:clamp(30px,9vw,48px);color:#ffd23f;text-shadow:0 3p
   <div class="sub">나무를 베어 마을을 세우고, 빨간 막대 군단을 막아라!</div>
   <button class="btn" id="bStart">시작!</button>
   <div class="best" id="bestTitle"></div>
-  <div class="hint">📱 화면을 끌어서 이동 · 공격은 자동<br>🌳 나무 옆에 서면 통나무를 모아요 → 🪵 동그라미 위에 서면 건설!<br>💻 WASD / 방향키 이동 · P 일시정지</div>
+  <div class="hint">📱 화면을 끌어서 이동 · 공격은 자동<br>🌳 나무 옆에 서면 통나무를 모아요 → 🪵 동그라미 위에 서면 건설!<br>⚔ 출격 문으로 모험 → 보스를 잡고 금화를 가져와요<br>💻 WASD / 방향키 이동 · P 일시정지</div>
 </div>
 
 <div class="ov" id="ovLevel">
@@ -72,19 +72,21 @@ h2{margin:0 0 14px;font-size:clamp(30px,9vw,48px);color:#ffd23f;text-shadow:0 3p
 
 <script>
 'use strict';
-const BUILD = 4;
+const BUILD = 5;
 const BOSS_INTERVAL = 180;      // 보스 등장 간격(초)
 const WAVE_INTERVAL = 60;       // 대규모 몰이 이벤트 간격(초)
 const MAX_ENEMIES = 220;
 const MAP_R = 720;              // 싸움터 반지름
-const WALL_R = 135;             // 울타리 반지름
+const WALL_R = 165;             // 울타리 반지름
 const BASE_R = 34;              // 마을 회관 크기
 const WALL_SEGS = 16;
 const K = 0.72, IK = 1 / K;      // 3/4 시점: 땅은 세로로 납작하게, 서 있는 물체는 그대로
 const TOWER_W = [6, 8, 10, 12, 15], TOWER_G = [0, 15, 30, 50, 80];   // 망루: 통나무·금화
 const WALL_W = [0, 8, 12, 16, 20], WALL_G = [0, 10, 25, 40, 60];     // 울타리: 현재 Lv 기준
 const REPAIR_W = 4;
-const GATE = { x: 0, y: 100 };  // 출격 문 자리
+const GATE = { x: 0, y: 128 };  // 출격 문 자리
+const SMITH = { x: -122, y: -8 }; // 대장간 자리
+const FORGE_MAX = 10;
 const STAGE_HW = 200;           // 스테이지 길 반폭
 const THEMES = [
   { name: '숲',   ground: '#8fd16a', check: 'rgba(255,255,255,.07)', edge: '#2d6a2e', deco: 'tree' },
@@ -172,6 +174,7 @@ function sfx(n) {
     case 'build': [392, 523, 659, 784, 1047].forEach((f, i) => tone(f, 0.12, 'square', 0.06, 0, i * 0.06)); noise(0.2, 0.1, 800); break;
     case 'arrow': noise(0.06, 0.05, 4000); break;
     case 'chop': noise(0.07, 0.15, 1500); tone(180, 0.08, 'square', 0.05, -60); break;
+    case 'drum': noise(0.25, 0.3, 220); tone(70, 0.25, 'sine', 0.2, -20); break;
     case 'baseHit': tone(90, 0.25, 'square', 0.08, -30); break;
   }
 }
@@ -213,7 +216,7 @@ function recalcStats() {
   if (p.maxHp > oldMax) p.hp += p.maxHp - oldMax;
   p.speed = 150 * (1 + 0.1 * (ps.speed || 0));
   p.magnet = 70 * (1 + 0.4 * (ps.magnet || 0));
-  p.dmgMul = 1 + 0.15 * (ps.power || 0);
+  p.dmgMul = (1 + 0.15 * (ps.power || 0)) * (1 + 0.1 * (G.forge || 0));
   p.cdMul = Math.max(0.5, 1 - 0.1 * (ps.haste || 0));
   p.cap = 12 + 6 * (ps.bag || 0);
 }
@@ -241,6 +244,7 @@ function newGame() {
     weapons: { pistol: 1 }, passives: {}, timers: {},
     enemies: [], bullets: [], ebullets: [], booms: [], gems: [], hearts: [], parts: [], texts: [], coins: [], corpses: [],
     trees: [], flyers: [], hint: null, mode: 'base', stageN: 0, st: null, stash: null, gateT: 0,
+    smith: false, forge: 0, raid: null, raidIn: 0, raidCount: 0, drumT: 0,
     gold: 0, base: { hp: 1000, maxHp: 1000, hitT: 0 }, respawnT: 0, squadAng: Math.random() * 7, squadT: 6,
     walls: Array.from({ length: WALL_SEGS }, () => ({ hp: 0, maxHp: 0, shake: 0 })), wallLvl: 0,
     towers: [], pads: [], baseDead: false,
@@ -250,11 +254,12 @@ function newGame() {
   G.p.y = 70; G.cam.y = 58;
   // 망루 자리 4곳 + 울타리 강화 자리 1곳 (order 순서대로 하나씩 열림)
   [1, 3, -3, -1].forEach((k, i) => {
-    const a = k * Math.PI / 4, x = Math.cos(a) * 92, y = Math.sin(a) * 92;
+    const a = k * Math.PI / 4, x = Math.cos(a) * 108, y = Math.sin(a) * 108;
     G.towers.push({ x, y, lvl: 0, cd: 0 });
     G.pads.push({ kind: 'tower', idx: i, x, y, pw: 0, pg: 0, acc: 0, order: i === 0 ? 0 : i + 1, built: false });
   });
   G.pads.push({ kind: 'wall', x: 0, y: -WALL_R + 52, pw: 0, pg: 0, acc: 0, order: 1, built: false });
+  G.pads.push({ kind: 'smith', x: SMITH.x, y: SMITH.y, pw: 0, pg: 0, acc: 0, order: 2, built: false });
   // 나무 숲 4곳 (첫 숲은 마을 가까이)
   const a0 = Math.random() * 7;
   for (let g = 0; g < 4; g++) {
@@ -411,12 +416,14 @@ function padVisible(pd) { return pd.order === 0 || G.pads.some(q => q.order === 
 function padCost(pd) {
   if (!padVisible(pd)) return null;
   if (pd.kind === 'tower') { const l = G.towers[pd.idx].lvl; return l < 5 ? { w: TOWER_W[l], g: TOWER_G[l] } : null; }
+  if (pd.kind === 'smith') return !G.smith ? { w: 10, g: 20 } : G.forge < FORGE_MAX ? { w: 0, g: 25 + 15 * G.forge } : null;
   if (G.wallLvl < 5) return { w: WALL_W[G.wallLvl], g: WALL_G[G.wallLvl] };
   return G.walls.some(w => w.hp < w.maxHp) ? { w: REPAIR_W, g: 0 } : null;
 }
-const padOY = pd => pd.kind === 'tower' && G.towers[pd.idx].lvl > 0 ? 40 : 0;
+const padOY = pd => pd.kind === 'tower' && G.towers[pd.idx].lvl > 0 ? 40 : pd.kind === 'smith' && G.smith ? 30 : 0;
 function padLabel(pd) {
   if (pd.kind === 'tower') { const l = G.towers[pd.idx].lvl; return l === 0 ? '망루 짓기' : l < 5 ? `망루 Lv${l + 1}` : '망루 MAX'; }
+  if (pd.kind === 'smith') return G.smith ? `⚒ 강화 Lv${G.forge + 1}` : '대장간 짓기';
   return G.wallLvl < 5 ? `울타리 Lv${G.wallLvl + 1}` : '울타리 수리';
 }
 function padDone(pd) {
@@ -425,6 +432,10 @@ function padDone(pd) {
     const t = G.towers[pd.idx]; t.lvl++;
     banner(t.lvl === 1 ? '망루 완성!' : `망루 Lv ${t.lvl}!`, t.lvl === 1 ? '자동으로 화살을 쏴요' : '더 빠르고 강하게!', '#7bed9f', 1.6);
     burst(t.x, t.y - 20, '#ffd23f', 30, 220, 5, 0.6);
+  } else if (pd.kind === 'smith') {
+    if (!G.smith) { G.smith = true; banner('대장간 완성!', '금화로 무기를 강화해요', '#7bed9f', 1.8); }
+    else { G.forge++; recalcStats(); banner(`무기 강화 Lv ${G.forge}!`, '모든 공격력 +10%', '#ffd23f', 1.6); sfx('swing'); }
+    burst(SMITH.x, SMITH.y - 20, '#ff9f1c', 30, 220, 5, 0.6);
   } else {
     if (G.wallLvl < 5) { upgradeWall(); banner(`울타리 Lv ${G.wallLvl}!`, '튼튼하게 다시 세웠다', '#7bed9f', 1.6); }
     else { repairWall(); banner('울타리 수리 완료!', '', '#7bed9f', 1.4); }
@@ -557,10 +568,14 @@ function updBase(dt) {
   // 출격 문: 첫 망루를 지은 뒤 열림. 위에 1초 서 있으면 출격
   G.gateOpen = G.pads.find(q => q.order === 0).built;
   const onGate = G.gateOpen && !p.dead && (p.x - GATE.x) ** 2 + (p.y - GATE.y) ** 2 < 30 * 30;
-  if (onGate && G.boss) { if (p.fullMsg <= 0) { floatText(p.x, p.y - 50, '보스부터 물리쳐!', '#ff6b6b', 16, 1.2); p.fullMsg = 2; } G.gateT = 0; }
+  if (onGate && (G.boss || G.raid || G.raidIn > 0)) { if (p.fullMsg <= 0) { floatText(p.x, p.y - 50, G.boss ? '보스부터 물리쳐!' : '대습격을 막아야 해!', '#ff6b6b', 16, 1.2); p.fullMsg = 2; } G.gateT = 0; }
   else if (onGate) { G.gateT += dt; if (G.gateT > 1) { enterStage(); return; } }
   else G.gateT = 0;
   if (!G.hint && G.gateOpen && G.stageN === 0 && p.logs < p.cap) G.hint = { x: GATE.x, y: GATE.y, text: '⚔ 출격 문에 서면 모험을 떠나요' };
+
+  // 대습격
+  if (G.raidIn > 0) { G.raidIn -= dt; if (G.raidIn <= 0) startRaid(); }
+  if (G.raid) updRaid(dt);
 
   // 생성
   G.nextBoss -= dt;
@@ -574,6 +589,39 @@ function updBase(dt) {
   G.spawnAcc += rate * dt;
   while (G.spawnAcc >= 1) { G.spawnAcc--; spawnEnemy(pickType()); }
 
+}
+
+// ---------- 대습격 ----------
+function startRaid() {
+  const a0 = Math.random() * 7, nd = G.raidCount >= 1 ? 4 : 3;
+  G.raid = { t: 0, dur: 35, n: G.raidCount++, dirs: Array.from({ length: nd }, (_, i) => a0 + i / nd * Math.PI * 2), acc: 0, bossDone: false };
+  banner('⚠ 대습격! ⚠', '사방에서 쳐들어온다! 마을을 지켜라!', '#ff3b3b', 3);
+  G.shake = 14; sfx('bossIn');
+}
+function updRaid(dt) {
+  const r = G.raid;
+  r.t += dt;
+  if (r.t < r.dur) {
+    G.drumT -= dt;
+    if (G.drumT <= 0) { G.drumT = 0.6; sfx('drum'); }
+    r.acc += (3 + r.n * 1.2) * dt;
+    while (r.acc >= 1) {
+      r.acc--;
+      if (G.enemies.length >= MAX_ENEMIES + 60) break;
+      const a = r.dirs[Math.floor(Math.random() * r.dirs.length)] + rand(-0.2, 0.2), R = MAP_R - rand(10, 50);
+      const q = Math.random(), type = q < 0.12 + r.n * 0.04 ? 'tank' : q < 0.45 ? 'runner' : 'grunt';
+      const e = makeEnemy(type, Math.cos(a) * R, Math.sin(a) * R); e.raid = true;
+      G.enemies.push(e);
+    }
+  }
+  if (r.t > 6 && !r.bossDone) { r.bossDone = true; if (!G.boss) { spawnBoss(); G.boss.raid = true; } }
+  if (r.t >= r.dur && !G.boss && !G.enemies.some(e => e.raid)) {
+    const prize = 60 + 30 * r.n;
+    G.gold += prize; G.raid = null;
+    G.base.hp = Math.min(G.base.maxHp, G.base.hp + 300);
+    banner('방어 성공!', `보상 🪙${prize} · 마을 체력 회복`, '#7bed9f', 3);
+    burst(0, -20, '#ffd23f', 60, 320, 6, 1); sfx('bigBoom'); sfx('level');
+  }
 }
 
 // ---------- 출격(스테이지) ----------
@@ -599,7 +647,11 @@ function returnBase(win) {
   G.bullets = []; G.ebullets = []; G.booms = []; G.corpses = []; G.flyers = []; G.boss = null;
   G.mode = 'base'; G.st = null; G.stash = null; G.gateT = 0;
   p.x = GATE.x; p.y = GATE.y - 40; G.cam.x = p.x; G.cam.y = p.y - 12;
-  if (win) { G.stageN++; banner('마을로 귀환!', `스테이지 ${G.stageN} 클리어 · 금화로 마을을 키우자`, '#7bed9f', 2.5); sfx('build'); }
+  if (win) {
+    G.stageN++; sfx('build');
+    if (G.stageN % 2 === 0) { G.raidIn = 10; banner('마을로 귀환!', '적의 대군이 다가온다… 준비해!', '#ff9f1c', 3); }
+    else banner('마을로 귀환!', `스테이지 ${G.stageN} 클리어 · 금화로 마을을 키우자`, '#7bed9f', 2.5);
+  }
   else banner('후퇴!', '마을에서 다시 준비하자', '#ff6b6b', 2.2);
 }
 function updStage(dt) {
@@ -1221,6 +1273,28 @@ function drawPads() {
   }
 }
 
+function drawSmith() {
+  if (!G.smith) return;
+  ctx.save(); ctx.translate(SMITH.x, SMITH.y); ctx.scale(1, IK);
+  ctx.fillStyle = 'rgba(0,0,0,.2)'; ctx.beginPath(); ctx.ellipse(0, 8, 30, 8, 0, 0, 7); ctx.fill();
+  ctx.strokeStyle = '#2b1a0c'; ctx.lineWidth = 2.5;
+  ctx.fillStyle = '#8d939a'; ctx.fillRect(14, -48, 9, 26); ctx.strokeRect(14, -48, 9, 26);   // 굴뚝
+  ctx.fillStyle = '#a0623a'; ctx.fillRect(-24, -26, 48, 32); ctx.strokeRect(-24, -26, 48, 32);
+  ctx.fillStyle = '#495057'; ctx.beginPath(); ctx.moveTo(-30, -24); ctx.lineTo(0, -44); ctx.lineTo(30, -24); ctx.closePath(); ctx.fill(); ctx.stroke();
+  ctx.fillStyle = '#ff7b00'; ctx.fillRect(-8, -14, 16, 20); ctx.strokeRect(-8, -14, 16, 20);    // 화덕 불빛
+  ctx.fillStyle = `rgba(255,220,80,${0.5 + 0.3 * Math.sin(G.t * 10)})`; ctx.fillRect(-5, -8, 10, 12);
+  // 모루
+  ctx.fillStyle = '#343a40'; ctx.beginPath(); ctx.moveTo(-14, 16); ctx.lineTo(14, 16); ctx.lineTo(10, 10); ctx.lineTo(18, 6); ctx.lineTo(-12, 6); ctx.lineTo(-8, 10); ctx.closePath(); ctx.fill(); ctx.stroke();
+  // 연기
+  for (let i = 0; i < 3; i++) {
+    const k = (G.t * 0.6 + i / 3) % 1;
+    ctx.fillStyle = `rgba(200,200,200,${0.5 * (1 - k)})`; ctx.beginPath(); ctx.arc(18 + k * 10, -52 - k * 30, 5 + k * 6, 0, 7); ctx.fill();
+  }
+  ctx.font = '900 10px system-ui,sans-serif'; ctx.textAlign = 'center'; ctx.lineWidth = 3; ctx.strokeStyle = '#222';
+  const lb = G.forge ? `⚒ Lv ${G.forge}` : '⚒ 대장간'; ctx.strokeText(lb, 0, -56); ctx.fillStyle = '#ffd23f'; ctx.fillText(lb, 0, -56);
+  ctx.restore();
+}
+
 function drawTower(t) {
   if (!t.lvl) return;
   const h = 34 + t.lvl * 3;
@@ -1395,6 +1469,7 @@ function drawWorld() {
     for (let i = 0; i < WALL_SEGS; i++) { const am = (i + 0.5) / WALL_SEGS * Math.PI * 2; list.push({ y: Math.sin(am) * WALL_R, draw: () => drawWallSeg(i) }); }
     for (const t of G.trees) if (vis(t)) list.push({ y: t.y, draw: () => drawTree(t) });
     for (const t of G.towers) if (t.lvl) list.push({ y: t.y + 4, draw: () => drawTower(t) });
+    if (G.smith) list.push({ y: SMITH.y + 6, draw: drawSmith });
   } else for (const d of G.st.deco) if (vis(d)) list.push({ y: d.y, draw: () => drawDeco(d) });
   if (!p.dead && G.deadT <= 0) list.push({ y: p.y, draw: () => drawStick(p) });
   list.sort((a, b) => a.y - b.y);
@@ -1521,8 +1596,15 @@ function drawHUD() {
     roundRect(W / 2 - tw / 2 - 12, H - 92, tw + 24, 30, 15); ctx.fillStyle = 'rgba(0,0,0,.55)'; ctx.fill();
     hudText(G.hint.text, W / 2, H - 77, 15, '#ffd23f', 'center');
   }
+  // 대습격 안내
+  if (G.mode === 'base' && G.raidIn > 0) hudText(`⚠ 대습격까지 ${Math.ceil(G.raidIn)}초!`, W / 2, top + 84, 18, Math.floor(G.t * 4) % 2 ? '#ff6b6b' : '#ffd23f', 'center');
+  if (G.mode === 'base' && G.raid) {
+    const left = G.enemies.filter(e => e.raid).length;
+    hudText(G.raid.t < G.raid.dur ? `⚠ 대습격! ${Math.ceil(G.raid.dur - G.raid.t)}초 버텨라` : `⚠ 남은 적 ${left}`, W / 2, top + (G.boss ? 106 : 84), 16, '#ff6b6b', 'center');
+    ctx.strokeStyle = `rgba(255,0,0,${0.18 + 0.12 * Math.sin(G.t * 6)})`; ctx.lineWidth = 14; ctx.strokeRect(0, 0, W, H);
+  }
   // 다음 보스
-  if (!G.boss && G.mode === 'base') {
+  if (!G.boss && G.mode === 'base' && !G.raid && !(G.raidIn > 0)) {
     const left = G.nextBoss;
     if (left < 20) hudText(`보스까지 ${Math.ceil(left)}초!`, W / 2, top + 84, 14, Math.floor(G.t * 4) % 2 ? '#ff6b6b' : '#ffd23f', 'center');
   }
@@ -1552,7 +1634,7 @@ function drawHUD() {
   // 보스 체력
   const b = G.boss;
   if (b) {
-    const bw = Math.min(W - 40, 360), bx = (W - bw) / 2, by = top + 78;
+    const bw = Math.min(W - 130, 360), bx = (W - bw) / 2, by = top + 78;
     roundRect(bx, by, bw, 18, 9); ctx.fillStyle = '#222'; ctx.fill();
     roundRect(bx + 2, by + 2, (bw - 4) * Math.max(0, b.hp / b.maxHp), 14, 7); ctx.fillStyle = b.color; ctx.fill();
     hudText('👑 ' + b.name, W / 2, by + 9, 12, '#fff', 'center');
@@ -1643,7 +1725,7 @@ window.SH = {
   kill() { G.p.inv = 0; hurtPlayer(99999); },
   killBase() { hurtBase(99999); },
   gold(n) { G.gold += n; },
-  enterStage() { enterStage(); }, returnBase(w) { returnBase(w); },
+  enterStage() { enterStage(); }, returnBase(w) { returnBase(w); }, raid() { startRaid(); },
 };
 </script>
 </body>
