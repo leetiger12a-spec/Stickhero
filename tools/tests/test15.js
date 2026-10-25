@@ -6,7 +6,7 @@ const { chromium } = require('/opt/node22/lib/node_modules/playwright');
   await ctx.addInitScript(() => localStorage.setItem('stickhero_story', '1'));
   const page = await ctx.newPage(); const OUT = process.env.OUT || 'shots';
   page.on('pageerror', e => errors.push(e.message)); page.on('console', m => { if (m.type() === 'error') errors.push(m.text()); });
-  await page.goto('file:///home/user/Stickhero/index.html'); await page.click('#bStart'); await page.waitForTimeout(300);
+  await page.goto('http://localhost:8765/index.html'); await page.click('#bStart'); await page.waitForTimeout(300);
   const base = await page.evaluate(() => ({ hp: SH.G.p.maxHp, dmg: SH.G.p.dmgMul }));
   await page.evaluate(() => { SH.G.gold = 500; }); await page.click('#bPause'); await page.waitForTimeout(150);
   await page.click('#bShopP'); await page.waitForTimeout(200);

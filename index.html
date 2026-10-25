@@ -195,7 +195,7 @@ h2{margin:0 0 14px;font-size:clamp(30px,9vw,48px);color:#ffd23f;text-shadow:0 3p
 
 <script>
 'use strict';
-const BUILD = 42;
+const BUILD = 43;
 const BOSS_INTERVAL = 180;      // 보스 등장 간격(초)
 const WAVE_INTERVAL = 60;       // 대규모 몰이 이벤트 간격(초)
 const MAX_ENEMIES = 220;
@@ -229,7 +229,32 @@ const GATE = { x: 0, y: 128 };  // 출격 문 자리 (울타리 바로 안쪽, �
 const SMITH = { x: -122, y: -8 }; // 대장간 자리
 const FORGE_MAX = 10;
 const TAVERN = { x: 122, y: -8 };  // 영웅 숙소(동료 고용) 자리
-const ALLY_MAX = 4, ALLY_COST = [60, 120, 200, 300];
+const ALLY_MAX = 4, ALLY_COST = [60, 120, 200, 300, 420];
+const allyMax = () => ALLY_MAX + (G && G.vLvl >= 3 ? 1 : 0);   // 마을 Lv3이면 동료 5명
+const ALLY_NEED = [0, 60, 180, 360, 600];  // 다음 레벨까지 경험치 (Lv1→2: 60 …)
+const ALLY_TRAIN = l => 50 + 60 * l;       // 숙소 훈련 비용 (금화)
+const ALLY_SKILL = { sword: '회전 베기', archer: '화살 3발', bomber: '두 번 펑', shield: '든든한 방패(주변 피해 −25%)' };
+function makeAlly(type, lvl, xp) {
+  const T = ALLY_TYPES[type], l = lvl || 1, hp = Math.round(T.hp * (1 + 0.2 * (l - 1)));
+  return { type, lvl: l, xp: xp || 0, slot: G.allies.length, x: TAVERN.x, y: TAVERN.y + 34, hp, maxHp: hp, cd: 0, inv: 0, face: 1, wob: 0, swing: 0, dead: false, reviveT: 0, hits: 0 };
+}
+function allyLevelUp(a) {
+  if (a.lvl >= 5) return;
+  a.lvl++; a.xp = 0;
+  const T = ALLY_TYPES[a.type], hp = Math.round(T.hp * (1 + 0.2 * (a.lvl - 1)));
+  a.maxHp = hp; a.hp = hp;
+  burst(a.x, a.y - 20, '#ffd23f', 24, 180, 5, 0.6); sfx('level'); startAct(a, 'cheer');
+  floatText(a.x, a.y - 56, `⭐ ${T.name} Lv ${a.lvl}!`, '#ffd23f', 16, 1.4);
+  if (a.lvl === 3) banner(`${T.name} 특기!`, ALLY_SKILL[a.type], '#ffd23f', 2.2);
+  if (a.lvl === 5) banner(`${T.name} 최고 레벨!`, '금빛으로 빛나요 ✨', '#ffd23f', 2.2);
+}
+function allyGainXp(x, y, v) { // 근처에서 적이 쓰러지면 동료 경험치
+  for (const a of G.allies) {
+    if (a.dead || a.lvl >= 5 || (a.x - x) ** 2 + (a.y - y) ** 2 > 220 * 220) continue;
+    a.xp += v; if (a.xp >= ALLY_NEED[a.lvl]) allyLevelUp(a);
+  }
+}
+const allyMul = a => 1 + 0.15 * ((a.lvl || 1) - 1);
 const ALLY_TYPES = {
   sword:  { name: '고양이 검사', color: '#3fa9f5', hp: 120, icon: '🗡️', desc: '가까이 달려가 칼로 베어요 · 튼튼함' },
   archer: { name: '고양이 궁수', color: '#2ecc71', hp: 80,  icon: '🏹', desc: '멀리서 화살을 쏴요 · 안전하게' },
@@ -833,7 +858,7 @@ function buildSave() {
     weapons: G.weapons, passives: G.passives, gold: G.gold, logs: p.logs, hp: p.dead ? -1 : p.hp,
     base: G.base.hp, wallLvl: G.wallLvl, walls: G.walls.map(w => w.hp), towers: G.towers.map(t => t.lvl),
     pads: G.pads.map(q => [q.built, q.pw, q.pg, q.ps || 0]), smith: G.smith, forge: G.forge, tavern: G.tavern,
-    allies: G.allies.map(a => a.type), stageN: G.stageN, stars: G.stars, bossCount: G.bossCount - (G.boss ? 1 : 0), bossKills: G.bossKills || 0,
+    allies: G.allies.map(a => [a.type, a.lvl || 1, Math.round(a.xp || 0)]), stageN: G.stageN, stars: G.stars, bossCount: G.bossCount - (G.boss ? 1 : 0), bossKills: G.bossKills || 0,
     vLvl: G.vLvl, stone: G.stone, bld: G.bld,
     rocks: G.rocks.map(o => [Math.round(o.x), Math.round(o.y), o.s, Math.round(o.regrow)]),
     camps: G.camps.map(c => [Math.round(c.x), Math.round(c.y), c.lvl, Math.round(c.rebuild), c.e && !c.e.dead ? Math.round(c.e.hp / c.e.maxHp * 100) / 100 : 0]),
@@ -863,7 +888,7 @@ function loadGame(d) {
   if (d.rocks) G.rocks = d.rocks.map(([x, y, s, rg]) => ({ x, y, s, max: 6, regrow: rg, shake: 0 }));
   if (d.camps) { G.enemies = G.enemies.filter(e => !e.camp); G.camps = d.camps.map(([x, y, lvl, rebuild, hp]) => ({ x, y, lvl, rebuild, spawnT: rand(8, 16), e: null })); G.camps.forEach((c, i) => { if (d.camps[i][4] > 0) makeCamp(c, d.camps[i][4]); }); }
   G.allies = [];
-  for (const type of d.allies) { const T = ALLY_TYPES[type]; G.allies.push({ type, slot: G.allies.length, x: TAVERN.x, y: TAVERN.y + 34, hp: T.hp, maxHp: T.hp, cd: 0, inv: 0, face: 1, wob: 0, swing: 0, dead: false, reviveT: 0 }); }
+  for (const it of d.allies) { const [type, lvl, xp] = Array.isArray(it) ? it : [it, 1, 0]; G.allies.push(makeAlly(type, lvl, xp)); }   // 예전 저장은 종류만
   if (d.raidPending) G.raidIn = 10;
   for (const t of G.weapons ? Object.keys(G.weapons) : []) G.timers[t] = 0.5;
 }
@@ -992,7 +1017,7 @@ function openAllyPick() {
     box.appendChild(b);
   });
   $('lvlTitle').textContent = '동료 고용!';
-  $('lvlSub').textContent = `함께 싸울 동료를 골라요 (${G.allies.length + 1}/${ALLY_MAX})`;
+  $('lvlSub').textContent = `함께 싸울 동료를 골라요 (${G.allies.length + 1}/${allyMax()})`;
   showOv('ovLevel');
 }
 function chooseAlly(i) {
@@ -1078,7 +1103,7 @@ function padCost(pd) {
   if (bk && G.broken[bk]) return repairCost(bk);
   if (!padVisible(pd)) return null;
   if (pd.kind === 'tower') { const l = G.towers[pd.idx].lvl; return l < 5 ? { w: TOWER_W[l], g: TOWER_G[l] } : null; }
-  if (pd.kind === 'tavern') return !G.tavern ? { w: 12, g: 40 } : G.allies.length < ALLY_MAX ? { w: 0, g: ALLY_COST[G.allies.length] } : null;
+  if (pd.kind === 'tavern') { if (!G.tavern) return { w: 12, g: 40 }; if (G.allies.length < allyMax()) return { w: 0, g: ALLY_COST[G.allies.length] }; const a = trainee(); return a ? { w: 0, g: ALLY_TRAIN(a.lvl) } : null; }
   if (pd.kind === 'smith') return !G.smith ? { w: 10, g: 20 } : G.forge < FORGE_MAX ? { w: 0, g: 25 + 15 * G.forge } : null;
   if (pd.kind === 'hall') return G.vLvl < VILLAGE.length ? VILLAGE[G.vLvl].cost : null;
   if (pd.kind === 'bld') { const l = G.bld[pd.id]; return l < 3 ? BLD[pd.id].cost[l] : null; }
@@ -1091,7 +1116,7 @@ function padLabel(pd) {
   if (bk && G.broken[bk]) return bk === 'hall' ? '🔨 마을회관 수리' : bk[0] === 't' && bk !== 'tavern' ? '🔨 망루 수리' : `🔨 ${bk === 'smith' ? '대장간' : bk === 'tavern' ? '영웅 숙소' : BLD[bk].name.slice(3)} 수리`;
   if (pd.kind === 'tower') { const l = G.towers[pd.idx].lvl; return l === 0 ? '망루 짓기' : l < 5 ? `망루 Lv${l + 1}` : '망루 MAX'; }
   if (pd.kind === 'smith') return G.smith ? `⚒ 강화 Lv${G.forge + 1}` : '대장간 짓기';
-  if (pd.kind === 'tavern') return G.tavern ? `👥 동료 고용 ${G.allies.length + 1}/${ALLY_MAX}` : '영웅 숙소 짓기';
+  if (pd.kind === 'tavern') { if (!G.tavern) return '영웅 숙소 짓기'; if (G.allies.length < allyMax()) return `👥 동료 고용 ${G.allies.length + 1}/${allyMax()}`; const a = trainee(); return `🎓 ${ALLY_TYPES[a.type].name.split(' ').pop()} 훈련 Lv${a.lvl}→${a.lvl + 1}`; }
   if (pd.kind === 'hall') return `🏛 마을 Lv${G.vLvl + 1}`;
   if (pd.kind === 'bld') { const l = G.bld[pd.id]; return l ? `${BLD[pd.id].name} Lv${l + 1}` : `${BLD[pd.id].name} 짓기`; }
   return G.wallLvl < wallMax() ? (G.wallLvl >= 5 ? `🪨 돌 성벽 Lv${G.wallLvl + 1}` : `울타리 Lv${G.wallLvl + 1}`) : '울타리 수리';
@@ -1129,7 +1154,8 @@ function padDone(pd) {
     burst(t.x, t.y - 20, '#ffd23f', 30, 220, 5, 0.6);
   } else if (pd.kind === 'tavern') {
     if (!G.tavern) { G.tavern = true; banner('영웅 숙소 완성!', '금화로 동료를 고용해요', '#7bed9f', 1.8); }
-    else openAllyPick();
+    else if (G.allies.length < allyMax()) openAllyPick();
+    else { const a = trainee(); if (a) { allyLevelUp(a); banner('🎓 훈련 완료!', `${ALLY_TYPES[a.type].name} Lv ${a.lvl}`, '#3fa9f5', 1.6); } }
     burst(TAVERN.x, TAVERN.y - 20, '#3fa9f5', 30, 220, 5, 0.6);
   } else if (pd.kind === 'hall') {
     hallUp();
@@ -1466,9 +1492,12 @@ function updBase(dt) {
 }
 
 // ---------- 동료 ----------
+function trainee() { // 훈련받을 동료: 레벨이 가장 낮은 동료 (최고 레벨 제외)
+  let b = null; for (const a of G.allies) if (a.lvl < 5 && (!b || a.lvl < b.lvl)) b = a; return b;
+}
 function hireAlly(type) {
   const T = ALLY_TYPES[type];
-  G.allies.push({ type, slot: G.allies.length, x: TAVERN.x, y: TAVERN.y + 34, hp: T.hp, maxHp: T.hp, cd: 0, inv: 0, face: 1, wob: 0, swing: 0, dead: false, reviveT: 0 });
+  G.allies.push(makeAlly(type));
   banner(`${T.name} 합류!`, '영웅을 따라다니며 함께 싸워요', '#3fa9f5', 1.8);
   setTimeout(() => sfx(type === 'shield' ? 'bark' : 'meow'), 250);
   startAct(G.allies[G.allies.length - 1], 'cheer');
@@ -1476,11 +1505,12 @@ function hireAlly(type) {
 }
 function placeAllies() { // 장소가 바뀔 때 영웅 곁으로
   const p = G.p;
-  for (const a of G.allies) { const an = a.slot * Math.PI / 2 + Math.PI / 4; a.x = p.x + Math.cos(an) * 34; a.y = p.y + Math.sin(an) * 34; }
+  for (const a of G.allies) { const an = a.slot * Math.PI * 2 / Math.max(4, G.allies.length) + Math.PI / 4; a.x = p.x + Math.cos(an) * 34; a.y = p.y + Math.sin(an) * 34; }
 }
 function updAllies(dt) {
-  const p = G.p, fm = 1 + 0.1 * G.forge;
+  const p = G.p, fm0 = 1 + 0.1 * G.forge;
   for (const a of G.allies) {
+    const fm = fm0 * allyMul(a), sk = (a.lvl || 1) >= 3;
     a.cd -= dt; a.inv -= dt; a.swing -= dt;
     if (a.act) { a.actT += dt; if (a.actT >= ACTS[a.act]) a.act = null; }
     if (a.queue) { for (const q of a.queue) { q.t -= dt; if (q.t <= 0 && !q.done) { q.done = true; if (!a.dead) q.fn(); } } a.queue = a.queue.filter(q => !q.done); }
@@ -1490,7 +1520,7 @@ function updAllies(dt) {
       continue;
     }
     // 자리: 영웅 주위 네 방향(영웅이 쓰러지면 마을 회관 곁)
-    const an = a.slot * Math.PI / 2 + Math.PI / 4, hx = p.dead ? 0 : p.x, hy = p.dead ? 50 : p.y;
+    const an = a.slot * Math.PI * 2 / Math.max(4, G.allies.length) + Math.PI / 4, hx = p.dead ? 0 : p.x, hy = p.dead ? 50 : p.y;
     let tx = hx + Math.cos(an) * 36, ty = hy + Math.sin(an) * 30;
     // 가까운 적 찾기 (영웅 곁을 너무 벗어나지 않게)
     let foe = null, fd = 1e12;
@@ -1508,24 +1538,31 @@ function updAllies(dt) {
       const later = (t, fn) => (a.queue = a.queue || []).push({ t, fn });
       if (a.type === 'sword' && fd < foe.r + 24) { // 뒤로 젖혔다가 휙! 베기
         startAct(a, 'slash'); a.cd = 0.55; a.face = ux > 0 ? 1 : -1;
-        later(0.12, () => { sfx('swing'); if (!foe.dead && Math.hypot(foe.x - a.x, foe.y - a.y) < foe.r + 40) hurtEnemy(foe, 14 * fm, ux, uy, 180); if (Math.random() < 0.06) sfx('meow'); });
+        const spin = sk && ++a.hits % 3 === 0;   // Lv3 특기: 세 번째마다 회전 베기
+        later(0.12, () => { sfx('swing');
+          if (spin) { for (const e of G.enemies) { const ex = e.x - a.x, ey = e.y - a.y, ed = Math.hypot(ex, ey); if (ed < e.r + 56) hurtEnemy(e, 14 * fm, ex / (ed || 1), ey / (ed || 1), 220); }
+            G.rings.push({ x: a.x, y: a.y - 6, r: 56, life: 0.3, max: 0.3, color: '#3fa9f5' }); }
+          else if (!foe.dead && Math.hypot(foe.x - a.x, foe.y - a.y) < foe.r + 40) hurtEnemy(foe, 14 * fm, ux, uy, 180);
+          if (Math.random() < 0.06) sfx('meow'); });
       } else if (a.type === 'archer' && fd < 250) { // 활을 당겼다가 슝!
         startAct(a, 'shoot'); a.cd = 0.8; a.face = ux > 0 ? 1 : -1;
         later(SPR.ally_archer_shoot ? 0.34 : 0.22, () => { const tx = foe.dead ? a.x + ux * 100 : foe.x, ty = foe.dead ? a.y + uy * 100 : foe.y, d2 = Math.hypot(tx - a.x, ty - a.y) || 1;
-          G.bullets.push({ x: a.x + a.face * 12, y: a.y - 22, vx: (tx - a.x) / d2 * 520, vy: (ty - a.y) / d2 * 520, r: 4, dmg: 9 * fm, life: 0.8, pierce: 0, hits: [], kind: 'arrow' }); sfx('arrow'); });
+          const ba = Math.atan2(ty - a.y, tx - a.x);
+          for (const off of sk ? [-0.18, 0, 0.18] : [0]) G.bullets.push({ x: a.x + a.face * 12, y: a.y - 22, vx: Math.cos(ba + off) * 520, vy: Math.sin(ba + off) * 520, r: 4, dmg: 9 * fm, life: 0.8, pierce: 0, hits: [], kind: 'arrow' });   // Lv3 특기: 3발
+          sfx('arrow'); });
       } else if (a.type === 'shield' && fd < foe.r + 26) { // 웅크렸다가 방패로 쾅!
         startAct(a, 'bash'); a.cd = 0.9; a.face = ux > 0 ? 1 : -1;
         later(SPR.ally_shield_bash ? 0.18 : 0.14, () => { if (!foe.dead) hurtEnemy(foe, 10 * fm, ux, uy, 520); sfx('thud'); G.shake = Math.max(G.shake, 2); if (Math.random() < 0.15) sfx('bark'); });
       } else if (a.type === 'bomber' && fd < 230) { // 크게 뒤로 젖혔다가 휙 던지기 (손에서 출발)
         startAct(a, 'toss'); a.cd = 2.2; a.face = ux > 0 ? 1 : -1;
         const fx = foe.x, fy = foe.y;
-        later(SPR.ally_bomber_toss ? 0.375 : 0.22, () => { G.bombs.push({ x0: a.x + a.face * (SPR.ally_bomber_toss ? 26 : 10), y0: a.y - (SPR.ally_bomber_toss ? 28 : 34), x1: fx, y1: fy, t: 0, dur: 0.6, dmg: 30 * fm }); sfx('toss'); });
+        later(SPR.ally_bomber_toss ? 0.375 : 0.22, () => { G.bombs.push({ x0: a.x + a.face * (SPR.ally_bomber_toss ? 26 : 10), y0: a.y - (SPR.ally_bomber_toss ? 28 : 34), x1: fx, y1: fy, t: 0, dur: 0.6, dmg: 30 * fm, twice: sk }); sfx('toss'); });
       }
     }
     // 맞기
     if (a.inv <= 0) for (const e of G.enemies) {
       if ((e.x - a.x) ** 2 + (e.y - a.y) ** 2 < (e.r + 10) ** 2) {
-        a.hp -= e.dmg * (a.type === 'shield' ? 0.5 : 1); a.inv = 0.8; burst(a.x, a.y - 12, '#e63946', 6, 100, 3, 0.3);
+        a.hp -= e.dmg * (a.type === 'shield' ? 0.5 : shieldGuard(a.x, a.y)); a.inv = 0.8; burst(a.x, a.y - 12, '#e63946', 6, 100, 3, 0.3);
         if (a.hp <= 0) { a.dead = true; a.reviveT = 12; burst(a.x, a.y - 12, ALLY_TYPES[a.type].color, 20, 180, 4, 0.6); floatText(a.x, a.y - 40, '으앙!', '#fff', 16, 1); }
         break;
       }
@@ -1546,6 +1583,7 @@ function updBombs(dt) {
       burst(b.x1, b.y1 - 6, '#ff9f1c', 26, 260, 6, 0.5); burst(b.x1, b.y1 - 6, '#ffd23f', 14, 160, 5, 0.4); burst(b.x1, b.y1, '#555', 10, 120, 6, 0.6);
       G.texts.push({ x: b.x1, y: b.y1 - 30, text: '펑!', color: '#ff9f1c', size: 22, life: 0.6, max: 0.6 });
       G.shake = Math.max(G.shake, 4); sfx('bombBoom');
+      if (b.twice) G.bombs.push({ x0: b.x1, y0: b.y1, x1: b.x1 + rand(-20, 20), y1: b.y1 + rand(-20, 20), t: 0, dur: 0.35, dmg: b.dmg * 0.6 });   // 폭탄병 Lv3: 한 번 더 펑
     }
   }
   G.bombs = G.bombs.filter(b => !b.done);
@@ -1984,6 +2022,7 @@ function dropCoin(x, y) {
 }
 function killEnemy(e) {
   e.dead = true; G.kills++;
+  if (G.allies.length) allyGainXp(e.x, e.y, e.boss ? 40 : e.camp ? 20 : e.xp);
   if (e.boss) { bossDie(e); return; }
   if (e.camp) { campDie(e); return; }
   if (e.type === 'e_slime' && !e.small) for (let k = 0; k < 2; k++) { // 작은 슬라임 2마리로
@@ -2016,9 +2055,13 @@ function bossDie(e) {
   if (G.mode === 'stage') stageClear(e.x, e.y + 60);
   sfx('bigBoom');
 }
+function shieldGuard(x, y) { // 근처에 Lv3 이상 방패병이 있으면 받는 피해 −25%
+  return G.allies.some(a => a.type === 'shield' && !a.dead && a.lvl >= 3 && (a.x - x) ** 2 + (a.y - y) ** 2 < 80 * 80) ? 0.75 : 1;
+}
 function hurtPlayer(dmg) {
   const p = G.p;
   if (p.inv > 0 || G.deadT > 0 || p.dead) return;
+  dmg *= shieldGuard(p.x, p.y);
   p.hp -= dmg; p.inv = 0.7; G.shake = Math.max(G.shake, 8); vib(35);
   if (G.mode === 'stage' && G.st) G.st.hits++;
   burst(p.x, p.y - 12, '#e63946', 10, 140, 4, 0.4);
@@ -2783,13 +2826,14 @@ function drawTavernInner() {
     ctx.font = '9px sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillStyle = '#000'; ctx.fillText('⚔', 16, -17);
   }
   ctx.font = '900 10px system-ui,sans-serif'; ctx.textAlign = 'center'; ctx.lineWidth = 3; ctx.strokeStyle = '#222';
-  const lb = `👥 ${G.allies.length}/${ALLY_MAX}`; ctx.strokeText(lb, 0, SPR.tavern ? -66 : -56); ctx.fillStyle = '#9fd8ff'; ctx.fillText(lb, 0, SPR.tavern ? -66 : -56);
+  const lb = `👥 ${G.allies.length}/${allyMax()}`; ctx.strokeText(lb, 0, SPR.tavern ? -66 : -56); ctx.fillStyle = '#9fd8ff'; ctx.fillText(lb, 0, SPR.tavern ? -66 : -56);
   ctx.restore();
 }
 function drawAlly(a) {
   const T = ALLY_TYPES[a.type], n = 'ally_' + a.type, blink = a.inv > 0 && Math.floor(a.inv * 20) % 2 === 0;
   if (blink) ctx.globalAlpha = 0.45;
-  if (SPR[n]) drawSpriteMan(n, a.x, a.y, { face: a.face, phase: a.wob, hit: false, flash: false, lunge: 0, act: a.act, actT: a.actT, idle: !a.moving, walking: a.moving });
+  if (a.lvl >= 5) { ctx.save(); ctx.translate(a.x, a.y); ctx.scale(1, IK); ctx.strokeStyle = `rgba(255,210,63,${0.6 + 0.3 * Math.sin(G.t * 5)})`; ctx.lineWidth = 3; ctx.beginPath(); ctx.ellipse(0, 2, 18, 6, 0, 0, 7); ctx.stroke(); ctx.restore(); }
+  if (SPR[n]) drawSpriteMan(n, a.x, a.y, { face: a.face, phase: a.wob, hit: false, flash: false, lunge: 0, act: a.act, actT: a.actT, idle: !a.moving, walking: a.moving, s: a.lvl >= 5 ? 1.15 : 1 });
   else {
     const P = actPose(a.act, a.actT);
     drawStickman(a.x + P.dx * a.face, a.y + P.dy, { color: T.color, s: 1, face: a.face, phase: a.wob, hit: false, flash: false, lunge: a.act ? Math.max(0, P.dx) / 60 : 0, type: 'ally' });
@@ -2805,6 +2849,11 @@ function drawAlly(a) {
   ctx.fillStyle = '#3fa9f5'; ctx.strokeStyle = '#222'; ctx.lineWidth = 1.5;
   const hy = a.y - 46 * IK;
   ctx.beginPath(); ctx.moveTo(a.x - 5, hy - 6); ctx.lineTo(a.x + 5, hy - 6); ctx.lineTo(a.x, hy); ctx.closePath(); ctx.fill(); ctx.stroke();
+  if (a.lvl > 1) { // 레벨 별
+    ctx.save(); ctx.translate(a.x, hy - 13); ctx.scale(1, IK); ctx.font = '900 9px system-ui,sans-serif'; ctx.textAlign = 'center'; ctx.lineWidth = 2.5; ctx.strokeStyle = '#222';
+    const st = '★'.repeat(a.lvl - 1); ctx.strokeText(st, 0, 0); ctx.fillStyle = a.lvl >= 5 ? '#ffd23f' : '#ffe58f'; ctx.fillText(st, 0, 0); ctx.restore();
+    if (a.lvl < 5 && a.xp > 0) { ctx.fillStyle = '#222'; ctx.fillRect(a.x - 10, hy - 26, 20, 3); ctx.fillStyle = '#ffd23f'; ctx.fillRect(a.x - 10, hy - 26, 20 * Math.min(1, a.xp / ALLY_NEED[a.lvl]), 3); }
+  }
   if (a.hp < a.maxHp) {
     ctx.fillStyle = '#222'; ctx.fillRect(a.x - 13, a.y + 14, 26, 5);
     ctx.fillStyle = '#3fa9f5'; ctx.fillRect(a.x - 12, a.y + 15, 24 * Math.max(0, a.hp / a.maxHp), 3);
@@ -3326,9 +3375,9 @@ function drawWorld() {
   // 불꽃 망치 고리
   for (const r of G.rings) {
     const k = 1 - r.life / r.max;
-    ctx.globalAlpha = r.life / r.max; ctx.strokeStyle = '#ff7b00'; ctx.lineWidth = 10 * (1 - k) + 2;
+    ctx.globalAlpha = r.life / r.max; ctx.strokeStyle = r.color || '#ff7b00'; ctx.lineWidth = 10 * (1 - k) + 2;
     ctx.beginPath(); ctx.arc(r.x, r.y, r.r * (0.4 + 0.6 * k), 0, 7); ctx.stroke();
-    ctx.fillStyle = 'rgba(255,190,60,.25)'; ctx.beginPath(); ctx.arc(r.x, r.y, r.r * (0.4 + 0.6 * k), 0, 7); ctx.fill();
+    ctx.fillStyle = r.color ? 'rgba(63,169,245,.2)' : 'rgba(255,190,60,.25)'; ctx.beginPath(); ctx.arc(r.x, r.y, r.r * (0.4 + 0.6 * k), 0, 7); ctx.fill();
   }
   ctx.globalAlpha = 1;
   // 번개
