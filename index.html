@@ -195,7 +195,7 @@ h2{margin:0 0 14px;font-size:clamp(30px,9vw,48px);color:#ffd23f;text-shadow:0 3p
 
 <script>
 'use strict';
-const BUILD = 41;
+const BUILD = 42;
 const BOSS_INTERVAL = 180;      // 보스 등장 간격(초)
 const WAVE_INTERVAL = 60;       // 대규모 몰이 이벤트 간격(초)
 const MAX_ENEMIES = 220;
@@ -282,6 +282,7 @@ const SPR_INFO = {    // ax: 발 위치(그림 폭 대비), h: 화면 키(월드
   tree: { h: 78 }, stump: { h: 20 }, log: { h: 8 }, stake: { h: 26 }, tower: { h: 76 }, hall: { h: 92 },
   smith: { h: 72 }, pillar: { h: 70 }, torch: { h: 58 }, coin: { h: 12 },
   ally_sword: { ax: 0.5, h: 52 }, ally_archer: { ax: 0.5, h: 52 }, ally_bomber: { ax: 0.45, h: 52 }, ally_shield: { ax: 0.5, h: 54 }, hero_slash: { h: 72 }, hero_walk: { h: 72 }, ally_archer_shoot: { h: 60 }, ally_bomber_toss: { h: 60 }, ally_shield_bash: { h: 60 }, ally_sword_slash: { h: 60 }, ally_sword_walk: { h: 60 }, ally_archer_walk: { h: 60 }, ally_bomber_walk: { h: 60 }, ally_shield_walk: { h: 60 }, sf_plane0: { h: 80 }, sf_plane1: { h: 80 }, sf_plane2: { h: 80 }, sf_plane3: { h: 80 }, sf_plane4: { h: 80 }, sf_pilot0: { h: 70 }, sf_pilot1: { h: 70 }, sf_pilot2: { h: 70 }, sf_pilot3: { h: 70 }, sf_pilot4: { h: 70 }, tavern: { h: 72 }, skyfang_plane: { h: 80 },
+  e_archer: { ax: 0.45, h: 50 }, e_bomber: { ax: 0.42, h: 50 }, e_bat: { ax: 0.5, h: 48 }, e_slime: { ax: 0.5, h: 42 }, e_shaman: { ax: 0.42, h: 56 }, e_charger: { ax: 0.5, h: 52 },
   farm: { h: 72 }, mine: { h: 74 }, market: { h: 76 }, stone: { h: 14 }, rock: { h: 64 }, camp: { h: 100 }, hall2: { h: 100 }, hall3: { h: 108 }, hall_broken: { h: 96 }, tower_broken: { h: 70 }, stonewall: { h: 34 }, repair: { h: 40 },
 };
 const SPR_SRC = {}, SPR_ORIG = {};
@@ -353,7 +354,7 @@ function bakeSprite(n) {
   SPR[n] = c; SPR_WHITE[n] = wc;
 }
 // img/ 폴더에 실제로 있는 그림만 불러옴 (없는 파일을 부르면 오류가 남)
-const SPR_FILES = ['hall2', 'hall3', 'hall_broken', 'tower_broken', 'stonewall', 'repair', 'farm', 'mine', 'market', 'stone', 'rock', 'camp', 'hero', 'grunt', 'runner', 'tank', 'boss0', 'boss1', 'boss2', 'tree', 'stump', 'log', 'stake', 'tower', 'hall',
+const SPR_FILES = ['e_archer', 'e_bomber', 'e_bat', 'e_slime', 'e_shaman', 'e_charger', 'hall2', 'hall3', 'hall_broken', 'tower_broken', 'stonewall', 'repair', 'farm', 'mine', 'market', 'stone', 'rock', 'camp', 'hero', 'grunt', 'runner', 'tank', 'boss0', 'boss1', 'boss2', 'tree', 'stump', 'log', 'stake', 'tower', 'hall',
   'smith', 'pillar', 'torch', 'coin', 'ally_sword', 'ally_archer', 'tavern', 'ally_bomber', 'skyfang_plane', 'ally_shield', 'hero_slash', 'hero_walk', 'ally_archer_shoot', 'ally_bomber_toss', 'ally_shield_bash', 'ally_sword_slash', 'ally_sword_walk', 'ally_archer_walk', 'ally_bomber_walk', 'ally_shield_walk', 'sf_plane0', 'sf_plane1', 'sf_plane2', 'sf_plane3', 'sf_plane4', 'sf_pilot0', 'sf_pilot1', 'sf_pilot2', 'sf_pilot3', 'sf_pilot4'];
 SPR_FILES.forEach(n => {
   const im = new Image();
@@ -633,7 +634,27 @@ const ETYPES = {
   grunt:  { r: 11, hp: 14, spd: 58,  dmg: 8,  color: '#e63946', xp: 1, gold: 1 },
   runner: { r: 9,  hp: 8,  spd: 100, dmg: 6,  color: '#ff4fa3', xp: 1, gold: 1 },
   tank:   { r: 17, hp: 75, spd: 40,  dmg: 18, color: '#2f6fd6', xp: 5, gold: 4 },
+  // 특수 적 (Build 42)
+  e_archer:  { r: 10, hp: 12, spd: 52, dmg: 6,  color: '#2ecc71', xp: 2, gold: 1 },
+  e_bomber:  { r: 11, hp: 16, spd: 74, dmg: 6,  color: '#ff9f1c', xp: 2, gold: 2 },
+  e_bat:     { r: 9,  hp: 10, spd: 88, dmg: 4,  color: '#9b5de5', xp: 2, gold: 1 },
+  e_slime:   { r: 13, hp: 20, spd: 44, dmg: 8,  color: '#7bed9f', xp: 2, gold: 1 },
+  e_shaman:  { r: 11, hp: 30, spd: 44, dmg: 5,  color: '#3a0ca3', xp: 4, gold: 3 },
+  e_charger: { r: 13, hp: 45, spd: 55, dmg: 14, color: '#ffd23f', xp: 4, gold: 3 },
 };
+// 특수 적: [종류, 마을에서 나오기 시작(초), 스테이지·탑에서 나오기 시작(난이도 n), 처음 나올 때 안내]
+const SPECIALS = [
+  ['e_slime',   120,  1, '🟢 분열 슬라임 등장!', '쓰러지면 작은 슬라임 2마리로 나뉘어요'],
+  ['e_archer',  180, 2, '🏹 궁수 등장!', '멀리서 화살을 쏴요'],
+  ['e_bomber',  240, 3, '💣 자폭병 등장!', '울타리에 닿으면 펑! 먼저 잡아요'],
+  ['e_bat',     300, 4, '🦇 박쥐병 등장!', '울타리를 넘어 회관으로 날아가요'],
+  ['e_charger', 300, 4, '🐗 돌격병 등장!', '가까이 가면 돌진해요'],
+  ['e_shaman',  360, 5, '🔮 주술사 등장!', '주변 적을 회복시켜요 · 먼저 잡아요'],
+];
+function pickSpecial(stageN) { // 열린 특수 적 중 하나 (없으면 null)
+  const pool = SPECIALS.filter(sp => stageN !== undefined ? stageN >= sp[2] : G.bt >= sp[1]);
+  return pool.length ? pool[Math.floor(Math.random() * pool.length)][0] : null;
+}
 const BOSSES = [
   { name: '대왕 슬라임', color: '#e63946' },
   { name: '강철 거인',   color: '#4d6cfa' },
@@ -1133,7 +1154,13 @@ function attackTarget(e, dt, onHit) {
   if (e.atk <= 0) { e.atk = e.boss ? 1.4 : 1.2; e.lunge = 0.25; onHit(); }
 }
 const dayMul = () => 1 + 0.25 * ((G && G.day || 1) - 1);   // 마을이 무너졌다 다시 세울 때마다(하루) 적 +25%
+function announceType(type) {
+  if (!G || !type.startsWith('e_') || (G.seen || (G.seen = {}))[type]) return;
+  G.seen[type] = true; const sp = SPECIALS.find(q => q[0] === type);
+  if (sp && state === 'play') banner(sp[3], sp[4], '#ff9f1c', 2.4);
+}
 function makeEnemy(type, x, y) {
+  announceType(type);
   const gr = DF().grow, T = ETYPES[type], hm = (1 + G.bt / 85 * gr) * (1 + G.bt / 1500 * gr) * (1 + Math.max(0, G.bt - 300) / 140 * gr) * DF().ehp * dayMul();   // 5분 뒤부터 후반 강화   // 난이도: 마을에서 보낸 시간 × 선택 난이도
   return { id: ++eid, type, x, y, r: T.r, hp: T.hp * hm, maxHp: T.hp * hm, spd: T.spd * (1 + Math.min(0.35, G.bt / 900)) * rand(0.9, 1.1), dmg: T.dmg * DF().edmg * (1 + G.bt / 900 * gr) * Math.sqrt(dayMul()), color: T.color, xp: T.xp, gold: T.gold, flash: 0, hitT: 0, kx: 0, ky: 0, swordCd: 0, wob: Math.random() * 6, inside: Math.hypot(x, y) < WALL_R, atk: 0.5, lunge: 0, face: 1 };
 }
@@ -1142,6 +1169,22 @@ function makeCamp(c, frac) {
   const hp = 900 * (1 + 0.6 * c.lvl) * DF().ehp * dayMul();
   c.e = { id: ++eid, type: 'camp', camp: c, x: c.x, y: c.y, r: 42, hp: hp * frac, maxHp: hp, spd: 0, dmg: 0, color: '#6b3e1a', xp: 0, gold: 0, flash: 0, hitT: 0, kx: 0, ky: 0, swordCd: 0, wob: 0, inside: false, atk: 0, lunge: 0, face: 1 };
   G.enemies.push(c.e);
+}
+function bomberBoom(e, w) { // 자폭병: 펑! 울타리·영웅에 큰 피해
+  if (e.dead) return;
+  const p = G.p;
+  burst(e.x, e.y - 10, '#ff9f1c', 30, 260, 6, 0.6); burst(e.x, e.y - 10, '#222', 14, 180, 6, 0.7);
+  G.texts.push({ x: e.x, y: e.y - 34, text: '펑!', color: '#ff6b00', size: 26, life: 0.7, max: 0.7 });
+  sfx('bombBoom'); G.shake = Math.max(G.shake, 8);
+  if (G.mode === 'base') {
+    const seg = w || G.walls[segOf(e.x, e.y)];
+    if (seg.hp > 0 && Math.hypot(e.x, e.y) < WALL_R + 45) {
+      seg.hp = Math.max(0, seg.hp - 50 * DF().edmg * Math.sqrt(dayMul())); seg.shake = 0.3;
+      if (seg.hp <= 0) { sfx('break'); floatText(e.x, e.y - 40, '와장창!', '#ffd23f', 20, 1); }
+    }
+  }
+  if (!p.dead && (p.x - e.x) ** 2 + (p.y - e.y) ** 2 < 70 * 70) hurtPlayer(e.dmg * 3);
+  e.hp = 0; killEnemy(e);
 }
 function campsDown() { return G.camps.filter(c => !c.e || c.e.dead).length; }
 function updCamps(dt) {
@@ -1179,6 +1222,7 @@ function spawnEnemy(type) {
 }
 function pickType() {
   const r = Math.random(), t = G.bt;
+  if (Math.random() < Math.min(0.15, Math.max(0, (t - 120) / 1200))) { const sp = pickSpecial(); if (sp) return sp; }   // 2분부터 서서히, 5분에 15%
   if (t > 90 && r < 0.1 + Math.min(0.1, t / 3000)) return 'tank';
   if (t > 35 && r < 0.38) return 'runner';
   return 'grunt';
@@ -1780,7 +1824,7 @@ function updStage(dt) {
     g.done = true;
     const n = 4 + Math.min(10, Math.round(st.n * 1.3)) + Math.floor(rand(0, 3));
     for (let i = 0; i < n; i++) {
-      const r = Math.random(), type = st.n >= 2 && r < 0.15 ? 'tank' : st.n >= 1 && r < 0.45 ? 'runner' : 'grunt';
+      const r = Math.random(), type = (Math.random() < 0.22 && pickSpecial(st.n)) || (st.n >= 2 && r < 0.15 ? 'tank' : st.n >= 1 && r < 0.45 ? 'runner' : 'grunt');
       const e = makeEnemy(type, rand(-STAGE_HW + 25, STAGE_HW - 25), g.y + rand(-70, 70));
       e.hp *= 1 + st.n * stGrow(); e.maxHp = e.hp; e.dmg *= 1 + st.n * 0.06 * DF().grow;
       G.enemies.push(e);
@@ -1792,7 +1836,7 @@ function updStage(dt) {
     st.acc += (1.6 + st.n * 0.25) * DF().rate * dt;
     while (st.acc >= 1 && G.enemies.length < 120) {
       st.acc--;
-      const r = Math.random(), type = r < 0.12 + st.n * 0.01 ? 'tank' : r < 0.5 ? 'runner' : 'grunt', up = Math.random() < 0.5;
+      const r = Math.random(), type = (Math.random() < 0.22 && pickSpecial(st.n)) || (r < 0.12 + st.n * 0.01 ? 'tank' : r < 0.5 ? 'runner' : 'grunt'), up = Math.random() < 0.5;
       const e = makeEnemy(type, rand(-STAGE_HW + 25, STAGE_HW - 25), p.y + (up ? -1 : 1) * rand(380, 460));
       e.hp *= 1 + st.n * stGrow(); e.maxHp = e.hp; e.dmg *= 1 + st.n * 0.06 * DF().grow; e.awake = true;
       G.enemies.push(e);
@@ -1942,6 +1986,11 @@ function killEnemy(e) {
   e.dead = true; G.kills++;
   if (e.boss) { bossDie(e); return; }
   if (e.camp) { campDie(e); return; }
+  if (e.type === 'e_slime' && !e.small) for (let k = 0; k < 2; k++) { // 작은 슬라임 2마리로
+    const m = makeEnemy('e_slime', e.x + (k ? 12 : -12), e.y + rand(-6, 6));
+    Object.assign(m, { small: true, r: 8, hp: e.maxHp * 0.35, maxHp: e.maxHp * 0.35, spd: m.spd * 1.25, dmg: e.dmg * 0.6, xp: 1, gold: 0, kx: (k ? 1 : -1) * 120, inside: e.inside });
+    G.enemies.push(m);
+  }
   burst(e.x, e.y - 8, e.color, e.type === 'tank' ? 16 : 8, 150, 4, 0.45);
   // 맞은 방향으로 빙글빙글 날아가는 막대 인간
   if (G.corpses.length < 60) {
@@ -2198,8 +2247,37 @@ function update(dt) {
     if (e.boss) updBoss(e, dt, dx, dy, d);
     else {
       const far = G.mode === 'base' && !chase && e.x * e.x + e.y * e.y > MAP_R * MAP_R ? 2.6 : 1;   // 야생 지대에서는 마을로 서둘러 옴
-      const sp = (e.hitT > 0 ? 0.35 : 1) * (idle ? 0.15 : 1) * e.spd * far;
-      e.x += dx / d * sp * dt; e.y += dy / d * sp * dt;
+      let mx = dx / d, my = dy / d, spm = 1;
+      const T = e.type, rB = G.mode === 'base' ? Math.hypot(e.x, e.y) : 1e9;
+      if (T === 'e_archer' || T === 'e_shaman') { // 멀리서 멈춰 서기
+        if (chase ? pd < (T === 'e_archer' ? 190 : 150) : rB < WALL_R + (T === 'e_archer' ? 110 : 150)) spm = 0;
+      }
+      if (T === 'e_archer') {
+        e.shotT = (e.shotT === undefined ? rand(0.5, 1.5) : e.shotT) - dt;
+        if (spm === 0 && e.shotT <= 0 && !idle) {
+          e.shotT = 2;
+          const tx = chase ? p.x : e.x / rB * WALL_R, ty = chase ? p.y - 8 : e.y / rB * WALL_R, a = Math.atan2(ty - (e.y - 14), tx - e.x);
+          G.ebullets.push({ x: e.x, y: e.y - 14, vx: Math.cos(a) * 280, vy: Math.sin(a) * 280, r: 5, dmg: e.dmg * 1.3, life: 2.2, arrow: true, wall: !chase });
+          e.lunge = 0.2; sfx('arrow');
+        }
+      }
+      if (T === 'e_shaman') {
+        e.healT = (e.healT === undefined ? 2 : e.healT) - dt;
+        if (e.healT <= 0 && !idle) {
+          e.healT = 3; let n = 0;
+          for (const f of G.enemies) if (!f.dead && !f.camp && f !== e && f.hp < f.maxHp && (f.x - e.x) ** 2 + (f.y - e.y) ** 2 < 130 * 130) { f.hp = Math.min(f.maxHp, f.hp + f.maxHp * 0.25); burst(f.x, f.y - 14, '#7bed9f', 4, 80, 3, 0.4); n++; }
+          if (n) { burst(e.x, e.y - 30, '#b388ff', 12, 120, 4, 0.5); floatText(e.x, e.y - 50, '✨회복', '#b388ff', 14, 0.8); }
+        }
+      }
+      if (T === 'e_charger') {
+        e.dashCd = (e.dashCd || 0) - dt;
+        if (e.dashT > 0) { e.dashT -= dt; mx = e.ddx; my = e.ddy; spm = 3.6; }
+        else if (chase && pd < 190 && e.dashCd <= 0) { e.dashT = 0.55; e.dashCd = 3; e.ddx = pdx / pd; e.ddy = pdy / pd; e.lunge = 0.3; floatText(e.x, e.y - 40, '돌진!', '#ffd23f', 14, 0.7); }
+      }
+      if (T === 'e_bat') e.z = 18 + Math.sin(e.wob * 0.8) * 5;   // 날아다님
+      if (T === 'e_bomber' && chase && pd < e.r + p.r + 12) { bomberBoom(e); continue; }
+      const sp = (e.hitT > 0 ? 0.35 : 1) * (idle ? 0.15 : 1) * e.spd * far * spm;
+      e.x += mx * sp * dt; e.y += my * sp * dt;
     }
     e.x += e.kx * dt; e.y += e.ky * dt;
     const decay = Math.exp(-9 * dt); e.kx *= decay; e.ky *= decay;
@@ -2228,10 +2306,13 @@ function update(dt) {
     if (e.camp) continue;
     const dB = Math.hypot(e.x, e.y) || 1, w = G.walls[segOf(e.x, e.y)], m = e.r * 0.6;
     let blocked = false;
-    if (w.hp > 0) {
+    if (e.type === 'e_bat') e.inside = dB < WALL_R;   // 박쥐는 울타리를 넘어감
+    else if (w.hp > 0) {
       if (!e.inside && dB < WALL_R + m) { const k = (WALL_R + m) / dB; e.x *= k; e.y *= k; blocked = true; }
       else if (e.inside && dB > WALL_R - m) { const k = (WALL_R - m) / dB; e.x *= k; e.y *= k; blocked = true; }
     } else e.inside = dB < WALL_R;
+    if (blocked && e.type === 'e_bomber') { bomberBoom(e, w); continue; }
+    if (blocked && e.dashT > 0) { e.dashT = 0; w.hp -= e.dmg * 3; w.shake = 0.3; G.shake = Math.max(G.shake, 6); sfx('thud'); }
     if (blocked) {
       if (e.boss && e.mode === 'dash') { e.mode = 'walk'; e.st = 1.5; w.hp -= 120; G.shake = 12; }
       attackTarget(e, dt, () => {
@@ -2275,6 +2356,11 @@ function update(dt) {
   for (const b of G.ebullets) {
     b.x += b.vx * dt; b.y += b.vy * dt; b.life -= dt;
     if (G.mode === 'base' && b.x * b.x + b.y * b.y < (BASE_R + b.r) ** 2) { hurtBase(b.dmg); b.life = 0; continue; }
+    if (b.wall && G.mode === 'base' && b.x * b.x + b.y * b.y < (WALL_R + 4) ** 2) { // 궁수 화살 → 울타리
+      const w = G.walls[segOf(b.x, b.y)];
+      if (w.hp > 0) { w.hp = Math.max(0, w.hp - b.dmg); w.shake = 0.15; b.life = 0; if (w.hp <= 0) sfx('break'); continue; }
+      b.wall = false;
+    }
     if (!p.dead && (b.x - p.x) ** 2 + (b.y - p.y + 12) ** 2 < (b.r + p.r) ** 2) { hurtPlayer(b.dmg); b.life = 0; }
   }
   G.ebullets = G.ebullets.filter(b => b.life > 0);
@@ -2982,7 +3068,7 @@ function drawActFx(act, t, w, h) {
 }
 function drawSpriteMan(n, x, y, o) {
   // 그림 적: 걸을 때 좌우로 흔들·통통, 맞으면 찌그러지며 하얗게 번쩍, 쓰러지면 빙글빙글
-  const img = SPR[n], inf = SPR_INFO[n], h = inf.h, w = h * img.width / img.height;
+  const img = SPR[n], inf = SPR_INFO[n], h = inf.h * (o.s || 1), w = h * img.width / img.height;
   ctx.save(); ctx.translate(x, y); ctx.scale(1, IK);
   if (!o.rot) { ctx.fillStyle = 'rgba(0,0,0,.18)'; ctx.beginPath(); ctx.ellipse(0, 2, h * 0.24, h * 0.08, 0, 0, 7); ctx.fill(); }
   ctx.translate(Math.max(0, o.lunge || 0) * 24 * o.face, -(o.z || 0));
@@ -3046,10 +3132,10 @@ function drawCampRuin(c) { // 부서진 진지: 그루터기 + 다시 지어지�
 }
 function drawEnemy(e) {
   if (e.camp) { drawCamp(e); return; }
-  if (SPR[e.type]) drawSpriteMan(e.type, e.x, e.y, { face: e.face, phase: e.wob, hit: e.hitT > 0, hitT: e.hitT, flash: e.flash > 0, lunge: e.lunge });
+  if (SPR[e.type]) drawSpriteMan(e.type, e.x, e.y, { face: e.face, phase: e.wob, hit: e.hitT > 0, hitT: e.hitT, flash: e.flash > 0, lunge: e.lunge, z: e.z, s: e.small ? 0.6 : 1 });
   else drawStickman(e.x, e.y, { color: e.color, s: e.r / 11, face: e.face, phase: e.wob, hit: e.hitT > 0, flash: e.flash > 0, lunge: e.lunge, type: e.type });
-  if (e.type === 'tank' && e.hp < e.maxHp) {
-    const by = e.y - (SPR.tank ? SPR_INFO.tank.h * IK + 6 : e.r * 2.8);
+  if ((e.type === 'tank' || e.type === 'e_shaman' || e.type === 'e_charger') && e.hp < e.maxHp) {
+    const by = e.y - (SPR[e.type] ? SPR_INFO[e.type].h * IK + 6 : e.r * 2.8);
     ctx.fillStyle = '#222'; ctx.fillRect(e.x - 16, by, 32, 5);
     ctx.fillStyle = '#e63946'; ctx.fillRect(e.x - 15, by + 1, 30 * Math.max(0, e.hp / e.maxHp), 3);
   }
@@ -3220,6 +3306,9 @@ function drawWorld() {
   }
   drawFists();
   for (const b of G.ebullets) {
+    if (b.arrow) { const a = Math.atan2(b.vy, b.vx); ctx.save(); ctx.translate(b.x, b.y); ctx.rotate(a);
+      ctx.strokeStyle = '#6b3e1a'; ctx.lineWidth = 2.5; ctx.beginPath(); ctx.moveTo(-12, 0); ctx.lineTo(6, 0); ctx.stroke();
+      ctx.fillStyle = '#aaa'; ctx.beginPath(); ctx.moveTo(10, 0); ctx.lineTo(4, -3.5); ctx.lineTo(4, 3.5); ctx.fill(); ctx.restore(); continue; }
     ctx.fillStyle = b.slime ? '#e63946' : '#b5179e'; ctx.strokeStyle = '#222'; ctx.lineWidth = 2;
     ctx.beginPath(); ctx.arc(b.x, b.y, b.r, 0, 7); ctx.fill(); ctx.stroke();
     ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(b.x - 2, b.y - 2, b.r * 0.35, 0, 7); ctx.fill();
