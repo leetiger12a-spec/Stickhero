@@ -63,7 +63,7 @@ const RUNS = +process.argv[2] || 4, MINUTES = +process.argv[3] || 15, STYLE = pr
           ev(`[상태] 마을 ${Math.round(g2.base.hp)} · 적 ${g2.enemies.length}(안 ${inside}) · 부서진 울타리 ${broken}/16 · 망루 ${g2.towers.map(t => t.lvl).join('')} · 🪵${p2.logs} 🪙${g2.gold} · 영웅Lv ${g2.lvl}`); }
       }
       const g = G();
-      return { log, t: Math.round(g.t), state: SH.state, lvl: g.lvl, kills: g.kills, gold: g.gold, base: Math.round(g.base.hp), minBase: Math.round(st.minBase), firstTower: st.firstTower, stages: st.stages, deaths: st.deaths, raidsWon: st.raidsWon, bosses: g.bossKills || 0, towers: g.towers.map(t => t.lvl).join(''), wall: g.wallLvl, vLvl: g.vLvl, bld: JSON.stringify(g.bld), stone: g.stone, forge: g.forge, smith: g.smith, weapons: JSON.stringify(g.weapons) };
+      return { log, t: Math.round(g.t), state: SH.state, lvl: g.lvl, kills: g.kills, gold: g.gold, base: Math.round(g.base.hp), minBase: Math.round(st.minBase), firstTower: st.firstTower, stages: st.stages, deaths: st.deaths, raidsWon: st.raidsWon, bosses: g.bossKills || 0, towers: g.towers.map(t => t.lvl).join(''), wall: g.wallLvl, vLvl: g.vLvl, bld: JSON.stringify(g.bld), stone: g.stone, campsDown: campsDown(), campLv: g.camps.map(c => c.lvl).join(''), forge: g.forge, smith: g.smith, weapons: JSON.stringify(g.weapons) };
     }, [MINUTES, STYLE]);
     results.push(r);
     await page.close();

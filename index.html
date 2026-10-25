@@ -195,11 +195,13 @@ h2{margin:0 0 14px;font-size:clamp(30px,9vw,48px);color:#ffd23f;text-shadow:0 3p
 
 <script>
 'use strict';
-const BUILD = 39;
+const BUILD = 40;
 const BOSS_INTERVAL = 180;      // 보스 등장 간격(초)
 const WAVE_INTERVAL = 60;       // 대규모 몰이 이벤트 간격(초)
 const MAX_ENEMIES = 220;
-const MAP_R = 720;              // 싸움터 반지름
+const MAP_R = 720;              // 싸움터 반지름 (이 안이 원래 들판, 바깥은 야생 지대)
+const WORLD_R = 1100;           // 월드 끝: 야생 지대에 적 진지·바위
+const CAMP_REBUILD = 240;       // 적 진지가 다시 지어지는 시간(초)
 let WALL_R = 165;               // 울타리 반지름 (마을 레벨에 따라 넓어짐)
 const BASE_R = 34;              // 마을 회관 크기
 const WALL_SEGS = 16;
@@ -280,7 +282,7 @@ const SPR_INFO = {    // ax: 발 위치(그림 폭 대비), h: 화면 키(월드
   tree: { h: 78 }, stump: { h: 20 }, log: { h: 8 }, stake: { h: 26 }, tower: { h: 76 }, hall: { h: 92 },
   smith: { h: 72 }, pillar: { h: 70 }, torch: { h: 58 }, coin: { h: 12 },
   ally_sword: { ax: 0.5, h: 52 }, ally_archer: { ax: 0.5, h: 52 }, ally_bomber: { ax: 0.45, h: 52 }, ally_shield: { ax: 0.5, h: 54 }, hero_slash: { h: 72 }, hero_walk: { h: 72 }, ally_archer_shoot: { h: 60 }, ally_bomber_toss: { h: 60 }, ally_shield_bash: { h: 60 }, ally_sword_slash: { h: 60 }, ally_sword_walk: { h: 60 }, ally_archer_walk: { h: 60 }, ally_bomber_walk: { h: 60 }, ally_shield_walk: { h: 60 }, sf_plane0: { h: 80 }, sf_plane1: { h: 80 }, sf_plane2: { h: 80 }, sf_plane3: { h: 80 }, sf_plane4: { h: 80 }, sf_pilot0: { h: 70 }, sf_pilot1: { h: 70 }, sf_pilot2: { h: 70 }, sf_pilot3: { h: 70 }, sf_pilot4: { h: 70 }, tavern: { h: 72 }, skyfang_plane: { h: 80 },
-  farm: { h: 72 }, mine: { h: 74 }, market: { h: 76 }, stone: { h: 14 }, rock: { h: 64 }, camp: { h: 80 },
+  farm: { h: 72 }, mine: { h: 74 }, market: { h: 76 }, stone: { h: 14 }, rock: { h: 64 }, camp: { h: 100 },
 };
 const SPR_SRC = {}, SPR_ORIG = {};
 // ---------- 영웅 꾸미기: 머리띠 색 (모은 별 수로 열림) ----------
@@ -651,7 +653,7 @@ function newGame() {
     smith: false, forge: 0, tavern: false, allies: [], raid: null, raidIn: 0, raidCount: 0, drumT: 0,
     gold: 0, base: { hp: 1500, maxHp: 1500, hitT: 0 }, respawnT: 0, squadAng: Math.random() * 7, squadT: 6,
     walls: Array.from({ length: WALL_SEGS }, () => ({ hp: 0, maxHp: 0, shake: 0 })), wallLvl: 0,
-    towers: [], pads: [], baseDead: false, vLvl: 1, stone: 0, bld: { farm: 0, mine: 0, market: 0 }, mineT: 0, marketT: 0,
+    towers: [], pads: [], baseDead: false, rocks: [], camps: [], mineHitT: 0, vLvl: 1, stone: 0, bld: { farm: 0, mine: 0, market: 0 }, mineT: 0, marketT: 0,
     spawnAcc: 0, nextBoss: BOSS_INTERVAL, nextWave: WAVE_INTERVAL, bossCount: 0, boss: null,
     shake: 0, swordAng: 0, slow: 0, banner: null, deadT: 0, cam: { x: 0, y: 0 }, lvlFlash: 0,
   };
@@ -683,6 +685,16 @@ function newGame() {
       G.trees.push({ x, y, logs: 4, max: 4, shake: 0, regrow: 0, sz: rand(0.9, 1.15) }); n++;
     }
   }
+  // 바위 언덕 (돌 캐기)
+  for (let n = 0, tries = 0; n < 7 && tries < 400; tries++) {
+    const a = Math.random() * Math.PI * 2, r = n < 2 ? rand(380, 520) : rand(560, WORLD_R - 120), x = Math.cos(a) * r, y = Math.sin(a) * r;
+    if (G.trees.some(t => (t.x - x) ** 2 + (t.y - y) ** 2 < 70 * 70) || G.rocks.some(o => (o.x - x) ** 2 + (o.y - y) ** 2 < 220 * 220)) continue;
+    G.rocks.push({ x, y, s: 6, max: 6, regrow: 0, shake: 0 }); n++;
+  }
+  // 적 진지 3곳 (야생 지대)
+  const c0 = Math.random() * 7;
+  for (let k = 0; k < 3; k++) { const a = c0 + k * Math.PI * 2 / 3 + rand(-0.3, 0.3), r = rand(880, 960); G.camps.push({ x: Math.cos(a) * r, y: Math.sin(a) * r, lvl: 0, rebuild: 0, spawnT: rand(8, 16), e: null }); }
+  G.camps.forEach(c => makeCamp(c, 1));
   upgradeWall(); // 기본 울타리 Lv 1로 시작
   recalcStats();
 }
@@ -798,6 +810,8 @@ function saveGame() {
     pads: G.pads.map(q => [q.built, q.pw, q.pg, q.ps || 0]), smith: G.smith, forge: G.forge, tavern: G.tavern,
     allies: G.allies.map(a => a.type), stageN: G.stageN, stars: G.stars, bossCount: G.bossCount - (G.boss ? 1 : 0), bossKills: G.bossKills || 0,
     vLvl: G.vLvl, stone: G.stone, bld: G.bld,
+    rocks: G.rocks.map(o => [Math.round(o.x), Math.round(o.y), o.s, Math.round(o.regrow)]),
+    camps: G.camps.map(c => [Math.round(c.x), Math.round(c.y), c.lvl, Math.round(c.rebuild), c.e && !c.e.dead ? Math.round(c.e.hp / c.e.maxHp * 100) / 100 : 0]),
     nextBoss: G.boss ? 15 : G.nextBoss, nextWave: G.nextWave, raidCount: G.raidCount - (G.raid ? 1 : 0), raidPending: !!(G.raid || G.raidIn > 0),
   });
   G.saveT = 10;
@@ -820,6 +834,8 @@ function loadGame(d) {
   G.pads.forEach((q, i) => { const s = d.pads[i]; if (s) { q.built = s[0]; q.pw = s[1]; q.pg = s[2]; q.ps = s[3] || 0; } });
   setVillage(d.vLvl || 1); G.stone = d.stone || 0; G.bld = Object.assign({ farm: 0, mine: 0, market: 0 }, d.bld || {});
   G.base.maxHp = 1500 + VILLAGE.slice(1, G.vLvl).reduce((a, v) => a + v.hp, 0);
+  if (d.rocks) G.rocks = d.rocks.map(([x, y, s, rg]) => ({ x, y, s, max: 6, regrow: rg, shake: 0 }));
+  if (d.camps) { G.enemies = G.enemies.filter(e => !e.camp); G.camps = d.camps.map(([x, y, lvl, rebuild, hp]) => ({ x, y, lvl, rebuild, spawnT: rand(8, 16), e: null })); G.camps.forEach((c, i) => { if (d.camps[i][4] > 0) makeCamp(c, d.camps[i][4]); }); }
   G.allies = [];
   for (const type of d.allies) { const T = ALLY_TYPES[type]; G.allies.push({ type, slot: G.allies.length, x: TAVERN.x, y: TAVERN.y + 34, hp: T.hp, maxHp: T.hp, cd: 0, inv: 0, face: 1, wob: 0, swing: 0, dead: false, reviveT: 0 }); }
   if (d.raidPending) G.raidIn = 10;
@@ -1077,10 +1093,44 @@ function makeEnemy(type, x, y) {
   const gr = DF().grow, T = ETYPES[type], hm = (1 + G.bt / 85 * gr) * (1 + G.bt / 1500 * gr) * (1 + Math.max(0, G.bt - 300) / 140 * gr) * DF().ehp;   // 5분 뒤부터 후반 강화   // 난이도: 마을에서 보낸 시간 × 선택 난이도
   return { id: ++eid, type, x, y, r: T.r, hp: T.hp * hm, maxHp: T.hp * hm, spd: T.spd * (1 + Math.min(0.35, G.bt / 900)) * rand(0.9, 1.1), dmg: T.dmg * DF().edmg * (1 + G.bt / 900 * gr), color: T.color, xp: T.xp, gold: T.gold, flash: 0, hitT: 0, kx: 0, ky: 0, swordCd: 0, wob: Math.random() * 6, inside: Math.hypot(x, y) < WALL_R, atk: 0.5, lunge: 0, face: 1 };
 }
+// ---------- 야생 지대: 적 진지 ----------
+function makeCamp(c, frac) {
+  const hp = 900 * (1 + 0.6 * c.lvl) * DF().ehp;
+  c.e = { id: ++eid, type: 'camp', camp: c, x: c.x, y: c.y, r: 42, hp: hp * frac, maxHp: hp, spd: 0, dmg: 0, color: '#6b3e1a', xp: 0, gold: 0, flash: 0, hitT: 0, kx: 0, ky: 0, swordCd: 0, wob: 0, inside: false, atk: 0, lunge: 0, face: 1 };
+  G.enemies.push(c.e);
+}
+function campsDown() { return G.camps.filter(c => !c.e || c.e.dead).length; }
+function updCamps(dt) {
+  for (const c of G.camps) {
+    if (!c.e || c.e.dead) { // 부서짐 → 시간이 지나면 다시 지어짐 (더 튼튼하게)
+      c.rebuild -= dt;
+      if (c.rebuild <= 0) { makeCamp(c, 1); c.spawnT = 12; banner('🏴 적 진지가 다시 세워졌다!', `더 튼튼해졌어요 (Lv ${c.lvl + 1})`, '#ff6b6b', 2.2); sfx('warn'); }
+      continue;
+    }
+    c.spawnT -= dt;
+    if (G.bt < 150) continue;   // 처음 2분 30초는 조용히 (마을 준비 시간)
+    if (c.spawnT <= 0 && G.enemies.length < MAX_ENEMIES) { // 진지에서 부대가 출발
+      c.spawnT = Math.max(18, 30 - c.lvl * 3);
+      const n = 2 + c.lvl + Math.floor(G.bt / 300);
+      for (let i = 0; i < n; i++) { const a = Math.random() * 7; G.enemies.push(makeEnemy(pickType(), c.x + Math.cos(a) * 55, c.y + Math.sin(a) * 55)); }
+      if (!G.campMsg) { G.campMsg = true; banner('🏴 적 진지에서 부대가 나왔다!', '작은 지도의 빨간 점 · 진지를 부수면 적이 줄어요', '#ff9f1c', 3); }
+    }
+  }
+}
+function campDie(e) {
+  const c = e.camp; c.lvl++; c.rebuild = CAMP_REBUILD; c.e = null;
+  for (let i = 0; i < 4; i++) burst(e.x + rand(-30, 30), e.y + rand(-30, 30), ['#8d5524', '#ffd23f', '#e63946', '#555'][i], 30, 300, 7, 1);
+  for (let i = 0; i < 20 + c.lvl * 8; i++) dropCoin(e.x + rand(-40, 40), e.y + rand(-40, 40));
+  for (let i = 0; i < 12; i++) dropGem(e.x + rand(-40, 40), e.y + rand(-40, 40), 4);
+  const st = 8 + 4 * c.lvl; G.stone += st;
+  floatText(e.x, e.y - 70, `+🪨${st}`, '#dee2e6', 20, 1.6);
+  G.shake = 14; sfx('bigBoom'); sfx('cheer'); cheerAll();
+  banner('🏴 적 진지 파괴!', `적이 줄어들어요 · ${Math.round(CAMP_REBUILD / 60)}분 뒤 다시 지어져요`, '#7bed9f', 2.6);
+}
 function spawnEnemy(type) {
   if (G.enemies.length >= MAX_ENEMIES) return;
   // 한 방향에서 부대처럼 몰려오고, 몇 초마다 방향이 바뀜
-  const a = G.squadAng + rand(-0.35, 0.35), R = MAP_R - rand(10, 40);
+  const a = G.squadAng + rand(-0.35, 0.35), R = WORLD_R - rand(10, 40);
   G.enemies.push(makeEnemy(type, Math.cos(a) * R, Math.sin(a) * R));
 }
 function pickType() {
@@ -1092,7 +1142,7 @@ function pickType() {
 function spawnWave() {
   const n = 20 + Math.floor(G.bt / 15), dirs = G.bt > 120 ? 3 : 2, a0 = Math.random() * 7;
   for (let i = 0; i < n && G.enemies.length < MAX_ENEMIES + 40; i++) {
-    const a = a0 + (i % dirs) / dirs * Math.PI * 2 + rand(-0.25, 0.25), R = MAP_R - rand(0, 60);
+    const a = a0 + (i % dirs) / dirs * Math.PI * 2 + rand(-0.25, 0.25), R = WORLD_R - rand(0, 60);
     G.enemies.push(makeEnemy(i % 4 === 0 && G.bt > 90 ? 'runner' : 'grunt', Math.cos(a) * R, Math.sin(a) * R));
   }
   banner('적군이 몰려온다!', dirs + '방향에서 쳐들어와!', '#ff6b6b', 2);
@@ -1202,6 +1252,25 @@ function updBase(dt) {
       }
     }
   } else p.chopT = Math.min(p.chopT, 0.1);
+  // 돌 캐기: 바위 옆에 서 있으면 쾅쾅 → 🪨 돌 (등짐과 따로, 바로 창고로)
+  let rock = null;
+  for (const o of G.rocks) {
+    o.shake = Math.max(0, o.shake - dt);
+    if (o.s <= 0) { o.regrow -= dt; if (o.regrow <= 0) { o.s = o.max; burst(o.x, o.y - 20, '#dee2e6', 10, 90, 4, 0.5); } continue; }
+    const dx = p.x - o.x, dy = p.y - o.y, d = Math.hypot(dx, dy) || 1;
+    if (d < 26) { p.x = o.x + dx / d * 26; p.y = o.y + dy / d * 26; }   // 바위는 통과할 수 없음
+    if (d < 46) rock = o;
+  }
+  if (rock && !tree && !p.dead) {
+    G.mineHitT -= dt;
+    if (G.mineHitT <= 0) {
+      G.mineHitT = 0.42; p.chop = 0.2; p.face = rock.x > p.x ? 1 : -1;
+      rock.s--; rock.shake = 0.25; G.stone++; sfx('thud');
+      burst(rock.x - p.face * 6, rock.y - 14, '#adb5bd', 6, 130, 3, 0.35);
+      G.flyers.push({ x0: rock.x, y0: rock.y - 24, x1: p.x, y1: p.y - 30, t: 0, dur: 0.3, kind: 'stone' });
+      if (rock.s <= 0) { rock.regrow = 45; sfx('break'); floatText(rock.x, rock.y - 60, '와르르!', '#fff', 18, 0.8); }
+    }
+  } else G.mineHitT = Math.min(G.mineHitT, 0.1);
 
   // 건설 자리: 위에 서 있으면 통나무·금화가 쏙쏙 들어가 망루·울타리가 지어짐
   for (const pd of G.pads) {
@@ -1284,6 +1353,7 @@ function updBase(dt) {
   else G.gateT = 0;
   if (!G.hint && G.gateOpen && G.stageN === 0 && p.logs < p.cap) G.hint = { x: GATE.x, y: GATE.y, text: '⚔ 출격 문에 서면 모험을 떠나요' };
 
+  updCamps(dt);
   // 대습격
   if (G.raidIn > 0) { G.raidIn -= dt; if (G.raidIn <= 0) startRaid(); }
   if (G.raid) updRaid(dt);
@@ -1297,6 +1367,7 @@ function updBase(dt) {
   if (G.squadT <= 0) { G.squadT = rand(5, 9); G.squadAng = Math.random() * Math.PI * 2; }
   let rate = ((G.bt < 10 ? 0.35 : 0.5) + G.bt * 0.016) * DF().rate;
   if (G.boss) rate *= 0.35;
+  rate *= 1 - 0.15 * campsDown();   // 부순 진지 하나마다 -15%
   G.spawnAcc += rate * dt;
   while (G.spawnAcc >= 1) { G.spawnAcc--; spawnEnemy(pickType()); }
 
@@ -1482,7 +1553,7 @@ function updRaid(dt) {
     while (r.acc >= 1) {
       r.acc--;
       if (G.enemies.length >= MAX_ENEMIES + 60) break;
-      const a = r.dirs[Math.floor(Math.random() * r.dirs.length)] + rand(-0.2, 0.2), R = MAP_R - rand(10, 50);
+      const a = r.dirs[Math.floor(Math.random() * r.dirs.length)] + rand(-0.2, 0.2), R = WORLD_R - rand(10, 50);
       const q = Math.random(), type = q < 0.12 + r.n * 0.04 ? 'tank' : q < 0.45 ? 'runner' : 'grunt';
       const e = makeEnemy(type, Math.cos(a) * R, Math.sin(a) * R); e.raid = true;
       G.enemies.push(e);
@@ -1822,6 +1893,7 @@ function dropCoin(x, y) {
 function killEnemy(e) {
   e.dead = true; G.kills++;
   if (e.boss) { bossDie(e); return; }
+  if (e.camp) { campDie(e); return; }
   burst(e.x, e.y - 8, e.color, e.type === 'tank' ? 16 : 8, 150, 4, 0.45);
   // 맞은 방향으로 빙글빙글 날아가는 막대 인간
   if (G.corpses.length < 60) {
@@ -1961,7 +2033,7 @@ function update(dt) {
       if (Math.abs(d.x) > 0.1) p.face = d.x > 0 ? 1 : -1;
       p.walk += dt * 12 * Math.min(1, l + 0.3);
       if (G.mode === 'base') {
-        const pr = Math.hypot(p.x, p.y), lim = MAP_R - 15;
+        const pr = Math.hypot(p.x, p.y), lim = WORLD_R - 15;
         if (pr > lim) { p.x *= lim / pr; p.y *= lim / pr; }
       } else {
         p.x = clamp(p.x, -STAGE_HW + 12, STAGE_HW - 12); p.y = clamp(p.y, -G.st.L - 380, 100);
@@ -2067,6 +2139,7 @@ function update(dt) {
   for (const e of G.enemies) {
     if (e.dead) continue;
     e.flash -= dt; e.hitT -= dt; e.swordCd -= dt; e.lunge -= dt; e.wob += dt * (e.hitT > 0 ? 3 : 9);
+    if (e.camp) continue;   // 적 진지는 움직이지 않음
     const pdx = p.x - e.x, pdy = p.y - 6 - e.y, pd = Math.hypot(pdx, pdy) || 1;
     // 마을: 영웅이 가까우면 영웅을, 아니면 마을을 노림 / 스테이지: 영웅을 발견하면 쫓아옴
     let chase = !p.dead && pd < (e.boss ? 260 : 170);
@@ -2076,7 +2149,8 @@ function update(dt) {
     if (Math.abs(dx) > 2) e.face = dx > 0 ? 1 : -1;
     if (e.boss) updBoss(e, dt, dx, dy, d);
     else {
-      const sp = (e.hitT > 0 ? 0.35 : 1) * (idle ? 0.15 : 1) * e.spd;
+      const far = G.mode === 'base' && !chase && e.x * e.x + e.y * e.y > MAP_R * MAP_R ? 2.6 : 1;   // 야생 지대에서는 마을로 서둘러 옴
+      const sp = (e.hitT > 0 ? 0.35 : 1) * (idle ? 0.15 : 1) * e.spd * far;
       e.x += dx / d * sp * dt; e.y += dy / d * sp * dt;
     }
     e.x += e.kx * dt; e.y += e.ky * dt;
@@ -2093,7 +2167,7 @@ function update(dt) {
       const d2 = dx * dx + dy * dy;
       if (d2 < rr * rr && d2 > 0.01) {
         const d = Math.sqrt(d2), push = (rr - d) * 0.5, nx = dx / d, ny = dy / d;
-        const wa = a.boss ? 0 : b.boss ? 1 : 0.5, wb = 1 - wa;
+        const wa = a.boss || a.camp ? 0 : b.boss || b.camp ? 1 : 0.5, wb = 1 - wa;
         a.x -= nx * push * wa * 2; a.y -= ny * push * wa * 2;
         b.x += nx * push * wb * 2; b.y += ny * push * wb * 2;
       }
@@ -2103,6 +2177,7 @@ function update(dt) {
   for (const e of es) {
     if (e.dead) continue;
     if (G.mode === 'stage') { e.x = clamp(e.x, -STAGE_HW + 8, STAGE_HW - 8); continue; }
+    if (e.camp) continue;
     const dB = Math.hypot(e.x, e.y) || 1, w = G.walls[segOf(e.x, e.y)], m = e.r * 0.6;
     let blocked = false;
     if (w.hp > 0) {
@@ -2345,8 +2420,10 @@ function drawGround() {
   // 바깥 숲
   ctx.fillStyle = '#3f7d3a'; ctx.fillRect(x0 * g, y0 * g, (x1 - x0) * g, (y1 - y0) * g);
   // 풀밭
+  ctx.fillStyle = '#6fae4c'; ctx.beginPath(); ctx.arc(0, 0, WORLD_R, 0, 7); ctx.fill();   // 야생 지대 (조금 어둡게)
+  ctx.strokeStyle = '#4f8a3a'; ctx.lineWidth = 10; ctx.stroke();
   ctx.fillStyle = '#8fd16a'; ctx.beginPath(); ctx.arc(0, 0, MAP_R, 0, 7); ctx.fill();
-  ctx.strokeStyle = '#6fb34e'; ctx.lineWidth = 10; ctx.stroke();
+  ctx.strokeStyle = 'rgba(80,140,60,.6)'; ctx.lineWidth = 6; ctx.setLineDash([18, 14]); ctx.stroke(); ctx.setLineDash([]);
   // 체크무늬 잔디
   ctx.fillStyle = 'rgba(255,255,255,.07)';
   for (let x = x0; x <= x1; x++) for (let y = y0; y <= y1; y++) if ((x + y) & 1) ctx.fillRect(x * g, y * g, g, g);
@@ -2357,7 +2434,7 @@ function drawGround() {
   for (let x = x0; x <= x1; x++) for (let y = y0; y <= y1; y++) {
     const h = Math.abs(Math.sin(x * 127.1 + y * 311.7) * 43758.5) % 1;
     const px = x * g + (h * 300) % g, py = y * g + (h * 700) % g, r = Math.hypot(px, py);
-    if (r > MAP_R + 20) { // 숲 나무
+    if (r > WORLD_R + 20) { // 숲 나무
       if (h < 0.7) {
         ctx.save(); ctx.translate(px, py); ctx.scale(1, IK);
         ctx.fillStyle = h < 0.35 ? '#2d6a2e' : '#357a36'; ctx.beginPath(); ctx.arc(0, -10, 22 + h * 10, 0, 7); ctx.fill();
@@ -2366,7 +2443,7 @@ function drawGround() {
       }
       continue;
     }
-    if (r < WALL_R + 10 || r > MAP_R - 10) continue;
+    if (r < WALL_R + 10 || r > WORLD_R - 10) continue;
     if (h < 0.22) {
       ctx.strokeStyle = 'rgba(40,110,40,.55)'; ctx.lineWidth = 2; ctx.beginPath();
       ctx.moveTo(px - 4, py); ctx.lineTo(px - 6, py - 7); ctx.moveTo(px, py); ctx.lineTo(px, py - 9); ctx.moveTo(px + 4, py); ctx.lineTo(px + 6, py - 7); ctx.stroke();
@@ -2859,7 +2936,42 @@ function drawSpriteMan(n, x, y, o) {
   if (o.act) drawActFx(o.act, o.actT, w, h);
   ctx.restore();
 }
+function drawRock(o) {
+  const sh = o.shake > 0 ? Math.sin(o.shake * 60) * 2 : 0;
+  ctx.save(); ctx.translate(o.x + sh, o.y); ctx.scale(1, IK);
+  ctx.fillStyle = 'rgba(0,0,0,.18)'; ctx.beginPath(); ctx.ellipse(0, 4, 34, 9, 0, 0, 7); ctx.fill();
+  const k = o.s > 0 ? 0.55 + 0.45 * o.s / o.max : 0.35, h = SPR_INFO.rock.h * k;
+  if (SPR.rock) { ctx.translate(0, 6); spr('rock', h); }
+  else { ctx.fillStyle = '#9aa0a6'; ctx.strokeStyle = '#3d4247'; ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(-30 * k, 4); ctx.lineTo(-20 * k, -h * 0.7); ctx.lineTo(0, -h); ctx.lineTo(22 * k, -h * 0.6); ctx.lineTo(32 * k, 4); ctx.closePath(); ctx.fill(); ctx.stroke(); }
+  ctx.restore();
+  if (o.s > 0 && o.s < o.max) { ctx.fillStyle = '#222'; ctx.fillRect(o.x - 14, o.y + 10, 28, 5); ctx.fillStyle = '#dee2e6'; ctx.fillRect(o.x - 13, o.y + 11, 26 * o.s / o.max, 3); }
+}
+function drawCamp(e) {
+  const c = e.camp, sh = e.hitT > 0 ? rand(-2, 2) : 0;
+  ctx.save(); ctx.translate(e.x + sh, e.y); ctx.scale(1, IK);
+  ctx.fillStyle = 'rgba(0,0,0,.25)'; ctx.beginPath(); ctx.ellipse(0, 6, 50, 13, 0, 0, 7); ctx.fill();
+  if (SPR.camp) { ctx.translate(0, 14); spr('camp', SPR_INFO.camp.h); if (e.flash > 0 && SPR_WHITE.camp) { ctx.globalAlpha = 0.6; spr('camp', SPR_INFO.camp.h, true); } ctx.translate(0, -14); }
+  else {
+    ctx.fillStyle = '#8d5524'; ctx.strokeStyle = '#2b1a0c'; ctx.lineWidth = 2;
+    for (let k = -4; k <= 4; k++) { ctx.beginPath(); ctx.moveTo(k * 10 - 4, 6); ctx.lineTo(k * 10 - 4, -26); ctx.lineTo(k * 10, -34); ctx.lineTo(k * 10 + 4, -26); ctx.lineTo(k * 10 + 4, 6); ctx.closePath(); ctx.fill(); ctx.stroke(); }
+    ctx.fillStyle = '#e63946'; ctx.fillRect(-2, -64, 22, 14); ctx.fillStyle = '#333'; ctx.fillRect(-3, -66, 3, 70);
+  }
+  ctx.font = '900 11px system-ui,sans-serif'; ctx.textAlign = 'center'; ctx.lineWidth = 3; ctx.strokeStyle = '#222';
+  const lb = `🏴 적 진지 Lv ${c.lvl + 1}`; ctx.strokeText(lb, 0, -112); ctx.fillStyle = "#ff6b6b"; ctx.fillText(lb, 0, -112);
+  ctx.restore();
+  ctx.fillStyle = '#222'; ctx.fillRect(e.x - 36, e.y + 16, 72, 8);
+  ctx.fillStyle = '#e63946'; ctx.fillRect(e.x - 35, e.y + 17, 70 * Math.max(0, e.hp / e.maxHp), 6);
+}
+function drawCampRuin(c) { // 부서진 진지: 그루터기 + 다시 지어지기까지 남은 시간
+  ctx.save(); ctx.translate(c.x, c.y); ctx.scale(1, IK);
+  ctx.fillStyle = 'rgba(60,40,20,.35)'; ctx.beginPath(); ctx.ellipse(0, 4, 46, 12, 0, 0, 7); ctx.fill();
+  ctx.fillStyle = '#6b3e1a'; for (let k = -3; k <= 3; k++) ctx.fillRect(k * 12 - 3, -6 - (k & 1) * 3, 6, 8 + (k & 1) * 3);
+  ctx.font = '900 11px system-ui,sans-serif'; ctx.textAlign = 'center'; ctx.lineWidth = 3; ctx.strokeStyle = '#222';
+  const lb = `재건까지 ${Math.ceil(Math.max(0, c.rebuild))}초`; ctx.strokeText(lb, 0, -22); ctx.fillStyle = '#ddd'; ctx.fillText(lb, 0, -22);
+  ctx.restore();
+}
 function drawEnemy(e) {
+  if (e.camp) { drawCamp(e); return; }
   if (SPR[e.type]) drawSpriteMan(e.type, e.x, e.y, { face: e.face, phase: e.wob, hit: e.hitT > 0, hitT: e.hitT, flash: e.flash > 0, lunge: e.lunge });
   else drawStickman(e.x, e.y, { color: e.color, s: e.r / 11, face: e.face, phase: e.wob, hit: e.hitT > 0, flash: e.flash > 0, lunge: e.lunge, type: e.type });
   if (e.type === 'tank' && e.hp < e.maxHp) {
@@ -2962,6 +3074,8 @@ function drawWorld() {
     if (!G.baseDead) list.push({ y: 14, draw: drawBase });
     for (let i = 0; i < WALL_SEGS; i++) { const am = (i + 0.5) / WALL_SEGS * Math.PI * 2; list.push({ y: Math.sin(am) * WALL_R, draw: () => drawWallSeg(i) }); }
     for (const t of G.trees) if (vis(t)) list.push({ y: t.y, draw: () => drawTree(t) });
+    for (const o of G.rocks) if (vis(o)) list.push({ y: o.y, draw: () => drawRock(o) });
+    for (const c of G.camps) if ((!c.e || c.e.dead) && vis(c)) list.push({ y: c.y, draw: () => drawCampRuin(c) });
     for (const t of G.towers) if (t.lvl) list.push({ y: t.y + 4, draw: () => drawTower(t) });
     if (G.smith) list.push({ y: SMITH.y + 6, draw: drawSmith });
     if (G.tavern) list.push({ y: TAVERN.y + 6, draw: drawTavern });
@@ -3096,6 +3210,19 @@ function hudText(t, x, y, size, color, align) {
   ctx.lineWidth = 4; ctx.strokeStyle = '#222'; ctx.lineJoin = 'round'; ctx.strokeText(t, x, y);
   ctx.fillStyle = color || '#fff'; ctx.fillText(t, x, y);
 }
+function drawMinimap(x, y, size) { // 작은 지도: 마을·적 진지·바위·영웅·보스
+  const R = size / 2, cx = x + R, cy = y + R, k = R / WORLD_R;
+  ctx.save();
+  ctx.fillStyle = 'rgba(20,40,20,.55)'; ctx.beginPath(); ctx.arc(cx, cy, R, 0, 7); ctx.fill();
+  ctx.fillStyle = 'rgba(143,209,106,.45)'; ctx.beginPath(); ctx.arc(cx, cy, MAP_R * k, 0, 7); ctx.fill();
+  ctx.fillStyle = '#e3c58f'; ctx.beginPath(); ctx.arc(cx, cy, Math.max(3, WALL_R * k), 0, 7); ctx.fill();
+  ctx.fillStyle = '#adb5bd'; for (const o of G.rocks) if (o.s > 0) ctx.fillRect(cx + o.x * k - 1.5, cy + o.y * k - 1.5, 3, 3);
+  for (const c of G.camps) { const up = c.e && !c.e.dead; ctx.fillStyle = up ? '#e63946' : '#777'; ctx.beginPath(); ctx.arc(cx + c.x * k, cy + c.y * k, up ? 3.5 : 2.5, 0, 7); ctx.fill(); }
+  if (G.boss && G.mode === 'base') { ctx.fillStyle = Math.floor(G.t * 4) % 2 ? '#ff3b3b' : '#ffd23f'; ctx.beginPath(); ctx.arc(cx + G.boss.x * k, cy + G.boss.y * k, 4, 0, 7); ctx.fill(); }
+  ctx.fillStyle = '#ffd23f'; ctx.strokeStyle = '#222'; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.arc(cx + G.p.x * k, cy + G.p.y * k, 3, 0, 7); ctx.fill(); ctx.stroke();
+  ctx.strokeStyle = 'rgba(255,255,255,.7)'; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(cx, cy, R, 0, 7); ctx.stroke();
+  ctx.restore();
+}
 function drawHUD() {
   const p = G.p, top = 8;
   // 경험치바
@@ -3117,7 +3244,8 @@ function drawHUD() {
   hudText(`🏠 ${Math.ceil(bb.hp)}`, 14, top + 57, 12, '#fff');
   hudText('🪙 ' + G.gold, W - 12, top + 60, 18, '#ffd23f', 'right');
   if (G.mode === 'base') hudText(`🪵 ${p.logs}/${p.cap}`, W - 12, top + 86, 16, p.logs >= p.cap ? '#ff6b6b' : '#ffe0b3', 'right');
-  if (G.mode === 'base' && (G.bld.mine || G.stone > 0)) hudText(`🪨 ${G.stone}`, W - 12, top + 108, 16, '#dee2e6', 'right');
+  if (G.mode === 'base') hudText(`🪨 ${G.stone}`, W - 12, top + 108, 16, '#dee2e6', 'right');
+  if (G.mode === 'base') drawMinimap(8, top + 72, 76);
   if (G.hint && !G.radio) {
     ctx.font = '900 15px system-ui,sans-serif'; const tw = ctx.measureText(G.hint.text).width;
     roundRect(W / 2 - tw / 2 - 12, H - 92, tw + 24, 30, 15); ctx.fillStyle = 'rgba(0,0,0,.55)'; ctx.fill();
