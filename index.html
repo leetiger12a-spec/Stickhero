@@ -99,6 +99,9 @@ h2{margin:0 0 14px;font-size:clamp(30px,9vw,48px);color:#ffd23f;text-shadow:0 3p
 .newrec{color:#ff6b6b;font-weight:900;font-size:22px;animation:pop .5s ease-out infinite alternate}
 #hudBtns{position:fixed;right:8px;top:140px;z-index:4;display:none;flex-direction:column;gap:8px}
 #hudBtns.show{display:flex}
+#questBox{position:fixed;left:8px;top:164px;z-index:4;display:none;background:rgba(20,20,30,.55);border:2px solid rgba(255,255,255,.35);border-radius:10px;padding:5px 8px;color:#fff;font:800 11px system-ui,sans-serif;max-width:190px;cursor:pointer;touch-action:none;user-select:none;-webkit-user-select:none}
+#questBox.show{display:block}#questBox .qh{color:#ffd23f;font-size:12px}#questBox .q{margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}#questBox .q.done{color:#7bed9f;text-decoration:line-through}
+#questBox .bar{height:4px;background:rgba(255,255,255,.25);border-radius:2px;margin-top:2px}#questBox .bar i{display:block;height:100%;background:#ffd23f;border-radius:2px}
 #bSos{position:fixed;right:10px;bottom:190px;z-index:4;width:66px;height:66px;border-radius:50%;border:4px solid #222;padding:0;cursor:pointer;display:none;
   background:conic-gradient(#3fa9f5 var(--k,100%),#555 0);box-shadow:0 4px 0 #111;color:#fff;font-weight:900;font-family:inherit;touch-action:none}
 #bSos.show{display:block}#bSos .in{position:absolute;inset:5px;border-radius:50%;background:#16324f;display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1.05}
@@ -110,6 +113,7 @@ h2{margin:0 0 14px;font-size:clamp(30px,9vw,48px);color:#ffd23f;text-shadow:0 3p
 <body>
 <canvas id="cv"></canvas>
 
+<div id="questBox"></div>
 <button id="bSos" aria-label="SKYFANG 지원 요청"><div class="in"><span class="ic">📻</span><span class="tx" id="sosTx">지원</span></div></button>
 <div id="hudBtns"><button class="hb" id="bPause" aria-label="일시정지">⏸</button><button class="hb" id="bSound" aria-label="소리">🔊</button></div>
 
@@ -195,7 +199,7 @@ h2{margin:0 0 14px;font-size:clamp(30px,9vw,48px);color:#ffd23f;text-shadow:0 3p
 
 <script>
 'use strict';
-const BUILD = 44;
+const BUILD = 45;
 const BOSS_INTERVAL = 180;      // 보스 등장 간격(초)
 const WAVE_INTERVAL = 60;       // 대규모 몰이 이벤트 간격(초)
 const MAX_ENEMIES = 220;
@@ -240,7 +244,7 @@ function makeAlly(type, lvl, xp) {
 }
 function allyLevelUp(a) {
   if (a.lvl >= 5) return;
-  a.lvl++; a.xp = 0;
+  a.lvl++; a.xp = 0; questEvent('ally');
   const T = ALLY_TYPES[a.type], hp = Math.round(T.hp * (1 + 0.2 * (a.lvl - 1)));
   a.maxHp = hp; a.hp = hp;
   burst(a.x, a.y - 20, '#ffd23f', 24, 180, 5, 0.6); sfx('level'); startAct(a, 'cheer');
@@ -748,6 +752,7 @@ function newGame() {
   for (let k = 0; k < 3; k++) { const a = c0 + k * Math.PI * 2 / 3 + rand(-0.3, 0.3), r = rand(880, 960); G.camps.push({ x: Math.cos(a) * r, y: Math.sin(a) * r, lvl: 0, rebuild: 0, spawnT: rand(8, 16), e: null }); }
   G.camps.forEach(c => makeCamp(c, 1));
   upgradeWall(); // 기본 울타리 Lv 1로 시작
+  newQuests();
   recalcStats();
 }
 
@@ -869,7 +874,7 @@ function buildSave() {
     rocks: G.rocks.map(o => [Math.round(o.x), Math.round(o.y), o.s, Math.round(o.regrow)]),
     camps: G.camps.map(c => [Math.round(c.x), Math.round(c.y), c.lvl, Math.round(c.rebuild), c.e && !c.e.dead ? Math.round(c.e.hp / c.e.maxHp * 100) / 100 : 0]),
     nextBoss: G.boss ? 15 : G.nextBoss, nextWave: G.nextWave, raidCount: G.raidCount - (G.raid ? 1 : 0), raidPending: !!(G.raid || G.raidIn > 0),
-    day: G.day, broken: Object.keys(G.broken).filter(k => G.broken[k]),
+    day: G.day, broken: Object.keys(G.broken).filter(k => G.broken[k]), quests: G.quests, questBonus: G.questBonus,
   };
 }
 function loadGame(d) {
@@ -891,6 +896,7 @@ function loadGame(d) {
   setVillage(d.vLvl || 1); G.stone = d.stone || 0; G.bld = Object.assign({ farm: 0, mine: 0, market: 0 }, d.bld || {});
   G.base.maxHp = 1500 + VILLAGE.slice(1, G.vLvl).reduce((a, v) => a + v.hp, 0);
   G.day = d.day || 1; G.broken = {}; for (const k of d.broken || []) G.broken[k] = true;
+  if (d.quests && d.quests.length) { G.quests = d.quests; G.questBonus = !!d.questBonus; } else newQuests();   // 새 날(또는 예전 저장)은 새 퀘스트
   if (d.rocks) G.rocks = d.rocks.map(([x, y, s, rg]) => ({ x, y, s, max: 6, regrow: rg, shake: 0 }));
   if (d.camps) { G.enemies = G.enemies.filter(e => !e.camp); G.camps = d.camps.map(([x, y, lvl, rebuild, hp]) => ({ x, y, lvl, rebuild, spawnT: rand(8, 16), e: null })); G.camps.forEach((c, i) => { if (d.camps[i][4] > 0) makeCamp(c, d.camps[i][4]); }); }
   G.allies = [];
@@ -1043,7 +1049,7 @@ function ruinSave(toBank) {
   for (const id in G.bld) if (G.bld[id]) brk.add(id);
   brk.add('hall');
   Object.assign(d, {
-    day: (G.day || 1) + 1, broken: [...brk],
+    day: (G.day || 1) + 1, broken: [...brk], quests: null, questBonus: false,
     t: 0, bt: 0, kills: 0, lvl: 1, xp: 0, need: xpNeed(1), pending: 0, weapons: { pistol: 1 }, passives: {},
     gold: G.gold - toBank, logs: 0, hp: -1, base: Math.round(G.base.maxHp * 0.3), walls: G.walls.map(() => 0),
     bossCount: 0, bossKills: G.bossKills || 0, nextBoss: BOSS_INTERVAL, nextWave: WAVE_INTERVAL, raidPending: false,
@@ -1147,8 +1153,9 @@ function hallUp() { // 마을 레벨업: 울타리 넓히기 + 마을 체력 + �
 function padDone(pd) {
   pd.built = true;
   const bk = brokenKey(pd);
+  if (!(bk && G.broken[bk])) questEvent('build');
   if (bk && G.broken[bk]) { // 수리 완료
-    G.broken[bk] = false; sfx('build'); G.shake = 6; vib([30, 30, 30]);
+    G.broken[bk] = false; sfx('build'); G.shake = 6; vib([30, 30, 30]); questEvent('repair');
     burst(pd.x, pd.y - 20, '#7bed9f', 30, 220, 5, 0.6);
     if (bk === 'hall') { G.base.hp = G.base.maxHp; banner('🏛 마을회관 수리 완료!', '마을 체력이 가득 찼어요', '#7bed9f', 2); }
     else banner('🔨 수리 완료!', '다시 일하기 시작해요', '#7bed9f', 1.4);
@@ -1237,7 +1244,7 @@ function updCamps(dt) {
   }
 }
 function campDie(e) {
-  const c = e.camp; c.lvl++; c.rebuild = CAMP_REBUILD; c.e = null;
+  const c = e.camp; c.lvl++; c.rebuild = CAMP_REBUILD; c.e = null; questEvent('camp');
   for (let i = 0; i < 4; i++) burst(e.x + rand(-30, 30), e.y + rand(-30, 30), ['#8d5524', '#ffd23f', '#e63946', '#555'][i], 30, 300, 7, 1);
   for (let i = 0; i < 20 + c.lvl * 8; i++) dropCoin(e.x + rand(-40, 40), e.y + rand(-40, 40));
   for (let i = 0; i < 12; i++) dropGem(e.x + rand(-40, 40), e.y + rand(-40, 40), 4);
@@ -1364,7 +1371,7 @@ function updBase(dt) {
       p.chopT -= dt;
       if (p.chopT <= 0) {
         p.chopT = 0.32; p.chop = 0.2; p.face = tree.x > p.x ? 1 : -1;
-        tree.logs--; tree.shake = 0.25; p.logs++; sfx('stack');
+        tree.logs--; tree.shake = 0.25; p.logs++; sfx('stack'); questEvent('wood');
         burst(tree.x - p.face * 4, tree.y - 10, '#c68642', 5, 120, 3, 0.35);
         G.flyers.push({ x0: tree.x, y0: tree.y - 20, x1: p.x, y1: p.y - 30, t: 0, dur: 0.3, kind: 'log' });
         sfx('chop');
@@ -1385,7 +1392,7 @@ function updBase(dt) {
     G.mineHitT -= dt;
     if (G.mineHitT <= 0) {
       G.mineHitT = 0.42; p.chop = 0.2; p.face = rock.x > p.x ? 1 : -1;
-      rock.s--; rock.shake = 0.25; G.stone++; sfx('thud');
+      rock.s--; rock.shake = 0.25; G.stone++; sfx('thud'); questEvent('stone');
       burst(rock.x - p.face * 6, rock.y - 14, '#adb5bd', 6, 130, 3, 0.35);
       G.flyers.push({ x0: rock.x, y0: rock.y - 24, x1: p.x, y1: p.y - 30, t: 0, dur: 0.3, kind: 'stone' });
       if (rock.s <= 0) { rock.regrow = 45; sfx('break'); floatText(rock.x, rock.y - 60, '와르르!', '#fff', 18, 0.8); }
@@ -1605,6 +1612,60 @@ const SKY_SQUAD = [
   { call: '백운', pilot: '한누리 중위', col: '#ffffff', size: 115, spd: 480, gap: 0.08, dmg: 42, spread: 34, heal: true, line: '백운 지원 왔어요! 영웅님 체력도 채워 드릴게요!' },
 ];
 let lastSquad = -1;
+// ---------- 📜 하루 퀘스트: 날마다 3개, 다 하면 보너스 ----------
+const QUESTS = [ // id, 글, 목표(날짜 d), 나올 수 있는지
+  { id: 'kill',    txt: n => `💀 적 ${n}마리 잡기`,          goal: d => 150 + 50 * (d - 1) },
+  { id: 'boss',    txt: () => '👑 보스 1마리 잡기',           goal: () => 1 },
+  { id: 'camp',    txt: () => '🏴 적 진지 1개 부수기',         goal: () => 1 },
+  { id: 'stone',   txt: n => `🪨 바위에서 돌 ${n}개 캐기`,     goal: d => 15 + 5 * d },
+  { id: 'wood',    txt: n => `🪵 통나무 ${n}개 모으기`,        goal: d => 30 + 10 * d },
+  { id: 'stage',   txt: () => '🗺 모험 스테이지 1칸 깨기',      goal: () => 1, ok: () => G.pads.find(q => q.order === 0).built },
+  { id: 'special', txt: n => `🎯 특수 적 ${n}마리 잡기`,       goal: d => 8 + 2 * d },
+  { id: 'ally',    txt: () => '🐱 동료 레벨업 1번',            goal: () => 1, ok: () => G.allies.length > 0 },
+  { id: 'repair',  txt: n => `🔨 건물 ${n}개 고치기`,          goal: () => 3, ok: () => Object.values(G.broken).filter(Boolean).length >= 3 },
+  { id: 'tower',   txt: n => `🗼 무한 탑 ${n}층 오르기`,       goal: d => 2 + d, ok: () => bestStage() >= 3 },
+  { id: 'build',   txt: n => `🏗 짓기·강화 ${n}번`,            goal: () => 4 },
+];
+function newQuests() {
+  const d = G.day || 1, pool = QUESTS.filter(q => !q.ok || q.ok()), out = [];
+  while (out.length < 3 && pool.length) { const q = pool.splice(Math.floor(Math.random() * pool.length), 1)[0]; out.push({ id: q.id, goal: q.goal(d), prog: 0, done: false }); }
+  // 고치기 퀘스트가 있으면 맨 앞에 (아침에 할 일)
+  out.sort((a, b) => (b.id === 'repair') - (a.id === 'repair'));
+  G.quests = out; G.questBonus = false; questShown = '';
+}
+const questReward = () => ({ g: 40 + 20 * (G.day || 1), s: 3 + (G.day || 1) });
+function questEvent(id, n) {
+  if (!G || !G.quests) return;
+  for (const q of G.quests) {
+    if (q.id !== id || q.done) continue;
+    q.prog = Math.min(q.goal, q.prog + (n || 1));
+    if (q.prog >= q.goal) {
+      q.done = true; const r = questReward(); G.gold += r.g; G.stone += r.s;
+      const Q = QUESTS.find(x => x.id === q.id);
+      banner('📜 퀘스트 완료!', `${Q.txt(q.goal)} · 🪙${r.g} 🪨${r.s}`, '#ffd23f', 2.2); sfx('unlock');
+      if (!G.questBonus && G.quests.every(x => x.done)) { // 셋 다 하면 하루 완료 보너스
+        G.questBonus = true; const bg = 100 + 50 * (G.day || 1); G.gold += bg;
+        setTimeout(() => { if (G) { banner('⭐ 오늘의 퀘스트 모두 완료!', `보너스 🪙${bg} · 내일 새 퀘스트`, '#7bed9f', 2.6); sfx('cheer'); cheerAll(); } }, 1600);
+        const m = readJSON(META_KEY) || {}; m.questDays = (m.questDays || 0) + 1; writeJSON(META_KEY, m);
+      }
+    }
+  }
+}
+let questShown = '', questOpen = true;
+try { questOpen = localStorage.getItem('stickhero_questfold') !== '1'; } catch (e) {}
+function updQuestBox() {
+  const box = $('questBox'), on = G && G.quests && G.quests.length && $('hudBtns').classList.contains('show') && state !== 'title';
+  box.classList.toggle('show', !!on); if (!on) return;
+  box.style.top = G.mode === 'base' ? '164px' : '86px';   // 마을에선 작은 지도 아래
+  const key = G.quests.map(q => q.id + q.prog + q.done).join() + questOpen + G.day;
+  if (key === questShown) return; questShown = key;
+  const nd = G.quests.filter(q => q.done).length;
+  if (!questOpen) { box.innerHTML = `<div class="qh">📜 퀘스트 ${nd}/${G.quests.length} ▸</div>`; return; }
+  box.innerHTML = `<div class="qh">📜 ${G.day || 1}일째 퀘스트 ${nd}/${G.quests.length} ▾</div>` + G.quests.map(q => { const Q = QUESTS.find(x => x.id === q.id);
+    return `<div class="q${q.done ? ' done' : ''}">${Q.txt(q.goal)} ${q.done ? '✔' : `<small>${q.prog}/${q.goal}</small>`}</div>` + (q.done ? '' : `<div class="bar"><i style="width:${Math.round(q.prog / q.goal * 100)}%"></i></div>`); }).join('');
+}
+$('questBox').addEventListener('pointerdown', e => { e.preventDefault(); e.stopPropagation(); questOpen = !questOpen; try { localStorage.setItem('stickhero_questfold', questOpen ? '0' : '1'); } catch (err) {} sfx('pick'); updQuestBox(); });
+
 // 📻 지원 요청 버튼: 원할 때 SKYFANG을 부름 (60초마다)
 const SOS_CD = 60;
 function callSos() {
@@ -1788,6 +1849,7 @@ function stageClear(x, y) {
   const st = G.st, p = G.p; if (st.clear) return;
   st.clear = true;
   if (st.tower) {
+    questEvent('tower');
     const f = st.tower, prize = 15 + f * 6 + (f % 5 === 0 ? 60 + f * 4 : 0);
     G.gold += prize; G.towerGold = (G.towerGold || 0) + prize;
     const meta = readJSON(META_KEY) || {}; if (f > (meta.bestFloor || 0)) { meta.bestFloor = f; writeJSON(META_KEY, meta); floatText(p.x, p.y - 80, `🏆 최고 기록 ${f}층!`, '#ffd23f', 20, 1.6); }
@@ -1817,6 +1879,7 @@ function returnBase(win) {
     G.towerGold = 0; saveGame(); return;
   }
   if (win && st) {
+    questEvent('stage');
     const i = st.n, first = i >= G.stageN, prize = stageReward(i, first), old = G.stars[i] || 0;
     G.stars[i] = Math.max(old, st.stars);
     { // 별을 모으면 머리띠 색이 열림 (게임오버 뒤에도 유지)
@@ -2029,6 +2092,7 @@ function dropCoin(x, y) {
 function killEnemy(e) {
   e.dead = true; G.kills++;
   if (G.allies.length) allyGainXp(e.x, e.y, e.boss ? 40 : e.camp ? 20 : e.xp);
+  if (!e.boss && !e.camp) { questEvent('kill'); if (e.type.startsWith('e_')) questEvent('special'); }
   if (e.boss) { bossDie(e); return; }
   if (e.camp) { campDie(e); return; }
   if (e.type === 'e_slime' && !e.small) for (let k = 0; k < 2; k++) { // 작은 슬라임 2마리로
@@ -2050,7 +2114,7 @@ function killEnemy(e) {
   if (Math.random() < 0.012) G.hearts.push({ x: e.x, y: e.y, bob: 0 });
 }
 function bossDie(e) {
-  G.boss = null; G.bossKills = (G.bossKills || 0) + 1;
+  G.boss = null; G.bossKills = (G.bossKills || 0) + 1; questEvent('boss');
   for (let i = 0; i < 5; i++) burst(e.x + rand(-40, 40), e.y + rand(-40, 40), [e.color, '#ffd23f', '#fff', '#ff9f1c', '#222'][i], 40, 380, 8, 1.2);
   for (let i = 0; i < 30; i++) { const a = Math.random() * Math.PI * 2, d = rand(10, 90); dropGem(e.x + Math.cos(a) * d, e.y + Math.sin(a) * d, 5); }
   for (let i = 0; i < 40 + e.lvl * 20; i++) dropCoin(e.x + rand(-40, 40), e.y + rand(-40, 40));
@@ -3721,7 +3785,7 @@ function frame(now) {
   const dt = Math.min(0.05, (now - last) / 1000); last = now;
   if (state === 'play') update(dt);
   if (AC) { const k = bgmFor(); if (!bgmCur || bgmCur.key !== k) playBgm(k); }
-  render(); updSosBtn();
+  render(); updSosBtn(); updQuestBox();
   requestAnimationFrame(frame);
 }
 requestAnimationFrame(frame);
