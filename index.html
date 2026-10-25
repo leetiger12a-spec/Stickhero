@@ -212,7 +212,7 @@ h2{margin:0 0 14px;font-size:clamp(30px,9vw,48px);color:#ffd23f;text-shadow:0 3p
 
 <script>
 'use strict';
-const BUILD = 47;
+const BUILD = 48;
 const BOSS_INTERVAL = 180;      // 보스 등장 간격(초)
 const WAVE_INTERVAL = 60;       // 대규모 몰이 이벤트 간격(초)
 const MAX_ENEMIES = 220;
@@ -3241,7 +3241,7 @@ const SHEETS = {
   ally_bomber_toss:  { n: 4, ax: 0.4409, ay: 0.9856, body: 0.7957 },
   ally_shield_bash:  { n: 4, ax: 0.4323, ay: 0.984,  body: 0.9626 },
   ally_sword_slash:  { n: 4, ax: 0.4377, ay: 0.9817, body: 0.7682 },   // 칼이 낮은 3번 칸의 귀~발끝 키
-  ally_sword_walk:   { n: 4, ax: 0.4478, ay: 0.986,  body: 0.768, seq: [2, 3] },
+  ally_sword_walk:   { n: 4, ax: 0.4962, ay: 0.9881, body: 0.9662, seq: [0, 1, 2, 3] },   // Build 48: 새 4컷 (간격 넓은 시트)
   ally_archer_walk:  { n: 4, ax: 0.5455, ay: 0.9861, body: 0.943, seq: [0, 1, 2, 3] },   // 4칸 평균 귀~발끝 키
   ally_bomber_walk:  { n: 4, ax: 0.4103, ay: 0.9861, body: 0.941, seq: [0, 1, 2, 3] },
   ally_shield_walk:  { n: 4, ax: 0.3943, ay: 0.9859, body: 0.937, seq: [0, 1, 2, 3] },   // 1·2번 칸은 칼을 치켜들어 빼고, 칼이 낮은 3·4번 칸으로 걷기
