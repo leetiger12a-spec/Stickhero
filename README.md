@@ -8,7 +8,7 @@
 - 플레이: https://leetiger12a-spec.github.io/Stickhero/ (GitHub Pages를 켠 뒤)
 
 ## 그림 제작 규칙 (제미나이)
-- 화질: **QHD(2560×1440) 이상** — 프롬프트에 `ultra high resolution, QHD (2560x1440) or higher, crisp clean lines` 포함, 가능하면 Gemini **Pro(Thinking) 모드**의 **2K/4K** 출력 사용
+- 화질: **QHD(2560×1440) 이상** — **모든 프롬프트에 항상** `ultra high resolution, QHD (2560x1440) or higher, crisp clean lines` 포함, 가능하면 Gemini **Pro(Thinking) 모드**의 **2K/4K** 출력 사용
 - 작은 그림은 **한 장 시트**(격자, 칸 사이 넓은 흰 여백)로 모아서 요청
 - 흰 배경 · 글자 없음 · 게임 스프라이트 · 3/4 위에서 본 시점, 공통 문구도 프롬프트마다 전부 포함(복사·붙여넣기용)
 - 받은 그림은 배경 제거·자르기·크기 조절만 (그림 내용은 수정하지 않음)

@@ -1,6 +1,6 @@
 # 레전드 히어로 작업 메모
 - 그림은 사용자가 제미나이로 만든다. 프롬프트는 영어로, 공통 문구까지 각각 전부 넣어서 준다.
-- 화질은 **QHD(2560×1440) 이상**으로 요청한다: `ultra high resolution, QHD (2560x1440) or higher, crisp clean lines`. 가능하면 Pro(Thinking) 모드의 2K/4K 출력.
+- **모든 그림 프롬프트에 항상** 화질 문구를 넣는다 (예외 없음, QHD(2560×1440) 이상): `ultra high resolution, QHD (2560x1440) or higher, crisp clean lines`. 가능하면 Pro(Thinking) 모드의 2K/4K 출력.
 - 작은 그림은 한 장 시트(격자, 넓은 흰 여백)로 모아서 요청한다.
 - 받은 그림은 배경 제거·자르기·크기 조절만 한다 (내용 수정 금지).
 - 기능마다 Playwright 테스트(오류 0) → 화면 구석·README 빌드 번호 올리기 → main에 커밋·푸시.
