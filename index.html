@@ -33,6 +33,11 @@ canvas{display:block;position:fixed;inset:0;width:100%;height:100%}
 #storyCap{font-size:18px;font-weight:700;line-height:1.5;margin:18px 22px;min-height:54px;max-width:640px}
 #storyNext{position:absolute;bottom:max(18px,env(safe-area-inset-bottom));right:18px;font-size:14px;opacity:.75}
 #bStorySkip{position:absolute;top:max(14px,env(safe-area-inset-top));right:14px}
+#achList{display:flex;flex-direction:column;gap:6px;width:min(94vw,400px);max-height:60vh;overflow-y:auto}
+.arow{display:flex;align-items:center;gap:8px;background:#fffaf0;color:#222;border:3px solid #222;border-radius:12px;padding:6px 8px;text-align:left}
+.arow.off{opacity:.62;background:#e9e4da}.arow .ic{font-size:24px;width:30px;text-align:center}.arow .tx{flex:1;font-size:13px;line-height:1.25}
+.arow .pb{height:5px;background:#ddd;border-radius:3px;margin-top:3px}.arow .pb i{display:block;height:100%;background:#3fa9f5;border-radius:3px}
+.arow button{font:800 12px system-ui,sans-serif;border:2px solid #222;border-radius:9px;padding:4px 7px;background:#ffd23f;cursor:pointer;white-space:nowrap}.arow button.on{background:#7bed9f}
 #shopList{display:flex;flex-direction:column;gap:8px;width:min(94vw,400px);max-height:58vh;overflow-y:auto}
 .srow{display:flex;align-items:center;gap:10px;background:#fffaf0;color:#222;border:3px solid #222;border-radius:14px;padding:8px 10px;text-align:left}
 .srow .ic{font-size:28px;width:36px;text-align:center}
@@ -134,7 +139,7 @@ h2{margin:0 0 14px;font-size:clamp(30px,9vw,48px);color:#ffd23f;text-shadow:0 3p
    <button class="btn big" id="bStart">⚔ 출전!</button>
   </div>
   <div class="best" id="bestTitle"></div>
-  <div class="mrow"><button class="hb" id="bHelp">❓ 조작법</button><button class="hb" id="bStory" style="display:none">📖 이야기</button><button class="hb" id="bMusicT">🎵 음악</button><button class="hb" id="bWard">🎨 꾸미기</button><button class="hb" id="bShopT">💪 강화</button></div>
+  <div class="mrow"><button class="hb" id="bHelp">❓ 조작법</button><button class="hb" id="bStory" style="display:none">📖 이야기</button><button class="hb" id="bMusicT">🎵 음악</button><button class="hb" id="bWard">🎨 꾸미기</button><button class="hb" id="bShopT">💪 강화</button><button class="hb" id="bAchT">🏅 업적</button></div>
   <div class="hint" id="helpBox" style="display:none">📱 화면을 끌어서 이동 · 공격은 자동<br>🌳 나무 옆에 서면 통나무를 모아요 → 🪵 동그라미 위에 서면 건설!<br>⚔ 출격 문으로 모험 → 보스를 잡고 금화를 가져와요<br>📻 위험할 땐 지원 버튼! SKYFANG 비행기가 폭격 (60초마다)<br>💻 WASD / 방향키 이동 · E 지원 요청 · P 일시정지</div>
  </div>
 </div>
@@ -152,6 +157,13 @@ h2{margin:0 0 14px;font-size:clamp(30px,9vw,48px);color:#ffd23f;text-shadow:0 3p
   <div id="shopWallet" style="margin-bottom:8px"></div>
   <div id="shopList"></div>
   <button class="btn" id="bShopOk">완료</button>
+</div>
+
+<div class="ov" id="ovAch">
+  <h2 style="margin-bottom:2px">🏅 업적</h2>
+  <div class="sub" id="achSub" style="margin-bottom:6px;font-size:13px"></div>
+  <div id="achList"></div>
+  <button class="btn" id="bAchOk">완료</button>
 </div>
 
 <div class="ov" id="ovWard">
@@ -185,6 +197,7 @@ h2{margin:0 0 14px;font-size:clamp(30px,9vw,48px);color:#ffd23f;text-shadow:0 3p
   <h2>일시정지</h2>
   <button class="btn" id="bResume">계속하기</button>
   <button class="btn" id="bShopP" style="background:linear-gradient(#9fe8ff,#3fa9f5);box-shadow:0 5px 0 #1d6fa5">💪 영웅 강화</button>
+  <button class="btn" id="bAchP" style="background:linear-gradient(#fff3b0,#ffd23f);box-shadow:0 5px 0 #b8860b">🏅 업적</button>
   <div class="mrow" style="margin:6px 0 10px"><button class="hb" id="bMusicP" style="width:auto;padding:0 14px;font-weight:800">🎵 음악</button><button class="hb" id="bVibP" style="width:auto;padding:0 14px;font-weight:800">📳 진동</button></div>
   <button class="btn" id="bQuit" style="background:linear-gradient(#ddd,#aaa);box-shadow:0 5px 0 #666">처음으로</button>
 </div>
@@ -199,7 +212,7 @@ h2{margin:0 0 14px;font-size:clamp(30px,9vw,48px);color:#ffd23f;text-shadow:0 3p
 
 <script>
 'use strict';
-const BUILD = 46;
+const BUILD = 47;
 const BOSS_INTERVAL = 180;      // 보스 등장 간격(초)
 const WAVE_INTERVAL = 60;       // 대규모 몰이 이벤트 간격(초)
 const MAX_ENEMIES = 220;
@@ -244,7 +257,7 @@ function makeAlly(type, lvl, xp) {
 }
 function allyLevelUp(a) {
   if (a.lvl >= 5) return;
-  a.lvl++; a.xp = 0; questEvent('ally');
+  a.lvl++; a.xp = 0; questEvent('ally'); stMax('allyLv', a.lvl);
   const T = ALLY_TYPES[a.type], hp = Math.round(T.hp * (1 + 0.2 * (a.lvl - 1)));
   a.maxHp = hp; a.hp = hp;
   burst(a.x, a.y - 20, '#ffd23f', 24, 180, 5, 0.6); sfx('level'); startAct(a, 'cheer');
@@ -376,6 +389,63 @@ $('bShopT').onclick = () => { audioInit(); sfx('pick'); openShop(); };
 $('bShopP').onclick = () => { sfx('pick'); openShop(); };
 $('bShopOk').onclick = () => { sfx('pick'); if (shopBack === 'title' || !G) { state = 'title'; refreshTitle(); showOv('ovTitle'); } else { state = 'paused'; showOv('ovPause'); } };
 $('bWard').onclick = () => { audioInit(); sfx('pick'); openWard(); };
+// ---------- 🏅 업적 · 칭호 (게임오버·날짜와 상관없이 영원히 쌓임) ----------
+const ST = Object.assign({ kills: 0, bosses: 0, camps: 0, towers: 0, bossT: [], specT: [], vLvl: 1, wall: 1, allyLv: 1, allies: 0, day: 1 }, (readJSON('stickhero_meta') || {}).st || {});   // META_KEY는 아래에서 정의됨
+let stDirty = false;
+const stAdd = (k, n) => { ST[k] = (ST[k] || 0) + (n || 1); stDirty = true; };
+const stMax = (k, v) => { if (v > (ST[k] || 0)) { ST[k] = v; stDirty = true; } };
+const stSet = (k, v) => { if (!ST[k].includes(v)) { ST[k].push(v); stDirty = true; } };
+const metaOf = k => (readJSON(META_KEY) || {})[k] || 0;
+const ACH = [
+  { id: 'tower1',  icon: '🏹', name: '첫 망루',       desc: '망루를 처음 지었다',       title: '새내기 영웅', bank: 50,  p: () => [ST.towers, 1] },
+  { id: 'boss1',   icon: '👑', name: '첫 보스',       desc: '보스 1마리 잡기',          title: '보스 사냥꾼', bank: 100, p: () => [ST.bosses, 1] },
+  { id: 'camp1',   icon: '🏴', name: '진지 파괴자',   desc: '적 진지 1개 부수기',       title: '돌격대장',   bank: 100, p: () => [ST.camps, 1] },
+  { id: 'kill1k',  icon: '💀', name: '천 마리 사냥',  desc: '적 1,000마리 잡기',        title: '사냥꾼',     bank: 150, p: () => [ST.kills, 1000] },
+  { id: 'spec6',   icon: '🎯', name: '특수 적 도감',  desc: '특수 적 6종 모두 잡기',    title: '관찰왕',     bank: 200, p: () => [ST.specT.length, 6] },
+  { id: 'vill3',   icon: '🏛', name: '큰 마을',       desc: '마을 Lv3 만들기',          title: '촌장님',     bank: 200, p: () => [ST.vLvl, 3] },
+  { id: 'wall7',   icon: '🪨', name: '철옹성',        desc: '돌 성벽 Lv7 세우기',       title: '성벽 장인',  bank: 200, p: () => [ST.wall, 7] },
+  { id: 'ally5',   icon: '🐱', name: '최강 동료',     desc: '동료 1명 Lv5 만들기',      title: '고양이 대장', bank: 200, p: () => [ST.allyLv, 5] },
+  { id: 'team5',   icon: '👥', name: '다섯 친구',     desc: '동료 5명 모으기',          title: '친구 부자',  bank: 200, p: () => [ST.allies, 5] },
+  { id: 'floor10', icon: '🗼', name: '탑 10층',       desc: '무한 탑 10층 돌파',        title: '등반가',     bank: 200, p: () => [metaOf('bestFloor'), 10] },
+  { id: 'camp10',  icon: '🚩', name: '진지 정복자',   desc: '적 진지 10개 부수기',      title: '정복자',     bank: 300, p: () => [ST.camps, 10] },
+  { id: 'day7',    icon: '🌅', name: '일주일 버티기', desc: '7일째 아침 맞이하기',      title: '불굴의 영웅', bank: 300, p: () => [ST.day, 7] },
+  { id: 'quest5',  icon: '📜', name: '성실한 영웅',   desc: '하루 퀘스트 5일 모두 완료', title: '모범생',    bank: 300, p: () => [metaOf('questDays'), 5] },
+  { id: 'boss6',   icon: '🐉', name: '보스 도감',     desc: '보스 6종 모두 잡기',       title: '도감 박사',  bank: 400, p: () => [ST.bossT.filter(n => BOSSES.some(B => B.name === n)).length, 6] },
+  { id: 'stars30', icon: '⭐', name: '별 수집가',     desc: '별 30개 모으기',           title: '별빛 영웅',  bank: 400, p: () => [metaOf('bestStars'), 30] },
+  { id: 'boss30',  icon: '⚔️', name: '보스 킬러',     desc: '보스 30마리 잡기',         title: '보스 킬러',  bank: 400, p: () => [ST.bosses, 30] },
+  { id: 'ending',  icon: '🏆', name: '왕관을 빼앗다', desc: '왕관 괴물 대왕 물리치기',  title: '레전드 히어로', bank: 500, p: () => [ST.bossT.includes('왕관 괴물 대왕') ? 1 : 0, 1] },
+  { id: 'kill10k', icon: '☠️', name: '만 마리 전설',  desc: '적 10,000마리 잡기',       title: '만 마리 전설', bank: 500, p: () => [ST.kills, 10000] },
+  { id: 'floor25', icon: '🌤', name: '하늘 끝까지',   desc: '무한 탑 25층 돌파',        title: '하늘 정복자', bank: 600, p: () => [metaOf('bestFloor'), 25] },
+];
+function checkAch() { // 1초마다: 기록 저장 + 새 업적
+  const m = readJSON(META_KEY) || {}; m.ach = m.ach || {};
+  let got = null;
+  for (const A of ACH) { if (m.ach[A.id]) continue; const [v, goal] = A.p(); if (v >= goal) { m.ach[A.id] = true; m.bank = (m.bank || 0) + A.bank; got = got || A; } }
+  if (stDirty || got) { m.st = ST; writeJSON(META_KEY, m); stDirty = false; }
+  if (got && G && state === 'play') { banner(`🏅 업적: ${got.name}!`, `칭호 '${got.title}' · 금고 🪙${got.bank}`, '#ffd23f', 2.6); sfx('unlock'); }
+}
+setInterval(checkAch, 1000);
+let achBack = null;
+function openAch() { checkAch(); achBack = state; state = 'ach'; renderAch(); showOv('ovAch'); }
+function renderAch() {
+  const m = readJSON(META_KEY) || {}, got = m.ach || {}, n = ACH.filter(A => got[A.id]).length;
+  $('achSub').innerHTML = `달성 <b>${n}/${ACH.length}</b> · 달성한 업적의 칭호를 눌러 영웅 머리 위에 달아요`;
+  const box = $('achList'); box.innerHTML = '';
+  ACH.forEach(A => {
+    const ok = !!got[A.id], [v, goal] = A.p(), row = document.createElement('div');
+    row.className = 'arow' + (ok ? '' : ' off');
+    row.innerHTML = `<div class="ic">${ok ? A.icon : '🔒'}</div><div class="tx"><b>${A.name}</b> <small>🪙${A.bank}</small><br><small>${A.desc}</small>` +
+      (ok ? '' : `<div class="pb"><i style="width:${Math.round(Math.min(1, v / goal) * 100)}%"></i></div><small>${Math.min(v, goal).toLocaleString()} / ${goal.toLocaleString()}</small>`) + '</div>';
+    if (ok) { const bt = document.createElement('button'); const on = m.title === A.id; bt.className = on ? 'on' : ''; bt.textContent = on ? `✔ ${A.title}` : A.title;
+      bt.onclick = () => { const mm = readJSON(META_KEY) || {}; mm.title = mm.title === A.id ? null : A.id; writeJSON(META_KEY, mm); sfx('pick'); renderAch(); }; row.appendChild(bt); }
+    box.appendChild(row);
+  });
+}
+const heroTitle = () => { const id = (readJSON(META_KEY) || {}).title, A = id && ACH.find(a => a.id === id); return A ? A.title : null; };
+let heroTitleCache = undefined, heroTitleT = 0;
+$('bAchT').onclick = () => { audioInit(); sfx('pick'); openAch(); };
+$('bAchP').onclick = () => { sfx('pick'); openAch(); };
+$('bAchOk').onclick = () => { sfx('pick'); heroTitleCache = undefined; if (achBack === 'title' || !G) { state = 'title'; refreshTitle(); showOv('ovTitle'); } else { state = 'paused'; showOv('ovPause'); } };
 // 화면에 그릴 크기로 미리 줄여 둔 그림(매 프레임 큰 그림을 줄이면 느림). 화면 크기가 바뀌면 다시 만듦
 function bakeSprite(n) {
   const im = SPR_SRC[n]; if (!im) return;
@@ -928,7 +998,7 @@ function refreshTitle() {
 }
 
 // ---------- 화면 전환 ----------
-function showOv(id) { ['ovTitle', 'ovLevel', 'ovPause', 'ovOver', 'ovStory', 'ovMap', 'ovClear', 'ovWard', 'ovShop'].forEach(o => $(o).classList.toggle('show', o === id)); }
+function showOv(id) { ['ovTitle', 'ovLevel', 'ovPause', 'ovOver', 'ovStory', 'ovMap', 'ovClear', 'ovWard', 'ovShop', 'ovAch'].forEach(o => $(o).classList.toggle('show', o === id)); }
 function startGame() {
   audioInit(); clearSave(); newGame(); state = 'play'; joy = null; showOv(null);
   $('hudBtns').classList.add('show');
@@ -1046,6 +1116,7 @@ function chooseAlly(i) {
 
 // 마을이 무너지면: 지은 것은 부서진 채로 남고, 영웅은 Lv1부터, 금화 절반·돌은 그대로, 다음 날(적 +15%)
 function ruinSave(toBank) {
+  stMax('day', (G.day || 1) + 1);
   const d = buildSave();
   const brk = new Set(d.broken);
   G.towers.forEach((t, i) => { if (t.lvl) brk.add('t' + i); });
@@ -1099,6 +1170,7 @@ function floatText(x, y, text, color, size, life) {
 const segOf = (x, y) => { let a = Math.atan2(y, x); if (a < 0) a += Math.PI * 2; return Math.floor(a / (Math.PI * 2) * WALL_SEGS) % WALL_SEGS; };
 function upgradeWall() {
   if (G.wallLvl < wallMax()) G.wallLvl++;
+  stMax('wall', G.wallLvl);
   const mh = 100 + 80 * G.wallLvl;
   for (const w of G.walls) { w.maxHp = mh; w.hp = mh; }
 }
@@ -1144,7 +1216,7 @@ const BLD_MSG = {
 };
 function hallUp() { // 마을 레벨업: 울타리 넓히기 + 마을 체력 + 숲 밀어내기
   const V = VILLAGE[G.vLvl];
-  setVillage(G.vLvl + 1);
+  setVillage(G.vLvl + 1); stMax('vLvl', G.vLvl);
   G.base.maxHp += V.hp; G.base.hp = G.base.maxHp; repairWall();
   for (const t of G.trees) {
     const r = Math.hypot(t.x, t.y);
@@ -1166,7 +1238,7 @@ function padDone(pd) {
     saveGame(); return;
   }
   if (pd.kind === 'tower') {
-    const t = G.towers[pd.idx]; t.lvl++;
+    const t = G.towers[pd.idx]; t.lvl++; if (t.lvl === 1) stAdd('towers');
     banner(t.lvl === 1 ? '망루 완성!' : `망루 Lv ${t.lvl}!`, t.lvl === 1 ? '자동으로 화살을 쏴요' : '더 빠르고 강하게!', '#7bed9f', 1.6);
     burst(t.x, t.y - 20, '#ffd23f', 30, 220, 5, 0.6);
   } else if (pd.kind === 'tavern') {
@@ -1248,7 +1320,7 @@ function updCamps(dt) {
   }
 }
 function campDie(e) {
-  const c = e.camp; c.lvl++; c.rebuild = CAMP_REBUILD; c.e = null; questEvent('camp');
+  const c = e.camp; c.lvl++; c.rebuild = CAMP_REBUILD; c.e = null; questEvent('camp'); stAdd('camps');
   for (let i = 0; i < 4; i++) burst(e.x + rand(-30, 30), e.y + rand(-30, 30), ['#8d5524', '#ffd23f', '#e63946', '#555'][i], 30, 300, 7, 1);
   for (let i = 0; i < 20 + c.lvl * 8; i++) dropCoin(e.x + rand(-40, 40), e.y + rand(-40, 40));
   for (let i = 0; i < 12; i++) dropGem(e.x + rand(-40, 40), e.y + rand(-40, 40), 4);
@@ -1514,7 +1586,7 @@ function trainee() { // 훈련받을 동료: 레벨이 가장 낮은 동료 (최
 }
 function hireAlly(type) {
   const T = ALLY_TYPES[type];
-  G.allies.push(makeAlly(type));
+  G.allies.push(makeAlly(type)); stMax('allies', G.allies.length);
   banner(`${T.name} 합류!`, '영웅을 따라다니며 함께 싸워요', '#3fa9f5', 1.8);
   setTimeout(() => sfx(type === 'shield' ? 'bark' : 'meow'), 250);
   startAct(G.allies[G.allies.length - 1], 'cheer');
@@ -2096,7 +2168,7 @@ function dropCoin(x, y) {
 function killEnemy(e) {
   e.dead = true; G.kills++;
   if (G.allies.length) allyGainXp(e.x, e.y, e.boss ? 40 : e.camp ? 20 : e.xp);
-  if (!e.boss && !e.camp) { questEvent('kill'); if (e.type.startsWith('e_')) questEvent('special'); }
+  if (!e.boss && !e.camp) { questEvent('kill'); stAdd('kills'); if (e.type.startsWith('e_')) { questEvent('special'); if (SPECIALS.some(q => q[0] === e.type)) stSet('specT', e.type); } }
   if (e.boss) { bossDie(e); return; }
   if (e.camp) { campDie(e); return; }
   if (e.type === 'e_slime' && !e.small) for (let k = 0; k < 2; k++) { // 작은 슬라임 2마리로
@@ -2118,7 +2190,7 @@ function killEnemy(e) {
   if (Math.random() < 0.012) G.hearts.push({ x: e.x, y: e.y, bob: 0 });
 }
 function bossDie(e) {
-  G.boss = null; G.bossKills = (G.bossKills || 0) + 1; questEvent('boss');
+  G.boss = null; G.bossKills = (G.bossKills || 0) + 1; questEvent('boss'); stAdd('bosses'); stSet('bossT', e.name);
   for (let i = 0; i < 5; i++) burst(e.x + rand(-40, 40), e.y + rand(-40, 40), [e.color, '#ffd23f', '#fff', '#ff9f1c', '#222'][i], 40, 380, 8, 1.2);
   for (let i = 0; i < 30; i++) { const a = Math.random() * Math.PI * 2, d = rand(10, 90); dropGem(e.x + Math.cos(a) * d, e.y + Math.sin(a) * d, 5); }
   for (let i = 0; i < 40 + e.lvl * 20; i++) dropCoin(e.x + rand(-40, 40), e.y + rand(-40, 40));
@@ -3423,7 +3495,7 @@ function drawWorld() {
     for (const d of G.st.deco) if (vis(d)) list.push({ y: d.y, draw: () => drawDeco(d) });
     for (const c of G.st.cages) if (vis(c)) list.push({ y: c.y, draw: () => drawCage(c) });
   }
-  if (!p.dead && G.deadT <= 0) list.push({ y: p.y, draw: () => { if (p.slowT > 0) { ctx.save(); ctx.translate(p.x, p.y); ctx.scale(1, IK); ctx.strokeStyle = 'rgba(160,210,255,.9)'; ctx.lineWidth = 3; ctx.beginPath(); ctx.ellipse(0, 2, 16, 6, 0, 0, 7); ctx.stroke(); ctx.restore(); } drawStick(p); } });
+  if (!p.dead && G.deadT <= 0) list.push({ y: p.y, draw: () => { if (p.slowT > 0) { ctx.save(); ctx.translate(p.x, p.y); ctx.scale(1, IK); ctx.strokeStyle = 'rgba(160,210,255,.9)'; ctx.lineWidth = 3; ctx.beginPath(); ctx.ellipse(0, 2, 16, 6, 0, 0, 7); ctx.stroke(); ctx.restore(); } drawStick(p); drawHeroTitle(p); } });
   for (const a of G.allies) if (!a.dead) list.push({ y: a.y, draw: () => drawAlly(a) });
   list.sort((a, b) => a.y - b.y);
   for (const e of list) { if (e.draw) e.draw(); else if (e.boss) drawBoss(e); else drawEnemy(e); }
@@ -3551,6 +3623,14 @@ function hudText(t, x, y, size, color, align) {
   ctx.font = `900 ${size}px system-ui,sans-serif`; ctx.textAlign = align || 'left'; ctx.textBaseline = 'middle';
   ctx.lineWidth = 4; ctx.strokeStyle = '#222'; ctx.lineJoin = 'round'; ctx.strokeText(t, x, y);
   ctx.fillStyle = color || '#fff'; ctx.fillText(t, x, y);
+}
+function drawHeroTitle(p) { // 달아 둔 칭호 (2초마다 다시 읽음)
+  if (heroTitleCache === undefined || G.t - heroTitleT > 2) { heroTitleCache = heroTitle(); heroTitleT = G.t; }
+  if (!heroTitleCache) return;
+  ctx.save(); ctx.translate(p.x, p.y - 88 * IK); ctx.scale(1, IK); ctx.font = '900 10px system-ui,sans-serif'; ctx.textAlign = 'center';
+  const t = '🏅 ' + heroTitleCache, w = ctx.measureText(t).width + 10;
+  roundRect(-w / 2, -9, w, 16, 8); ctx.fillStyle = 'rgba(0,0,0,.55)'; ctx.fill();
+  ctx.fillStyle = '#ffd23f'; ctx.fillText(t, 0, 3); ctx.restore();
 }
 function drawMinimap(x, y, size) { // 작은 지도: 마을·적 진지·바위·영웅·보스
   const R = size / 2, cx = x + R, cy = y + R, k = R / WORLD_R;

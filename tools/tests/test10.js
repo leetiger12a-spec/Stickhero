@@ -23,6 +23,7 @@ const { chromium } = require('/opt/node22/lib/node_modules/playwright');
       while (SH.state === 'levelup' || SH.state === 'allypick') { if (SH.state === 'allypick') SH.chooseAlly(0); else SH.choose(0); }
       if (SH.state !== 'play') break;
       if (G.intro) endIntro();
+      G.p.hp = G.p.maxHp;   // 영웅은 죽지 않게 (Build 46부터 체력이 최대치로 맞춰짐)
       const st = G.st; if (!st) break;
       // 길을 따라 위로, 우리가 있으면 우리로, 포털이 있으면 포털로
       const cage = st.cages.find(c => !c.freed);
@@ -62,7 +63,9 @@ const { chromium } = require('/opt/node22/lib/node_modules/playwright');
   await page.evaluate(() => { SH.ok(); SH.openMap(); }); await page.waitForTimeout(300);
   await page.screenshot({ path: `${process.env.OUT||OUT||'.'}/b24_map_full.png` });
   // 저장/불러오기에 별 포함
-  const saved = await page.evaluate(() => { SH.ok(); saveGame(); return JSON.parse(localStorage.getItem('stickhero_save')).stars; });
+  let saved = null;   // 결과·지도·이야기 화면이 다 닫히고 마을로 돌아온 뒤에 저장
+  for (let i = 0; i < 40; i++) { saved = await page.evaluate(() => { SH.ok(); if (SH.state === 'story') document.getElementById('bStorySkip').click(); if (SH.state !== 'play' || SH.G.mode !== 'base') return null; saveGame(); return JSON.parse(localStorage.getItem('stickhero_save')).stars; }); if (saved) break; await page.waitForTimeout(150); }
+  if (!(Array.isArray(saved) && saved[9] >= 1)) console.log('DBG', JSON.stringify(saved), await page.evaluate(() => JSON.stringify({ st: SH.state, mode: SH.G.mode, stars: SH.G.stars, stageN: SH.G.stageN, dead: SH.G.p.dead, deadT: SH.G.deadT, baseDead: SH.G.baseDead })));
   check(Array.isArray(saved) && saved[9] >= 1, 'stars not saved');
   await browser.close(); console.log('ERRORS:', errors.length); errors.forEach(e => console.log(e)); process.exit(errors.length ? 1 : 0);
 })();
