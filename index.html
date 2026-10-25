@@ -195,19 +195,35 @@ h2{margin:0 0 14px;font-size:clamp(30px,9vw,48px);color:#ffd23f;text-shadow:0 3p
 
 <script>
 'use strict';
-const BUILD = 37;
+const BUILD = 38;
 const BOSS_INTERVAL = 180;      // 보스 등장 간격(초)
 const WAVE_INTERVAL = 60;       // 대규모 몰이 이벤트 간격(초)
 const MAX_ENEMIES = 220;
 const MAP_R = 720;              // 싸움터 반지름
-const WALL_R = 165;             // 울타리 반지름
+let WALL_R = 165;               // 울타리 반지름 (마을 레벨에 따라 넓어짐)
 const BASE_R = 34;              // 마을 회관 크기
 const WALL_SEGS = 16;
 const K = 0.72, IK = 1 / K;      // 3/4 시점: 땅은 세로로 납작하게, 서 있는 물체는 그대로
 const TOWER_W = [6, 0, 0, 0, 0], TOWER_G = [0, 20, 40, 70, 110];    // 망루: 처음엔 통나무, 강화는 금화만
-const WALL_W = [0, 8, 12, 16, 20], WALL_G = [0, 10, 25, 40, 60];     // 울타리: 현재 Lv 기준
+const WALL_W = [0, 8, 12, 16, 20, 0, 0], WALL_G = [0, 10, 25, 40, 60, 80, 120], WALL_S = [0, 0, 0, 0, 0, 15, 30];   // 울타리: 현재 Lv 기준 (Lv6~7은 돌 성벽)
+// 마을 레벨: 마을회관을 키우면 울타리가 넓어지고 새 건물 자리가 생김
+const VILLAGE = [
+  { r: 165 },
+  { r: 225, cost: { w: 30, g: 250, s: 0 },  hp: 500, desc: '울타리가 넓어지고 🌾 농장 · ⛏ 광산 자리가 생겨요' },
+  { r: 285, cost: { w: 40, g: 600, s: 25 }, hp: 500, desc: '더 넓게! 🏪 시장 · 바깥 망루 2개 자리가 생겨요' },
+];
+const FARM = { x: -150, y: -112 }, MINE = { x: 150, y: -112 }, MARKET = { x: 0, y: -235 };
+const BLD = {   // 새 건물: 짓기 비용 + 강화 비용(Lv2, Lv3)
+  farm:   { name: '🌾 농장', at: FARM,   vl: 2, cost: [{ w: 15, g: 100 }, { w: 0, g: 150 }, { w: 0, g: 300 }] },
+  mine:   { name: '⛏ 광산', at: MINE,   vl: 2, cost: [{ w: 20, g: 120 }, { w: 0, g: 180 }, { w: 0, g: 350 }] },
+  market: { name: '🏪 시장', at: MARKET, vl: 3, cost: [{ w: 25, g: 200, s: 10 }, { w: 0, g: 300, s: 10 }, { w: 0, g: 500, s: 20 }] },
+};
+const wallMax = () => G.bld.mine ? 7 : 5;
+function setVillage(l) { // 마을 크기 적용 (효과 없이)
+  G.vLvl = l; WALL_R = VILLAGE[l - 1].r; GATE.y = WALL_R - 37;
+}
 const REPAIR_W = 4;
-const GATE = { x: 0, y: 128 };  // 출격 문 자리
+const GATE = { x: 0, y: 128 };  // 출격 문 자리 (울타리 바로 안쪽, 마을이 넓어지면 같이 이동)
 const SMITH = { x: -122, y: -8 }; // 대장간 자리
 const FORGE_MAX = 10;
 const TAVERN = { x: 122, y: -8 };  // 영웅 숙소(동료 고용) 자리
@@ -634,11 +650,11 @@ function newGame() {
     smith: false, forge: 0, tavern: false, allies: [], raid: null, raidIn: 0, raidCount: 0, drumT: 0,
     gold: 0, base: { hp: 1500, maxHp: 1500, hitT: 0 }, respawnT: 0, squadAng: Math.random() * 7, squadT: 6,
     walls: Array.from({ length: WALL_SEGS }, () => ({ hp: 0, maxHp: 0, shake: 0 })), wallLvl: 0,
-    towers: [], pads: [], baseDead: false,
+    towers: [], pads: [], baseDead: false, vLvl: 1, stone: 0, bld: { farm: 0, mine: 0, market: 0 }, mineT: 0, marketT: 0,
     spawnAcc: 0, nextBoss: BOSS_INTERVAL, nextWave: WAVE_INTERVAL, bossCount: 0, boss: null,
     shake: 0, swordAng: 0, slow: 0, banner: null, deadT: 0, cam: { x: 0, y: 0 }, lvlFlash: 0,
   };
-  G.p.y = 70; G.cam.y = 58;
+  G.p.y = 92; G.cam.y = 80; setVillage(1);
   // 망루 자리 4곳 + 울타리 강화 자리 1곳 (order 순서대로 하나씩 열림)
   [1, 3, -3, -1].forEach((k, i) => {
     const a = k * Math.PI / 4, x = Math.cos(a) * 108, y = Math.sin(a) * 108;
@@ -648,6 +664,13 @@ function newGame() {
   G.pads.push({ kind: 'wall', x: 0, y: -WALL_R + 52, pw: 0, pg: 0, acc: 0, order: 1, built: false });
   G.pads.push({ kind: 'smith', x: SMITH.x, y: SMITH.y, pw: 0, pg: 0, acc: 0, order: 2, built: false });
   G.pads.push({ kind: 'tavern', x: TAVERN.x, y: TAVERN.y, pw: 0, pg: 0, acc: 0, order: 3, built: false });
+  // 마을 확장 (저장 순서 유지를 위해 항상 뒤에 추가)
+  G.pads.push({ kind: 'hall', x: 0, y: 46, pw: 0, pg: 0, ps: 0, acc: 0, order: 5, built: false });
+  for (const id of ['farm', 'mine', 'market']) G.pads.push({ kind: 'bld', id, x: BLD[id].at.x, y: BLD[id].at.y, pw: 0, pg: 0, ps: 0, acc: 0, vl: BLD[id].vl, built: false });
+  [[-205, 95], [205, 95]].forEach(([x, y], k) => {
+    G.towers.push({ x, y, lvl: 0, cd: 0 });
+    G.pads.push({ kind: 'tower', idx: 4 + k, x, y, pw: 0, pg: 0, acc: 0, vl: 3, built: false });
+  });
   // 나무 숲 4곳 (첫 숲은 마을 가까이)
   const a0 = Math.random() * 7;
   for (let g = 0; g < 4; g++) {
@@ -771,8 +794,9 @@ function saveGame() {
     t: G.t, bt: G.bt, kills: G.kills, lvl: G.lvl, xp: G.xp, need: G.need, pending: G.pending,
     weapons: G.weapons, passives: G.passives, gold: G.gold, logs: p.logs, hp: p.dead ? -1 : p.hp,
     base: G.base.hp, wallLvl: G.wallLvl, walls: G.walls.map(w => w.hp), towers: G.towers.map(t => t.lvl),
-    pads: G.pads.map(q => [q.built, q.pw, q.pg]), smith: G.smith, forge: G.forge, tavern: G.tavern,
+    pads: G.pads.map(q => [q.built, q.pw, q.pg, q.ps || 0]), smith: G.smith, forge: G.forge, tavern: G.tavern,
     allies: G.allies.map(a => a.type), stageN: G.stageN, stars: G.stars, bossCount: G.bossCount - (G.boss ? 1 : 0), bossKills: G.bossKills || 0,
+    vLvl: G.vLvl, stone: G.stone, bld: G.bld,
     nextBoss: G.boss ? 15 : G.nextBoss, nextWave: G.nextWave, raidCount: G.raidCount - (G.raid ? 1 : 0), raidPending: !!(G.raid || G.raidIn > 0),
   });
   G.saveT = 10;
@@ -791,8 +815,10 @@ function loadGame(d) {
   G.base.hp = d.base;
   const mh = 100 + 80 * G.wallLvl;
   G.walls.forEach((w, i) => { w.maxHp = mh; w.hp = d.walls[i]; });
-  G.towers.forEach((t, i) => { t.lvl = d.towers[i]; });
-  G.pads.forEach((q, i) => { const s = d.pads[i]; if (s) { q.built = s[0]; q.pw = s[1]; q.pg = s[2]; } });
+  G.towers.forEach((t, i) => { t.lvl = d.towers[i] || 0; });
+  G.pads.forEach((q, i) => { const s = d.pads[i]; if (s) { q.built = s[0]; q.pw = s[1]; q.pg = s[2]; q.ps = s[3] || 0; } });
+  setVillage(d.vLvl || 1); G.stone = d.stone || 0; G.bld = Object.assign({ farm: 0, mine: 0, market: 0 }, d.bld || {});
+  G.base.maxHp = 1500 + VILLAGE.slice(1, G.vLvl).reduce((a, v) => a + v.hp, 0);
   G.allies = [];
   for (const type of d.allies) { const T = ALLY_TYPES[type]; G.allies.push({ type, slot: G.allies.length, x: TAVERN.x, y: TAVERN.y + 34, hp: T.hp, maxHp: T.hp, cd: 0, inv: 0, face: 1, wob: 0, swing: 0, dead: false, reviveT: 0 }); }
   if (d.raidPending) G.raidIn = 10;
@@ -969,26 +995,50 @@ function floatText(x, y, text, color, size, life) {
 // ---------- 마을 · 울타리 · 망루 ----------
 const segOf = (x, y) => { let a = Math.atan2(y, x); if (a < 0) a += Math.PI * 2; return Math.floor(a / (Math.PI * 2) * WALL_SEGS) % WALL_SEGS; };
 function upgradeWall() {
-  if (G.wallLvl < 5) G.wallLvl++;
+  if (G.wallLvl < wallMax()) G.wallLvl++;
   const mh = 100 + 80 * G.wallLvl;
   for (const w of G.walls) { w.maxHp = mh; w.hp = mh; }
 }
 function repairWall() { for (const w of G.walls) w.hp = w.maxHp; }
-function padVisible(pd) { return pd.order === 0 || G.pads.some(q => q.order === pd.order - 1 && q.built); }
+function padVisible(pd) {
+  if (pd.vl) return G.vLvl >= pd.vl;
+  return pd.order === 0 || G.pads.some(q => q.order === pd.order - 1 && q.built);
+}
 function padCost(pd) {
   if (!padVisible(pd)) return null;
   if (pd.kind === 'tower') { const l = G.towers[pd.idx].lvl; return l < 5 ? { w: TOWER_W[l], g: TOWER_G[l] } : null; }
   if (pd.kind === 'tavern') return !G.tavern ? { w: 12, g: 40 } : G.allies.length < ALLY_MAX ? { w: 0, g: ALLY_COST[G.allies.length] } : null;
   if (pd.kind === 'smith') return !G.smith ? { w: 10, g: 20 } : G.forge < FORGE_MAX ? { w: 0, g: 25 + 15 * G.forge } : null;
-  if (G.wallLvl < 5) return { w: WALL_W[G.wallLvl], g: WALL_G[G.wallLvl] };
+  if (pd.kind === 'hall') return G.vLvl < VILLAGE.length ? VILLAGE[G.vLvl].cost : null;
+  if (pd.kind === 'bld') { const l = G.bld[pd.id]; return l < 3 ? BLD[pd.id].cost[l] : null; }
+  if (G.wallLvl < wallMax()) return { w: WALL_W[G.wallLvl], g: WALL_G[G.wallLvl], s: WALL_S[G.wallLvl] };
   return G.walls.some(w => w.hp < w.maxHp) ? { w: REPAIR_W, g: 0 } : null;
 }
-const padOY = pd => pd.kind === 'tower' && G.towers[pd.idx].lvl > 0 ? 40 : (pd.kind === 'smith' && G.smith) || (pd.kind === 'tavern' && G.tavern) ? 30 : 0;
+const padOY = pd => pd.kind === 'tower' && G.towers[pd.idx].lvl > 0 ? 40 : (pd.kind === 'smith' && G.smith) || (pd.kind === 'tavern' && G.tavern) || (pd.kind === 'bld' && G.bld[pd.id]) ? 30 : 0;
 function padLabel(pd) {
   if (pd.kind === 'tower') { const l = G.towers[pd.idx].lvl; return l === 0 ? '망루 짓기' : l < 5 ? `망루 Lv${l + 1}` : '망루 MAX'; }
   if (pd.kind === 'smith') return G.smith ? `⚒ 강화 Lv${G.forge + 1}` : '대장간 짓기';
   if (pd.kind === 'tavern') return G.tavern ? `👥 동료 고용 ${G.allies.length + 1}/${ALLY_MAX}` : '영웅 숙소 짓기';
-  return G.wallLvl < 5 ? `울타리 Lv${G.wallLvl + 1}` : '울타리 수리';
+  if (pd.kind === 'hall') return `🏛 마을 Lv${G.vLvl + 1}`;
+  if (pd.kind === 'bld') { const l = G.bld[pd.id]; return l ? `${BLD[pd.id].name} Lv${l + 1}` : `${BLD[pd.id].name} 짓기`; }
+  return G.wallLvl < wallMax() ? (G.wallLvl >= 5 ? `🪨 돌 성벽 Lv${G.wallLvl + 1}` : `울타리 Lv${G.wallLvl + 1}`) : '울타리 수리';
+}
+const BLD_MSG = {
+  farm:   l => l === 1 ? ['🌾 농장 완성!', '마을 안에 있으면 체력이 차오르고 마을도 고쳐져요'] : [`🌾 농장 Lv ${l}!`, '회복이 더 빨라져요'],
+  mine:   l => l === 1 ? ['⛏ 광산 완성!', '🪨 돌이 저절로 모여요 · 돌 성벽을 지을 수 있어요'] : [`⛏ 광산 Lv ${l}!`, '돌이 더 빨리 모여요'],
+  market: l => l === 1 ? ['🏪 시장 완성!', '10초마다 금화가 들어와요'] : [`🏪 시장 Lv ${l}!`, '금화가 더 많이 들어와요'],
+};
+function hallUp() { // 마을 레벨업: 울타리 넓히기 + 마을 체력 + 숲 밀어내기
+  const V = VILLAGE[G.vLvl];
+  setVillage(G.vLvl + 1);
+  G.base.maxHp += V.hp; G.base.hp = G.base.maxHp; repairWall();
+  for (const t of G.trees) {
+    const r = Math.hypot(t.x, t.y);
+    if (r < WALL_R + 55) { const k = (WALL_R + 55 + Math.random() * 120) / r; t.x *= k; t.y *= k; }
+  }
+  for (const e of G.enemies) { const r = Math.hypot(e.x, e.y); if (r < WALL_R + 20) { const k = (WALL_R + 30) / (r || 1); e.x *= k; e.y *= k; e.inside = false; } }
+  banner(`🏛 마을 Lv ${G.vLvl}!`, V.desc, '#ffd23f', 3); sfx('unlock'); cheerAll();
+  for (let i = 0; i < 24; i++) { const a = i / 24 * Math.PI * 2; burst(Math.cos(a) * WALL_R, Math.sin(a) * WALL_R, '#ffd23f', 5, 120, 4, 0.6); }
 }
 function padDone(pd) {
   pd.built = true;
@@ -1000,12 +1050,18 @@ function padDone(pd) {
     if (!G.tavern) { G.tavern = true; banner('영웅 숙소 완성!', '금화로 동료를 고용해요', '#7bed9f', 1.8); }
     else openAllyPick();
     burst(TAVERN.x, TAVERN.y - 20, '#3fa9f5', 30, 220, 5, 0.6);
+  } else if (pd.kind === 'hall') {
+    hallUp();
+  } else if (pd.kind === 'bld') {
+    const l = ++G.bld[pd.id], m = BLD_MSG[pd.id](l);
+    banner(m[0], m[1], '#7bed9f', 2); burst(pd.x, pd.y - 20, '#7bed9f', 30, 220, 5, 0.6);
+    if (pd.id === 'mine' && l === 1 && G.wallLvl >= 5) floatText(0, -WALL_R + 30, '🪨 돌 성벽을 올릴 수 있어요!', '#ddd', 16, 2);
   } else if (pd.kind === 'smith') {
     if (!G.smith) { G.smith = true; banner('대장간 완성!', '금화로 무기를 강화해요', '#7bed9f', 1.8); }
     else { G.forge++; recalcStats(); banner(`무기 강화 Lv ${G.forge}!`, '모든 공격력 +10%', '#ffd23f', 1.6); sfx('swing'); }
     burst(SMITH.x, SMITH.y - 20, '#ff9f1c', 30, 220, 5, 0.6);
   } else {
-    if (G.wallLvl < 5) { upgradeWall(); banner(`울타리 Lv ${G.wallLvl}!`, '튼튼하게 다시 세웠다', '#7bed9f', 1.6); }
+    if (G.wallLvl < wallMax()) { upgradeWall(); banner(G.wallLvl >= 6 ? `🪨 돌 성벽 Lv ${G.wallLvl}!` : `울타리 Lv ${G.wallLvl}!`, '튼튼하게 다시 세웠다', '#7bed9f', 1.6); }
     else { repairWall(); banner('울타리 수리 완료!', '', '#7bed9f', 1.4); }
     for (let i = 0; i < WALL_SEGS; i++) { const a = (i + 0.5) / WALL_SEGS * Math.PI * 2; burst(Math.cos(a) * WALL_R, Math.sin(a) * WALL_R, '#c68642', 6, 100, 4, 0.5); }
   }
@@ -1161,9 +1217,12 @@ function updBase(dt) {
         const n = Math.min(Math.max(3, Math.ceil(c.g / 25)), c.g - pd.pg, G.gold);   // 비싼 건 더 빨리 쏙쏙
         G.gold -= n; pd.pg += n; sfx('pay');
         G.flyers.push({ x0: p.x, y0: p.y - 30, x1: pd.x, y1: pd.y + oy, t: 0, dur: 0.25, kind: 'coin' });
+      } else if ((pd.ps || 0) < (c.s || 0) && G.stone > 0) {
+        G.stone--; pd.ps = (pd.ps || 0) + 1; sfx('stack');
+        G.flyers.push({ x0: p.x, y0: p.y - 30, x1: pd.x, y1: pd.y + oy, t: 0, dur: 0.25, kind: 'stone' });
       } else { pd.acc = 0; break; }
     }
-    if (pd.pw >= c.w && pd.pg >= c.g) { pd.pw = pd.pg = 0; padDone(pd); }
+    if (pd.pw >= c.w && pd.pg >= c.g && (pd.ps || 0) >= (c.s || 0)) { pd.pw = pd.pg = pd.ps = 0; padDone(pd); }
   }
   for (const f of G.flyers) f.t += dt;
   G.flyers = G.flyers.filter(f => f.t < f.dur);
@@ -1180,6 +1239,23 @@ function updBase(dt) {
       const pd = near(G.pads.filter(q => padCost(q) && padCost(q).w > 0).map(q => ({ x: q.x, y: q.y + padOY(q) })));
       if (pd) G.hint = { x: pd.x, y: pd.y, text: '🎒 가득 찼어요! 동그라미로 가져가요' };
     }
+  }
+
+  // 새 건물들
+  if (G.bld.farm) { // 농장: 울타리 안에 있으면 영웅·동료 회복, 마을 수리
+    const rg = 1.5 + 1.5 * G.bld.farm;
+    if (!p.dead && Math.hypot(p.x, p.y) < WALL_R && p.hp < p.maxHp) p.hp = Math.min(p.maxHp, p.hp + rg * dt);
+    for (const a of G.allies) if (!a.dead && Math.hypot(a.x, a.y) < WALL_R) a.hp = Math.min(a.maxHp, a.hp + rg * dt);
+    G.base.hp = Math.min(G.base.maxHp, G.base.hp + G.bld.farm * dt);
+  }
+  if (G.bld.mine) { // 광산: 돌이 저절로
+    G.mineT += dt;
+    const per = [0, 7, 5, 3.5][G.bld.mine];
+    if (G.mineT >= per) { G.mineT -= per; G.stone++; G.texts.push({ x: MINE.x, y: MINE.y - 50, text: '+🪨', color: '#dee2e6', size: 14, life: 0.8, max: 0.8 }); }
+  }
+  if (G.bld.market) { // 시장: 10초마다 금화
+    G.marketT += dt;
+    if (G.marketT >= 10) { G.marketT -= 10; const n = [0, 8, 14, 22][G.bld.market]; G.gold += n; G.texts.push({ x: MARKET.x, y: MARKET.y - 60, text: `+🪙${n}`, color: '#ffd23f', size: 16, life: 1, max: 1 }); sfx('coin'); }
   }
 
   // 망루
@@ -1869,7 +1945,7 @@ function update(dt) {
     G.respawnT -= dt;
     if (G.respawnT <= 0) {
       if (G.mode === 'stage') returnBase(false);
-      p.dead = false; p.hp = p.maxHp; p.inv = 2; p.x = 0; p.y = 60;
+      p.dead = false; p.hp = p.maxHp; p.inv = 2; p.x = 0; p.y = 92;
       burst(p.x, p.y - 12, '#ffd23f', 30, 220, 5, 0.7); sfx('level');
       banner('영웅 부활!', '', '#ffd23f', 1.2);
     }
@@ -2304,7 +2380,7 @@ function drawGround() {
 }
 
 function drawWallSeg(i) {
-  const lvl = G.wallLvl, stone = lvl >= 4;
+  const lvl = G.wallLvl, stone = lvl >= 4, rock = lvl >= 6;
   {
     const w = G.walls[i], a0 = i / WALL_SEGS * Math.PI * 2, a1 = (i + 1) / WALL_SEGS * Math.PI * 2;
     const n = SPR.stake ? 9 : 5, sh = w.shake > 0 ? rand(-1.5, 1.5) : 0;   // 그림 말뚝은 촘촘하게
@@ -2325,8 +2401,8 @@ function drawWallSeg(i) {
       const a = a0 + (k + 0.5) / n * (a1 - a0), x = Math.cos(a) * WALL_R + sh, y = Math.sin(a) * WALL_R;
       const tilt = dmg > 0.5 && k % 2 ? 0.35 : 0;
       ctx.save(); ctx.translate(x, y); ctx.scale(1, IK); ctx.rotate(tilt);
-      if (SPR.stake) { ctx.translate(0, 3); spr('stake', hgt + 10); if (stone) { ctx.globalAlpha = 0.35; spr('stake', hgt + 10, true); } ctx.restore(); continue; }
-      ctx.fillStyle = stone ? '#adb5bd' : lvl >= 2 ? '#b5733a' : '#c68642'; ctx.strokeStyle = '#4a2c12'; ctx.lineWidth = 1.8;
+      if (SPR.stake) { ctx.translate(0, 3); spr('stake', hgt + 10); if (stone) { ctx.globalAlpha = rock ? 0.6 : 0.35; spr('stake', hgt + 10, true); if (rock) { ctx.globalAlpha = 0.45; ctx.fillStyle = '#343a40'; ctx.fillRect(-5, -hgt - 6, 10, hgt + 6); } } ctx.restore(); continue; }
+      ctx.fillStyle = rock ? '#6c757d' : stone ? '#adb5bd' : lvl >= 2 ? '#b5733a' : '#c68642'; ctx.strokeStyle = rock ? '#212529' : '#4a2c12'; ctx.lineWidth = 1.8;
       ctx.beginPath(); ctx.moveTo(-4.5, 2); ctx.lineTo(-4.5, -hgt + 5); ctx.lineTo(0, -hgt); ctx.lineTo(4.5, -hgt + 5); ctx.lineTo(4.5, 2); ctx.closePath(); ctx.fill(); ctx.stroke();
       ctx.fillStyle = 'rgba(0,0,0,.15)'; ctx.fillRect(1.5, -hgt + 5, 3, hgt - 3);
       ctx.restore();
@@ -2391,6 +2467,10 @@ function drawBase() {
   ctx.fillStyle = '#ffd23f'; ctx.beginPath(); ctx.moveTo(0, -74); ctx.quadraticCurveTo(12, -72 + f, 22, -68); ctx.lineTo(0, -62); ctx.closePath(); ctx.fill(); ctx.stroke();
   ctx.restore();
   }
+  if (G.vLvl > 1) {
+    ctx.save(); ctx.scale(1, IK); ctx.font = '900 11px system-ui,sans-serif'; ctx.textAlign = 'center'; ctx.lineWidth = 3; ctx.strokeStyle = '#222';
+    const lb = `🏛 마을 Lv ${G.vLvl}`; ctx.strokeText(lb, 0, 50); ctx.fillStyle = '#ffd23f'; ctx.fillText(lb, 0, 50); ctx.restore();
+  }
   if (b.hp < b.maxHp) {
     ctx.fillStyle = '#222'; ctx.fillRect(-30, 28, 60, 9);
     ctx.fillStyle = '#2ecc71'; ctx.fillRect(-29, 29, 58 * b.hp / b.maxHp, 7);
@@ -2406,7 +2486,7 @@ function drawPads() {
     ctx.fillStyle = on ? 'rgba(255,210,63,.5)' : 'rgba(255,255,255,.35)';
     ctx.strokeStyle = '#fff'; ctx.lineWidth = 3; ctx.setLineDash([6, 5]); ctx.lineDashOffset = -G.t * 15;
     ctx.beginPath(); ctx.arc(0, 0, r, 0, 7); ctx.fill(); ctx.stroke(); ctx.setLineDash([]);
-    const done = (pd.pw + pd.pg) / (cost.w + cost.g || 1);
+    const done = (pd.pw + pd.pg + (pd.ps || 0)) / (cost.w + cost.g + (cost.s || 0) || 1);
     if (done > 0) {
       ctx.strokeStyle = '#ffd23f'; ctx.lineWidth = 6;
       ctx.beginPath(); ctx.arc(0, 0, r + 4, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * done); ctx.stroke();
@@ -2418,12 +2498,54 @@ function drawPads() {
     const parts = [];
     if (cost.w) parts.push(['🪵' + (cost.w - pd.pw), '#ffe0b3']);
     if (cost.g) parts.push(['🪙' + (cost.g - pd.pg), '#ffd23f']);
+    if (cost.s) parts.push(['🪨' + (cost.s - (pd.ps || 0)), '#dee2e6']);
     ctx.font = '900 12px system-ui,sans-serif';
     parts.forEach((pt, i) => { const y = (i - (parts.length - 1) / 2) * 14; ctx.strokeText(pt[0], 0, y); ctx.fillStyle = pt[1]; ctx.fillText(pt[0], 0, y); });
     ctx.restore();
   }
 }
 
+function drawStone(x, y) {
+  ctx.fillStyle = '#9aa0a6'; ctx.strokeStyle = '#3d4247'; ctx.lineWidth = 1.5;
+  ctx.beginPath(); ctx.moveTo(x - 6, y + 3); ctx.lineTo(x - 5, y - 3); ctx.lineTo(x, y - 6); ctx.lineTo(x + 6, y - 2); ctx.lineTo(x + 5, y + 4); ctx.closePath(); ctx.fill(); ctx.stroke();
+}
+function drawBld(id) {
+  const B = BLD[id], l = G.bld[id];
+  ctx.save(); ctx.translate(B.at.x, B.at.y); ctx.scale(1, IK);
+  ctx.fillStyle = 'rgba(0,0,0,.2)'; ctx.beginPath(); ctx.ellipse(0, 8, 32, 8, 0, 0, 7); ctx.fill();
+  if (SPR[id]) { ctx.translate(0, 12); spr(id, 72); ctx.translate(0, -12); }
+  else {
+    ctx.strokeStyle = '#2b1a0c'; ctx.lineWidth = 2.5;
+    if (id === 'farm') {
+      ctx.fillStyle = '#8d5524'; ctx.fillRect(-34, -6, 30, 18); ctx.strokeRect(-34, -6, 30, 18);   // 밭
+      for (let k = 0; k < 3; k++) for (let j = 0; j < 4; j++) { const sw = Math.sin(G.t * 3 + j + k) * 1.5;
+        ctx.strokeStyle = '#2d6a2e'; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(-31 + j * 8, 8 - k * 6); ctx.lineTo(-31 + j * 8 + sw, 2 - k * 6); ctx.stroke();
+        ctx.fillStyle = '#ffd23f'; ctx.beginPath(); ctx.arc(-31 + j * 8 + sw, 1 - k * 6, 2, 0, 7); ctx.fill(); }
+      ctx.strokeStyle = '#2b1a0c'; ctx.lineWidth = 2.5;
+      ctx.fillStyle = '#c0392b'; ctx.fillRect(2, -26, 30, 32); ctx.strokeRect(2, -26, 30, 32);       // 헛간
+      ctx.fillStyle = '#7f1d1d'; ctx.beginPath(); ctx.moveTo(-2, -24); ctx.lineTo(17, -42); ctx.lineTo(36, -24); ctx.closePath(); ctx.fill(); ctx.stroke();
+      ctx.fillStyle = '#fff'; ctx.fillRect(11, -12, 12, 18); ctx.strokeRect(11, -12, 12, 18);
+      ctx.beginPath(); ctx.moveTo(11, -12); ctx.lineTo(23, 6); ctx.moveTo(23, -12); ctx.lineTo(11, 6); ctx.stroke();
+    } else if (id === 'mine') {
+      ctx.fillStyle = '#6c757d'; ctx.beginPath(); ctx.moveTo(-34, 8); ctx.lineTo(-22, -30); ctx.lineTo(-4, -42); ctx.lineTo(16, -32); ctx.lineTo(32, 8); ctx.closePath(); ctx.fill(); ctx.stroke();   // 바위산
+      ctx.fillStyle = '#212529'; ctx.beginPath(); ctx.moveTo(-12, 8); ctx.lineTo(-12, -10); ctx.quadraticCurveTo(0, -22, 12, -10); ctx.lineTo(12, 8); ctx.closePath(); ctx.fill(); ctx.stroke();   // 굴
+      ctx.strokeStyle = '#8d5524'; ctx.lineWidth = 4; ctx.beginPath(); ctx.moveTo(-14, 8); ctx.lineTo(-14, -12); ctx.quadraticCurveTo(0, -26, 14, -12); ctx.lineTo(14, 8); ctx.stroke();
+      ctx.strokeStyle = '#2b1a0c'; ctx.lineWidth = 2;
+      ctx.fillStyle = '#a0623a'; ctx.fillRect(18, -2, 18, 10); ctx.strokeRect(18, -2, 18, 10);   // 수레
+      for (const [x, y] of [[21, -4], [27, -6], [33, -4]]) drawStone(x, y);
+      ctx.fillStyle = '#333'; ctx.beginPath(); ctx.arc(22, 10, 3, 0, 7); ctx.arc(32, 10, 3, 0, 7); ctx.fill();
+    } else {
+      ctx.fillStyle = '#e9c46a'; ctx.fillRect(-30, -18, 60, 26); ctx.strokeRect(-30, -18, 60, 26);   // 가판대
+      for (let k = 0; k < 6; k++) { ctx.fillStyle = k % 2 ? '#fff' : '#e63946'; ctx.beginPath(); ctx.moveTo(-36 + k * 12, -22); ctx.lineTo(-24 + k * 12, -22); ctx.lineTo(-22 + k * 12, -40); ctx.lineTo(-34 + k * 12, -40); ctx.closePath(); ctx.fill(); ctx.stroke(); }
+      ctx.fillStyle = '#ff9f1c'; ctx.beginPath(); ctx.arc(-16, -22, 5, 0, 7); ctx.fill(); ctx.fillStyle = '#7bed9f'; ctx.beginPath(); ctx.arc(-4, -22, 5, 0, 7); ctx.fill();
+      ctx.fillStyle = '#ffd23f'; ctx.beginPath(); ctx.arc(10, -22, 5, 0, 7); ctx.fill(); ctx.stroke();
+      ctx.fillStyle = '#8d5524'; ctx.fillRect(-28, 8, 4, 6); ctx.fillRect(24, 8, 4, 6);
+    }
+  }
+  ctx.font = '900 10px system-ui,sans-serif'; ctx.textAlign = 'center'; ctx.lineWidth = 3; ctx.strokeStyle = '#222';
+  const lb = `${B.name} Lv ${l}`; ctx.strokeText(lb, 0, SPR[id] ? -66 : -52); ctx.fillStyle = '#7bed9f'; ctx.fillText(lb, 0, SPR[id] ? -66 : -52);
+  ctx.restore();
+}
 function drawTavern() {
   if (!G.tavern) return;
   ctx.save(); ctx.translate(TAVERN.x, TAVERN.y); ctx.scale(1, IK);
@@ -2841,6 +2963,7 @@ function drawWorld() {
     for (const t of G.towers) if (t.lvl) list.push({ y: t.y + 4, draw: () => drawTower(t) });
     if (G.smith) list.push({ y: SMITH.y + 6, draw: drawSmith });
     if (G.tavern) list.push({ y: TAVERN.y + 6, draw: drawTavern });
+    for (const id in G.bld) if (G.bld[id]) list.push({ y: BLD[id].at.y + 6, draw: () => drawBld(id) });
   } else {
     for (const d of G.st.deco) if (vis(d)) list.push({ y: d.y, draw: () => drawDeco(d) });
     for (const c of G.st.cages) if (vis(c)) list.push({ y: c.y, draw: () => drawCage(c) });
@@ -2852,7 +2975,7 @@ function drawWorld() {
   for (const f of G.flyers) { // 날아가는 통나무·금화
     const k = f.t / f.dur, x = f.x0 + (f.x1 - f.x0) * k, y = f.y0 + (f.y1 - f.y0) * k - Math.sin(k * Math.PI) * 30;
     ctx.save(); ctx.translate(x, y); ctx.scale(1, IK);
-    if (f.kind === 'log') drawLog(0, 0, 1); else if (SPR.coin) { ctx.translate(0, 6); spr('coin', 12); } else { ctx.fillStyle = '#ffd23f'; ctx.strokeStyle = '#b8860b'; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.arc(0, 0, 5, 0, 7); ctx.fill(); ctx.stroke(); }
+    if (f.kind === 'log') drawLog(0, 0, 1); else if (f.kind === 'stone') drawStone(0, 0); else if (SPR.coin) { ctx.translate(0, 6); spr('coin', 12); } else { ctx.fillStyle = '#ffd23f'; ctx.strokeStyle = '#b8860b'; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.arc(0, 0, 5, 0, 7); ctx.fill(); ctx.stroke(); }
     ctx.restore();
   }
   // 안내 화살표
@@ -2992,6 +3115,7 @@ function drawHUD() {
   hudText(`🏠 ${Math.ceil(bb.hp)}`, 14, top + 57, 12, '#fff');
   hudText('🪙 ' + G.gold, W - 12, top + 60, 18, '#ffd23f', 'right');
   if (G.mode === 'base') hudText(`🪵 ${p.logs}/${p.cap}`, W - 12, top + 86, 16, p.logs >= p.cap ? '#ff6b6b' : '#ffe0b3', 'right');
+  if (G.mode === 'base' && (G.bld.mine || G.stone > 0)) hudText(`🪨 ${G.stone}`, W - 12, top + 108, 16, '#dee2e6', 'right');
   if (G.hint && !G.radio) {
     ctx.font = '900 15px system-ui,sans-serif'; const tw = ctx.measureText(G.hint.text).width;
     roundRect(W / 2 - tw / 2 - 12, H - 92, tw + 24, 30, 15); ctx.fillStyle = 'rgba(0,0,0,.55)'; ctx.fill();

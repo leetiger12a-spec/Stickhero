@@ -37,7 +37,7 @@ const RUNS = +process.argv[2] || 4, MINUTES = +process.argv[3] || 15, STYLE = pr
             if (foe && fd < (foe.boss ? 150 : 55) && !(cg && Math.hypot(cg.x - p.x, cg.y - p.y) < 40)) { tx = p.x - (foe.x - p.x); ty = p.y - (foe.y - p.y); }   // 너무 가까우면 피하기
           } else {
             const threat = g.enemies.filter(e => Math.hypot(e.x, e.y) < 330);
-            const pads = g.pads.map(q => ({ q, c: padCost(q) })).filter(o => o.c && p.logs >= Math.min(o.c.w - o.q.pw, p.logs) && (o.c.w - o.q.pw <= p.logs || p.logs >= p.cap) && (o.c.g - o.q.pg <= g.gold || o.c.g === 0) && (o.c.w > 0 || o.c.g > 0) && !(o.c.w - o.q.pw > 0 && p.logs === 0));
+            const pads = g.pads.map(q => ({ q, c: padCost(q) })).filter(o => o.c && p.logs >= Math.min(o.c.w - o.q.pw, p.logs) && (o.c.w - o.q.pw <= p.logs || p.logs >= p.cap) && (o.c.g - o.q.pg <= g.gold || o.c.g === 0) && ((o.c.s || 0) - (o.q.ps || 0) <= g.stone) && (o.c.w > 0 || o.c.g > 0) && !(o.c.w - o.q.pw > 0 && p.logs === 0));
             if (threat.length && !lowHp) { const t = near(threat, p.x, p.y); tx = t.x; ty = t.y; if (Math.hypot(t.x - p.x, t.y - p.y) < 60) { tx = p.x - (t.x - p.x); ty = p.y - (t.y - p.y); } }
             else if (lowHp) { tx = 0; ty = 60; }
             else if (pads.length) { const o = pads[0]; tx = o.q.x; ty = o.q.y + padOY(o.q); }
@@ -63,7 +63,7 @@ const RUNS = +process.argv[2] || 4, MINUTES = +process.argv[3] || 15, STYLE = pr
           ev(`[상태] 마을 ${Math.round(g2.base.hp)} · 적 ${g2.enemies.length}(안 ${inside}) · 부서진 울타리 ${broken}/16 · 망루 ${g2.towers.map(t => t.lvl).join('')} · 🪵${p2.logs} 🪙${g2.gold} · 영웅Lv ${g2.lvl}`); }
       }
       const g = G();
-      return { log, t: Math.round(g.t), state: SH.state, lvl: g.lvl, kills: g.kills, gold: g.gold, base: Math.round(g.base.hp), minBase: Math.round(st.minBase), firstTower: st.firstTower, stages: st.stages, deaths: st.deaths, raidsWon: st.raidsWon, bosses: g.bossKills || 0, towers: g.towers.map(t => t.lvl).join(''), wall: g.wallLvl, forge: g.forge, smith: g.smith, weapons: JSON.stringify(g.weapons) };
+      return { log, t: Math.round(g.t), state: SH.state, lvl: g.lvl, kills: g.kills, gold: g.gold, base: Math.round(g.base.hp), minBase: Math.round(st.minBase), firstTower: st.firstTower, stages: st.stages, deaths: st.deaths, raidsWon: st.raidsWon, bosses: g.bossKills || 0, towers: g.towers.map(t => t.lvl).join(''), wall: g.wallLvl, vLvl: g.vLvl, bld: JSON.stringify(g.bld), stone: g.stone, forge: g.forge, smith: g.smith, weapons: JSON.stringify(g.weapons) };
     }, [MINUTES, STYLE]);
     results.push(r);
     await page.close();
