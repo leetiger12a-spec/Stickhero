@@ -72,7 +72,7 @@ const URL = 'file:///home/user/Stickhero/index.html';
     check(s2 === 'over', 'game over not reached: ' + s2);
     await page.screenshot({ path: `${process.env.OUT||OUT||'.'}/b3_07_over.png` });
     await page.tap('#bRetry'); await page.waitForTimeout(300);
-    check(await page.evaluate(() => SH.state === 'play' && SH.G.gold === 0 && SH.G.p.logs === 0), 'retry failed');
+    check(await page.evaluate(() => SH.state === 'play' && SH.G.day === 2 && SH.G.lvl === 1 && SH.G.p.logs === 0), 'retry failed');   // Build 41: 마을은 부서진 채로 다음 날
   });
   await run('desktop', { viewport: { width: 1280, height: 800 } }, async page => {
     await page.click('#bStart');

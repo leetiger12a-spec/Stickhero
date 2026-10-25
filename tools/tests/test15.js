@@ -27,7 +27,7 @@ const { chromium } = require('/opt/node22/lib/node_modules/playwright');
   await page.screenshot({ path: `${OUT}/b35_shop_title.png` });
   await page.click('.sbuy >> nth=5');   // 든든한 시작 60
   check(await page.evaluate(() => JSON.parse(localStorage.getItem('stickhero_meta')).bank === 90), 'bank spend wrong');
-  await page.click('#bShopOk'); await page.click('#bStart'); await page.waitForTimeout(300);
+  await page.click('#bShopOk'); await page.click('#bStart'); await page.click('#bStart'); await page.waitForTimeout(300);   // 저장(부서진 마을)이 있으면 두 번 눌러 새로 시작
   const st = await page.evaluate(() => ({ gold: SH.G.gold, hp: SH.G.p.maxHp }));
   console.log('new run', JSON.stringify(st)); check(st.gold === 25 && st.hp === 120, 'upgrades not applied in new run');
   await b.close(); console.log('ERRORS:', errors.length); errors.forEach(e => console.log(e)); process.exit(errors.length ? 1 : 0);

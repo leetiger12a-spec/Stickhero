@@ -195,7 +195,7 @@ h2{margin:0 0 14px;font-size:clamp(30px,9vw,48px);color:#ffd23f;text-shadow:0 3p
 
 <script>
 'use strict';
-const BUILD = 40;
+const BUILD = 41;
 const BOSS_INTERVAL = 180;      // 보스 등장 간격(초)
 const WAVE_INTERVAL = 60;       // 대규모 몰이 이벤트 간격(초)
 const MAX_ENEMIES = 220;
@@ -282,7 +282,7 @@ const SPR_INFO = {    // ax: 발 위치(그림 폭 대비), h: 화면 키(월드
   tree: { h: 78 }, stump: { h: 20 }, log: { h: 8 }, stake: { h: 26 }, tower: { h: 76 }, hall: { h: 92 },
   smith: { h: 72 }, pillar: { h: 70 }, torch: { h: 58 }, coin: { h: 12 },
   ally_sword: { ax: 0.5, h: 52 }, ally_archer: { ax: 0.5, h: 52 }, ally_bomber: { ax: 0.45, h: 52 }, ally_shield: { ax: 0.5, h: 54 }, hero_slash: { h: 72 }, hero_walk: { h: 72 }, ally_archer_shoot: { h: 60 }, ally_bomber_toss: { h: 60 }, ally_shield_bash: { h: 60 }, ally_sword_slash: { h: 60 }, ally_sword_walk: { h: 60 }, ally_archer_walk: { h: 60 }, ally_bomber_walk: { h: 60 }, ally_shield_walk: { h: 60 }, sf_plane0: { h: 80 }, sf_plane1: { h: 80 }, sf_plane2: { h: 80 }, sf_plane3: { h: 80 }, sf_plane4: { h: 80 }, sf_pilot0: { h: 70 }, sf_pilot1: { h: 70 }, sf_pilot2: { h: 70 }, sf_pilot3: { h: 70 }, sf_pilot4: { h: 70 }, tavern: { h: 72 }, skyfang_plane: { h: 80 },
-  farm: { h: 72 }, mine: { h: 74 }, market: { h: 76 }, stone: { h: 14 }, rock: { h: 64 }, camp: { h: 100 },
+  farm: { h: 72 }, mine: { h: 74 }, market: { h: 76 }, stone: { h: 14 }, rock: { h: 64 }, camp: { h: 100 }, hall2: { h: 100 }, hall3: { h: 108 }, hall_broken: { h: 96 }, tower_broken: { h: 70 }, stonewall: { h: 34 }, repair: { h: 40 },
 };
 const SPR_SRC = {}, SPR_ORIG = {};
 // ---------- 영웅 꾸미기: 머리띠 색 (모은 별 수로 열림) ----------
@@ -353,7 +353,7 @@ function bakeSprite(n) {
   SPR[n] = c; SPR_WHITE[n] = wc;
 }
 // img/ 폴더에 실제로 있는 그림만 불러옴 (없는 파일을 부르면 오류가 남)
-const SPR_FILES = ['farm', 'mine', 'market', 'stone', 'rock', 'camp', 'hero', 'grunt', 'runner', 'tank', 'boss0', 'boss1', 'boss2', 'tree', 'stump', 'log', 'stake', 'tower', 'hall',
+const SPR_FILES = ['hall2', 'hall3', 'hall_broken', 'tower_broken', 'stonewall', 'repair', 'farm', 'mine', 'market', 'stone', 'rock', 'camp', 'hero', 'grunt', 'runner', 'tank', 'boss0', 'boss1', 'boss2', 'tree', 'stump', 'log', 'stake', 'tower', 'hall',
   'smith', 'pillar', 'torch', 'coin', 'ally_sword', 'ally_archer', 'tavern', 'ally_bomber', 'skyfang_plane', 'ally_shield', 'hero_slash', 'hero_walk', 'ally_archer_shoot', 'ally_bomber_toss', 'ally_shield_bash', 'ally_sword_slash', 'ally_sword_walk', 'ally_archer_walk', 'ally_bomber_walk', 'ally_shield_walk', 'sf_plane0', 'sf_plane1', 'sf_plane2', 'sf_plane3', 'sf_plane4', 'sf_pilot0', 'sf_pilot1', 'sf_pilot2', 'sf_pilot3', 'sf_pilot4'];
 SPR_FILES.forEach(n => {
   const im = new Image();
@@ -653,7 +653,7 @@ function newGame() {
     smith: false, forge: 0, tavern: false, allies: [], raid: null, raidIn: 0, raidCount: 0, drumT: 0,
     gold: 0, base: { hp: 1500, maxHp: 1500, hitT: 0 }, respawnT: 0, squadAng: Math.random() * 7, squadT: 6,
     walls: Array.from({ length: WALL_SEGS }, () => ({ hp: 0, maxHp: 0, shake: 0 })), wallLvl: 0,
-    towers: [], pads: [], baseDead: false, rocks: [], camps: [], mineHitT: 0, vLvl: 1, stone: 0, bld: { farm: 0, mine: 0, market: 0 }, mineT: 0, marketT: 0,
+    towers: [], pads: [], baseDead: false, rocks: [], camps: [], day: 1, broken: {}, mineHitT: 0, vLvl: 1, stone: 0, bld: { farm: 0, mine: 0, market: 0 }, mineT: 0, marketT: 0,
     spawnAcc: 0, nextBoss: BOSS_INTERVAL, nextWave: WAVE_INTERVAL, bossCount: 0, boss: null,
     shake: 0, swordAng: 0, slow: 0, banner: null, deadT: 0, cam: { x: 0, y: 0 }, lvlFlash: 0,
   };
@@ -801,8 +801,12 @@ function writeJSON(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } c
 function clearSave() { try { localStorage.removeItem(SAVE_KEY); } catch (e) {} }
 function saveGame() {
   if (!G || G.mode !== 'base' || G.baseDead || G.deadT > 0 || state === 'over' || state === 'title') return;
+  writeJSON(SAVE_KEY, buildSave());
+  G.saveT = 10;
+}
+function buildSave() {
   const p = G.p;
-  writeJSON(SAVE_KEY, {
+  return {
     v: 1, build: BUILD, at: Date.now(), diff: G.diff,
     t: G.t, bt: G.bt, kills: G.kills, lvl: G.lvl, xp: G.xp, need: G.need, pending: G.pending,
     weapons: G.weapons, passives: G.passives, gold: G.gold, logs: p.logs, hp: p.dead ? -1 : p.hp,
@@ -813,8 +817,8 @@ function saveGame() {
     rocks: G.rocks.map(o => [Math.round(o.x), Math.round(o.y), o.s, Math.round(o.regrow)]),
     camps: G.camps.map(c => [Math.round(c.x), Math.round(c.y), c.lvl, Math.round(c.rebuild), c.e && !c.e.dead ? Math.round(c.e.hp / c.e.maxHp * 100) / 100 : 0]),
     nextBoss: G.boss ? 15 : G.nextBoss, nextWave: G.nextWave, raidCount: G.raidCount - (G.raid ? 1 : 0), raidPending: !!(G.raid || G.raidIn > 0),
-  });
-  G.saveT = 10;
+    day: G.day, broken: Object.keys(G.broken).filter(k => G.broken[k]),
+  };
 }
 function loadGame(d) {
   newGame();
@@ -834,6 +838,7 @@ function loadGame(d) {
   G.pads.forEach((q, i) => { const s = d.pads[i]; if (s) { q.built = s[0]; q.pw = s[1]; q.pg = s[2]; q.ps = s[3] || 0; } });
   setVillage(d.vLvl || 1); G.stone = d.stone || 0; G.bld = Object.assign({ farm: 0, mine: 0, market: 0 }, d.bld || {});
   G.base.maxHp = 1500 + VILLAGE.slice(1, G.vLvl).reduce((a, v) => a + v.hp, 0);
+  G.day = d.day || 1; G.broken = {}; for (const k of d.broken || []) G.broken[k] = true;
   if (d.rocks) G.rocks = d.rocks.map(([x, y, s, rg]) => ({ x, y, s, max: 6, regrow: rg, shake: 0 }));
   if (d.camps) { G.enemies = G.enemies.filter(e => !e.camp); G.camps = d.camps.map(([x, y, lvl, rebuild, hp]) => ({ x, y, lvl, rebuild, spawnT: rand(8, 16), e: null })); G.camps.forEach((c, i) => { if (d.camps[i][4] > 0) makeCamp(c, d.camps[i][4]); }); }
   G.allies = [];
@@ -874,7 +879,8 @@ function continueGame() {
   const d = readJSON(SAVE_KEY); if (!d) { startGame(); return; }
   audioInit(); loadGame(d); state = 'play'; joy = null; showOv(null);
   $('hudBtns').classList.add('show');
-  banner('이어하기!', `스테이지 ${G.stageN} 클리어한 마을로 돌아왔다`, '#7bed9f', 2.5);
+  if (G.broken.hall) { banner(`🌅 ${G.day}일째 아침`, '부서진 건물에 서서 🔨 고쳐요 · 마을회관부터!', '#ffd23f', 3.2); sfx('cheer'); }
+  else banner('이어하기!', `${G.day > 1 ? G.day + '일째 · ' : ''}스테이지 ${G.stageN} 클리어한 마을로 돌아왔다`, '#7bed9f', 2.5);
   if (G.pending > 0) openLevelUp();
 }
 function togglePause() {
@@ -887,7 +893,7 @@ let newConfirm = 0;
 $('bStory').onclick = () => { audioInit(); playStory(() => { state = 'title'; refreshTitle(); showOv('ovTitle'); }); };
 $('bStart').onclick = () => {
   if (readJSON(SAVE_KEY) && Date.now() - newConfirm > 3000) {
-    newConfirm = Date.now(); $('bStart').textContent = '정말 지울까요? 한 번 더 누르기';
+    newConfirm = Date.now(); $('bStart').textContent = '마을이 모두 사라져요! 한 번 더 누르기';
     setTimeout(() => { if (state === 'title' && Date.now() - newConfirm >= 3000) refreshTitle(); }, 3100);
     return;
   }
@@ -896,7 +902,7 @@ $('bStart').onclick = () => {
 };
 $('bContinue').onclick = continueGame;
 $('bHelp').onclick = () => { const h = $('helpBox'); h.style.display = h.style.display === 'none' ? '' : 'none'; };
-$('bRetry').onclick = startGame;
+$('bRetry').onclick = () => continueGame();
 $('bResume').onclick = togglePause;
 $('bQuit').onclick = toTitle;
 $('bPause').onclick = () => { audioInit(); togglePause(); };
@@ -976,11 +982,27 @@ function chooseAlly(i) {
   if (G.pending > 0) openLevelUp(); else { state = 'play'; showOv(null); }
 }
 
+// 마을이 무너지면: 지은 것은 부서진 채로 남고, 영웅은 Lv1부터, 금화 절반·돌은 그대로, 다음 날(적 +15%)
+function ruinSave(toBank) {
+  const d = buildSave();
+  const brk = new Set(d.broken);
+  G.towers.forEach((t, i) => { if (t.lvl) brk.add('t' + i); });
+  if (G.smith) brk.add('smith'); if (G.tavern) brk.add('tavern');
+  for (const id in G.bld) if (G.bld[id]) brk.add(id);
+  brk.add('hall');
+  Object.assign(d, {
+    day: (G.day || 1) + 1, broken: [...brk],
+    t: 0, bt: 0, kills: 0, lvl: 1, xp: 0, need: xpNeed(1), pending: 0, weapons: { pistol: 1 }, passives: {},
+    gold: G.gold - toBank, logs: 0, hp: -1, base: Math.round(G.base.maxHp * 0.3), walls: G.walls.map(() => 0),
+    bossCount: 0, bossKills: G.bossKills || 0, nextBoss: BOSS_INTERVAL, nextWave: WAVE_INTERVAL, raidPending: false,
+  });
+  writeJSON(SAVE_KEY, d);
+}
 function gameOver() {
   state = 'over'; joy = null; G.banner = null;
   const toBank = Math.floor(G.gold / 2);
   { const m = readJSON(META_KEY) || {}; G.bankAdd = toBank; writeJSON(META_KEY, Object.assign(m, { forge: G.forge, maxStage: bestStage(), bank: (m.bank || 0) + toBank })); }
-  clearSave();   // 마을은 처음부터, 대장간 강화만 남김
+  ruinSave(toBank);   // 마을은 부서진 채로 남음 → 다음 날 고쳐서 다시
   const b = loadBest(); let rec = false;
   if (G.t > b.time) { b.time = G.t; rec = true; }
   if (G.kills > b.kills) { b.kills = G.kills; rec = true; }
@@ -988,7 +1010,9 @@ function gameOver() {
   saveBest(b);
   $('ovOver').querySelector('h2').textContent = G.baseDead ? '마을이 무너졌다!' : '게임 오버';
   $('overStats').innerHTML = `⏱ 버틴 시간 <b>${fmtTime(G.t)}</b><br>💀 처치 <b>${G.kills}</b><br>⭐ 레벨 <b>${G.lvl}</b><br>👑 보스 처치 <b>${G.bossKills || 0}</b>`;
-  $('overRec').innerHTML = (rec ? '<div class="newrec">🎉 새 기록! 🎉</div>' : '') + (G.forge > 0 ? `<div class="hint" style="opacity:.9">⚒ 무기 강화 Lv ${G.forge}는 다음 판에도 유지돼요</div>` : '');
+  $('overRec').innerHTML = (rec ? '<div class="newrec">🎉 새 기록! 🎉</div>' : '') +
+    `<div class="hint" style="opacity:.95">🏚 지은 건물은 부서진 채로 남아요 → 🔨 고쳐서 다시!<br>🌅 다음은 <b>${(G.day || 1) + 1}일째</b> · 적이 더 강해져요 (+25%)</div>`;
+  $('bRetry').textContent = `🔨 마을 다시 세우기 (${(G.day || 1) + 1}일째)`;
   $('bestOver').innerHTML = bestText(b) + (G.bankAdd > 0 ? `<br>🏦 금고에 금화 <b>${G.bankAdd}</b> 저장 → 시작 화면 '💪 강화'에서 써요` : '');
   $('hudBtns').classList.remove('show');
   showOv('ovOver');
@@ -1021,7 +1045,16 @@ function padVisible(pd) {
   if (pd.vl) return G.vLvl >= pd.vl;
   return pd.order === 0 || G.pads.some(q => q.order === pd.order - 1 && q.built);
 }
+const brokenKey = pd => pd.kind === 'tower' ? 't' + pd.idx : pd.kind === 'bld' ? pd.id : pd.kind === 'smith' || pd.kind === 'tavern' || pd.kind === 'hall' ? pd.kind : null;
+function repairCost(k) {
+  if (k === 'hall') return { w: 8, g: 30 * G.vLvl };
+  if (k[0] === 't' && k !== 'tavern') { const l = G.towers[+k.slice(1)].lvl; return { w: 3 + l, g: 8 * l }; }
+  const l = G.bld[k] || (k === 'smith' ? 1 + Math.floor(G.forge / 4) : 1);
+  return { w: 5, g: 15 * l };
+}
 function padCost(pd) {
+  const bk = brokenKey(pd);
+  if (bk && G.broken[bk]) return repairCost(bk);
   if (!padVisible(pd)) return null;
   if (pd.kind === 'tower') { const l = G.towers[pd.idx].lvl; return l < 5 ? { w: TOWER_W[l], g: TOWER_G[l] } : null; }
   if (pd.kind === 'tavern') return !G.tavern ? { w: 12, g: 40 } : G.allies.length < ALLY_MAX ? { w: 0, g: ALLY_COST[G.allies.length] } : null;
@@ -1033,6 +1066,8 @@ function padCost(pd) {
 }
 const padOY = pd => pd.kind === 'tower' && G.towers[pd.idx].lvl > 0 ? 40 : (pd.kind === 'smith' && G.smith) || (pd.kind === 'tavern' && G.tavern) || (pd.kind === 'bld' && G.bld[pd.id]) ? 30 : 0;
 function padLabel(pd) {
+  const bk = brokenKey(pd);
+  if (bk && G.broken[bk]) return bk === 'hall' ? '🔨 마을회관 수리' : bk[0] === 't' && bk !== 'tavern' ? '🔨 망루 수리' : `🔨 ${bk === 'smith' ? '대장간' : bk === 'tavern' ? '영웅 숙소' : BLD[bk].name.slice(3)} 수리`;
   if (pd.kind === 'tower') { const l = G.towers[pd.idx].lvl; return l === 0 ? '망루 짓기' : l < 5 ? `망루 Lv${l + 1}` : '망루 MAX'; }
   if (pd.kind === 'smith') return G.smith ? `⚒ 강화 Lv${G.forge + 1}` : '대장간 짓기';
   if (pd.kind === 'tavern') return G.tavern ? `👥 동료 고용 ${G.allies.length + 1}/${ALLY_MAX}` : '영웅 숙소 짓기';
@@ -1059,6 +1094,14 @@ function hallUp() { // 마을 레벨업: 울타리 넓히기 + 마을 체력 + �
 }
 function padDone(pd) {
   pd.built = true;
+  const bk = brokenKey(pd);
+  if (bk && G.broken[bk]) { // 수리 완료
+    G.broken[bk] = false; sfx('build'); G.shake = 6; vib([30, 30, 30]);
+    burst(pd.x, pd.y - 20, '#7bed9f', 30, 220, 5, 0.6);
+    if (bk === 'hall') { G.base.hp = G.base.maxHp; banner('🏛 마을회관 수리 완료!', '마을 체력이 가득 찼어요', '#7bed9f', 2); }
+    else banner('🔨 수리 완료!', '다시 일하기 시작해요', '#7bed9f', 1.4);
+    saveGame(); return;
+  }
   if (pd.kind === 'tower') {
     const t = G.towers[pd.idx]; t.lvl++;
     banner(t.lvl === 1 ? '망루 완성!' : `망루 Lv ${t.lvl}!`, t.lvl === 1 ? '자동으로 화살을 쏴요' : '더 빠르고 강하게!', '#7bed9f', 1.6);
@@ -1089,13 +1132,14 @@ function attackTarget(e, dt, onHit) {
   e.atk -= dt;
   if (e.atk <= 0) { e.atk = e.boss ? 1.4 : 1.2; e.lunge = 0.25; onHit(); }
 }
+const dayMul = () => 1 + 0.25 * ((G && G.day || 1) - 1);   // 마을이 무너졌다 다시 세울 때마다(하루) 적 +25%
 function makeEnemy(type, x, y) {
-  const gr = DF().grow, T = ETYPES[type], hm = (1 + G.bt / 85 * gr) * (1 + G.bt / 1500 * gr) * (1 + Math.max(0, G.bt - 300) / 140 * gr) * DF().ehp;   // 5분 뒤부터 후반 강화   // 난이도: 마을에서 보낸 시간 × 선택 난이도
-  return { id: ++eid, type, x, y, r: T.r, hp: T.hp * hm, maxHp: T.hp * hm, spd: T.spd * (1 + Math.min(0.35, G.bt / 900)) * rand(0.9, 1.1), dmg: T.dmg * DF().edmg * (1 + G.bt / 900 * gr), color: T.color, xp: T.xp, gold: T.gold, flash: 0, hitT: 0, kx: 0, ky: 0, swordCd: 0, wob: Math.random() * 6, inside: Math.hypot(x, y) < WALL_R, atk: 0.5, lunge: 0, face: 1 };
+  const gr = DF().grow, T = ETYPES[type], hm = (1 + G.bt / 85 * gr) * (1 + G.bt / 1500 * gr) * (1 + Math.max(0, G.bt - 300) / 140 * gr) * DF().ehp * dayMul();   // 5분 뒤부터 후반 강화   // 난이도: 마을에서 보낸 시간 × 선택 난이도
+  return { id: ++eid, type, x, y, r: T.r, hp: T.hp * hm, maxHp: T.hp * hm, spd: T.spd * (1 + Math.min(0.35, G.bt / 900)) * rand(0.9, 1.1), dmg: T.dmg * DF().edmg * (1 + G.bt / 900 * gr) * Math.sqrt(dayMul()), color: T.color, xp: T.xp, gold: T.gold, flash: 0, hitT: 0, kx: 0, ky: 0, swordCd: 0, wob: Math.random() * 6, inside: Math.hypot(x, y) < WALL_R, atk: 0.5, lunge: 0, face: 1 };
 }
 // ---------- 야생 지대: 적 진지 ----------
 function makeCamp(c, frac) {
-  const hp = 900 * (1 + 0.6 * c.lvl) * DF().ehp;
+  const hp = 900 * (1 + 0.6 * c.lvl) * DF().ehp * dayMul();
   c.e = { id: ++eid, type: 'camp', camp: c, x: c.x, y: c.y, r: 42, hp: hp * frac, maxHp: hp, spd: 0, dmg: 0, color: '#6b3e1a', xp: 0, gold: 0, flash: 0, hitT: 0, kx: 0, ky: 0, swordCd: 0, wob: 0, inside: false, atk: 0, lunge: 0, face: 1 };
   G.enemies.push(c.e);
 }
@@ -1156,7 +1200,7 @@ function spawnBoss(bx, by) {
   const a = Math.random() * Math.PI * 2, R = MAP_R - 60;
   if (bx === undefined) { bx = Math.cos(a) * R; by = Math.sin(a) * R; }
   // 스테이지 보스는 스테이지 번호로, 마을 보스는 등장 횟수로 체력이 정해짐
-  const hp = DF().boss * (inStage ? 450 * (1 + 0.6 * DF().grow * Math.min(1, si / 3)) * (1 + si * 0.55) * (final ? 2.5 : 1) : n === 0 ? 800 : 1200 * (n + 1) * (1 + n * 0.4));  // 첫 마을 보스는 연습용으로 약하게
+  const hp = DF().boss * (inStage ? 1 : dayMul()) * (inStage ? 450 * (1 + 0.6 * DF().grow * Math.min(1, si / 3)) * (1 + si * 0.55) * (final ? 2.5 : 1) : n === 0 ? 800 : 1200 * (n + 1) * (1 + n * 0.4));  // 첫 마을 보스는 연습용으로 약하게
   const b = { id: ++eid, type: 'boss', boss: true, name: B.name, x: bx, y: by, inside: false, atk: 0, lunge: 0, r: 58, hp, maxHp: hp, spd: 50 + n * 6, dmg: (25 + n * 8) * DF().edmg, color: B.color, xp: 0, flash: 0, hitT: 0, kx: 0, ky: 0, swordCd: 0, wob: 0, mode: 'walk', st: 3, rings: 0, ax: 0, ay: 0, lvl: n, spr: final ? 'boss0' : 'boss' + BOSSES.indexOf(B) };
   if (final) { b.r = 76; b.final = true; }
   G.enemies.push(b); G.boss = b;
@@ -1305,6 +1349,10 @@ function updBase(dt) {
     if (!first.built) {
       if (p.logs < TOWER_W[0]) { const t = near(G.trees.filter(t => t.logs > 0)); if (t) G.hint = { x: t.x, y: t.y, text: `🌳 나무 옆에 서면 나무를 베요 (🪵 ${p.logs}/${TOWER_W[0]})` }; }
       else G.hint = { x: first.x, y: first.y, text: '🪵 통나무를 동그라미에 가져가 망루를 지어요!' };
+    } else if (G.broken.hall) {
+      const hp = G.pads.find(q => q.kind === 'hall'), c = repairCost('hall');
+      if (p.logs < c.w) { const t = near(G.trees.filter(t => t.logs > 0)); if (t) G.hint = { x: t.x, y: t.y, text: `🌳 나무를 모아 마을회관을 고쳐요 (🪵 ${p.logs}/${c.w})` }; }
+      else G.hint = { x: hp.x, y: hp.y, text: '🔨 회관 앞 동그라미에 서서 고쳐요!' };
     } else if (p.logs >= p.cap) {
       const pd = near(G.pads.filter(q => padCost(q) && padCost(q).w > 0).map(q => ({ x: q.x, y: q.y + padOY(q) })));
       if (pd) G.hint = { x: pd.x, y: pd.y, text: '🎒 가득 찼어요! 동그라미로 가져가요' };
@@ -1312,25 +1360,25 @@ function updBase(dt) {
   }
 
   // 새 건물들
-  if (G.bld.farm) { // 농장: 울타리 안에 있으면 영웅·동료 회복, 마을 수리
+  if (G.bld.farm && !G.broken.farm) { // 농장: 울타리 안에 있으면 영웅·동료 회복, 마을 수리
     const rg = 1.5 + 1.5 * G.bld.farm;
     if (!p.dead && Math.hypot(p.x, p.y) < WALL_R && p.hp < p.maxHp) p.hp = Math.min(p.maxHp, p.hp + rg * dt);
     for (const a of G.allies) if (!a.dead && Math.hypot(a.x, a.y) < WALL_R) a.hp = Math.min(a.maxHp, a.hp + rg * dt);
     G.base.hp = Math.min(G.base.maxHp, G.base.hp + G.bld.farm * dt);
   }
-  if (G.bld.mine) { // 광산: 돌이 저절로
+  if (G.bld.mine && !G.broken.mine) { // 광산: 돌이 저절로
     G.mineT += dt;
     const per = [0, 7, 5, 3.5][G.bld.mine];
     if (G.mineT >= per) { G.mineT -= per; G.stone++; G.texts.push({ x: MINE.x, y: MINE.y - 50, text: '+🪨', color: '#dee2e6', size: 14, life: 0.8, max: 0.8 }); }
   }
-  if (G.bld.market) { // 시장: 10초마다 금화
+  if (G.bld.market && !G.broken.market) { // 시장: 10초마다 금화
     G.marketT += dt;
     if (G.marketT >= 10) { G.marketT -= 10; const n = [0, 8, 14, 22][G.bld.market]; G.gold += n; G.texts.push({ x: MARKET.x, y: MARKET.y - 60, text: `+🪙${n}`, color: '#ffd23f', size: 16, life: 1, max: 1 }); sfx('coin'); }
   }
 
   // 망루
-  for (const t of G.towers) {
-    if (!t.lvl) continue;
+  for (const [ti, t] of G.towers.entries()) {
+    if (!t.lvl || G.broken['t' + ti]) continue;
     t.cd -= dt;
     if (t.cd > 0) continue;
     const range = 210 + 20 * t.lvl, tgt = nearest(t.x, t.y - 34, range);
@@ -2461,7 +2509,7 @@ function drawWallSeg(i) {
   const lvl = G.wallLvl, stone = lvl >= 4, rock = lvl >= 6;
   {
     const w = G.walls[i], a0 = i / WALL_SEGS * Math.PI * 2, a1 = (i + 1) / WALL_SEGS * Math.PI * 2;
-    const n = SPR.stake ? 9 : 5, sh = w.shake > 0 ? rand(-1.5, 1.5) : 0;   // 그림 말뚝은 촘촘하게
+    const rockW = lvl >= 6 && SPR.stonewall, n = rockW ? Math.max(4, Math.round(WALL_R * 0.024)) : SPR.stake ? 9 : 5, sh = w.shake > 0 ? rand(-1.5, 1.5) : 0;   // 그림 말뚝은 촘촘하게
     if (w.hp <= 0) { // 부서진 울타리 그루터기
       for (let k = 0; k < n; k++) {
         const a = a0 + (k + 0.5) / n * (a1 - a0), x = Math.cos(a) * WALL_R, y = Math.sin(a) * WALL_R;
@@ -2479,6 +2527,7 @@ function drawWallSeg(i) {
       const a = a0 + (k + 0.5) / n * (a1 - a0), x = Math.cos(a) * WALL_R + sh, y = Math.sin(a) * WALL_R;
       const tilt = dmg > 0.5 && k % 2 ? 0.35 : 0;
       ctx.save(); ctx.translate(x, y); ctx.scale(1, IK); ctx.rotate(tilt);
+      if (rockW) { ctx.translate(0, 3); spr('stonewall', hgt + 12); ctx.restore(); continue; }
       if (SPR.stake) { ctx.translate(0, 3); spr('stake', hgt + 10); if (stone) { ctx.globalAlpha = rock ? 0.6 : 0.35; spr('stake', hgt + 10, true); if (rock) { ctx.globalAlpha = 0.45; ctx.fillStyle = '#343a40'; ctx.fillRect(-5, -hgt - 6, 10, hgt + 6); } } ctx.restore(); continue; }
       ctx.fillStyle = rock ? '#6c757d' : stone ? '#adb5bd' : lvl >= 2 ? '#b5733a' : '#c68642'; ctx.strokeStyle = rock ? '#212529' : '#4a2c12'; ctx.lineWidth = 1.8;
       ctx.beginPath(); ctx.moveTo(-4.5, 2); ctx.lineTo(-4.5, -hgt + 5); ctx.lineTo(0, -hgt); ctx.lineTo(4.5, -hgt + 5); ctx.lineTo(4.5, 2); ctx.closePath(); ctx.fill(); ctx.stroke();
@@ -2529,9 +2578,10 @@ function drawBase() {
   const b = G.base, sh = b.hitT > 0 ? rand(-2, 2) : 0;
   ctx.save(); ctx.translate(sh, 0); ctx.scale(1, IK);
   ctx.fillStyle = 'rgba(0,0,0,.2)'; ctx.beginPath(); ctx.ellipse(0, 18, 38, 10, 0, 0, 7); ctx.fill();
-  if (SPR.hall) {
-    ctx.translate(0, 22); spr('hall', 92);
-    if (b.hitT > 0.15 && SPR_WHITE.hall) { ctx.globalAlpha = 0.5; spr('hall', 92, true); }
+  const hn = G.broken.hall && SPR.hall_broken ? 'hall_broken' : G.vLvl >= 3 && SPR.hall3 ? 'hall3' : G.vLvl >= 2 && SPR.hall2 ? 'hall2' : 'hall', hh = SPR_INFO[hn].h;
+  if (SPR[hn]) {
+    ctx.translate(0, 22); spr(hn, hh);
+    if (b.hitT > 0.15 && SPR_WHITE[hn]) { ctx.globalAlpha = 0.5; spr(hn, hh, true); }
     ctx.restore();
   } else {
   ctx.fillStyle = b.hitT > 0.2 ? '#fff' : '#f1e3c8'; ctx.strokeStyle = '#4a2c12'; ctx.lineWidth = 3;
@@ -2589,6 +2639,10 @@ function drawStone(x, y) {
   ctx.beginPath(); ctx.moveTo(x - 6, y + 3); ctx.lineTo(x - 5, y - 3); ctx.lineTo(x, y - 6); ctx.lineTo(x + 6, y - 2); ctx.lineTo(x + 5, y + 4); ctx.closePath(); ctx.fill(); ctx.stroke();
 }
 function drawBld(id) {
+  if (G.broken[id]) { ctx.save(); ctx.globalAlpha = 0.55; ctx.filter = 'grayscale(0.7)'; drawBldInner(id); ctx.restore(); drawRepairMark(BLD[id].at.x + 24, BLD[id].at.y - 56); return; }
+  drawBldInner(id);
+}
+function drawBldInner(id) {
   const B = BLD[id], l = G.bld[id];
   ctx.save(); ctx.translate(B.at.x, B.at.y); ctx.scale(1, IK);
   ctx.fillStyle = 'rgba(0,0,0,.2)'; ctx.beginPath(); ctx.ellipse(0, 8, 32, 8, 0, 0, 7); ctx.fill();
@@ -2627,6 +2681,10 @@ function drawBld(id) {
 }
 function drawTavern() {
   if (!G.tavern) return;
+  if (G.broken.tavern) { ctx.save(); ctx.globalAlpha = 0.55; ctx.filter = 'grayscale(0.7)'; drawTavernInner(); ctx.restore(); drawRepairMark(TAVERN.x + 22, TAVERN.y - 56); return; }
+  drawTavernInner();
+}
+function drawTavernInner() {
   ctx.save(); ctx.translate(TAVERN.x, TAVERN.y); ctx.scale(1, IK);
   ctx.fillStyle = 'rgba(0,0,0,.2)'; ctx.beginPath(); ctx.ellipse(0, 8, 30, 8, 0, 0, 7); ctx.fill();
   if (SPR.tavern) { ctx.translate(0, 12); spr('tavern', 72); }
@@ -2668,6 +2726,10 @@ function drawAlly(a) {
 }
 function drawSmith() {
   if (!G.smith) return;
+  if (G.broken.smith) { ctx.save(); ctx.globalAlpha = 0.55; ctx.filter = 'grayscale(0.7)'; drawSmithInner(); ctx.restore(); drawRepairMark(SMITH.x + 22, SMITH.y - 56); return; }
+  drawSmithInner();
+}
+function drawSmithInner() {
   ctx.save(); ctx.translate(SMITH.x, SMITH.y); ctx.scale(1, IK);
   ctx.fillStyle = 'rgba(0,0,0,.2)'; ctx.beginPath(); ctx.ellipse(0, 8, 30, 8, 0, 0, 7); ctx.fill();
   if (SPR.smith) {
@@ -2694,8 +2756,20 @@ function drawSmith() {
   ctx.restore();
 }
 
+function drawRepairMark(x, y) { // 부서진 건물 위 🔨 표시 (통통 튀며)
+  ctx.save(); ctx.translate(x, y + Math.abs(Math.sin(G.t * 4)) * -5); ctx.scale(1, IK);
+  if (SPR.repair) spr('repair', 26); else { ctx.font = '20px sans-serif'; ctx.textAlign = 'center'; ctx.fillText('🔨', 0, 0); }
+  ctx.restore();
+}
 function drawTower(t) {
   if (!t.lvl) return;
+  if (G.broken['t' + G.towers.indexOf(t)]) {
+    ctx.save(); ctx.translate(t.x, t.y); ctx.scale(1, IK);
+    ctx.fillStyle = 'rgba(0,0,0,.2)'; ctx.beginPath(); ctx.ellipse(0, 6, 22, 7, 0, 0, 7); ctx.fill();
+    if (SPR.tower_broken) { ctx.translate(0, 8); spr('tower_broken', SPR_INFO.tower_broken.h); }
+    else { ctx.strokeStyle = '#6b3e1a'; ctx.lineWidth = 4; ctx.beginPath(); ctx.moveTo(-14, 4); ctx.lineTo(-4, -30); ctx.moveTo(14, 4); ctx.lineTo(2, -24); ctx.stroke(); }
+    ctx.restore(); drawRepairMark(t.x + 16, t.y - 50); return;
+  }
   const h = 34 + t.lvl * 3;
   ctx.save(); ctx.translate(t.x, t.y); ctx.scale(1, IK);
   ctx.fillStyle = 'rgba(0,0,0,.2)'; ctx.beginPath(); ctx.ellipse(0, 6, 18, 6, 0, 0, 7); ctx.fill();

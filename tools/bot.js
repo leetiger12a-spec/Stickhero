@@ -1,5 +1,5 @@
 // 치트 없는 자동 플레이 봇: 키보드 입력(keys)만 조작, 레벨업 카드는 무작위 선택
-// 사용: node tools/bot.js [판 수] [분] — 결과·사건 기록 출력 (음악까지 쓰려면 http로 열 것)
+// 사용: node tools/bot.js [판 수] [분] [normal|fighter|days(무너져도 다음 날 계속)] — 결과·사건 기록 출력 (음악까지 쓰려면 http로 열 것)
 const { chromium } = require('/opt/node22/lib/node_modules/playwright');
 const RUNS = +process.argv[2] || 4, MINUTES = +process.argv[3] || 15, STYLE = process.argv[4] || 'normal';
 (async () => {
@@ -22,7 +22,7 @@ const RUNS = +process.argv[2] || 4, MINUTES = +process.argv[3] || 15, STYLE = pr
         if (SH.state === 'levelup') SH.choose(Math.floor(Math.random() * 3));
         if (SH.state === 'result') SH.ok(); if (SH.state === 'map') document.getElementById('bGo').click();
         if (SH.state === 'allypick') SH.chooseAlly(Math.floor(Math.random() * 2));
-        if (SH.state === 'over') { ev('게임오버 (' + (G().baseDead ? '마을 붕괴' : '?') + ')'); break; }
+        if (SH.state === 'over') { ev('게임오버 (' + (G().baseDead ? '마을 붕괴' : '?') + ')'); if (STYLE !== 'days') break; continueGame(); ev(`→ ${G().day}일째 다시 세우기`); continue; }
         const g = G(), p = g.p;
         if (i % 3 === 0 && !p.dead) {
           const foe = near(g.enemies, p.x, p.y), fd = foe ? Math.hypot(foe.x - p.x, foe.y - p.y) : 1e9;
@@ -63,7 +63,7 @@ const RUNS = +process.argv[2] || 4, MINUTES = +process.argv[3] || 15, STYLE = pr
           ev(`[상태] 마을 ${Math.round(g2.base.hp)} · 적 ${g2.enemies.length}(안 ${inside}) · 부서진 울타리 ${broken}/16 · 망루 ${g2.towers.map(t => t.lvl).join('')} · 🪵${p2.logs} 🪙${g2.gold} · 영웅Lv ${g2.lvl}`); }
       }
       const g = G();
-      return { log, t: Math.round(g.t), state: SH.state, lvl: g.lvl, kills: g.kills, gold: g.gold, base: Math.round(g.base.hp), minBase: Math.round(st.minBase), firstTower: st.firstTower, stages: st.stages, deaths: st.deaths, raidsWon: st.raidsWon, bosses: g.bossKills || 0, towers: g.towers.map(t => t.lvl).join(''), wall: g.wallLvl, vLvl: g.vLvl, bld: JSON.stringify(g.bld), stone: g.stone, campsDown: campsDown(), campLv: g.camps.map(c => c.lvl).join(''), forge: g.forge, smith: g.smith, weapons: JSON.stringify(g.weapons) };
+      return { log, t: Math.round(g.t), state: SH.state, lvl: g.lvl, kills: g.kills, gold: g.gold, base: Math.round(g.base.hp), minBase: Math.round(st.minBase), firstTower: st.firstTower, stages: st.stages, deaths: st.deaths, raidsWon: st.raidsWon, bosses: g.bossKills || 0, day: g.day, broken: Object.keys(g.broken).filter(k => g.broken[k]).length, towers: g.towers.map(t => t.lvl).join(''), wall: g.wallLvl, vLvl: g.vLvl, bld: JSON.stringify(g.bld), stone: g.stone, campsDown: campsDown(), campLv: g.camps.map(c => c.lvl).join(''), forge: g.forge, smith: g.smith, weapons: JSON.stringify(g.weapons) };
     }, [MINUTES, STYLE]);
     results.push(r);
     await page.close();

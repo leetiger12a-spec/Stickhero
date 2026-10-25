@@ -22,7 +22,7 @@ const { chromium } = require('/opt/node22/lib/node_modules/playwright');
   // 게임오버 뒤에도 해금 유지
   await page.evaluate(() => { SH.killBase(); }); await page.waitForTimeout(2600);
   await page.tap('#bRetry'); await page.waitForTimeout(300);
-  check(await page.evaluate(() => SH.G.stageN === 0 && isUnlocked('w', 'bolt')), 'unlock not kept after game over');
+  check(await page.evaluate(() => SH.G.day === 2 && isUnlocked('w', 'bolt')), 'unlock not kept after game over');
   // 무기 둘 다 써 보기
   await page.evaluate(() => { const G = SH.G; G.p.hp = G.p.maxHp = 1e6; G.weapons = { bolt: 3, hammer: 3 }; G.timers = {}; G.p.x = 0; G.p.y = 300;
     for (let i = 0; i < 14; i++) G.enemies.push(makeEnemy('grunt', rand(-60, 60), 300 + rand(-60, 60))); });

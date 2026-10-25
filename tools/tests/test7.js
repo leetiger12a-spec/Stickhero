@@ -44,9 +44,9 @@ const { chromium } = require('/opt/node22/lib/node_modules/playwright');
   const forge = after.forge;
   await page.evaluate(() => { while (SH.state === 'levelup' || SH.state === 'allypick' || SH.state === 'result' || SH.state === 'map') { if (SH.state === 'result' || SH.state === 'map') { SH.ok(); continue; } if (SH.state === 'allypick') SH.chooseAlly(0); else SH.choose(0); } SH.killBase(); });
   await page.waitForTimeout(3000);
-  check(await page.evaluate(() => SH.state === 'over' && !localStorage.getItem('stickhero_save')), 'save not cleared on game over');
+  check(await page.evaluate(() => SH.state === 'over' && JSON.parse(localStorage.getItem('stickhero_save')).day === 2), 'ruin save not written on game over');   // Build 41: 마을 영구 보존
   await page.screenshot({ path: (process.env.OUT||'.')+'/b15_over.png' });
   await page.tap('#bRetry'); await page.waitForTimeout(300);
-  check(await page.evaluate(f => SH.G.forge === f && SH.G.towers[0].lvl === 0, forge), 'forge not kept / village not reset');
+  check(await page.evaluate(f => SH.G.forge === f && SH.G.towers[0].lvl === 3 && SH.G.broken.t0, forge), 'forge not kept / village not kept as ruins');
   await browser.close(); console.log('ERRORS:', errors.length); errors.forEach(e => console.log(e)); process.exit(errors.length ? 1 : 0);
 })();
