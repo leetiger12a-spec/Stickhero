@@ -35,7 +35,7 @@ const { chromium } = require('/opt/node22/lib/node_modules/playwright');
   // 최종 보스: 3종 모두 사용
   const kinds = await page.evaluate(() => { const G = SH.G; G.mode = 'stage'; G.st = { n: 9, def: STAGES[9], th: THEMES[4], cages: [], deco: [], rocks: [], groups: [], L: 2600 }; G.stash = { enemies: [], coins: [], gems: [], hearts: [] };
     G.enemies = []; G.boss = null; spawnBoss(0, 0); endIntro(); const e = G.boss, seen = new Set();
-    for (let i = 0; i < 40; i++) { startSpecial(e, 1, 0, 1); seen.add(bossKind(e)); e.mode = 'walk'; } return [...seen].sort().join(','); });
-  console.log('final kinds', kinds); check(kinds === 'fire,jump,punch', 'final boss kinds');
+    for (let i = 0; i < 80; i++) { startSpecial(e, 1, 0, 1); seen.add(bossKind(e)); e.mode = 'walk'; } return [...seen].sort().join(','); });
+  console.log('final kinds', kinds); check(kinds === 'fire,ice,jump,punch,skull,web', 'final boss kinds');   // Build 44: 6종 섞어 씀
   await b.close(); console.log('ERRORS:', errors.length); errors.forEach(e => console.log(e)); process.exit(errors.length ? 1 : 0);
 })();
