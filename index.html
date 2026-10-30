@@ -38,6 +38,7 @@ canvas{display:block;position:fixed;inset:0;width:100%;height:100%}
 .arow.off{opacity:.62;background:#e9e4da}.arow .ic{font-size:24px;width:30px;text-align:center}.arow .tx{flex:1;font-size:13px;line-height:1.25}
 .arow .pb{height:5px;background:#ddd;border-radius:3px;margin-top:3px}.arow .pb i{display:block;height:100%;background:#3fa9f5;border-radius:3px}
 .arow button{font:800 12px system-ui,sans-serif;border:2px solid #222;border-radius:9px;padding:4px 7px;background:#ffd23f;cursor:pointer;white-space:nowrap}.arow button.on{background:#7bed9f}
+#evoList{display:flex;flex-direction:column;gap:6px;width:min(94vw,400px);max-height:60vh;overflow-y:auto}.evoNow{color:#1d6fa5;font-weight:800}
 #shopList{display:flex;flex-direction:column;gap:8px;width:min(94vw,400px);max-height:58vh;overflow-y:auto}
 .srow{display:flex;align-items:center;gap:10px;background:#fffaf0;color:#222;border:3px solid #222;border-radius:14px;padding:8px 10px;text-align:left}
 .srow .ic{font-size:28px;width:36px;text-align:center}
@@ -163,10 +164,17 @@ h2{margin:0 0 14px;font-size:clamp(30px,9vw,48px);color:#ffd23f;text-shadow:0 3p
 </div>
 
 <div class="ov" id="ovAch">
-  <h2 style="margin-bottom:2px">🏅 업적</h2>
+  <h2 style="margin-bottom:2px">🏅 업적 <button class="hb" id="bEvoA" style="width:auto;padding:0 10px;font-weight:800;font-size:14px;vertical-align:middle">✨ 진화 도감</button></h2>
   <div class="sub" id="achSub" style="margin-bottom:6px;font-size:13px"></div>
   <div id="achList"></div>
   <button class="btn" id="bAchOk">완료</button>
+</div>
+
+<div class="ov" id="ovEvo">
+  <h2 style="margin-bottom:2px">✨ 진화 도감</h2>
+  <div class="sub" id="evoSub" style="margin-bottom:6px;font-size:13px"></div>
+  <div id="evoList"></div>
+  <button class="btn" id="bEvoOk">완료</button>
 </div>
 
 <div class="ov" id="ovWard">
@@ -201,7 +209,7 @@ h2{margin:0 0 14px;font-size:clamp(30px,9vw,48px);color:#ffd23f;text-shadow:0 3p
   <button class="btn" id="bResume">계속하기</button>
   <button class="btn" id="bShopP" style="background:linear-gradient(#9fe8ff,#3fa9f5);box-shadow:0 5px 0 #1d6fa5">💪 영웅 강화</button>
   <button class="btn" id="bAchP" style="background:linear-gradient(#fff3b0,#ffd23f);box-shadow:0 5px 0 #b8860b">🏅 업적</button>
-  <div class="mrow" style="margin:6px 0 10px"><button class="hb" id="bMusicP" style="width:auto;padding:0 14px;font-weight:800">🎵 음악</button><button class="hb" id="bVibP" style="width:auto;padding:0 14px;font-weight:800">📳 진동</button></div>
+  <div class="mrow" style="margin:6px 0 10px"><button class="hb" id="bMusicP" style="width:auto;padding:0 14px;font-weight:800">🎵 음악</button><button class="hb" id="bVibP" style="width:auto;padding:0 14px;font-weight:800">📳 진동</button><button class="hb" id="bEvoP" style="width:auto;padding:0 14px;font-weight:800">✨ 진화 도감</button></div>
   <button class="btn" id="bQuit" style="background:linear-gradient(#ddd,#aaa);box-shadow:0 5px 0 #666">처음으로</button>
 </div>
 
@@ -215,7 +223,7 @@ h2{margin:0 0 14px;font-size:clamp(30px,9vw,48px);color:#ffd23f;text-shadow:0 3p
 
 <script>
 'use strict';
-const BUILD = 50;
+const BUILD = 51;
 const BOSS_INTERVAL = 180;      // 보스 등장 간격(초)
 const WAVE_INTERVAL = 60;       // 대규모 몰이 이벤트 간격(초)
 const MAX_ENEMIES = 220;
@@ -687,6 +695,31 @@ const EVO = {
   bolt:      { need: 'hp',     name: '천둥 신',      icon: '🌩️', desc: '하늘에서 낙뢰가 여러 적에게 쾅!' },
   hammer:    { need: 'bag',    name: '화산 망치',    icon: '🌋', desc: '더 크게 쾅! 주변에 불길이 솟아요' },
 };
+// 진화 도감: 만든 진화는 이름·설명, 아직이면 ??? + 조합만 (기록은 ST.evoT)
+let evoBack = null;
+function openEvo() { evoBack = state; state = 'evo'; renderEvo(); showOv('ovEvo'); }
+function renderEvo() {
+  const ids = Object.keys(EVO), n = ids.filter(id => ST.evoT.includes(id)).length;
+  $('evoSub').innerHTML = `만든 진화 <b>${n}/${ids.length}</b> · 무기 Lv5 + 짝 능력이 있으면 레벨업 때 진화 카드가 나와요`;
+  const box = $('evoList'); box.innerHTML = '';
+  ids.forEach(id => {
+    const E = EVO[id], W = WEAP[id], P = PASS[E.need], ok = ST.evoT.includes(id), row = document.createElement('div');
+    let now = '';
+    if (G && G.weapons) {
+      const wl = G.weapons[id] || 0, has = (G.passives[E.need] || 0) > 0;
+      now = wl > MAX_WLV ? '<br><small class="evoNow">🎉 지금 진화 완료!</small>'
+        : wl ? `<br><small class="evoNow">지금: ${W.icon} Lv${wl}/${MAX_WLV} · ${P.icon} ${has ? '있음 ✔' : '없음'}</small>` : '';
+    }
+    const lock = isUnlocked('w', id) ? '' : `<br><small>🔒 스테이지 ${UNLOCKS.find(u => u.id === id).at}칸 깨면 무기가 열려요</small>`;
+    row.className = 'arow' + (ok ? '' : ' off');
+    row.innerHTML = `<div class="ic">${ok ? E.icon : '❓'}</div><div class="tx"><b>${ok ? E.name : '???'}</b><br><small>${W.icon} ${W.name} Lv${MAX_WLV} + ${P.icon} ${P.name} → ${ok ? E.icon : '❓'}</small>` +
+      (ok ? `<br><small>${E.desc}</small>` : '') + lock + now + '</div>';
+    box.appendChild(row);
+  });
+}
+$('bEvoA').onclick = () => { sfx('pick'); openEvo(); };
+$('bEvoP').onclick = () => { sfx('pick'); openEvo(); };
+$('bEvoOk').onclick = () => { sfx('pick'); if (evoBack === 'ach') { state = 'ach'; renderAch(); showOv('ovAch'); } else { state = 'paused'; showOv('ovPause'); } };
 const evolved = id => (G.weapons[id] || 0) > MAX_WLV;
 const canEvolve = id => G.weapons[id] === MAX_WLV && (G.passives[EVO[id].need] || 0) > 0;
 function wStat(id) {
@@ -1022,7 +1055,7 @@ function refreshTitle() {
 }
 
 // ---------- 화면 전환 ----------
-function showOv(id) { ['ovTitle', 'ovLevel', 'ovPause', 'ovOver', 'ovStory', 'ovMap', 'ovClear', 'ovWard', 'ovShop', 'ovAch'].forEach(o => $(o).classList.toggle('show', o === id)); }
+function showOv(id) { ['ovTitle', 'ovLevel', 'ovPause', 'ovOver', 'ovStory', 'ovMap', 'ovClear', 'ovWard', 'ovShop', 'ovAch', 'ovEvo'].forEach(o => $(o).classList.toggle('show', o === id)); }
 function startGame() {
   audioInit(); clearSave(); newGame(); state = 'play'; joy = null; showOv(null);
   $('hudBtns').classList.add('show');
