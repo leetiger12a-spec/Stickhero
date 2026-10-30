@@ -35,7 +35,7 @@ const { chromium } = require('/opt/node22/lib/node_modules/playwright');
   check(await page.evaluate(() => !!SH.G.plane), 'E key did not call');
   // 보스 폭격 절반
   const half = await page.evaluate(() => { SH.G.bombs.length = 0; SH.spawnBoss(); SH.skipIntro(); const bo = SH.G.boss; bo.hp = bo.maxHp = 10000; bo.inv = 0;
-    SH.G.bombs.push({ x0: bo.x, y0: bo.y, x1: bo.x, y1: bo.y, t: 1, dur: 0.1, dmg: 100, drop: true }); return bo.hp; });
+    SH.G.bombs.push({ x0: bo.x, y0: bo.y, x1: bo.x, y1: bo.y, t: 1, dur: 0.1, dmg: 100, drop: true }); const R = Math.random; Math.random = () => 0.5; updBombs(0); Math.random = R; return bo.hp; });   // 치명타(10%) 없이 한 번만 터뜨려 확인
   await page.waitForTimeout(150);
   const lost = await page.evaluate(() => 10000 - SH.G.boss.hp); console.log('boss lost', lost); check(lost > 0 && lost <= 60 * 1.3, 'boss bomb not halved');
   // 일시정지·게임오버에서 숨김

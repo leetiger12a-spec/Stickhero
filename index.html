@@ -215,7 +215,7 @@ h2{margin:0 0 14px;font-size:clamp(30px,9vw,48px);color:#ffd23f;text-shadow:0 3p
 
 <script>
 'use strict';
-const BUILD = 49;
+const BUILD = 50;
 const BOSS_INTERVAL = 180;      // 보스 등장 간격(초)
 const WAVE_INTERVAL = 60;       // 대규모 몰이 이벤트 간격(초)
 const MAX_ENEMIES = 220;
@@ -1310,8 +1310,8 @@ function announceType(type) {
 }
 function makeEnemy(type, x, y) {
   announceType(type);
-  const gr = DF().grow, T = ETYPES[type], hm = (1 + G.bt / 85 * gr) * (1 + G.bt / 1500 * gr) * (1 + Math.max(0, G.bt - 300) / 140 * gr) * DF().ehp * dayMul();   // 5분 뒤부터 후반 강화   // 난이도: 마을에서 보낸 시간 × 선택 난이도
-  return { id: ++eid, type, x, y, r: T.r, hp: T.hp * hm, maxHp: T.hp * hm, spd: T.spd * (1 + Math.min(0.35, G.bt / 900)) * rand(0.9, 1.1), dmg: T.dmg * DF().edmg * (1 + G.bt / 900 * gr) * Math.sqrt(dayMul()), color: T.color, xp: T.xp, gold: T.gold, flash: 0, hitT: 0, kx: 0, ky: 0, swordCd: 0, wob: Math.random() * 6, inside: Math.hypot(x, y) < WALL_R, atk: 0.5, lunge: 0, face: 1 };
+  const gr = DF().grow, T = ETYPES[type], hm = (1 + G.bt / 85 * gr) * (1 + G.bt / 1500 * gr) * (1 + Math.max(0, G.bt - 300) / 105 * gr) * DF().ehp * dayMul();   // 5분 뒤부터 후반 강화   // 난이도: 마을에서 보낸 시간 × 선택 난이도
+  return { id: ++eid, type, x, y, r: T.r, hp: T.hp * hm, maxHp: T.hp * hm, spd: T.spd * (1 + Math.min(0.35, G.bt / 900)) * rand(0.9, 1.1), dmg: T.dmg * DF().edmg * (1 + G.bt / 650 * gr) * Math.sqrt(dayMul()), color: T.color, xp: T.xp, gold: T.gold, flash: 0, hitT: 0, kx: 0, ky: 0, swordCd: 0, wob: Math.random() * 6, inside: Math.hypot(x, y) < WALL_R, atk: 0.5, lunge: 0, face: 1 };
 }
 // ---------- 야생 지대: 적 진지 ----------
 function makeCamp(c, frac) {
@@ -1371,7 +1371,7 @@ function spawnEnemy(type) {
 }
 function pickType() {
   const r = Math.random(), t = G.bt;
-  if (Math.random() < Math.min(0.15, Math.max(0, (t - 120) / 1200))) { const sp = pickSpecial(); if (sp) return sp; }   // 2분부터 서서히, 5분에 15%
+  if (Math.random() < Math.min(0.15 + Math.max(0, t - 420) / 3000 * DF().grow, Math.max(0, (t - 120) / 1200))) { const sp = pickSpecial(); if (sp) return sp; }   // 2분부터 서서히, 5분에 15%
   if (t > 90 && r < 0.1 + Math.min(0.1, t / 3000)) return 'tank';
   if (t > 35 && r < 0.38) return 'runner';
   return 'grunt';
@@ -1393,7 +1393,7 @@ function spawnBoss(bx, by) {
   const a = Math.random() * Math.PI * 2, R = MAP_R - 60;
   if (bx === undefined) { bx = Math.cos(a) * R; by = Math.sin(a) * R; }
   // 스테이지 보스는 스테이지 번호로, 마을 보스는 등장 횟수로 체력이 정해짐
-  const hp = DF().boss * (inStage ? 1 : dayMul()) * (inStage ? 450 * (1 + 0.6 * DF().grow * Math.min(1, si / 3)) * (1 + si * 0.55) * (final ? 2.5 : 1) : n === 0 ? 800 : 1200 * (n + 1) * (1 + n * 0.4));  // 첫 마을 보스는 연습용으로 약하게
+  const hp = DF().boss * (inStage ? 1 : dayMul()) * (inStage ? 450 * (1 + 0.6 * DF().grow * Math.min(1, si / 3)) * (1 + si * 0.55) * (final ? 2.5 : 1) : n === 0 ? 800 : 1200 * (n + 1) * (1 + n * 0.4) * (1 + 0.3 * DF().grow));  // 첫 마을 보스는 연습용으로 약하게
   const b = { id: ++eid, type: 'boss', boss: true, name: B.name, x: bx, y: by, inside: false, atk: 0, lunge: 0, r: 58, hp, maxHp: hp, spd: 50 + n * 6, dmg: (25 + n * 8) * DF().edmg, color: B.color, xp: 0, flash: 0, hitT: 0, kx: 0, ky: 0, swordCd: 0, wob: 0, mode: 'walk', st: 3, rings: 0, ax: 0, ay: 0, lvl: n, spr: final ? (SPR.boss_final ? 'boss_final' : 'boss0') : 'boss' + BOSSES.indexOf(B) };
   if (final) { b.r = 76; b.final = true; }
   G.enemies.push(b); G.boss = b;
