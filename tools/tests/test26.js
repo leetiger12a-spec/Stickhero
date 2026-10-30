@@ -9,7 +9,7 @@ const { chromium } = require('/opt/node22/lib/node_modules/playwright');
   await page.goto('http://localhost:8765/index.html');
   // 시작 화면에서 열기
   await page.click('#bAchT'); await page.waitForTimeout(200);
-  const sub0 = await page.evaluate(() => document.getElementById('achSub').textContent); console.log(sub0); check(sub0.includes('0/19'), 'ach count wrong');
+  const sub0 = await page.evaluate(() => document.getElementById('achSub').textContent); console.log(sub0); check(sub0.includes('0/21'), 'ach count wrong');
   await page.click('#bAchOk'); await page.click('#bStart'); await page.waitForTimeout(300);
   // 첫 망루 · 적 잡기 · 보스 · 특수 적
   await page.evaluate(() => { const G = SH.G; G.nextBoss = 999; G.nextWave = 999; G.spawnAcc = -1e9;
