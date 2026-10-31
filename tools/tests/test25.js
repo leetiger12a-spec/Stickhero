@@ -29,8 +29,11 @@ const { chromium } = require('/opt/node22/lib/node_modules/playwright');
   // 무한 탑에서 쓰러짐
   await page.evaluate(() => { SH.tower(4); }); await page.waitForTimeout(300); await pick();
   await page.evaluate(() => { const G = SH.G; G.p.inv = 0; G.p.hp = 1; hurtPlayer(9999); G.respawnT = 0.1; }); 
-  for (let i = 0; i < 20 && await page.evaluate(() => SH.G.mode !== 'base'); i++) { await page.waitForTimeout(150); await pick(); }
-  check(await page.evaluate(() => SH.G.mode === 'base' && !SH.G.p.dead), 'tower death did not return home');
+  // 마을 도착 + 영웅 부활까지 기다림 (적이 많으면 프레임이 느려 3초로는 모자랄 때가 있었음)
+  for (let i = 0; i < 40 && await page.evaluate(() => SH.G.mode !== 'base' || SH.G.p.dead); i++) { await page.waitForTimeout(150); await pick(); }
+  const td = await page.evaluate(() => ({ mode: SH.G.mode, dead: SH.G.p.dead, st: SH.state, respawn: SH.G.respawnT }));
+  if (td.mode !== 'base' || td.dead) console.log('tower death state', JSON.stringify(td));
+  check(td.mode === 'base' && !td.dead, 'tower death did not return home');
   // 레벨업 카드가 떠 있을 때 마을 붕괴
   await page.evaluate(() => { const G = SH.G; G.pending = 2; openLevelUp(); });
   check(await page.evaluate(() => SH.state === 'levelup'), 'levelup not open');
