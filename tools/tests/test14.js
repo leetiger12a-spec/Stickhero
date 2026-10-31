@@ -17,13 +17,13 @@ const { chromium } = require('/opt/node22/lib/node_modules/playwright');
   await page.waitForTimeout(900); await pick();
   check(await page.evaluate(h => SH.G.p.hp < h, hp0), 'slime slam no damage');
   // 거인 로켓 펀치
-  const h1 = await page.evaluate(() => SH.G.p.hp); await setup(1); await page.waitForTimeout(950);
+  await setup(1); const h1 = await page.evaluate(() => SH.G.p.hp); await page.waitForTimeout(950);   // 체력은 setup이 가득 채운 뒤에 읽음 (전에는 슬라임에게 맞은 체력과 비교해 가끔 실패)
   check(await page.evaluate(() => SH.G.fists.length > 0), 'no fist');
   await page.screenshot({ path: `${OUT}/b34_punch.png` });
   await page.waitForTimeout(1500); await pick();
   check(await page.evaluate(h => SH.G.p.hp < h, h1), 'fist no damage');
   // 대마왕 불길
-  const h2 = await page.evaluate(() => SH.G.p.hp); await setup(2); await page.waitForTimeout(1300);
+  await setup(2); const h2 = await page.evaluate(() => SH.G.p.hp); await page.waitForTimeout(1300);
   check(await page.evaluate(() => SH.G.hazards.filter(h => h.warn <= 0).length >= 3), 'no fire');
   await page.screenshot({ path: `${OUT}/b34_fire.png` });
   await page.waitForTimeout(1500); await pick();
