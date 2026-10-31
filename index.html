@@ -230,7 +230,7 @@ h2 .hb{-webkit-text-stroke:0;text-shadow:none;letter-spacing:0;font-family:"Jua"
 
 <script>
 'use strict';
-const BUILD = 56;
+const BUILD = 57;
 const BOSS_INTERVAL = 180;      // 보스 등장 간격(초)
 const WAVE_INTERVAL = 60;       // 대규모 몰이 이벤트 간격(초)
 const MAX_ENEMIES = 220;
@@ -2944,8 +2944,8 @@ function drawFists() {
 // ---------- 그리기 ----------
 // 땅 무늬 그림(이어 붙여도 이음선 없는 정사각형): 화면 크기로 한 번 줄여 패턴으로 칠함
 const TEX = {}, TEX_PAT = {}, TEX_WORLD = 300;
-const TEX_TONE = { grass: 'rgba(110,170,80,.3)' };   // 형광 연두를 예전 풀색 쪽으로 살짝 (적·구슬이 잘 보이게)   // 그림 한 장이 덮는 월드 크기
-for (const n of ['grass']) { const im = new Image(); im.onload = () => { TEX[n] = im; }; im.src = `img/tex_${n}.webp?b=${BUILD}`; }
+const TEX_TONE = { grass: 'rgba(110,170,80,.3)', dirt: 'rgba(227,197,143,.35)' };   // 너무 밝은 색을 예전 색 쪽으로 살짝 (적·구슬·건설 표시가 잘 보이게)   // 그림 한 장이 덮는 월드 크기
+for (const n of ['grass', 'dirt']) { const im = new Image(); im.onload = () => { TEX[n] = im; }; im.src = `img/tex_${n}.webp?b=${BUILD}`; }
 function texPat(n) {
   const im = TEX[n]; if (!im || dprCap <= 1.25) return null;   // 아주 느린 기기(화질 자동 조절 마지막 단계)는 단색 땅
   const key = n + '|' + SCALE + '|' + DPR; if (TEX_PAT[n] && TEX_PAT[n].key === key) return TEX_PAT[n].p;
@@ -2977,7 +2977,7 @@ function drawGround() {
   if (!gp) { ctx.fillStyle = 'rgba(255,255,255,.07)';
     for (let x = x0; x <= x1; x++) for (let y = y0; y <= y1; y++) if ((x + y) & 1) ctx.fillRect(x * g, y * g, g, g); }
   // 마을 마당
-  ctx.fillStyle = '#e3c58f'; ctx.beginPath(); ctx.arc(0, 0, WALL_R - 6, 0, 7); ctx.fill();
+  ctx.fillStyle = texPat('dirt') || '#e3c58f'; ctx.beginPath(); ctx.arc(0, 0, WALL_R - 6, 0, 7); ctx.fill();
   ctx.strokeStyle = 'rgba(150,110,60,.35)'; ctx.lineWidth = 4; ctx.stroke();
   // 칸마다 고정된 풀·꽃·나무 장식
   for (let x = x0; x <= x1; x++) for (let y = y0; y <= y1; y++) {
