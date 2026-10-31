@@ -35,7 +35,7 @@ canvas{display:block;position:fixed;inset:0;width:100%;height:100%}
 #bStorySkip{position:absolute;top:max(14px,env(safe-area-inset-top));right:14px}
 #achList{display:flex;flex-direction:column;gap:6px;width:min(94vw,400px);max-height:60vh;overflow-y:auto}
 .arow{display:flex;align-items:center;gap:8px;background:#fffaf0;color:#222;border:3px solid #222;border-radius:12px;padding:6px 8px;text-align:left}
-.arow.off{opacity:.62;background:#e9e4da}.arow .ic{font-size:24px;width:30px;text-align:center}.arow .tx{flex:1;font-size:13px;line-height:1.25}
+.arow.off{opacity:.62;background:#e9e4da}.arow .ic{font-size:24px;width:30px;text-align:center}.arow .ic img{width:40px;height:40px;object-fit:contain;display:block;margin-left:-5px}.arow .tx{flex:1;font-size:13px;line-height:1.25}
 .arow .pb{height:5px;background:#ddd;border-radius:3px;margin-top:3px}.arow .pb i{display:block;height:100%;background:#3fa9f5;border-radius:3px}
 .arow button{font:800 12px system-ui,sans-serif;border:2px solid #222;border-radius:9px;padding:4px 7px;background:#ffd23f;cursor:pointer;white-space:nowrap}.arow button.on{background:#7bed9f}
 #evoList{display:flex;flex-direction:column;gap:6px;width:min(94vw,400px);max-height:60vh;overflow-y:auto}.evoNow{color:#1d6fa5;font-weight:800}
@@ -223,7 +223,7 @@ h2{margin:0 0 14px;font-size:clamp(30px,9vw,48px);color:#ffd23f;text-shadow:0 3p
 
 <script>
 'use strict';
-const BUILD = 51;
+const BUILD = 52;
 const BOSS_INTERVAL = 180;      // 보스 등장 간격(초)
 const WAVE_INTERVAL = 60;       // 대규모 몰이 이벤트 간격(초)
 const MAX_ENEMIES = 220;
@@ -695,6 +695,10 @@ const EVO = {
   bolt:      { need: 'hp',     name: '천둥 신',      icon: '🌩️', desc: '하늘에서 낙뢰가 여러 적에게 쾅!' },
   hammer:    { need: 'bag',    name: '화산 망치',    icon: '🌋', desc: '더 크게 쾅! 주변에 불길이 솟아요' },
 };
+// 무기 그림 아이콘 (img/w_무기.webp, 진화는 w_무기_evo.webp) — 못 불러오면 이모지
+const WICON = {};
+for (const id in WEAP) for (const ev of [0, 1]) { const n = id + (ev ? '_evo' : ''), im = new Image(); im.onload = () => { WICON[n] = im; }; im.src = `img/w_${n}.webp?b=${BUILD}`; }
+const wIco = (id, ev) => { const n = id + (ev ? '_evo' : ''); return WICON[n] ? `<img src="img/w_${n}.webp?b=${BUILD}" alt="">` : ev ? EVO[id].icon : WEAP[id].icon; };
 // 진화 도감: 만든 진화는 이름·설명, 아직이면 ??? + 조합만 (기록은 ST.evoT)
 let evoBack = null;
 function openEvo() { evoBack = state; state = 'evo'; renderEvo(); showOv('ovEvo'); }
@@ -712,7 +716,7 @@ function renderEvo() {
     }
     const lock = isUnlocked('w', id) ? '' : `<br><small>🔒 스테이지 ${UNLOCKS.find(u => u.id === id).at}칸 깨면 무기가 열려요</small>`;
     row.className = 'arow' + (ok ? '' : ' off');
-    row.innerHTML = `<div class="ic">${ok ? E.icon : '❓'}</div><div class="tx"><b>${ok ? E.name : '???'}</b><br><small>${W.icon} ${W.name} Lv${MAX_WLV} + ${P.icon} ${P.name} → ${ok ? E.icon : '❓'}</small>` +
+    row.innerHTML = `<div class="ic">${ok ? wIco(id, 1) : '❓'}</div><div class="tx"><b>${ok ? E.name : '???'}</b><br><small>${W.icon} ${W.name} Lv${MAX_WLV} + ${P.icon} ${P.name} → ${ok ? E.icon : '❓'}</small>` +
       (ok ? `<br><small>${E.desc}</small>` : '') + lock + now + '</div>';
     box.appendChild(row);
   });
@@ -1132,7 +1136,8 @@ function openLevelUp() {
     if (c.kind === 'p' && !G.passives[c.id]) { const w = Object.keys(EVO).find(id => EVO[id].need === c.id && G.weapons[id] === MAX_WLV); if (w) desc += `<br><b class="hint">✨ ${EVO[w].icon} ${EVO[w].name} 진화에 필요!</b>`; }
     const lv = c.kind === 'food' ? '' : c.kind === 'evo' ? '<span class="lv evo">진화!</span>' : c.l === 0 ? '<span class="lv new">NEW</span>' : `<span class="lv">Lv ${c.l}→${c.l + 1}</span>`;
     const b = document.createElement('button'); b.className = 'card' + (c.kind === 'evo' ? ' evo' : '');
-    b.innerHTML = `<div class="ic">${d.icon}</div><div><div class="nm">${d.name}${lv}</div><div class="ds">${desc}</div></div><div class="key">${i + 1}</div>`;
+    const ic = c.kind === 'w' ? wIco(c.id, 0) : c.kind === 'evo' ? wIco(c.id, 1) : d.icon;
+    b.innerHTML = `<div class="ic">${ic}</div><div><div class="nm">${d.name}${lv}</div><div class="ds">${desc}</div></div><div class="key">${i + 1}</div>`;
     b.onclick = () => chooseCard(i);
     box.appendChild(b);
   });
@@ -3828,7 +3833,9 @@ function drawHUD() {
   for (const id in G.weapons) {
     const ev = evolved(id);
     roundRect(ix, H - 46, 38, 38, 9); ctx.fillStyle = ev ? '#ffe9a0' : 'rgba(255,250,240,.85)'; ctx.fill(); ctx.strokeStyle = ev ? '#ff9f1c' : '#222'; ctx.lineWidth = ev ? 3.5 : 2.5; ctx.stroke();
-    ctx.textAlign = 'center'; ctx.fillStyle = '#000'; ctx.font = '20px sans-serif'; ctx.fillText(ev ? EVO[id].icon : WEAP[id].icon, ix + 19, H - 28);
+    const wi = WICON[id + (ev ? '_evo' : '')];
+    if (wi) { const k = Math.min(32 / wi.width, 32 / wi.height); ctx.drawImage(wi, ix + 19 - wi.width * k / 2, H - 27 - wi.height * k / 2, wi.width * k, wi.height * k); }
+    else { ctx.textAlign = 'center'; ctx.fillStyle = '#000'; ctx.font = '20px sans-serif'; ctx.fillText(ev ? EVO[id].icon : WEAP[id].icon, ix + 19, H - 28); }
     hudText(ev ? '★' : '' + G.weapons[id], ix + 33, H - 12, 11, '#ffd23f', 'center');
     if (!ev && canEvolve(id) && Math.floor(G.t * 3) % 2) hudText('✨', ix + 6, H - 40, 12, '#ffd23f', 'center');   // 다음 레벨업에 진화 가능
     ix += 44;
