@@ -35,7 +35,7 @@ canvas{display:block;position:fixed;inset:0;width:100%;height:100%}
 #bStorySkip{position:absolute;top:max(14px,env(safe-area-inset-top));right:14px}
 #achList{display:flex;flex-direction:column;gap:6px;width:min(94vw,400px);max-height:60vh;overflow-y:auto}
 .arow{display:flex;align-items:center;gap:8px;background:#fffaf0;color:#222;border:3px solid #222;border-radius:12px;padding:6px 8px;text-align:left}
-.arow.off{opacity:.62;background:#e9e4da}.arow .ic{font-size:24px;width:30px;text-align:center}.arow .ic img{width:40px;height:40px;object-fit:contain;display:block;margin-left:-5px}.arow .tx{flex:1;font-size:13px;line-height:1.25}
+.arow.off{opacity:.62;background:#e9e4da}.arow .ic{font-size:24px;width:30px;text-align:center}img.mi{height:1.35em;width:auto;vertical-align:-.3em}.arow .ic img{width:40px;height:40px;object-fit:contain;display:block;margin-left:-5px}.arow .tx{flex:1;font-size:13px;line-height:1.25}
 .arow .pb{height:5px;background:#ddd;border-radius:3px;margin-top:3px}.arow .pb i{display:block;height:100%;background:#3fa9f5;border-radius:3px}
 .arow button{font:800 12px system-ui,sans-serif;border:2px solid #222;border-radius:9px;padding:4px 7px;background:#ffd23f;cursor:pointer;white-space:nowrap}.arow button.on{background:#7bed9f}
 #evoList{display:flex;flex-direction:column;gap:6px;width:min(94vw,400px);max-height:60vh;overflow-y:auto}.evoNow{color:#1d6fa5;font-weight:800}
@@ -223,7 +223,7 @@ h2{margin:0 0 14px;font-size:clamp(30px,9vw,48px);color:#ffd23f;text-shadow:0 3p
 
 <script>
 'use strict';
-const BUILD = 53;
+const BUILD = 54;
 const BOSS_INTERVAL = 180;      // 보스 등장 간격(초)
 const WAVE_INTERVAL = 60;       // 대규모 몰이 이벤트 간격(초)
 const MAX_ENEMIES = 220;
@@ -477,7 +477,7 @@ SPR_FILES.forEach(n => {
   im.onload = () => { SPR_ORIG[n] = im; SPR_SRC[n] = HERO_SPR.includes(n) ? recolorHero(im) : im; bakeSprite(n); };
   im.src = `img/${n}.webp?b=${BUILD}`;
 });
-window.addEventListener('resize', () => Object.keys(SPR_SRC).forEach(bakeSprite));
+window.addEventListener('resize', () => { Object.keys(SPR_SRC).forEach(bakeSprite); for (const k in ICO_BAKE) delete ICO_BAKE[k]; });
 const rand = (a, b) => a + Math.random() * (b - a);
 const clamp = (v, a, b) => v < a ? a : v > b ? b : v;
 const fmtTime = s => { s = Math.floor(s); return String(Math.floor(s / 60)).padStart(2, '0') + ':' + String(s % 60).padStart(2, '0'); };
@@ -698,6 +698,20 @@ const EVO = {
 // 무기 그림 아이콘 (img/w_무기.webp, 진화는 w_무기_evo.webp) — 못 불러오면 이모지
 const WICON = {};
 for (const id in WEAP) for (const ev of [0, 1]) { const n = id + (ev ? '_evo' : ''), im = new Image(); im.onload = () => { WICON[n] = im; }; im.src = `img/w_${n}.webp?b=${BUILD}`; }
+// 능력·회복·경험치 구슬 그림 (img/p_능력.webp, i_chicken, i_heart, gem_b/g/r)
+for (const n of [...Object.keys(PASS).map(id => 'p_' + id), 'i_chicken', 'i_heart', 'gem_b', 'gem_g', 'gem_r']) { const im = new Image(); im.onload = () => { WICON[n] = im; }; im.src = `img/${n}.webp?b=${BUILD}`; }
+const icoHtml = (n, alt) => WICON[n] ? `<img src="img/${n}.webp?b=${BUILD}" alt="">` : alt;
+const mIco = (n, alt) => WICON[n] ? `<img class="mi" src="img/${n}.webp?b=${BUILD}" alt="">` : alt;   // 글자 줄 안의 작은 그림
+const pMini = id => mIco('p_' + id, PASS[id].icon), wMini = (id, ev) => { const n = id + (ev ? '_evo' : ''); return WICON[n] ? `<img class="mi" src="img/w_${n}.webp?b=${BUILD}" alt="">` : ev ? EVO[id].icon : WEAP[id].icon; };   // 무기 그림 키는 w_ 없이
+// 땅에 많이 깔리는 작은 그림은 화면 크기로 미리 줄여 둠 (매 프레임 큰 그림 줄이기는 느림)
+const ICO_BAKE = {};
+function bakedIco(n, h) {
+  const im = WICON[n]; if (!im) return null;
+  const key = n + '|' + h + '|' + SCALE + '|' + DPR; let c = ICO_BAKE[key];
+  if (!c) { const px = Math.max(8, Math.round(h * SCALE * DPR)); c = document.createElement('canvas'); c.height = px; c.width = Math.round(px * im.width / im.height);
+    const x = c.getContext('2d'); x.imageSmoothingQuality = 'high'; x.drawImage(im, 0, 0, c.width, c.height); ICO_BAKE[key] = c; }
+  return c;
+}
 const wIco = (id, ev) => { const n = id + (ev ? '_evo' : ''); return WICON[n] ? `<img src="img/w_${n}.webp?b=${BUILD}" alt="">` : ev ? EVO[id].icon : WEAP[id].icon; };
 // 무기 그림을 세상 속에 그리기: 그림마다 날 끝 방향(도, 그림 기준)을 맞춰 aim 쪽으로 돌림, 왼쪽을 볼 땐 뒤집어 거꾸로 안 보이게
 const WTIP = { sword: -56, sword_evo: -58, pistol: -35, pistol_evo: -30, shotgun: -38, shotgun_evo: -25, boomerang: -65, boomerang_evo: -59, bolt: -60, bolt_evo: -66, hammer: -60, hammer_evo: -62 };
@@ -748,11 +762,11 @@ function renderEvo() {
     if (G && G.weapons) {
       const wl = G.weapons[id] || 0, has = (G.passives[E.need] || 0) > 0;
       now = wl > MAX_WLV ? '<br><small class="evoNow">🎉 지금 진화 완료!</small>'
-        : wl ? `<br><small class="evoNow">지금: ${W.icon} Lv${wl}/${MAX_WLV} · ${P.icon} ${has ? '있음 ✔' : '없음'}</small>` : '';
+        : wl ? `<br><small class="evoNow">지금: ${wMini(id, 0)} Lv${wl}/${MAX_WLV} · ${pMini(E.need)} ${has ? '있음 ✔' : '없음'}</small>` : '';
     }
     const lock = isUnlocked('w', id) ? '' : `<br><small>🔒 스테이지 ${UNLOCKS.find(u => u.id === id).at}칸 깨면 무기가 열려요</small>`;
     row.className = 'arow' + (ok ? '' : ' off');
-    row.innerHTML = `<div class="ic">${ok ? wIco(id, 1) : '❓'}</div><div class="tx"><b>${ok ? E.name : '???'}</b><br><small>${W.icon} ${W.name} Lv${MAX_WLV} + ${P.icon} ${P.name} → ${ok ? E.icon : '❓'}</small>` +
+    row.innerHTML = `<div class="ic">${ok ? wIco(id, 1) : '❓'}</div><div class="tx"><b>${ok ? E.name : '???'}</b><br><small>${wMini(id, 0)} ${W.name} Lv${MAX_WLV} + ${pMini(E.need)} ${P.name} → ${ok ? wMini(id, 1) : '❓'}</small>` +
       (ok ? `<br><small>${E.desc}</small>` : '') + lock + now + '</div>';
     box.appendChild(row);
   });
@@ -1168,11 +1182,11 @@ function openLevelUp() {
     const d = c.kind === 'w' ? WEAP[c.id] : c.kind === 'p' ? PASS[c.id] : c.kind === 'evo' ? EVO[c.id] : { name: '치킨', icon: '🍗', desc: '체력을 50 회복' };
     let desc = c.kind === 'w' ? d.desc(c.l) : d.desc;
     // 진화 힌트: Lv5가 되는 무기, 진화에 필요한 능력
-    if (c.kind === 'w' && c.l === MAX_WLV - 1) desc += `<br><b class="hint">✨ Lv5 + ${PASS[EVO[c.id].need].icon} ${PASS[EVO[c.id].need].name} → ${EVO[c.id].name}!</b>`;
-    if (c.kind === 'p' && !G.passives[c.id]) { const w = Object.keys(EVO).find(id => EVO[id].need === c.id && G.weapons[id] === MAX_WLV); if (w) desc += `<br><b class="hint">✨ ${EVO[w].icon} ${EVO[w].name} 진화에 필요!</b>`; }
+    if (c.kind === 'w' && c.l === MAX_WLV - 1) desc += `<br><b class="hint">✨ Lv5 + ${pMini(EVO[c.id].need)} ${PASS[EVO[c.id].need].name} → ${EVO[c.id].name}!</b>`;
+    if (c.kind === 'p' && !G.passives[c.id]) { const w = Object.keys(EVO).find(id => EVO[id].need === c.id && G.weapons[id] === MAX_WLV); if (w) desc += `<br><b class="hint">✨ ${wMini(w, 0)} ${EVO[w].name} 진화에 필요!</b>`; }
     const lv = c.kind === 'food' ? '' : c.kind === 'evo' ? '<span class="lv evo">진화!</span>' : c.l === 0 ? '<span class="lv new">NEW</span>' : `<span class="lv">Lv ${c.l}→${c.l + 1}</span>`;
     const b = document.createElement('button'); b.className = 'card' + (c.kind === 'evo' ? ' evo' : '');
-    const ic = c.kind === 'w' ? wIco(c.id, 0) : c.kind === 'evo' ? wIco(c.id, 1) : d.icon;
+    const ic = c.kind === 'w' ? wIco(c.id, 0) : c.kind === 'evo' ? wIco(c.id, 1) : c.kind === 'p' ? icoHtml('p_' + c.id, d.icon) : icoHtml('i_chicken', d.icon);
     b.innerHTML = `<div class="ic">${ic}</div><div><div class="nm">${d.name}${lv}</div><div class="ds">${desc}</div></div><div class="key">${i + 1}</div>`;
     b.onclick = () => chooseCard(i);
     box.appendChild(b);
@@ -3608,13 +3622,18 @@ function drawWorld() {
   // 구슬
   for (const g of G.gems) {
     const c = g.v >= 20 ? '#ff4d6d' : g.v >= 5 ? '#2ecc71' : '#3fa9f5', s = g.v >= 5 ? 6.5 : 5, y = g.y + Math.sin(g.bob) * 2;
+    const gi = bakedIco(g.v >= 20 ? 'gem_r' : g.v >= 5 ? 'gem_g' : 'gem_b', s * 2.8);
+    if (gi) { const h = s * 2.8, w = h * gi.width / gi.height; ctx.drawImage(gi, g.x - w / 2, y - h * IK / 2, w, h * IK); continue; }   // save/restore 없이 (구슬은 수백 개)
     ctx.fillStyle = c; ctx.strokeStyle = '#1d3557'; ctx.lineWidth = 1.5;
     ctx.beginPath(); ctx.moveTo(g.x, y - s * 1.3); ctx.lineTo(g.x + s, y); ctx.lineTo(g.x, y + s * 1.3); ctx.lineTo(g.x - s, y); ctx.closePath(); ctx.fill(); ctx.stroke();
     ctx.fillStyle = 'rgba(255,255,255,.7)'; ctx.fillRect(g.x - 1.5, y - s * 0.7, 2, 3);
   }
   for (const h of G.hearts) {
-    ctx.font = '22px sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-    ctx.save(); ctx.translate(h.x, h.y + Math.sin(h.bob) * 3); ctx.scale(1, IK); ctx.fillText('❤️', 0, -8); ctx.restore();
+    const hi = bakedIco('i_heart', 22);
+    ctx.save(); ctx.translate(h.x, h.y + Math.sin(h.bob) * 3); ctx.scale(1, IK);
+    if (hi) { const w = 22 * hi.width / hi.height; ctx.drawImage(hi, -w / 2, -19, w, 22); }
+    else { ctx.font = '22px sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText('❤️', 0, -8); }
+    ctx.restore();
   }
   // 마을·망루·적·영웅을 y 순서로
   const list = G.enemies.slice();
