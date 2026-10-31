@@ -24,9 +24,10 @@ const { chromium } = require('/opt/node22/lib/node_modules/playwright');
   await page.tap('#bRetry'); await page.waitForTimeout(300);
   check(await page.evaluate(() => SH.G.day === 2 && isUnlocked('w', 'bolt')), 'unlock not kept after game over');
   // 무기 둘 다 써 보기
-  await page.evaluate(() => { const G = SH.G; G.p.hp = G.p.maxHp = 1e6; G.weapons = { bolt: 3, hammer: 3 }; G.timers = {}; G.p.x = 0; G.p.y = 300;
-    for (let i = 0; i < 14; i++) G.enemies.push(makeEnemy('grunt', rand(-60, 60), 300 + rand(-60, 60))); });
-  let shot = false; const k0 = await page.evaluate(() => SH.G.kills);
+  // 처음 잡은 수는 적을 넣기 직전에 같이 읽음 (망치가 첫 프레임에 바로 잡을 수 있음)
+  const k0 = await page.evaluate(() => { const G = SH.G; G.p.hp = G.p.maxHp = 1e6; G.weapons = { bolt: 3, hammer: 3 }; G.timers = {}; G.p.x = 0; G.p.y = 300;
+    const k = G.kills; for (let i = 0; i < 14; i++) G.enemies.push(makeEnemy('grunt', rand(-60, 60), 300 + rand(-60, 60))); return k; });
+  let shot = false;
   for (let i = 0; i < 20; i++) { await page.waitForTimeout(100); await page.evaluate(() => { while (SH.state === 'levelup') SH.choose(0); });
     if (!shot && await page.evaluate(() => SH.G.zaps.length > 0 && SH.G.rings.length > 0)) { await page.screenshot({ path: `${process.env.OUT||OUT||'.'}/b25_weapons.png` }); shot = true; } }
   const k1 = await page.evaluate(() => SH.G.kills);

@@ -17,13 +17,13 @@ const { chromium } = require('/opt/node22/lib/node_modules/playwright');
   await page.waitForTimeout(300);
   check(await page.evaluate(() => Object.keys(ICO_BAKE).length >= 3), 'gems not baked');
   await page.screenshot({ path: `${OUT}/b54_world.png`, clip: { x: 75, y: 262, width: 240, height: 260 } });
-  // 레벨업 카드: 능력 카드 그림, 체력 가득이면 치킨도
-  await page.evaluate(() => { const G = SH.G; G.weapons = { sword: 5 }; G.passives = {}; for (const id in PASS) if (id !== 'power') G.passives[id] = PASS[id].max; openLevelUp(); });
+  // 레벨업 카드: 고를 수 있는 건 힘뿐 (카드가 매번 같게) → 힘 카드 그림 + 치킨 카드 그림
+  await page.evaluate(() => { const G = SH.G; G.weapons = {}; for (const id in WEAP) G.weapons[id] = MAX_WLV + 1; G.weapons.sword = 5; G.passives = {}; for (const id in PASS) if (id !== 'power') G.passives[id] = PASS[id].max; openLevelUp(); });
   await page.waitForTimeout(400);
   const cards = await page.evaluate(() => [...document.querySelectorAll('#cards .card')].map(c => (c.querySelector('.ic img') || {}).src || c.querySelector('.ic').textContent));
   console.log(cards.map(s => s.replace(/.*img\//, '')).join(' | '));
   check(cards.some(s => s.includes('p_power')), 'power card no image');
-  check(cards.every(s => s.includes('.webp')), 'card without image');
+  check(cards.every(s => s.includes('.webp')), 'card without image');   // 힘 + 치킨 카드
   const hint = await page.evaluate(() => document.querySelectorAll('#cards img.mi').length); check(hint >= 1, 'hint mini icon missing');
   await page.screenshot({ path: `${OUT}/b54_cards.png` });
   await page.click('#cards .card >> nth=0'); await page.waitForTimeout(300);
