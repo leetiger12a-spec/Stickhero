@@ -223,7 +223,7 @@ h2{margin:0 0 14px;font-size:clamp(30px,9vw,48px);color:#ffd23f;text-shadow:0 3p
 
 <script>
 'use strict';
-const BUILD = 52;
+const BUILD = 53;
 const BOSS_INTERVAL = 180;      // 보스 등장 간격(초)
 const WAVE_INTERVAL = 60;       // 대규모 몰이 이벤트 간격(초)
 const MAX_ENEMIES = 220;
@@ -699,6 +699,42 @@ const EVO = {
 const WICON = {};
 for (const id in WEAP) for (const ev of [0, 1]) { const n = id + (ev ? '_evo' : ''), im = new Image(); im.onload = () => { WICON[n] = im; }; im.src = `img/w_${n}.webp?b=${BUILD}`; }
 const wIco = (id, ev) => { const n = id + (ev ? '_evo' : ''); return WICON[n] ? `<img src="img/w_${n}.webp?b=${BUILD}" alt="">` : ev ? EVO[id].icon : WEAP[id].icon; };
+// 무기 그림을 세상 속에 그리기: 그림마다 날 끝 방향(도, 그림 기준)을 맞춰 aim 쪽으로 돌림, 왼쪽을 볼 땐 뒤집어 거꾸로 안 보이게
+const WTIP = { sword: -56, sword_evo: -58, pistol: -35, pistol_evo: -30, shotgun: -38, shotgun_evo: -25, boomerang: -65, boomerang_evo: -59, bolt: -60, bolt_evo: -66, hammer: -60, hammer_evo: -62 };
+const wName = id => id + (G.weapons[id] > MAX_WLV ? '_evo' : '');
+function drawWImg(n, x, y, aim, size, o) {
+  const im = WICON[n]; if (!im) return false;
+  o = o || {}; const k = size / Math.max(im.width, im.height);
+  ctx.save(); ctx.translate(x, y); ctx.scale(1, IK); ctx.rotate(aim);
+  if (o.flip && Math.cos(aim) < 0) ctx.scale(1, -1);
+  ctx.rotate(-WTIP[n] * Math.PI / 180);
+  if (o.alpha !== undefined) ctx.globalAlpha = o.alpha;
+  if (o.glow) { ctx.shadowColor = o.glow; ctx.shadowBlur = 12; }
+  ctx.drawImage(im, -im.width * k / 2 + (o.ox || 0), -im.height * k / 2, im.width * k, im.height * k);
+  ctx.restore(); return true;
+}
+// 발동 순간 영웅 손에 무기가 보이는 효과 (총: 반동, 지팡이: 치켜들기, 망치: 내려찍기)
+function wPose(id, aim, dur) { G.wfx = G.wfx || {}; G.wfx[id] = { aim, t: dur, max: dur }; }
+function drawWPoses() {
+  const p = G.p; if (!G.wfx || p.dead) return;
+  for (const id in G.wfx) {
+    const f = G.wfx[id], k = 1 - f.t / f.max, n = wName(id), ev = n.endsWith('_evo'), hx = p.x, hy = p.y - 16;
+    const fade = Math.min(1, f.t / 0.08);
+    if (id === 'pistol' || id === 'shotgun') {
+      const big = id === 'shotgun' ? 40 : 30, rec = Math.max(0, 1 - k * 3) * 7, d = 20 - rec;
+      drawWImg(n, hx + Math.cos(f.aim) * d, hy + Math.sin(f.aim) * d, f.aim, ev ? big + 10 : big, { flip: true, alpha: fade });
+      if (k < 0.35) { const md = d + (ev ? big + 10 : big) * 0.5; ctx.fillStyle = id === 'shotgun' && ev ? 'rgba(255,120,0,.9)' : 'rgba(255,230,120,.95)';
+        ctx.beginPath(); ctx.arc(hx + Math.cos(f.aim) * md, hy + Math.sin(f.aim) * md, (ev ? 9 : 6) * (1 - k * 2), 0, 7); ctx.fill(); }
+    } else if (id === 'bolt') { // 지팡이를 머리 위로 치켜듦
+      const up = -Math.PI / 2 + p.face * 0.35, lift = Math.min(1, k * 4) * 10;
+      drawWImg(n, hx + p.face * 14, hy - 14 - lift, up, ev ? 46 : 38, { alpha: fade, glow: ev ? '#ffe066' : '#9fd8ff' });
+    } else if (id === 'hammer') { // 머리 위에서 앞쪽 땅으로 쾅
+      const sw = Math.min(1, k / 0.35), a0 = p.face > 0 ? -Math.PI * 0.85 : -Math.PI * 0.15, a1 = p.face > 0 ? Math.PI * 0.2 : Math.PI * 0.8;
+      const a = a0 + (a1 - a0) * sw * sw, L = ev ? 30 : 24;
+      drawWImg(n, hx + Math.cos(a) * L, hy + Math.sin(a) * L, a, ev ? 58 : 46, { flip: true, alpha: fade });
+    }
+  }
+}
 // 진화 도감: 만든 진화는 이름·설명, 아직이면 ??? + 조합만 (기록은 ST.evoT)
 let evoBack = null;
 function openEvo() { evoBack = state; state = 'evo'; renderEvo(); showOv('ovEvo'); }
@@ -2325,6 +2361,7 @@ function fireWeapons(dt) {
         const a = ang + (k - (s.shots - 1) / 2) * 0.12 + (s.jitter ? rand(-s.jitter, s.jitter) : 0);
         G.bullets.push({ x: ox, y: oy, vx: Math.cos(a) * 560, vy: Math.sin(a) * 560, r: 4, dmg: s.dmg, life: 0.9, pierce: s.pierce, hits: [], kind: 'pistol' });
       }
+      wPose('pistol', ang, evolved('pistol') ? 0.3 : 0.22);
       sfx('shoot');
     } else if (id === 'shotgun') {
       for (let k = 0; k < s.pellets; k++) {
@@ -2333,6 +2370,7 @@ function fireWeapons(dt) {
       }
       if (s.fire) for (let k = 0; k < 3; k++) { const a = ang + (k - 1) * 0.3, d = rand(90, 170); addFlame(ox + Math.cos(a) * d, oy + 12 + Math.sin(a) * d, 30, 2.2); }   // 용의 숨결: 땅에 불길
       burst(ox + Math.cos(ang) * 14, oy + Math.sin(ang) * 14, '#ffb347', 6, 120, 4, 0.2);
+      wPose('shotgun', ang, 0.3);
       sfx('shotgun');
     } else if (id === 'boomerang') {
       for (let k = 0; k < s.count; k++) {
@@ -2341,7 +2379,8 @@ function fireWeapons(dt) {
       }
       sfx('boom');
     } else if (id === 'bolt') { // 첫 적에서 가까운 적으로 지그재그 번개
-      let cur = tgt, from = { x: ox, y: oy - 10 }; const hit = new Set();
+      wPose('bolt', ang, 0.4);
+      let cur = tgt, from = { x: ox + p.face * 20, y: oy - 46 }; const hit = new Set();   // 치켜든 지팡이 끝에서 번개
       for (let k = 0; k <= s.chain && cur; k++) {
         hit.add(cur); zap(from.x, from.y, cur.x, cur.y - 14);
         hurtEnemy(cur, s.dmg, (cur.x - from.x) / 100, (cur.y - from.y) / 100, 60);
@@ -2350,6 +2389,7 @@ function fireWeapons(dt) {
         for (const e of G.enemies) { if (e.dead || hit.has(e)) continue; const d = (e.x - from.x) ** 2 + (e.y - from.y) ** 2; if (d < nd) { nd = d; nx = e; } }
         cur = nx;
       }
+      burst(ox + p.face * 20, oy - 46, '#fff7a8', 6, 90, 3, 0.25);
       if (s.sky) { // 천둥 신: 하늘에서 낙뢰
         const near = G.enemies.filter(e => !e.dead && (e.x - p.x) ** 2 + (e.y - p.y) ** 2 < 400 * 400);
         for (let k = 0; k < s.sky && near.length; k++) { const e = near.splice(Math.floor(Math.random() * near.length), 1)[0];
@@ -2361,7 +2401,7 @@ function fireWeapons(dt) {
       for (const e of G.enemies) { const dx = e.x - p.x, dy = e.y - p.y, d = Math.hypot(dx, dy) || 1; if (d < s.rad + e.r) hurtEnemy(e, s.dmg, dx / d, dy / d, 420); }
       G.rings.push({ x: p.x, y: p.y, r: s.rad, life: 0.45, max: 0.45 });
       burst(p.x, p.y, '#ff7b00', 26, s.rad * 3, 6, 0.5); burst(p.x, p.y, '#ffd23f', 14, s.rad * 2, 5, 0.4);
-      G.shake = Math.max(G.shake, 7); p.slam = 0.25; sfx('slam'); vib(30);
+      G.shake = Math.max(G.shake, 7); p.slam = 0.25; sfx('slam'); vib(30); wPose('hammer', 0, 0.4);
       if (s.fire) for (let k = 0; k < 6; k++) { const a = k / 6 * Math.PI * 2 + rand(-0.2, 0.2), d = s.rad * rand(0.5, 0.85); addFlame(p.x + Math.cos(a) * d, p.y + Math.sin(a) * d, 34, 2.5); }   // 화산 망치
     }
     G.timers[id] = s.cd * p.cdMul;
@@ -2462,6 +2502,7 @@ function update(dt) {
   for (const z of G.zaps) z.life -= dt; G.zaps = G.zaps.filter(z => z.life > 0);
   for (const r of G.rings) r.life -= dt; G.rings = G.rings.filter(r => r.life > 0);
   if (p.slam > 0) p.slam -= dt;
+  if (G.wfx) for (const id in G.wfx) if ((G.wfx[id].t -= dt) <= 0) delete G.wfx[id];
   if (G.mode === 'base') { G.saveT = (G.saveT === undefined ? 10 : G.saveT) - dt; if (G.saveT <= 0) saveGame(); }
 
   // 회전 칼
@@ -3619,6 +3660,14 @@ function drawWorld() {
     const s = wStat('sword');
     for (let k = 0; k < s.n; k++) {
       const a = G.swordAng + k / s.n * Math.PI * 2;
+      if (WICON[wName('sword')]) { // 그림 칼: 칼끝이 바깥, 지나간 자리에 빛 꼬리
+        const ev = evolved('sword');
+        ctx.save(); ctx.translate(p.x, p.y - 12); ctx.rotate(a);
+        ctx.strokeStyle = ev ? 'rgba(255,230,120,.45)' : 'rgba(160,220,255,.35)'; ctx.lineWidth = ev ? 14 : 10; ctx.lineCap = 'round';
+        ctx.beginPath(); ctx.arc(0, 0, s.rad, -0.6, 0); ctx.stroke(); ctx.restore();
+        drawWImg(wName('sword'), p.x + Math.cos(a) * s.rad, p.y - 12 + Math.sin(a) * s.rad, Math.atan2(Math.sin(a) * K, Math.cos(a)), ev ? 50 : 40);   // 빛 번짐(shadowBlur)은 모바일에서 느려서 안 씀
+        continue;
+      }
       ctx.save(); ctx.translate(p.x, p.y - 12); ctx.rotate(a);
       ctx.strokeStyle = 'rgba(160,220,255,.35)'; ctx.lineWidth = 10; ctx.lineCap = 'round';
       ctx.beginPath(); ctx.arc(0, 0, s.rad, -0.5, 0); ctx.stroke();
@@ -3648,6 +3697,7 @@ function drawWorld() {
     ctx.beginPath(); ctx.arc(b.x, b.y, b.r, 0, 7); ctx.fill(); ctx.stroke();
   }
   for (const b of G.booms) {
+    if (WICON[b.big ? 'boomerang_evo' : 'boomerang']) { drawWImg(b.big ? 'boomerang_evo' : 'boomerang', b.x, b.y, b.rot, b.big ? 56 : 30); continue; }
     ctx.save(); ctx.translate(b.x, b.y); ctx.rotate(b.rot); if (b.big) { ctx.scale(2, 2); ctx.shadowColor = '#9fd8ff'; ctx.shadowBlur = 6; }
     ctx.strokeStyle = '#222'; ctx.lineWidth = 9; ctx.lineCap = 'round';
     ctx.beginPath(); ctx.moveTo(-13, 9); ctx.lineTo(0, -4); ctx.lineTo(13, 9); ctx.stroke();
@@ -3655,7 +3705,7 @@ function drawWorld() {
     ctx.beginPath(); ctx.moveTo(-13, 9); ctx.lineTo(0, -4); ctx.lineTo(13, 9); ctx.stroke();
     ctx.restore();
   }
-  drawFists(); drawFlames();
+  drawWPoses(); drawFists(); drawFlames();
   for (const b of G.ebullets) {
     if (b.arrow) { const a = Math.atan2(b.vy, b.vx); ctx.save(); ctx.translate(b.x, b.y); ctx.rotate(a);
       ctx.strokeStyle = '#6b3e1a'; ctx.lineWidth = 2.5; ctx.beginPath(); ctx.moveTo(-12, 0); ctx.lineTo(6, 0); ctx.stroke();
