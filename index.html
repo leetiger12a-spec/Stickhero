@@ -230,7 +230,7 @@ h2 .hb{-webkit-text-stroke:0;text-shadow:none;letter-spacing:0;font-family:"Jua"
 
 <script>
 'use strict';
-const BUILD = 57;
+const BUILD = 58;
 const BOSS_INTERVAL = 180;      // 보스 등장 간격(초)
 const WAVE_INTERVAL = 60;       // 대규모 몰이 이벤트 간격(초)
 const MAX_ENEMIES = 220;
@@ -298,7 +298,7 @@ const ALLY_TYPES = {
 };
 const STAGE_HW = 200;           // 스테이지 길 반폭
 const THEMES = [
-  { name: '숲',   tex: 'grass', ground: '#8fd16a', check: 'rgba(255,255,255,.07)', edge: '#2d6a2e', deco: 'tree',   bgm: 'b', map: '#5fae46' },
+  { name: '숲',   tex: 'grass', edgeTex: 'forest', ground: '#8fd16a', check: 'rgba(255,255,255,.07)', edge: '#2d6a2e', deco: 'tree',   bgm: 'b', map: '#5fae46' },
   { name: '폐허', ground: '#cfc6b0', check: 'rgba(0,0,0,.05)',       edge: '#5c5f66', deco: 'pillar', bgm: 'c', map: '#a89f88' },
   { name: '던전', ground: '#5d4d70', check: 'rgba(0,0,0,.12)',       edge: '#231a2e', deco: 'torch',  bgm: 'd', map: '#5d4d70' },
   { name: '화산', ground: '#7a4a3a', check: 'rgba(255,90,0,.08)',    edge: '#2a1410', deco: 'torch',  bgm: 'c', map: '#b5482e' },
@@ -2213,7 +2213,7 @@ function drawStageGround() {
   const st = G.st, th = st.th, g = 64;
   const x0 = Math.floor((G.cam.x - VW / 2) / g) - 1, x1 = Math.ceil((G.cam.x + VW / 2) / g) + 1;
   const y0 = Math.floor((G.cam.y - VH * IK / 2) / g) - 1, y1 = Math.ceil((G.cam.y + VH * IK / 2) / g) + 2;
-  ctx.fillStyle = th.edge; ctx.fillRect(x0 * g, y0 * g, (x1 - x0) * g, (y1 - y0) * g);
+  ctx.fillStyle = (th.edgeTex && texPat(th.edgeTex)) || th.edge; ctx.fillRect(x0 * g, y0 * g, (x1 - x0) * g, (y1 - y0) * g);
   const top = -st.L - 420, bot = 140;
   const tp = th.tex && texPat(th.tex);
   ctx.fillStyle = tp || th.ground; ctx.fillRect(-STAGE_HW - 10, top, STAGE_HW * 2 + 20, bot - top);
@@ -2944,8 +2944,8 @@ function drawFists() {
 // ---------- 그리기 ----------
 // 땅 무늬 그림(이어 붙여도 이음선 없는 정사각형): 화면 크기로 한 번 줄여 패턴으로 칠함
 const TEX = {}, TEX_PAT = {}, TEX_WORLD = 300;
-const TEX_TONE = { grass: 'rgba(110,170,80,.3)', dirt: 'rgba(227,197,143,.35)' };   // 너무 밝은 색을 예전 색 쪽으로 살짝 (적·구슬·건설 표시가 잘 보이게)   // 그림 한 장이 덮는 월드 크기
-for (const n of ['grass', 'dirt']) { const im = new Image(); im.onload = () => { TEX[n] = im; }; im.src = `img/tex_${n}.webp?b=${BUILD}`; }
+const TEX_TONE = { grass: 'rgba(110,170,80,.3)', dirt: 'rgba(227,197,143,.35)', forest: 'rgba(25,60,25,.3)' };   // 숲은 경기장보다 어둡게   // 너무 밝은 색을 예전 색 쪽으로 살짝 (적·구슬·건설 표시가 잘 보이게)   // 그림 한 장이 덮는 월드 크기
+for (const n of ['grass', 'dirt', 'forest']) { const im = new Image(); im.onload = () => { TEX[n] = im; }; im.src = `img/tex_${n}.webp?b=${BUILD}`; }
 function texPat(n) {
   const im = TEX[n]; if (!im || dprCap <= 1.25) return null;   // 아주 느린 기기(화질 자동 조절 마지막 단계)는 단색 땅
   const key = n + '|' + SCALE + '|' + DPR; if (TEX_PAT[n] && TEX_PAT[n].key === key) return TEX_PAT[n].p;
@@ -2959,7 +2959,8 @@ function drawGround() {
   const g = 64, x0 = Math.floor((G.cam.x - VW / 2) / g) - 1, x1 = Math.ceil((G.cam.x + VW / 2) / g) + 1;
   const y0 = Math.floor((G.cam.y - VH * IK / 2) / g) - 1, y1 = Math.ceil((G.cam.y + VH * IK / 2) / g) + 2;
   // 바깥 숲 (화면이 맵 가장자리에 닿을 때만 칠함)
-  if (Math.hypot(Math.abs(G.cam.x) + VW / 2, Math.abs(G.cam.y) + VH * IK / 2) > WORLD_R - 10) { ctx.fillStyle = '#3f7d3a'; ctx.fillRect(x0 * g, y0 * g, (x1 - x0) * g, (y1 - y0) * g); }
+  const fp = texPat('forest');
+  if (Math.hypot(Math.abs(G.cam.x) + VW / 2, Math.abs(G.cam.y) + VH * IK / 2) > WORLD_R - 10) { ctx.fillStyle = fp || '#3f7d3a'; ctx.fillRect(x0 * g, y0 * g, (x1 - x0) * g, (y1 - y0) * g); }
   // 풀밭
   const gp = texPat('grass');
   if (gp) { // 풀밭 그림 한 번 + 맵 밖 야생 지대(고리)만 어둡게 한 번
@@ -2983,8 +2984,8 @@ function drawGround() {
   for (let x = x0; x <= x1; x++) for (let y = y0; y <= y1; y++) {
     const h = Math.abs(Math.sin(x * 127.1 + y * 311.7) * 43758.5) % 1;
     const px = x * g + (h * 300) % g, py = y * g + (h * 700) % g, r = Math.hypot(px, py);
-    if (r > WORLD_R + 20) { // 숲 나무
-      if (h < 0.7) {
+    if (r > WORLD_R + 20) { // 숲 나무 (숲 지붕 그림이 있으면 그림이 대신함)
+      if (h < 0.7 && !fp) {
         ctx.save(); ctx.translate(px, py); ctx.scale(1, IK);
         ctx.fillStyle = h < 0.35 ? '#2d6a2e' : '#357a36'; ctx.beginPath(); ctx.arc(0, -10, 22 + h * 10, 0, 7); ctx.fill();
         ctx.fillStyle = 'rgba(255,255,255,.12)'; ctx.beginPath(); ctx.arc(-7, -18, 9, 0, 7); ctx.fill();
