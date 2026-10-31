@@ -6,26 +6,30 @@
 <meta name="theme-color" content="#1b1f2e">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <title>레전드 히어로 LEGEND HERO</title>
+<link rel="preload" href="fonts/jua.woff2" as="font" type="font/woff2" crossorigin>
 <style>
-html,body{margin:0;height:100%;background:#1b1f2e;overflow:hidden;touch-action:none;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;-webkit-tap-highlight-color:transparent;font-family:system-ui,-apple-system,"Apple SD Gothic Neo","Malgun Gothic",sans-serif;color:#fff}
+/* 글꼴: 배민 주아체(본문·버튼·HUD), 검은고딕(제목) — 게임 글자만 남긴 부분 글꼴, tools/fonts.py */
+@font-face{font-family:"Jua";src:url(fonts/jua.woff2) format("woff2");font-display:swap}
+@font-face{font-family:"BHS";src:url(fonts/blackhansans.woff2) format("woff2");font-display:swap}
+html,body{margin:0;height:100%;background:#1b1f2e;overflow:hidden;touch-action:none;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;-webkit-tap-highlight-color:transparent;font-family:"Jua",system-ui,-apple-system,"Apple SD Gothic Neo","Malgun Gothic",sans-serif;font-synthesis:none;color:#fff;letter-spacing:.2px}
 canvas{display:block;position:fixed;inset:0;width:100%;height:100%}
-.ov{position:fixed;inset:0;display:none;flex-direction:column;align-items:center;justify-content:center;background:rgba(12,14,28,.86);z-index:5;text-align:center;padding:16px;box-sizing:border-box}
+.ov{position:fixed;inset:0;display:none;flex-direction:column;align-items:center;justify-content:center;background:radial-gradient(ellipse at 50% 38%,rgba(34,46,92,.82),rgba(8,10,24,.94) 75%);-webkit-backdrop-filter:blur(3px);backdrop-filter:blur(3px);z-index:5;text-align:center;padding:16px;box-sizing:border-box}
 .ov.show{display:flex}
-#ovTitle{justify-content:space-between;background:linear-gradient(rgba(12,14,28,.5),rgba(12,14,28,0) 24%,rgba(12,14,28,0) 100%);padding:max(18px,env(safe-area-inset-top)) 16px max(14px,env(safe-area-inset-bottom))}
+#ovTitle{-webkit-backdrop-filter:none;backdrop-filter:none;justify-content:space-between;background:linear-gradient(rgba(12,14,28,.5),rgba(12,14,28,0) 24%,rgba(12,14,28,0) 100%);padding:max(18px,env(safe-area-inset-top)) 16px max(14px,env(safe-area-inset-bottom))}
 #ovTitle .top{margin-top:2vh}
 #ovTitle .bottom{display:flex;flex-direction:column;align-items:center}
 #ovTitle .hint{margin-top:6px}
 .panel{background:rgba(8,18,30,.62);border:2px solid rgba(255,210,63,.55);border-radius:18px;padding:10px 12px 12px;box-shadow:0 6px 18px rgba(0,0,0,.45),inset 0 0 0 2px rgba(0,0,0,.35);width:min(92vw,380px);box-sizing:border-box;display:flex;flex-direction:column;align-items:center;gap:6px;backdrop-filter:blur(2px)}
-.plabel{font-size:12px;font-weight:800;color:#ffd23f;opacity:.9;letter-spacing:1px}
+.plabel{font-size:13px;color:#ffd23f;opacity:.9;letter-spacing:1px}
 .pills{display:flex;background:rgba(0,0,0,.45);border:2px solid rgba(255,255,255,.18);border-radius:999px;padding:3px;gap:2px}
-.pill{font:inherit;font-size:14px;font-weight:800;color:#fff;background:none;border:none;border-radius:999px;padding:7px 11px;cursor:pointer;white-space:nowrap}
+.pill{font:inherit;font-size:15px;color:#fff;background:none;border:none;border-radius:999px;padding:7px 11px;cursor:pointer;white-space:nowrap}
 .pill.on{background:linear-gradient(#ffe27a,#ffb703);color:#3a1a00;box-shadow:0 2px 0 #b56b00}
 #diffDesc{font-size:12px;opacity:.85}
-.btn.big{font-size:24px;padding:12px 52px;position:relative;overflow:hidden;margin:4px}
+.btn.big{font-size:27px;padding:12px 52px;position:relative;overflow:hidden;margin:4px}
 .btn.big::after{content:'';position:absolute;top:0;left:-60%;width:40%;height:100%;background:linear-gradient(100deg,transparent,rgba(255,255,255,.7),transparent);transform:skewX(-20deg);animation:shine 2.6s infinite}
 @keyframes shine{0%,55%{left:-60%}100%{left:130%}}
 .mrow{display:flex;gap:8px;margin-top:6px}
-.mrow .hb{width:auto;padding:0 9px;font-size:12px;font-weight:800;white-space:nowrap}
+.mrow .hb{width:auto;padding:0 10px;font-size:14px;white-space:nowrap}
 .mrow{flex-wrap:wrap;justify-content:center}
 #logoImg{width:min(88vw,460px);filter:drop-shadow(0 6px 10px rgba(0,0,0,.55));animation:titleBob 2.4s ease-in-out infinite}
 #ovStory{background:#000;z-index:8;padding:0;justify-content:center}
@@ -34,18 +38,18 @@ canvas{display:block;position:fixed;inset:0;width:100%;height:100%}
 #storyNext{position:absolute;bottom:max(18px,env(safe-area-inset-bottom));right:18px;font-size:14px;opacity:.75}
 #bStorySkip{position:absolute;top:max(14px,env(safe-area-inset-top));right:14px}
 #achList{display:flex;flex-direction:column;gap:6px;width:min(94vw,400px);max-height:60vh;overflow-y:auto}
-.arow{display:flex;align-items:center;gap:8px;background:#fffaf0;color:#222;border:3px solid #222;border-radius:12px;padding:6px 8px;text-align:left}
-.arow.off{opacity:.62;background:#e9e4da}.arow .ic{font-size:24px;width:30px;text-align:center}img.mi{height:1.35em;width:auto;vertical-align:-.3em}.arow .ic img{width:40px;height:40px;object-fit:contain;display:block;margin-left:-5px}.arow .tx{flex:1;font-size:13px;line-height:1.25}
+.arow{display:flex;align-items:center;gap:8px;background:linear-gradient(#fffdf7,#fff1d6);color:#2b2d42;border:3px solid #2b2d42;border-radius:14px;padding:6px 8px;text-align:left;box-shadow:0 3px 0 #2b2d42}
+.arow.off{opacity:.62;background:#e9e4da}.arow .ic{font-size:24px;width:30px;text-align:center}img.mi{height:1.35em;width:auto;vertical-align:-.3em}.arow .ic img{width:40px;height:40px;object-fit:contain;display:block;margin-left:-5px}.arow .tx{flex:1;font-size:14px;line-height:1.3}.arow .tx b{font-weight:400;font-size:16px}
 .arow .pb{height:5px;background:#ddd;border-radius:3px;margin-top:3px}.arow .pb i{display:block;height:100%;background:#3fa9f5;border-radius:3px}
-.arow button{font:800 12px system-ui,sans-serif;border:2px solid #222;border-radius:9px;padding:4px 7px;background:#ffd23f;cursor:pointer;white-space:nowrap}.arow button.on{background:#7bed9f}
+.arow button{font:inherit;font-size:13px;color:#2b2d42;border:2px solid #2b2d42;border-radius:9px;padding:4px 7px;background:#ffd23f;cursor:pointer;white-space:nowrap}.arow button.on{background:#7bed9f}
 #evoList{display:flex;flex-direction:column;gap:6px;width:min(94vw,400px);max-height:60vh;overflow-y:auto}.evoNow{color:#1d6fa5;font-weight:800}
 #shopList{display:flex;flex-direction:column;gap:8px;width:min(94vw,400px);max-height:58vh;overflow-y:auto}
-.srow{display:flex;align-items:center;gap:10px;background:#fffaf0;color:#222;border:3px solid #222;border-radius:14px;padding:8px 10px;text-align:left}
+.srow{display:flex;align-items:center;gap:10px;background:linear-gradient(#fffdf7,#fff1d6);color:#2b2d42;border:3px solid #2b2d42;border-radius:16px;padding:8px 10px;text-align:left;box-shadow:0 3px 0 #2b2d42}
 .srow .ic{font-size:28px;width:36px;text-align:center}
 .srow .tx{flex:1;font-size:15px;line-height:1.3}
 .srow .lv{font-size:12px;color:#fff;background:#3fa9f5;border-radius:8px;padding:1px 6px}
 .srow small{font-size:12px;color:#555}
-.sbuy{font:inherit;font-weight:900;font-size:14px;border:none;border-radius:12px;padding:10px 12px;background:linear-gradient(#ffe27a,#ffb703);color:#3a1a00;box-shadow:0 3px 0 #b56b00;cursor:pointer;white-space:nowrap}
+.sbuy{font:inherit;font-size:15px;border:2px solid #3a1a00;border-radius:12px;padding:10px 12px;background:linear-gradient(#ffe27a,#ffb703);color:#3a1a00;box-shadow:0 3px 0 #b56b00;cursor:pointer;white-space:nowrap}
 .sbuy.off{filter:grayscale(1);opacity:.6}
 #wardPrev{position:static;inset:auto;display:block}
 #wardGrid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;width:min(92vw,360px);margin:10px 0}
@@ -81,26 +85,28 @@ canvas{display:block;position:fixed;inset:0;width:100%;height:100%}
 #ovTitle .kr{font-size:clamp(18px,5.5vw,26px);font-weight:900;color:#fff;letter-spacing:6px;text-shadow:0 2px 0 #b5179e,0 0 12px rgba(0,0,0,.6);margin-bottom:6px}
 #ovTitle .sub{font-weight:700;text-shadow:0 2px 6px rgba(0,0,0,.8);margin-bottom:0}
 @keyframes titleBob{0%,100%{transform:translateY(0) rotate(-2deg)}50%{transform:translateY(-6px) rotate(2deg)}}
-h1{margin:0 0 4px;font-size:clamp(40px,12vw,72px);letter-spacing:2px;color:#ffd23f;text-shadow:0 4px 0 #b5179e,0 8px 18px rgba(0,0,0,.6)}
-h2{margin:0 0 14px;font-size:clamp(30px,9vw,48px);color:#ffd23f;text-shadow:0 3px 0 #b5179e}
+h1{margin:0 0 4px;font:400 clamp(40px,12vw,72px) "BHS","Jua",system-ui,-apple-system,"Apple SD Gothic Neo","Malgun Gothic",sans-serif;letter-spacing:2px;color:#ffd23f;-webkit-text-stroke:6px #3a1a00;paint-order:stroke fill;text-shadow:0 5px 0 #3a1a00,0 10px 18px rgba(0,0,0,.55)}
+h2{margin:0 0 14px;font:400 clamp(30px,9vw,46px) "BHS","Jua",system-ui,-apple-system,"Apple SD Gothic Neo","Malgun Gothic",sans-serif;letter-spacing:1px;color:#ffd23f;-webkit-text-stroke:5px #3a1a00;paint-order:stroke fill;text-shadow:0 4px 0 #3a1a00,0 8px 16px rgba(0,0,0,.5)}
 .sub{opacity:.9;margin-bottom:18px;font-size:17px}
-.btn{font:inherit;font-size:22px;font-weight:800;padding:14px 38px;border-radius:16px;border:none;background:linear-gradient(#ffd23f,#ff9f1c);color:#3a1a00;box-shadow:0 5px 0 #b56b00;cursor:pointer;margin:8px}
-.btn:active{transform:translateY(3px);box-shadow:0 2px 0 #b56b00}
+.btn{font:inherit;font-size:23px;padding:12px 38px;border-radius:18px;border:3px solid #3a1a00;background:linear-gradient(#ffe680,#ffc21a 55%,#ff9a00);color:#3a1a00;text-shadow:0 1px 0 rgba(255,255,255,.55);box-shadow:inset 0 3px 0 rgba(255,255,255,.6),inset 0 -4px 0 rgba(150,60,0,.25),0 5px 0 #3a1a00,0 9px 14px rgba(0,0,0,.35);cursor:pointer;margin:8px;min-width:200px}
+.btn:active{transform:translateY(4px);box-shadow:inset 0 3px 0 rgba(255,255,255,.6),inset 0 -2px 0 rgba(150,60,0,.25),0 1px 0 #3a1a00,0 3px 6px rgba(0,0,0,.35)}
+.btn.blue{background:linear-gradient(#a8ecff,#45b4f7 55%,#1f86d9);color:#fff;text-shadow:0 2px 0 #0f4c81;border-color:#0d3358;box-shadow:inset 0 3px 0 rgba(255,255,255,.55),inset 0 -4px 0 rgba(0,40,90,.25),0 5px 0 #0d3358,0 9px 14px rgba(0,0,0,.35)}
+.btn.gray{background:linear-gradient(#ffffff,#d9d9d9 55%,#b3b3b3);color:#333;border-color:#333;box-shadow:inset 0 3px 0 rgba(255,255,255,.8),inset 0 -4px 0 rgba(0,0,0,.12),0 5px 0 #333,0 9px 14px rgba(0,0,0,.35)}
 .best{margin-top:14px;font-size:15px;opacity:.85;line-height:1.6}
 .hint{margin-top:14px;font-size:13px;opacity:.65;line-height:1.5}
 #cards{display:flex;flex-direction:column;gap:12px;width:min(92vw,420px)}
-.card{display:flex;align-items:center;gap:14px;text-align:left;font:inherit;color:#222;background:#fffaf0;border:4px solid #333;border-radius:16px;padding:12px 14px;cursor:pointer;box-shadow:0 5px 0 #333;animation:pop .25s ease-out backwards}
+.card{display:flex;align-items:center;gap:14px;text-align:left;font:inherit;color:#2b2d42;background:linear-gradient(#fffdf7,#fff1d6);border:3px solid #2b2d42;border-radius:18px;padding:12px 14px;cursor:pointer;box-shadow:inset 0 2px 0 #fff,0 5px 0 #2b2d42,0 10px 18px rgba(0,0,0,.3);animation:pop .25s ease-out backwards}
 .card:nth-child(2){animation-delay:.07s}.card:nth-child(3){animation-delay:.14s}
-.card:active{transform:translateY(3px);box-shadow:0 2px 0 #333}
+.card:active{transform:translateY(3px);box-shadow:0 2px 0 #2b2d42}
 .card .ic{font-size:40px;width:52px;text-align:center;flex:none}
 .card .ic img{width:56px;height:56px;object-fit:contain;display:block}
-.card .nm{font-size:19px;font-weight:800}
-.card .lv{font-size:13px;font-weight:700;color:#fff;background:#e63946;border-radius:8px;padding:1px 7px;margin-left:6px}
+.card .nm{font-size:21px}
+.card .lv{font-size:13px;color:#fff;vertical-align:2px;background:#e63946;border-radius:8px;padding:1px 7px;margin-left:6px}
 .card .lv.new{background:#2a9d8f}
 .card .lv.evo{background:linear-gradient(90deg,#ff9f1c,#ffd23f);color:#222}.card .hint{color:#b5179e;font-size:12px}
 .card.evo{border-color:#ffb703;background:linear-gradient(#fff8d6,#ffe9a0);box-shadow:0 5px 0 #b8860b,0 0 18px rgba(255,210,63,.8);animation:pop .25s ease-out backwards,evoGlow 1s ease-in-out infinite}
 @keyframes evoGlow{50%{box-shadow:0 5px 0 #b8860b,0 0 30px rgba(255,210,63,1)}}
-.card .ds{font-size:14px;color:#555;margin-top:3px}
+.card .ds{font-size:15px;color:#6b5b4b;margin-top:3px}
 .card .key{margin-left:auto;font-size:13px;color:#999;flex:none}
 @keyframes pop{from{transform:scale(.6);opacity:0}to{transform:scale(1);opacity:1}}
 .stats{font-size:19px;line-height:1.7;margin-bottom:10px}
@@ -108,7 +114,7 @@ h2{margin:0 0 14px;font-size:clamp(30px,9vw,48px);color:#ffd23f;text-shadow:0 3p
 .newrec{color:#ff6b6b;font-weight:900;font-size:22px;animation:pop .5s ease-out infinite alternate}
 #hudBtns{position:fixed;right:8px;top:140px;z-index:4;display:none;flex-direction:column;gap:8px}
 #hudBtns.show{display:flex}
-#questBox{position:fixed;left:8px;top:164px;z-index:4;display:none;background:rgba(20,20,30,.55);border:2px solid rgba(255,255,255,.35);border-radius:10px;padding:5px 8px;color:#fff;font:800 11px system-ui,sans-serif;max-width:190px;cursor:pointer;touch-action:none;user-select:none;-webkit-user-select:none}
+#questBox{position:fixed;left:8px;top:164px;z-index:4;display:none;background:rgba(20,20,30,.55);border:2px solid rgba(255,255,255,.35);border-radius:10px;padding:5px 8px;color:#fff;font:inherit;font-size:12px;max-width:190px;cursor:pointer;touch-action:none;user-select:none;-webkit-user-select:none}
 #questBox.show{display:block}#questBox .qh{color:#ffd23f;font-size:12px}#questBox .q{margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}#questBox .q.done{color:#7bed9f;text-decoration:line-through}
 #questBox .bar{height:4px;background:rgba(255,255,255,.25);border-radius:2px;margin-top:2px}#questBox .bar i{display:block;height:100%;background:#ffd23f;border-radius:2px}
 #bSos{position:fixed;right:10px;bottom:190px;z-index:4;width:66px;height:66px;border-radius:50%;border:4px solid #222;padding:0;cursor:pointer;display:none;
@@ -116,7 +122,9 @@ h2{margin:0 0 14px;font-size:clamp(30px,9vw,48px);color:#ffd23f;text-shadow:0 3p
 #bSos.show{display:block}#bSos .in{position:absolute;inset:5px;border-radius:50%;background:#16324f;display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1.05}
 #bSos .ic{font-size:24px}#bSos .tx{font-size:11px}#bSos.ready{animation:sosPulse 1s infinite}#bSos.ready .in{background:#1d5c94}
 @keyframes sosPulse{50%{transform:scale(1.07)}}
-.hb{width:40px;height:40px;border-radius:12px;border:3px solid #333;background:rgba(255,250,240,.85);font-size:18px;cursor:pointer;padding:0;color:#222}
+.hb{width:40px;height:40px;border-radius:12px;border:3px solid #2b2d42;background:linear-gradient(#fffdf6,#f1e6cf);font:inherit;font-size:18px;cursor:pointer;padding:0;color:#2b2d42;box-shadow:inset 0 2px 0 #fff,0 3px 0 #2b2d42}
+h2 .hb{-webkit-text-stroke:0;text-shadow:none;letter-spacing:0;font-family:"Jua",system-ui,sans-serif}
+.hb:active{transform:translateY(2px);box-shadow:0 1px 0 #2b2d42}
 </style>
 </head>
 <body>
@@ -207,10 +215,10 @@ h2{margin:0 0 14px;font-size:clamp(30px,9vw,48px);color:#ffd23f;text-shadow:0 3p
 <div class="ov" id="ovPause">
   <h2>일시정지</h2>
   <button class="btn" id="bResume">계속하기</button>
-  <button class="btn" id="bShopP" style="background:linear-gradient(#9fe8ff,#3fa9f5);box-shadow:0 5px 0 #1d6fa5">💪 영웅 강화</button>
-  <button class="btn" id="bAchP" style="background:linear-gradient(#fff3b0,#ffd23f);box-shadow:0 5px 0 #b8860b">🏅 업적</button>
+  <button class="btn blue" id="bShopP">💪 영웅 강화</button>
+  <button class="btn" id="bAchP">🏅 업적</button>
   <div class="mrow" style="margin:6px 0 10px"><button class="hb" id="bMusicP" style="width:auto;padding:0 14px;font-weight:800">🎵 음악</button><button class="hb" id="bVibP" style="width:auto;padding:0 14px;font-weight:800">📳 진동</button><button class="hb" id="bEvoP" style="width:auto;padding:0 14px;font-weight:800">✨ 진화 도감</button></div>
-  <button class="btn" id="bQuit" style="background:linear-gradient(#ddd,#aaa);box-shadow:0 5px 0 #666">처음으로</button>
+  <button class="btn gray" id="bQuit">처음으로</button>
 </div>
 
 <div class="ov" id="ovOver">
@@ -223,7 +231,7 @@ h2{margin:0 0 14px;font-size:clamp(30px,9vw,48px);color:#ffd23f;text-shadow:0 3p
 
 <script>
 'use strict';
-const BUILD = 54;
+const BUILD = 55;
 const BOSS_INTERVAL = 180;      // 보스 등장 간격(초)
 const WAVE_INTERVAL = 60;       // 대규모 몰이 이벤트 간격(초)
 const MAX_ENEMIES = 220;
@@ -317,6 +325,7 @@ const cv = document.getElementById('cv'), ctx = cv.getContext('2d');
 let W = 0, H = 0, DPR = 1, SCALE = 1, VW = 0, VH = 0;
 // 화질 자동 조절: 느린 기기는 그리는 해상도를 2 → 1.5 → 1.25배로 낮춤 (기기마다 기억)
 let dprCap = 2;
+if (document.fonts) { document.fonts.load('20px Jua'); document.fonts.load('20px BHS'); }   // 캔버스 글자용 글꼴 미리 불러오기
 try { const v = +localStorage.getItem('stickhero_dpr'); if (v >= 1 && v <= 2) dprCap = v; } catch (e) {}
 function resize() {
   DPR = Math.min(window.devicePixelRatio || 1, dprCap);
@@ -2195,7 +2204,7 @@ function drawCage(c) {
     ctx.fillStyle = '#8d5524'; ctx.strokeStyle = '#2b1a0c'; ctx.lineWidth = 2;
     ctx.fillRect(-28, -56, 56, 8); ctx.strokeRect(-28, -56, 56, 8); ctx.fillRect(-28, -2, 56, 6); ctx.strokeRect(-28, -2, 56, 6);
     if (c.hold > 0) { ctx.strokeStyle = '#ffd23f'; ctx.lineWidth = 5; ctx.beginPath(); ctx.arc(0, -26, 36, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * c.hold); ctx.stroke(); }
-    else { ctx.font = '900 12px system-ui,sans-serif'; ctx.textAlign = 'center'; ctx.lineWidth = 3; ctx.strokeStyle = '#222'; ctx.strokeText('살려줘 야옹!', 0, -64); ctx.fillStyle = '#fff'; ctx.fillText('살려줘 야옹!', 0, -64); }
+    else { ctx.font = '12px Jua,system-ui,sans-serif'; ctx.textAlign = 'center'; ctx.lineWidth = 3; ctx.strokeStyle = '#222'; ctx.strokeText('살려줘 야옹!', 0, -64); ctx.fillStyle = '#fff'; ctx.fillText('살려줘 야옹!', 0, -64); }
   } else { // 부서진 우리
     ctx.fillStyle = '#8d5524'; ctx.save(); ctx.rotate(0.3); ctx.fillRect(-26, -4, 30, 6); ctx.restore(); ctx.save(); ctx.rotate(-0.5); ctx.fillRect(0, 4, 26, 6); ctx.restore();
   }
@@ -2254,7 +2263,7 @@ function drawPortal(x, y, on, label, color) {
   ctx.beginPath(); ctx.arc(0, 0, 28 * pulse, 0, 7); ctx.stroke(); ctx.setLineDash([]);
   for (let i = 0; i < 3; i++) { const a = G.t * 3 + i * 2.1; ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(Math.cos(a) * 18, Math.sin(a) * 18, 2.5, 0, 7); ctx.fill(); }
   ctx.scale(1, IK);
-  ctx.font = '900 13px system-ui,sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.lineWidth = 3; ctx.strokeStyle = '#222';
+  ctx.font = '13px Jua,system-ui,sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.lineWidth = 3; ctx.strokeStyle = '#222';
   ctx.strokeText(label, 0, -30); ctx.fillStyle = '#fff'; ctx.fillText(label, 0, -30);
   ctx.restore();
 }
@@ -3067,7 +3076,7 @@ function drawBase() {
   ctx.restore();
   }
   if (G.vLvl > 1) {
-    ctx.save(); ctx.scale(1, IK); ctx.font = '900 11px system-ui,sans-serif'; ctx.textAlign = 'center'; ctx.lineWidth = 3; ctx.strokeStyle = '#222';
+    ctx.save(); ctx.scale(1, IK); ctx.font = '11px Jua,system-ui,sans-serif'; ctx.textAlign = 'center'; ctx.lineWidth = 3; ctx.strokeStyle = '#222';
     const lb = `🏛 마을 Lv ${G.vLvl}`; ctx.strokeText(lb, 0, 50); ctx.fillStyle = '#ffd23f'; ctx.fillText(lb, 0, 50); ctx.restore();
   }
   if (b.hp < b.maxHp) {
@@ -3092,13 +3101,13 @@ function drawPads() {
     }
     ctx.scale(1, IK);
     ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.lineWidth = 3; ctx.strokeStyle = '#222';
-    ctx.font = '900 12px system-ui,sans-serif';
+    ctx.font = '12px Jua,system-ui,sans-serif';
     const lb = padLabel(pd); ctx.strokeText(lb, 0, -r * K - 12); ctx.fillStyle = '#fff'; ctx.fillText(lb, 0, -r * K - 12);
     const parts = [];
     if (cost.w) parts.push(['🪵' + (cost.w - pd.pw), '#ffe0b3']);
     if (cost.g) parts.push(['🪙' + (cost.g - pd.pg), '#ffd23f']);
     if (cost.s) parts.push(['🪨' + (cost.s - (pd.ps || 0)), '#dee2e6']);
-    ctx.font = '900 12px system-ui,sans-serif';
+    ctx.font = '12px Jua,system-ui,sans-serif';
     parts.forEach((pt, i) => { const y = (i - (parts.length - 1) / 2) * 14; ctx.strokeText(pt[0], 0, y); ctx.fillStyle = pt[1]; ctx.fillText(pt[0], 0, y); });
     ctx.restore();
   }
@@ -3146,7 +3155,7 @@ function drawBldInner(id) {
       ctx.fillStyle = '#8d5524'; ctx.fillRect(-28, 8, 4, 6); ctx.fillRect(24, 8, 4, 6);
     }
   }
-  ctx.font = '900 10px system-ui,sans-serif'; ctx.textAlign = 'center'; ctx.lineWidth = 3; ctx.strokeStyle = '#222';
+  ctx.font = '10px Jua,system-ui,sans-serif'; ctx.textAlign = 'center'; ctx.lineWidth = 3; ctx.strokeStyle = '#222';
   const lb = `${B.name} Lv ${l}`, ly = SPR[id] ? -SPR_INFO[id].h + 4 : -52; ctx.strokeText(lb, 0, ly); ctx.fillStyle = '#7bed9f'; ctx.fillText(lb, 0, ly);
   ctx.restore();
 }
@@ -3167,7 +3176,7 @@ function drawTavernInner() {
     ctx.fillStyle = '#fff'; ctx.fillRect(10, -22, 12, 10); ctx.strokeRect(10, -22, 12, 10);
     ctx.font = '9px sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillStyle = '#000'; ctx.fillText('⚔', 16, -17);
   }
-  ctx.font = '900 10px system-ui,sans-serif'; ctx.textAlign = 'center'; ctx.lineWidth = 3; ctx.strokeStyle = '#222';
+  ctx.font = '10px Jua,system-ui,sans-serif'; ctx.textAlign = 'center'; ctx.lineWidth = 3; ctx.strokeStyle = '#222';
   const lb = `👥 ${G.allies.length}/${allyMax()}`; ctx.strokeText(lb, 0, SPR.tavern ? -66 : -56); ctx.fillStyle = '#9fd8ff'; ctx.fillText(lb, 0, SPR.tavern ? -66 : -56);
   ctx.restore();
 }
@@ -3192,7 +3201,7 @@ function drawAlly(a) {
   const hy = a.y - 46 * IK;
   ctx.beginPath(); ctx.moveTo(a.x - 5, hy - 6); ctx.lineTo(a.x + 5, hy - 6); ctx.lineTo(a.x, hy); ctx.closePath(); ctx.fill(); ctx.stroke();
   if (a.lvl > 1) { // 레벨 별
-    ctx.save(); ctx.translate(a.x, hy - 13); ctx.scale(1, IK); ctx.font = '900 9px system-ui,sans-serif'; ctx.textAlign = 'center'; ctx.lineWidth = 2.5; ctx.strokeStyle = '#222';
+    ctx.save(); ctx.translate(a.x, hy - 13); ctx.scale(1, IK); ctx.font = '9px Jua,system-ui,sans-serif'; ctx.textAlign = 'center'; ctx.lineWidth = 2.5; ctx.strokeStyle = '#222';
     const st = '★'.repeat(a.lvl - 1); ctx.strokeText(st, 0, 0); ctx.fillStyle = a.lvl >= 5 ? '#ffd23f' : '#ffe58f'; ctx.fillText(st, 0, 0); ctx.restore();
     if (a.lvl < 5 && a.xp > 0) { ctx.fillStyle = '#222'; ctx.fillRect(a.x - 10, hy - 26, 20, 3); ctx.fillStyle = '#ffd23f'; ctx.fillRect(a.x - 10, hy - 26, 20 * Math.min(1, a.xp / ALLY_NEED[a.lvl]), 3); }
   }
@@ -3211,7 +3220,7 @@ function drawSmithInner() {
   ctx.fillStyle = 'rgba(0,0,0,.2)'; ctx.beginPath(); ctx.ellipse(0, 8, 30, 8, 0, 0, 7); ctx.fill();
   if (SPR.smith) {
     ctx.translate(0, 12); spr('smith', 72);
-    ctx.font = '900 10px system-ui,sans-serif'; ctx.textAlign = 'center'; ctx.lineWidth = 3; ctx.strokeStyle = '#222';
+    ctx.font = '10px Jua,system-ui,sans-serif'; ctx.textAlign = 'center'; ctx.lineWidth = 3; ctx.strokeStyle = '#222';
     const lb = G.forge ? `⚒ Lv ${G.forge}` : '⚒ 대장간'; ctx.strokeText(lb, 0, -78); ctx.fillStyle = '#ffd23f'; ctx.fillText(lb, 0, -78);
     ctx.restore(); return;
   }
@@ -3228,7 +3237,7 @@ function drawSmithInner() {
     const k = (G.t * 0.6 + i / 3) % 1;
     ctx.fillStyle = `rgba(200,200,200,${0.5 * (1 - k)})`; ctx.beginPath(); ctx.arc(18 + k * 10, -52 - k * 30, 5 + k * 6, 0, 7); ctx.fill();
   }
-  ctx.font = '900 10px system-ui,sans-serif'; ctx.textAlign = 'center'; ctx.lineWidth = 3; ctx.strokeStyle = '#222';
+  ctx.font = '10px Jua,system-ui,sans-serif'; ctx.textAlign = 'center'; ctx.lineWidth = 3; ctx.strokeStyle = '#222';
   const lb = G.forge ? `⚒ Lv ${G.forge}` : '⚒ 대장간'; ctx.strokeText(lb, 0, -56); ctx.fillStyle = '#ffd23f'; ctx.fillText(lb, 0, -56);
   ctx.restore();
 }
@@ -3507,7 +3516,7 @@ function drawCamp(e) {
     for (let k = -4; k <= 4; k++) { ctx.beginPath(); ctx.moveTo(k * 10 - 4, 6); ctx.lineTo(k * 10 - 4, -26); ctx.lineTo(k * 10, -34); ctx.lineTo(k * 10 + 4, -26); ctx.lineTo(k * 10 + 4, 6); ctx.closePath(); ctx.fill(); ctx.stroke(); }
     ctx.fillStyle = '#e63946'; ctx.fillRect(-2, -64, 22, 14); ctx.fillStyle = '#333'; ctx.fillRect(-3, -66, 3, 70);
   }
-  ctx.font = '900 11px system-ui,sans-serif'; ctx.textAlign = 'center'; ctx.lineWidth = 3; ctx.strokeStyle = '#222';
+  ctx.font = '11px Jua,system-ui,sans-serif'; ctx.textAlign = 'center'; ctx.lineWidth = 3; ctx.strokeStyle = '#222';
   const lb = `🏴 적 진지 Lv ${c.lvl + 1}`; ctx.strokeText(lb, 0, -112); ctx.fillStyle = "#ff6b6b"; ctx.fillText(lb, 0, -112);
   ctx.restore();
   ctx.fillStyle = '#222'; ctx.fillRect(e.x - 36, e.y + 16, 72, 8);
@@ -3517,7 +3526,7 @@ function drawCampRuin(c) { // 부서진 진지: 그루터기 + 다시 지어지�
   ctx.save(); ctx.translate(c.x, c.y); ctx.scale(1, IK);
   ctx.fillStyle = 'rgba(60,40,20,.35)'; ctx.beginPath(); ctx.ellipse(0, 4, 46, 12, 0, 0, 7); ctx.fill();
   ctx.fillStyle = '#6b3e1a'; for (let k = -3; k <= 3; k++) ctx.fillRect(k * 12 - 3, -6 - (k & 1) * 3, 6, 8 + (k & 1) * 3);
-  ctx.font = '900 11px system-ui,sans-serif'; ctx.textAlign = 'center'; ctx.lineWidth = 3; ctx.strokeStyle = '#222';
+  ctx.font = '11px Jua,system-ui,sans-serif'; ctx.textAlign = 'center'; ctx.lineWidth = 3; ctx.strokeStyle = '#222';
   const lb = `재건까지 ${Math.ceil(Math.max(0, c.rebuild))}초`; ctx.strokeText(lb, 0, -22); ctx.fillStyle = '#ddd'; ctx.fillText(lb, 0, -22);
   ctx.restore();
 }
@@ -3774,7 +3783,7 @@ function drawWorld() {
   for (const t of G.texts) {
     ctx.globalAlpha = Math.min(1, t.life / t.max * 2);
     ctx.save(); ctx.translate(t.x, t.y); ctx.scale(1, IK);
-    ctx.font = `900 ${t.size}px system-ui,sans-serif`;
+    ctx.font = `${t.size}px Jua,system-ui,sans-serif`;
     ctx.lineWidth = 3.5; ctx.strokeStyle = '#222'; ctx.strokeText(t.text, 0, 0);
     ctx.fillStyle = t.color; ctx.fillText(t.text, 0, 0);
     ctx.restore();
@@ -3788,15 +3797,15 @@ function drawWorld() {
 }
 
 function roundRect(x, y, w, h, r) { ctx.beginPath(); ctx.roundRect ? ctx.roundRect(x, y, w, h, r) : ctx.rect(x, y, w, h); }
-function hudText(t, x, y, size, color, align) {
-  ctx.font = `900 ${size}px system-ui,sans-serif`; ctx.textAlign = align || 'left'; ctx.textBaseline = 'middle';
-  ctx.lineWidth = 4; ctx.strokeStyle = '#222'; ctx.lineJoin = 'round'; ctx.strokeText(t, x, y);
+function hudText(t, x, y, size, color, align, big) {   // big: 제목 글꼴(검은고딕) + 굵은 테두리
+  ctx.font = big ? `${size}px BHS,Jua,system-ui,sans-serif` : `${size}px Jua,system-ui,sans-serif`; ctx.textAlign = align || 'left'; ctx.textBaseline = 'middle';
+  ctx.lineWidth = big ? 7 : 4; ctx.strokeStyle = '#222'; ctx.lineJoin = 'round'; ctx.strokeText(t, x, y);
   ctx.fillStyle = color || '#fff'; ctx.fillText(t, x, y);
 }
 function drawHeroTitle(p) { // 달아 둔 칭호 (2초마다 다시 읽음)
   if (heroTitleCache === undefined || G.t - heroTitleT > 2) { heroTitleCache = heroTitle(); heroTitleT = G.t; }
   if (!heroTitleCache) return;
-  ctx.save(); ctx.translate(p.x, p.y - 88 * IK); ctx.scale(1, IK); ctx.font = '900 10px system-ui,sans-serif'; ctx.textAlign = 'center';
+  ctx.save(); ctx.translate(p.x, p.y - 88 * IK); ctx.scale(1, IK); ctx.font = '10px Jua,system-ui,sans-serif'; ctx.textAlign = 'center';
   const t = '🏅 ' + heroTitleCache, w = ctx.measureText(t).width + 10;
   roundRect(-w / 2, -9, w, 16, 8); ctx.fillStyle = 'rgba(0,0,0,.55)'; ctx.fill();
   ctx.fillStyle = '#ffd23f'; ctx.fillText(t, 0, 3); ctx.restore();
@@ -3838,7 +3847,7 @@ function drawHUD() {
   if (G.mode === 'base') hudText(`🪨 ${G.stone}`, W - 12, top + 108, 16, '#dee2e6', 'right');
   if (G.mode === 'base') drawMinimap(8, top + 72, 76);
   if (G.hint && !G.radio) {
-    ctx.font = '900 15px system-ui,sans-serif'; const tw = ctx.measureText(G.hint.text).width;
+    ctx.font = '15px Jua,system-ui,sans-serif'; const tw = ctx.measureText(G.hint.text).width;
     roundRect(W / 2 - tw / 2 - 12, H - 92, tw + 24, 30, 15); ctx.fillStyle = 'rgba(0,0,0,.55)'; ctx.fill();
     hudText(G.hint.text, W / 2, H - 77, 15, '#ffd23f', 'center');
   }
@@ -3910,7 +3919,7 @@ function drawHUD() {
     ix += 44;
   }
   // 빌드 번호
-  ctx.font = '600 10px system-ui,sans-serif'; ctx.textAlign = 'right'; ctx.textBaseline = 'bottom'; ctx.fillStyle = 'rgba(255,255,255,.7)';
+  ctx.font = '10px Jua,system-ui,sans-serif'; ctx.textAlign = 'right'; ctx.textBaseline = 'bottom'; ctx.fillStyle = 'rgba(255,255,255,.7)';
   ctx.fillText('Build ' + BUILD, W - 6, H - 4);
   // 배너
   const bn = G.banner;
@@ -3920,7 +3929,7 @@ function drawHUD() {
     const sc = bn.t < 0.25 ? 0.5 + k * 0.5 : 1;
     ctx.save(); ctx.translate(W / 2, H * 0.3); ctx.scale(sc, sc);
     ctx.fillStyle = 'rgba(0,0,0,.45)'; ctx.fillRect(-W / 2, -38, W, 76);
-    hudText(bn.text, 0, -10, Math.min(36, W / 11), bn.color, 'center');
+    hudText(bn.text, 0, -10, Math.min(36, W / 11), bn.color, 'center', true);
     if (bn.sub) hudText(bn.sub, 0, 22, 16, '#fff', 'center');
     ctx.restore(); ctx.globalAlpha = 1;
   }
@@ -3944,13 +3953,13 @@ function drawHUD() {
     hudText(Q.call, 14 + size / 2, by + size + 4, 12, '#fff', 'center');
     // 말풍선 (글자가 한 자씩 나타남)
     const bx = size + 30, bw = Math.min(W - bx - 12, 270), shown = Q.line.slice(0, Math.floor(R.t * 26));
-    ctx.font = '800 14px system-ui,sans-serif';
+    ctx.font = '14px Jua,system-ui,sans-serif';
     const words = shown.split(' '), lines = ['']; for (const wd of words) { const tl = lines[lines.length - 1] ? lines[lines.length - 1] + ' ' + wd : wd; if (ctx.measureText(tl).width > bw - 20) lines.push(wd); else lines[lines.length - 1] = tl; }
     const bh = 30 + 19 * Math.max(2, lines.length);
     roundRect(bx, by + 6, bw, bh, 14); ctx.fillStyle = 'rgba(255,255,255,.95)'; ctx.fill(); ctx.strokeStyle = '#222'; ctx.lineWidth = 2.5; ctx.stroke();
     ctx.fillStyle = 'rgba(255,255,255,.95)'; ctx.beginPath(); ctx.moveTo(bx + 1, by + 30); ctx.lineTo(bx - 12, by + 38); ctx.lineTo(bx + 1, by + 44); ctx.fill();
-    ctx.fillStyle = '#e63946'; ctx.font = '900 11px system-ui,sans-serif'; ctx.textAlign = 'left'; ctx.textBaseline = 'top'; ctx.fillText(`📻 ${Q.pilot}`, bx + 10, by + 13);
-    ctx.fillStyle = '#222'; ctx.font = '800 14px system-ui,sans-serif';
+    ctx.fillStyle = '#e63946'; ctx.font = '11px Jua,system-ui,sans-serif'; ctx.textAlign = 'left'; ctx.textBaseline = 'top'; ctx.fillText(`📻 ${Q.pilot}`, bx + 10, by + 13);
+    ctx.fillStyle = '#222'; ctx.font = '14px Jua,system-ui,sans-serif';
     lines.forEach((ln, i) => ctx.fillText(ln, bx + 10, by + 31 + i * 19));
     ctx.restore();
   }
@@ -4020,7 +4029,7 @@ function drawTitleScene() {
     const k = (t * 0.15 + i / 14) % 1, x = (Math.sin(i * 12.9) * 0.5 + 0.5) * W, y = H * (0.95 - k * 0.7);
     ctx.fillStyle = `rgba(255,230,120,${0.6 * Math.sin(k * Math.PI)})`; ctx.beginPath(); ctx.arc(x, y, 2 + (i % 3), 0, 7); ctx.fill();
   }
-  ctx.font = '600 10px system-ui,sans-serif'; ctx.textAlign = 'right'; ctx.textBaseline = 'bottom'; ctx.fillStyle = 'rgba(255,255,255,.6)';
+  ctx.font = '10px Jua,system-ui,sans-serif'; ctx.textAlign = 'right'; ctx.textBaseline = 'bottom'; ctx.fillStyle = 'rgba(255,255,255,.6)';
   ctx.fillText('Build ' + BUILD, W - 6, H - 4);
 }
 

@@ -1,0 +1,4 @@
+fonts/jua.woff2          — BM JUA (배민 주아체), Copyright 2018 The BM JUA Project Authors
+fonts/blackhansans.woff2 — Black Han Sans, Copyright 2015 The Black Han Sans Project Authors (https://github.com/zesstype/Black-Han-Sans)
+두 글꼴 모두 SIL Open Font License 1.1 (https://openfontlicense.org) — 게임에 쓰인 글자만 남긴 부분 글꼴.
+원본: art/fonts/*.ttf (Google Fonts 배포본), 만들기: python3 tools/fonts.py
