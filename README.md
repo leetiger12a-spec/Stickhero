@@ -4,7 +4,7 @@
 
 막대 영웅 서바이벌 게임 — 아빠와 아들이 함께 만드는 HTML5 게임.
 
-- **현재 빌드: Build 59** (화면 오른쪽 아래에도 표시)
+- **현재 빌드: Build 60** (화면 오른쪽 아래에도 표시)
 - 플레이: https://leetiger12a-spec.github.io/Stickhero/ (GitHub Pages를 켠 뒤)
 
 ## 그림 제작 규칙 (ChatGPT · 제미나이)
@@ -17,6 +17,13 @@
 ## 조작
 - 📱 폰: 화면 아무 곳이나 끌면 가상 조이스틱으로 이동, 공격은 자동
 - 💻 PC: WASD / 방향키 이동, P·Esc 일시정지, 레벨업 카드는 1·2·3 키
+
+## Build 60 내용 — 성 바닥 그림 (땅 무늬 7종 완료)
+- 성 테마(왕관 괴물의 성, 무한 탑 21~25층) 바닥 적용 (ChatGPT, `art/tex_castle_src.png` → `img/tex_castle.webp`)
+- 측정: 평균 #818299 (목표 #8d8fa3), 4등분 반복 없음, 이어 붙인 곳 눈으로 안 보임, 덧칠 없이 씀. 길 바깥은 어둡게 덧칠(`castle_dark`)
+- 분홍 최종 보스가 파란 회색 바닥에서 잘 보임
+- 땅 무늬 7종(풀밭·흙 마당·숲 지붕·폐허·던전·화산·성) 합계 약 680KB
+- 테스트: test33에 성 추가
 
 ## Build 59 내용 — 폐허·던전·화산 바닥 그림
 - 모험 테마 바닥 3종 적용 (ChatGPT, `art/tex_ruins|dungeon|volcano_src.png` → `img/tex_*.webp`)
