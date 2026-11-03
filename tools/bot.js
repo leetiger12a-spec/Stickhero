@@ -9,7 +9,7 @@ const RUNS = +process.argv[2] || 4, MINUTES = +process.argv[3] || 15, STYLE = pr
     const page = await (await browser.newContext({ viewport: { width: 390, height: 844 } })).newPage();
     page.on('pageerror', e => errors.push(`run${run}: ${e.message}`));
     page.on('console', m => { if (m.type() === 'error') errors.push(`run${run}: ${m.text()}`); });
-    await page.goto('file:///home/user/Stickhero/index.html');
+    await page.goto(process.env.BOT_URL || 'file:///home/user/Stickhero/index.html');   // BOT_URL: 고정 사본으로 돌릴 때
     await page.click('#bStart');
     const r = await page.evaluate(([MINUTES, STYLE]) => {
       const log = [], ev = (t) => log.push(`${Math.floor(SH.G.t / 60)}:${String(Math.floor(SH.G.t % 60)).padStart(2, '0')} ${t}`);

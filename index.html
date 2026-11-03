@@ -272,7 +272,7 @@ h2 .hb{-webkit-text-stroke:0;text-shadow:none;letter-spacing:0;font-family:"Jua"
 
 <script>
 'use strict';
-const BUILD = 64;
+const BUILD = 65;
 const BOSS_INTERVAL = 180;      // 보스 등장 간격(초)
 const WAVE_INTERVAL = 60;       // 대규모 몰이 이벤트 간격(초)
 const MAX_ENEMIES = 220;
@@ -788,6 +788,13 @@ const mIco = (n, alt) => WICON[n] ? `<img class="mi" src="img/${n}.webp?b=${BUIL
 const pMini = id => mIco('p_' + id, PASS[id].icon), wMini = (id, ev) => { const n = id + (ev ? '_evo' : ''); return WICON[n] ? `<img class="mi" src="img/w_${n}.webp?b=${BUILD}" alt="">` : ev ? EVO[id].icon : WEAP[id].icon; };   // 무기 그림 키는 w_ 없이
 // 땅에 많이 깔리는 작은 그림은 화면 크기로 미리 줄여 둠 (매 프레임 큰 그림 줄이기는 느림)
 const ICO_BAKE = {};
+function bakedHudIco(n) { // HUD(화면 좌표)용: 22px 정사각 칸에 맞춰 미리 줄임
+  const im = WICON[n]; if (!im) return null;
+  const key = 'hud|' + n + '|' + DPR; let c = ICO_BAKE[key];
+  if (!c) { const px = Math.round(22 * DPR); c = document.createElement('canvas'); c.width = c.height = px; const k = Math.min(px / im.width, px / im.height), x = c.getContext('2d');
+    x.imageSmoothingQuality = 'high'; x.drawImage(im, (px - im.width * k) / 2, (px - im.height * k) / 2, im.width * k, im.height * k); ICO_BAKE[key] = c; }
+  return c;
+}
 function bakedIco(n, h) {
   const im = WICON[n]; if (!im) return null;
   const key = n + '|' + h + '|' + SCALE + '|' + DPR; let c = ICO_BAKE[key];
@@ -1174,7 +1181,7 @@ function buildSave() {
   return {
     v: 1, build: BUILD, at: Date.now(), diff: G.diff,
     t: G.t, bt: G.bt, kills: G.kills, lvl: G.lvl, xp: G.xp, need: G.need, pending: G.pending,
-    weapons: G.weapons, passives: G.passives, gold: G.gold, logs: p.logs, hp: p.dead ? -1 : p.hp,
+    weapons: G.weapons, passives: G.passives, gold: G.gold, chests: G.mode === 'base' ? (G.chests || []).map(c => [Math.round(c.x), Math.round(c.y)]) : [], logs: p.logs, hp: p.dead ? -1 : p.hp,
     base: G.base.hp, wallLvl: G.wallLvl, walls: G.walls.map(w => w.hp), towers: G.towers.map(t => t.lvl),
     pads: G.pads.map(q => [q.built, q.pw, q.pg, q.ps || 0]), smith: G.smith, forge: G.forge, tavern: G.tavern,
     allies: G.allies.map(a => [a.type, a.lvl || 1, Math.round(a.xp || 0)]), stageN: G.stageN, stars: G.stars, bossCount: G.bossCount - (G.boss ? 1 : 0), bossKills: G.bossKills || 0,
@@ -1204,6 +1211,7 @@ function loadGame(d) {
   setVillage(d.vLvl || 1); G.stone = d.stone || 0; G.bld = Object.assign({ farm: 0, mine: 0, market: 0 }, d.bld || {});
   G.base.maxHp = 1500 + VILLAGE.slice(1, G.vLvl).reduce((a, v) => a + v.hp, 0);
   G.day = d.day || 1; G.broken = {}; for (const k of d.broken || []) G.broken[k] = true;
+  G.chests = (d.chests || []).map(([x, y]) => ({ x, y, bob: 0, t: 1 }));   // 줍기 전에 끈 마을 보물 상자
   if (d.quests && d.quests.length) { G.quests = d.quests; G.questBonus = !!d.questBonus; } else newQuests();   // 새 날(또는 예전 저장)은 새 퀘스트
   if (d.rocks) G.rocks = d.rocks.map(([x, y, s, rg]) => ({ x, y, s, max: 6, regrow: rg, shake: 0 }));
   if (d.camps) { G.enemies = G.enemies.filter(e => !e.camp); G.camps = d.camps.map(([x, y, lvl, rebuild, hp]) => ({ x, y, lvl, rebuild, spawnT: rand(8, 16), e: null })); G.camps.forEach((c, i) => { if (d.camps[i][4] > 0) makeCamp(c, d.camps[i][4]); }); }
@@ -2639,11 +2647,13 @@ function updFlames(dt) { // 영웅 쪽 불길: 0.4초마다 위에 있는 적에
   G.pflames = G.pflames.filter(f => f.life > 0);
 }
 function drawFlames() {
+  const hot = G.mode === 'stage' && G.st && THEMES[G.st.def.th] && THEMES[G.st.def.th].tex === 'volcano';
   for (const f of G.pflames) {
     const a = Math.min(1, f.life / 0.5, (f.max - f.life) / 0.15 + 0.3);
     const g = ctx.createRadialGradient(f.x, f.y, 2, f.x, f.y, f.r);
     g.addColorStop(0, `rgba(255,240,120,${0.8 * a})`); g.addColorStop(0.55, `rgba(255,140,0,${0.6 * a})`); g.addColorStop(1, 'rgba(255,60,0,0)');
     ctx.fillStyle = g; ctx.beginPath(); ctx.ellipse(f.x, f.y, f.r, f.r * 0.8, 0, 0, 7); ctx.fill();
+    if (hot) { ctx.strokeStyle = `rgba(255,250,190,${0.75 * a})`; ctx.lineWidth = 2.5; ctx.stroke(); }   // 화산 바닥에서도 보이게 밝은 테두리
   }
 }
 function zap(x0, y0, x1, y1) {
@@ -4096,8 +4106,9 @@ function drawHUD() {
   if (G.mode === 'base') drawMinimap(8, top + 72, 76);
   if (G.hint && !G.radio) {
     ctx.font = '15px Jua,system-ui,sans-serif'; const tw = ctx.measureText(G.hint.text).width;
-    roundRect(W / 2 - tw / 2 - 12, H - 92, tw + 24, 30, 15); ctx.fillStyle = 'rgba(0,0,0,.55)'; ctx.fill();
-    hudText(G.hint.text, W / 2, H - 77, 15, '#ffd23f', 'center');
+    const hy = Object.values(G.passives).some(l => l > 0) ? 26 : 0;   // 능력 줄이 있으면 위로
+    roundRect(W / 2 - tw / 2 - 12, H - 92 - hy, tw + 24, 30, 15); ctx.fillStyle = 'rgba(0,0,0,.55)'; ctx.fill();
+    hudText(G.hint.text, W / 2, H - 77 - hy, 15, '#ffd23f', 'center');
   }
   // 대습격 안내
   if (G.mode === 'base' && G.raidIn > 0) hudText(`⚠ 대습격까지 ${Math.ceil(G.raidIn)}초!`, W / 2, top + 84, 18, Math.floor(G.t * 4) % 2 ? '#ff6b6b' : '#ffd23f', 'center');
@@ -4165,6 +4176,15 @@ function drawHUD() {
     hudText(ev ? '★' : '' + G.weapons[id], ix + 33, H - 12, 11, '#ffd23f', 'center');
     if (!ev && canEvolve(id) && Math.floor(G.t * 3) % 2) hudText('✨', ix + 6, H - 40, 12, '#ffd23f', 'center');   // 다음 레벨업에 진화 가능
     ix += 44;
+  }
+  // 가진 능력: 무기 칸 위 작은 그림 + 레벨 (Build 65)
+  let px = 12;
+  for (const id in PASS) {
+    const l = G.passives[id] || 0; if (!l) continue;
+    const pi = bakedHudIco('p_' + id);
+    if (pi) ctx.drawImage(pi, px, H - 72, 22, 22); else { ctx.textAlign = 'center'; ctx.font = '16px sans-serif'; ctx.fillStyle = '#000'; ctx.fillText(PASS[id].icon, px + 11, H - 61); }
+    hudText(l >= PASS[id].max ? 'M' : '' + l, px + 22, H - 52, 10, l >= PASS[id].max ? '#7bed9f' : '#fff', 'center');
+    px += 30;
   }
   // 빌드 번호
   ctx.font = '10px Jua,system-ui,sans-serif'; ctx.textAlign = 'right'; ctx.textBaseline = 'bottom'; ctx.fillStyle = 'rgba(255,255,255,.7)';
