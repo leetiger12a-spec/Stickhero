@@ -44,7 +44,7 @@ canvas{display:block;position:fixed;inset:0;width:100%;height:100%}
 #chestBox{position:relative;margin:4px 0 10px;animation:chestShake .45s ease-in-out infinite}
 #chestBox::before{content:'';position:absolute;inset:-30px;background:radial-gradient(circle,rgba(255,226,120,.75),rgba(255,226,120,0) 62%);opacity:0;transition:opacity .3s}
 #chestBox.open{animation:none}#chestBox.open::before{opacity:1;animation:chestGlow 1.2s ease-in-out infinite}
-#chestBox svg{position:relative;display:block}#chestLid{transition:transform .35s cubic-bezier(.3,1.6,.5,1);transform-origin:60px 44px}#chestBox.open #chestLid{transform:translateY(-14px) rotate(-18deg)}
+#chestBox svg{position:relative;display:block}#chestImg{position:relative;display:none;width:170px;height:auto;filter:drop-shadow(0 8px 10px rgba(0,0,0,.45))}#chestBox.img svg{display:none}#chestBox.img #chestImg{display:block}#chestLid{transition:transform .35s cubic-bezier(.3,1.6,.5,1);transform-origin:60px 44px}#chestBox.open #chestLid{transform:translateY(-14px) rotate(-18deg)}
 @keyframes chestShake{0%,100%{transform:rotate(0)}25%{transform:rotate(-6deg) scale(1.03)}75%{transform:rotate(6deg) scale(1.03)}}
 @keyframes chestGlow{50%{transform:scale(1.12)}}
 #chestItems{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;min-height:120px}
@@ -190,7 +190,7 @@ h2 .hb{-webkit-text-stroke:0;text-shadow:none;letter-spacing:0;font-family:"Jua"
 
 <div class="ov" id="ovChest">
   <h2 id="chestTitle">보물 상자!</h2>
-  <div id="chestBox"><svg viewBox="0 0 120 100" width="150" height="125" aria-hidden="true">
+  <div id="chestBox"><img id="chestImg" alt="" width="170"><svg viewBox="0 0 120 100" width="150" height="125" aria-hidden="true">
     <ellipse cx="60" cy="92" rx="46" ry="7" fill="rgba(0,0,0,.35)"/>
     <rect x="14" y="44" width="92" height="46" rx="6" fill="#a0612b" stroke="#3a1a00" stroke-width="4"/>
     <rect x="14" y="60" width="92" height="7" fill="#7a4419"/>
@@ -257,7 +257,7 @@ h2 .hb{-webkit-text-stroke:0;text-shadow:none;letter-spacing:0;font-family:"Jua"
 
 <script>
 'use strict';
-const BUILD = 61;
+const BUILD = 62;
 const BOSS_INTERVAL = 180;      // 보스 등장 간격(초)
 const WAVE_INTERVAL = 60;       // 대규모 몰이 이벤트 간격(초)
 const MAX_ENEMIES = 220;
@@ -735,7 +735,7 @@ const EVO = {
 const WICON = {};
 for (const id in WEAP) for (const ev of [0, 1]) { const n = id + (ev ? '_evo' : ''), im = new Image(); im.onload = () => { WICON[n] = im; }; im.src = `img/w_${n}.webp?b=${BUILD}`; }
 // 능력·회복·경험치 구슬 그림 (img/p_능력.webp, i_chicken, i_heart, gem_b/g/r)
-for (const n of [...Object.keys(PASS).map(id => 'p_' + id), 'i_chicken', 'i_heart', 'gem_b', 'gem_g', 'gem_r']) { const im = new Image(); im.onload = () => { WICON[n] = im; }; im.src = `img/${n}.webp?b=${BUILD}`; }
+for (const n of [...Object.keys(PASS).map(id => 'p_' + id), 'i_chicken', 'i_heart', 'gem_b', 'gem_g', 'gem_r', 'chest_big', 'chest_big_open', 'chest_small', 'chest_small_open']) { const im = new Image(); im.onload = () => { WICON[n] = im; }; im.src = `img/${n}.webp?b=${BUILD}`; }
 const icoHtml = (n, alt) => WICON[n] ? `<img src="img/${n}.webp?b=${BUILD}" alt="">` : alt;
 const mIco = (n, alt) => WICON[n] ? `<img class="mi" src="img/${n}.webp?b=${BUILD}" alt="">` : alt;   // 글자 줄 안의 작은 그림
 const pMini = id => mIco('p_' + id, PASS[id].icon), wMini = (id, ev) => { const n = id + (ev ? '_evo' : ''); return WICON[n] ? `<img class="mi" src="img/w_${n}.webp?b=${BUILD}" alt="">` : ev ? EVO[id].icon : WEAP[id].icon; };   // 무기 그림 키는 w_ 없이
@@ -1287,19 +1287,25 @@ function openChest(auto) {
   const box = $('chestItems'); box.innerHTML = '';
   const spinIcons = [...Object.keys(WEAP).map(id => wIco(id, 0)), ...Object.keys(PASS).map(id => icoHtml('p_' + id, PASS[id].icon))];
   const els = items.map(c => { const el = document.createElement('div'); el.className = 'ci spin'; el.innerHTML = '<div class="ic"></div><div class="nm">?</div><span class="lv">?</span>'; box.appendChild(el); return el; });
-  $('chestBox').classList.remove('open'); $('bChestOk').style.display = 'none'; $('chestHint').style.display = '';
+  const cb = $('chestBox'), hasImg = !!WICON.chest_big; cb.classList.toggle('img', hasImg);   // 그림이 있으면 그림 상자 (없으면 SVG)
+  if (hasImg) $('chestImg').src = `img/chest_big.webp?b=${BUILD}`;
+  cb.classList.remove('open'); $('bChestOk').style.display = 'none'; $('chestHint').style.display = '';
   $('chestTitle').textContent = items.length > 1 ? `보물 상자! ×${items.length}` : '보물 상자!';
   showOv('ovChest'); sfx('unlock'); vib([30, 30, 30]);
   let t = 0, k = 0; const stopAt = items.map((_, i) => 0.9 + i * 0.45);
   const done = i => { if (els[i].classList.contains('done')) return; els[i].className = 'ci done' + (items[i].kind === 'evo' ? ' evo' : ''); els[i].innerHTML = chestCardHtml(items[i]); sfx(items[i].kind === 'evo' ? 'unlock' : 'pick'); };
-  const finish = () => { clearInterval(chestAnim); chestAnim = null; items.forEach((_, i) => done(i)); $('chestBox').classList.add('open'); $('chestHint').style.display = 'none'; $('bChestOk').style.display = ''; };
+  const finish = () => { clearInterval(chestAnim); chestAnim = null; items.forEach((_, i) => done(i)); chestOpenLook(); $('chestHint').style.display = 'none'; $('bChestOk').style.display = ''; };
   clearInterval(chestAnim);
   chestAnim = setInterval(() => {
-    t += 0.07; if (t > 0.45) $('chestBox').classList.add('open');
+    t += 0.07; if (t > 0.45) chestOpenLook();
     els.forEach((el, i) => { if (t >= stopAt[i]) done(i); else el.querySelector('.ic').innerHTML = spinIcons[(k + i * 3) % spinIcons.length]; });
     k++; if (t >= stopAt[stopAt.length - 1]) finish();
   }, 70);
   $('ovChest').onclick = e => { if (chestAnim && e.target.id !== 'bChestOk') finish(); };
+}
+function chestOpenLook() { // 뚜껑 열린 모습 (그림이면 열린 상자 그림으로 바꿈)
+  const cb = $('chestBox'); if (cb.classList.contains('open')) return;
+  cb.classList.add('open'); if (cb.classList.contains('img')) $('chestImg').src = `img/chest_big_open.webp?b=${BUILD}`;
 }
 function closeChest() {
   if (state !== 'chest' || chestAnim) return;
@@ -2861,7 +2867,7 @@ function update(dt) {
   G.cam.x += (fx - G.cam.x) * Math.min(1, dt * (p.dead ? 3 : 8));
   G.cam.y += (fy - G.cam.y) * Math.min(1, dt * (p.dead ? 3 : 8));
 
-  if (G.pending > 0 && G.deadT <= 0 && !p.dead) {
+  if (G.pending > 0 && G.deadT <= 0 && !p.dead && state === 'play') {   // 같은 프레임에 보물 상자를 열었으면 상자를 닫은 뒤에
     G.lvlFlash = 0.6; burst(p.x, p.y - 12, '#ffd23f', 30, 260, 5, 0.6); sfx('level'); cheerAll();
     openLevelUp();
   }
@@ -3062,11 +3068,13 @@ function drawChest(c) { // 땅의 보물 상자: 통통 튀며 빛나는 원
   const pulse = 0.5 + 0.5 * Math.sin(c.t * 5), y = c.y - 6 - Math.abs(Math.sin(c.bob)) * 6;
   ctx.fillStyle = `rgba(255,214,90,${0.18 + pulse * 0.2})`; ctx.beginPath(); ctx.ellipse(c.x, c.y, 30 + pulse * 6, 20 + pulse * 4, 0, 0, 7); ctx.fill();
   ctx.fillStyle = 'rgba(0,0,0,.22)'; ctx.beginPath(); ctx.ellipse(c.x, c.y + 2, 17, 7, 0, 0, 7); ctx.fill();
-  ctx.save(); ctx.translate(c.x, y); ctx.scale(1, IK); ctx.lineWidth = 2.5; ctx.strokeStyle = '#3a1a00';
+  const ci = bakedIco('chest_big', 34);
+  if (ci) { const w = 34 * ci.width / ci.height; ctx.save(); ctx.translate(c.x, y); ctx.scale(1, IK); ctx.drawImage(ci, -w / 2, -30, w, 34); ctx.restore(); }
+  else { ctx.save(); ctx.translate(c.x, y); ctx.scale(1, IK); ctx.lineWidth = 2.5; ctx.strokeStyle = '#3a1a00';
   ctx.fillStyle = '#a0612b'; ctx.fillRect(-16, -14, 32, 18); ctx.strokeRect(-16, -14, 32, 18);
   ctx.fillStyle = '#b8722f'; ctx.beginPath(); ctx.moveTo(-16, -14); ctx.quadraticCurveTo(0, -30, 16, -14); ctx.closePath(); ctx.fill(); ctx.stroke();
   ctx.fillStyle = '#ffc21a'; ctx.fillRect(-12, -22, 4, 26); ctx.fillRect(8, -22, 4, 26); ctx.fillRect(-4, -16, 8, 9); ctx.strokeRect(-4, -16, 8, 9);
-  ctx.restore();
+  ctx.restore(); }
   if (pulse > 0.9) { ctx.fillStyle = '#fff7c2'; ctx.beginPath(); ctx.arc(c.x + Math.cos(c.t * 3) * 18, y - 24 + Math.sin(c.t * 4) * 4, 2.2, 0, 7); ctx.fill(); }
 }
 function drawGround() {
