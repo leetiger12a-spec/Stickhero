@@ -7,7 +7,7 @@ const { chromium } = require('/opt/node22/lib/node_modules/playwright');
   const page = await ctx.newPage(); const OUT = process.env.OUT || 'shots';
   page.on('pageerror', e => errors.push(e.message)); page.on('console', m => { if (m.type() === 'error') errors.push(m.text()); });
   await page.goto('http://localhost:8765/index.html'); await page.click('#bStart'); await page.waitForTimeout(300);
-  const pick = () => page.evaluate(() => { for (let i = 0; i < 10; i++) { if (SH.state === 'levelup') SH.choose(0); else if (SH.state === 'allypick') SH.chooseAlly(0); else if (SH.state === 'result' || SH.state === 'map') SH.ok(); } if (SH.G && SH.G.intro) SH.skipIntro(); });
+  const pick = () => page.evaluate(() => { for (let i = 0; i < 10; i++) { if (SH.state === 'levelup') SH.choose(0); else if (SH.state === 'allypick') SH.chooseAlly(0); else if (SH.state === 'result' || SH.state === 'map') SH.ok(); else if (SH.state === 'chest') { document.getElementById('ovChest').onclick({ target: {} }); SH.closeChest(); } } if (SH.G && SH.G.intro) SH.skipIntro(); });
   // 키운 마을 + 혼돈
   await page.evaluate(() => { const G = SH.G;
     G.towers.forEach(t => t.lvl = 3); G.pads.forEach(q => { if (q.kind !== 'bld') q.built = true; }); G.smith = true; G.tavern = true; hallUp(); hallUp(); G.bld = { farm: 1, mine: 1, market: 1 };

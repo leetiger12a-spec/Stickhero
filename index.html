@@ -55,7 +55,7 @@ canvas{display:block;position:fixed;inset:0;width:100%;height:100%}
 #dexList{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;width:min(94vw,420px);max-height:62vh;overflow-y:auto;padding:2px 2px 6px;box-sizing:border-box}
 .dexH{grid-column:1/-1;text-align:left;color:#ffd23f;font-size:14px;margin:4px 2px 0}
 .dex{position:relative;display:flex;flex-direction:column;align-items:center;gap:2px;background:linear-gradient(#fffdf7,#fff1d6);color:#2b2d42;border:3px solid #2b2d42;border-radius:14px;padding:6px 4px 8px;box-shadow:0 3px 0 #2b2d42;min-width:0}
-.dex.boss{background:linear-gradient(#fff6f9,#ffe0ea)}.dex .pic{height:58px;display:grid;place-items:center}.dex .pic img{max-height:56px;max-width:100%;object-fit:contain}
+.dex.boss{background:linear-gradient(#fff6f9,#ffe0ea)}.dex.ally{background:linear-gradient(#f4fff6,#dff7e5)}.dex .pic{height:58px;display:grid;place-items:center}.dex .pic img{max-height:56px;max-width:100%;object-fit:contain}
 .dex.off .pic img{filter:brightness(0);opacity:.45}.dex.off{background:#e9e4da}
 .dex b{font-weight:400;font-size:14px;line-height:1.15}.dex small{font-size:11px;line-height:1.25;color:#6b5b4b}.dex .cnt{color:#1d6fa5}
 .dex .stars{color:#ffb703;font-size:15px;letter-spacing:1px;text-shadow:0 1px 0 #7a4a00}.dex .stars i{font-style:normal;color:#d6cdbd;text-shadow:none}
@@ -272,7 +272,7 @@ h2 .hb{-webkit-text-stroke:0;text-shadow:none;letter-spacing:0;font-family:"Jua"
 
 <script>
 'use strict';
-const BUILD = 65;
+const BUILD = 66;
 const BOSS_INTERVAL = 180;      // 보스 등장 간격(초)
 const WAVE_INTERVAL = 60;       // 대규모 몰이 이벤트 간격(초)
 const MAX_ENEMIES = 220;
@@ -312,12 +312,13 @@ const ALLY_NEED = [0, 60, 180, 360, 600];  // 다음 레벨까지 경험치 (Lv1
 const ALLY_TRAIN = l => 50 + 60 * l;       // 숙소 훈련 비용 (금화)
 const ALLY_SKILL = { sword: '회전 베기', archer: '화살 3발', bomber: '두 번 펑', shield: '든든한 방패(주변 피해 −25%)' };
 function makeAlly(type, lvl, xp) {
+  if ((ST.alv[type] || 0) < (lvl || 1)) { ST.alv[type] = lvl || 1; stDirty = true; }   // 동료 도감: 만난 동료·최고 레벨
   const T = ALLY_TYPES[type], l = lvl || 1, hp = Math.round(T.hp * (1 + 0.2 * (l - 1)));
   return { type, lvl: l, xp: xp || 0, slot: G.allies.length, x: TAVERN.x, y: TAVERN.y + 34, hp, maxHp: hp, cd: 0, inv: 0, face: 1, wob: 0, swing: 0, dead: false, reviveT: 0, hits: 0 };
 }
 function allyLevelUp(a) {
   if (a.lvl >= 5) return;
-  a.lvl++; a.xp = 0; questEvent('ally'); stMax('allyLv', a.lvl);
+  a.lvl++; a.xp = 0; questEvent('ally'); stMax('allyLv', a.lvl); if ((ST.alv[a.type] || 0) < a.lvl) { ST.alv[a.type] = a.lvl; stDirty = true; }
   const T = ALLY_TYPES[a.type], hp = Math.round(T.hp * (1 + 0.2 * (a.lvl - 1)));
   a.maxHp = hp; a.hp = hp;
   burst(a.x, a.y - 20, '#ffd23f', 24, 180, 5, 0.6); sfx('level'); startAct(a, 'cheer');
@@ -451,7 +452,7 @@ $('bShopP').onclick = () => { sfx('pick'); openShop(); };
 $('bShopOk').onclick = () => { sfx('pick'); if (shopBack === 'title' || !G) { state = 'title'; refreshTitle(); showOv('ovTitle'); } else { state = 'paused'; showOv('ovPause'); } };
 $('bWard').onclick = () => { audioInit(); sfx('pick'); openWard(); };
 // ---------- 🏅 업적 · 칭호 (게임오버·날짜와 상관없이 영원히 쌓임) ----------
-const ST = Object.assign({ kills: 0, bosses: 0, camps: 0, towers: 0, bossT: [], specT: [], vLvl: 1, wall: 1, allyLv: 1, allies: 0, day: 1, evoT: [], kc: {}, bk: {}, goldT: [] }, (readJSON('stickhero_meta') || {}).st || {});   // META_KEY는 아래에서 정의됨
+const ST = Object.assign({ kills: 0, bosses: 0, camps: 0, towers: 0, bossT: [], specT: [], vLvl: 1, wall: 1, allyLv: 1, allies: 0, day: 1, evoT: [], kc: {}, bk: {}, goldT: [], goldB: [], alv: {} }, (readJSON('stickhero_meta') || {}).st || {});   // META_KEY는 아래에서 정의됨
 // 몬스터 도감(Build 64) 전 기록 이어받기: 이미 잡은 보스·특수 적은 1마리로
 for (const n of ST.bossT) if (!ST.bk[n]) ST.bk[n] = 1;
 for (const t of ST.specT) if (!ST.kc[t]) ST.kc[t] = 1;
@@ -484,6 +485,9 @@ const ACH = [
   { id: 'gold1',   icon: '✨', name: '반짝반짝',     desc: '황금 몬스터 처음 잡기',     title: '행운아',     bank: 150, p: () => [ST.goldT.length, 1] },
   { id: 'dex18',   icon: '📖', name: '몬스터 박사',   desc: '몬스터 18종 모두 발견',     title: '몬스터 박사', bank: 400, p: () => [DEX.filter(d => dexCount(d) > 0).length, DEX.length] },
   { id: 'gold11',  icon: '👑', name: '황금 사냥꾼',   desc: '황금 몬스터 11종 모두 잡기', title: '황금 사냥꾼', bank: 800, p: () => [ST.goldT.length, 11] },
+  { id: 'chest10',  icon: '🎁', name: '보물 사냥꾼',   desc: '보물 상자 10개 열기',       title: '보물 사냥꾼', bank: 200, p: () => [ST.chests || 0, 10] },
+  { id: 'goldB1',   icon: '🌟', name: '황금 보스',     desc: '황금 보스 쓰러뜨리기',       title: '황금 기사',  bank: 400, p: () => [ST.goldB.length, 1] },
+  { id: 'stars27',  icon: '💫', name: '별 반짝',       desc: '몬스터 도감 별 27개 모으기', title: '도감 수집가', bank: 400, p: () => [DEX.reduce((a, d) => a + dexStars(d), 0), 27] },
   { id: 'floor25', icon: '🌤', name: '하늘 끝까지',   desc: '무한 탑 25층 돌파',        title: '하늘 정복자', bank: 600, p: () => [metaOf('bestFloor'), 25] },
 ];
 function checkAch() { // 1초마다: 기록 저장 + 새 업적
@@ -525,7 +529,7 @@ function bakeSprite(n) {
   const wc = document.createElement('canvas'); wc.width = c.width; wc.height = c.height;
   const wx = wc.getContext('2d'); wx.drawImage(c, 0, 0); wx.globalCompositeOperation = 'source-atop'; wx.fillStyle = '#fff'; wx.fillRect(0, 0, wc.width, wc.height);
   SPR[n] = c; SPR_WHITE[n] = wc;
-  if (ETYPES[n]) { // 황금 몬스터용 금빛 그림
+  if (ETYPES[n] || /^boss/.test(n)) { // 황금 몬스터·보스용 금빛 그림
     const gc = document.createElement('canvas'); gc.width = c.width; gc.height = c.height;
     const gx = gc.getContext('2d'); gx.drawImage(c, 0, 0);
     try { // 밝기 → 금색 (어두우면 진한 금, 밝으면 연한 금): 원래 색과 상관없이 금으로, 테두리·명암은 그대로
@@ -868,21 +872,30 @@ let dexBack = null;
 function openDex() { checkAch(); dexBack = state; state = 'dex'; renderDex(); showOv('ovDex'); }
 function renderDex() {
   const found = DEX.filter(d => dexCount(d) > 0).length, stars = DEX.reduce((a, d) => a + dexStars(d), 0);
-  $('dexSub').innerHTML = `발견 <b>${found}/${DEX.length}</b> · 별 <b>${stars}/${DEX.length * 3}</b> · ✨황금 <b>${ST.goldT.length}/11</b>`;
+  $('dexSub').innerHTML = `발견 <b>${found}/${DEX.length}</b> · 별 <b>${stars}/${DEX.length * 3}</b> · ✨황금 <b>${ST.goldT.length + ST.goldB.length}/18</b> · 동료 <b>${Object.keys(ST.alv).length}/4</b>`;
   const box = $('dexList'); box.innerHTML = '';
   const sec = t => { const h = document.createElement('div'); h.className = 'dexH'; h.textContent = t; box.appendChild(h); };
   DEX.forEach((d, i) => {
     if (i === 0) sec('⚔ 적 11종 · 별: 10 / 100 / 1,000마리');
     if (i === 11) sec('👑 보스 7종 · 별: 1 / 5 / 20번');
-    const n = dexCount(d), ok = n > 0, st = dexStars(d), g = !d.boss && ST.goldT.includes(d.k);
+    const n = dexCount(d), ok = n > 0, st = dexStars(d), g = d.boss ? ST.goldB.includes(d.boss) : ST.goldT.includes(d.k);
     const el = document.createElement('div'); el.className = 'dex' + (ok ? '' : ' off') + (d.boss ? ' boss' : '');
     const lim = d.boss ? DEX_STARS.boss : DEX_STARS.mob, next = lim.find(x => n < x);
     el.innerHTML = `<div class="pic"><img src="img/${d.k}.webp?b=${BUILD}" alt=""></div><b>${ok ? d.name : '???'}</b>` +
       `<span class="stars">${'★'.repeat(st)}<i>${'★'.repeat(3 - st)}</i></span>` +
       `<small>${ok ? d.desc : d.where}</small><small class="cnt">${ok ? `${n.toLocaleString()}${d.boss ? '번' : '마리'}${next ? ` · 다음 별 ${next.toLocaleString()}` : ' · 완성!'}` : '아직 못 만났어요'}</small>` +
-      (d.boss ? '' : `<span class="gold${g ? ' on' : ''}" title="황금">${g ? '✨황금' : '황금 ?'}</span>`);
+      `<span class="gold${g ? ' on' : ''}" title="황금">${g ? '✨황금' : '황금 ?'}</span>`;
     box.appendChild(el);
   });
+  // 동료 (만난 동료 · 별: Lv1 / Lv3 / Lv5)
+  sec('🐾 동료 4종 · 별: 고용 / Lv3 / Lv5');
+  for (const t in ALLY_TYPES) {
+    const T = ALLY_TYPES[t], l = ST.alv[t] || 0, st = [1, 3, 5].filter(x => l >= x).length, el = document.createElement('div');
+    el.className = 'dex ally' + (l ? '' : ' off');
+    el.innerHTML = `<div class="pic"><img src="img/ally_${t}.webp?b=${BUILD}" alt=""></div><b>${l ? T.name : '???'}</b><span class="stars">${'★'.repeat(st)}<i>${'★'.repeat(3 - st)}</i></span>` +
+      `<small>${l ? T.desc : isUnlocked('a', t) ? '영웅 숙소에서 고용' : '모험 지도를 더 깨면 열려요'}</small><small class="cnt">${l ? `최고 Lv${l}` : '아직 못 만났어요'}</small>`;
+    box.appendChild(el);
+  }
 }
 $('bDexA').onclick = () => { sfx('pick'); openDex(); };
 $('bDexP').onclick = () => { sfx('pick'); openDex(); };
@@ -1181,7 +1194,7 @@ function buildSave() {
   return {
     v: 1, build: BUILD, at: Date.now(), diff: G.diff,
     t: G.t, bt: G.bt, kills: G.kills, lvl: G.lvl, xp: G.xp, need: G.need, pending: G.pending,
-    weapons: G.weapons, passives: G.passives, gold: G.gold, chests: G.mode === 'base' ? (G.chests || []).map(c => [Math.round(c.x), Math.round(c.y)]) : [], logs: p.logs, hp: p.dead ? -1 : p.hp,
+    weapons: G.weapons, passives: G.passives, gold: G.gold, chests: G.mode === 'base' ? (G.chests || []).map(c => [Math.round(c.x), Math.round(c.y), c.small ? 1 : 0, c.gold ? 1 : 0]) : [], logs: p.logs, hp: p.dead ? -1 : p.hp,
     base: G.base.hp, wallLvl: G.wallLvl, walls: G.walls.map(w => w.hp), towers: G.towers.map(t => t.lvl),
     pads: G.pads.map(q => [q.built, q.pw, q.pg, q.ps || 0]), smith: G.smith, forge: G.forge, tavern: G.tavern,
     allies: G.allies.map(a => [a.type, a.lvl || 1, Math.round(a.xp || 0)]), stageN: G.stageN, stars: G.stars, bossCount: G.bossCount - (G.boss ? 1 : 0), bossKills: G.bossKills || 0,
@@ -1211,7 +1224,7 @@ function loadGame(d) {
   setVillage(d.vLvl || 1); G.stone = d.stone || 0; G.bld = Object.assign({ farm: 0, mine: 0, market: 0 }, d.bld || {});
   G.base.maxHp = 1500 + VILLAGE.slice(1, G.vLvl).reduce((a, v) => a + v.hp, 0);
   G.day = d.day || 1; G.broken = {}; for (const k of d.broken || []) G.broken[k] = true;
-  G.chests = (d.chests || []).map(([x, y]) => ({ x, y, bob: 0, t: 1 }));   // 줍기 전에 끈 마을 보물 상자
+  G.chests = (d.chests || []).map(([x, y, sm, gd]) => ({ x, y, bob: 0, t: 1, small: !!sm, gold: !!gd }));   // 줍기 전에 끈 마을 보물 상자
   if (d.quests && d.quests.length) { G.quests = d.quests; G.questBonus = !!d.questBonus; } else newQuests();   // 새 날(또는 예전 저장)은 새 퀘스트
   if (d.rocks) G.rocks = d.rocks.map(([x, y, s, rg]) => ({ x, y, s, max: 6, regrow: rg, shake: 0 }));
   if (d.camps) { G.enemies = G.enemies.filter(e => !e.camp); G.camps = d.camps.map(([x, y, lvl, rebuild, hp]) => ({ x, y, lvl, rebuild, spawnT: rand(8, 16), e: null })); G.camps.forEach((c, i) => { if (d.camps[i][4] > 0) makeCamp(c, d.camps[i][4]); }); }
@@ -1348,9 +1361,9 @@ function applyChoice(c, quiet) { // 레벨업 카드·보물 상자 공통: 무�
 
 // ---------- 보물 상자: 보스를 쓰러뜨리면 떨어짐, 닿으면 열기 → 무기·능력 1~3개 (진화 먼저) ----------
 const CHEST_ROLL = [[1, 0.6], [2, 0.3], [3, 0.1]];   // [개수, 확률]
-function dropChest(x, y) { G.chests = G.chests || []; G.chests.push({ x, y, bob: 0, t: 0 }); }
-function chestPick() { // 지금 상태에서 상자가 줄 것 하나 (진화 → 가진 무기·능력 → 새 무기·능력 → 금화)
-  const evo = Object.keys(EVO).filter(id => canEvolve(id));
+function dropChest(x, y, small, gold) { G.chests = G.chests || []; G.chests.push({ x, y, bob: 0, t: 0, small: !!small, gold: !!gold }); }   // small: 진지 작은 상자(1개·진화 없음), gold: 황금 보스(최소 2개)
+function chestPick(noEvo) { // 지금 상태에서 상자가 줄 것 하나 (진화 → 가진 무기·능력 → 새 무기·능력 → 금화)
+  const evo = noEvo ? [] : Object.keys(EVO).filter(id => canEvolve(id));
   if (evo.length) return { kind: 'evo', id: evo[Math.floor(Math.random() * evo.length)], l: MAX_WLV };
   const own = [], fresh = [];
   for (const id in WEAP) { const l = G.weapons[id] || 0; if (l < MAX_WLV && (l > 0 || isUnlocked('w', id))) (l ? own : fresh).push({ kind: 'w', id, l }); }
@@ -1359,9 +1372,10 @@ function chestPick() { // 지금 상태에서 상자가 줄 것 하나 (진화 �
   if (pool.length) return pool[Math.floor(Math.random() * pool.length)];
   return { kind: 'gold', id: 'gold', n: 60 + 15 * (G.lvl || 1) };
 }
-function chestRewards() {
+function chestRewards(ch) {
   let r = Math.random(), n = 1; for (const [k, pr] of CHEST_ROLL) { if ((r -= pr) <= 0) { n = k; break; } }
-  const out = []; for (let i = 0; i < n; i++) { const c = chestPick(); applyChoice(c, true); out.push(c); }   // 하나씩 적용해야 다음 것이 진화 조건을 봄
+  if (ch && ch.small) n = 1; if (ch && ch.gold) n = Math.max(2, n);
+  const out = []; for (let i = 0; i < n; i++) { const c = chestPick(ch && ch.small); applyChoice(c, true); out.push(c); }   // 하나씩 적용해야 다음 것이 진화 조건을 봄
   return out;
 }
 function chestCardHtml(c) {
@@ -1371,8 +1385,8 @@ function chestCardHtml(c) {
   return `<div class="ic">${ic}</div><div class="nm">${d.name}</div>${lv}`;
 }
 let chestAnim = null;
-function openChest(auto) {
-  const items = chestRewards(); stAdd('chests');
+function openChest(auto, ch) {
+  const items = chestRewards(ch); stAdd('chests');
   if (auto) { // 스테이지를 떠날 때 못 주운 상자: 자동으로 열고 알림만
     banner('🎁 보물 상자 자동 열기!', items.map(c => c.kind === 'gold' ? `금화 ${c.n}` : (c.kind === 'evo' ? EVO : c.kind === 'w' ? WEAP : PASS)[c.id].name).join(' · '), '#ffd23f', 2.6);
     return;
@@ -1381,10 +1395,10 @@ function openChest(auto) {
   const box = $('chestItems'); box.innerHTML = '';
   const spinIcons = [...Object.keys(WEAP).map(id => wIco(id, 0)), ...Object.keys(PASS).map(id => icoHtml('p_' + id, PASS[id].icon))];
   const els = items.map(c => { const el = document.createElement('div'); el.className = 'ci spin'; el.innerHTML = '<div class="ic"></div><div class="nm">?</div><span class="lv">?</span>'; box.appendChild(el); return el; });
-  const cb = $('chestBox'), hasImg = !!WICON.chest_big; cb.classList.toggle('img', hasImg);   // 그림이 있으면 그림 상자 (없으면 SVG)
-  if (hasImg) $('chestImg').src = `img/chest_big.webp?b=${BUILD}`;
+  const kind = ch && ch.small ? 'chest_small' : 'chest_big', cb = $('chestBox'), hasImg = !!WICON[kind]; cb.classList.toggle('img', hasImg);   // 그림이 있으면 그림 상자 (없으면 SVG)
+  if (hasImg) $('chestImg').src = `img/${kind}.webp?b=${BUILD}`; cb.dataset.kind = kind;
   cb.classList.remove('open'); $('bChestOk').style.display = 'none'; $('chestHint').style.display = '';
-  $('chestTitle').textContent = items.length > 1 ? `보물 상자! ×${items.length}` : '보물 상자!';
+  $('chestTitle').textContent = (ch && ch.gold ? '✨ 황금 ' : '') + (ch && ch.small ? '작은 상자!' : items.length > 1 ? `보물 상자! ×${items.length}` : '보물 상자!');
   showOv('ovChest'); sfx('chestShake'); vib([30, 30, 30]);
   let t = 0, k = 0; const stopAt = items.map((_, i) => 0.9 + i * 0.45);
   const done = i => { if (els[i].classList.contains('done')) return; els[i].className = 'ci done' + (items[i].kind === 'evo' ? ' evo' : ''); els[i].innerHTML = chestCardHtml(items[i]); sfx(items[i].kind === 'evo' ? 'rewardEvo' : 'reward'); };
@@ -1400,7 +1414,7 @@ function openChest(auto) {
 }
 function chestOpenLook() { // 뚜껑 열린 모습 (그림이면 열린 상자 그림으로 바꿈)
   const cb = $('chestBox'); if (cb.classList.contains('open')) return;
-  cb.classList.add('open'); sfx('chestOpen'); if (cb.classList.contains('img')) $('chestImg').src = `img/chest_big_open.webp?b=${BUILD}`;
+  cb.classList.add('open'); sfx('chestOpen'); if (cb.classList.contains('img')) $('chestImg').src = `img/${cb.dataset.kind || 'chest_big'}_open.webp?b=${BUILD}`;
 }
 function closeChest() {
   if (state !== 'chest' || chestAnim) return;
@@ -1409,7 +1423,7 @@ function closeChest() {
 }
 function flushChests() { // 스테이지 바뀔 때 남은 상자는 자동으로 열기
   if (!G.chests || !G.chests.length) return;
-  for (const c of G.chests) openChest(true);
+  for (const c of G.chests) openChest(true, c);
   G.chests = [];
 }
 
@@ -1598,7 +1612,7 @@ function announceType(type) {
   if (sp && state === 'play') banner(sp[3], sp[4], '#ff9f1c', 2.4);
 }
 // 황금 몬스터 (Build 64): 아주 가끔 반짝이는 황금 버전 — 체력 3배, 금화·구슬 많이, 도감 황금 칸
-const GOLD_P = 1 / 1500;   // 봇 한 판 처치 750~4200마리 → 한 판에 0.5~3번
+const GOLD_P = 1 / 1500, GOLD_BOSS_P = 1 / 20;   // 보스는 봇 한 판 2~15마리 → 가끔   // 봇 한 판 처치 750~4200마리 → 한 판에 0.5~3번
 let goldAnnT = -99;
 function makeGolden(e) {
   e.golden = true; e.hp *= 3; e.maxHp *= 3; e.gold = e.gold * 10 + 5; e.xp *= 3;
@@ -1609,7 +1623,7 @@ function makeEnemy(type, x, y) {
   announceType(type);
   const gr = DF().grow, T = ETYPES[type], hm = (1 + G.bt / 85 * gr) * (1 + G.bt / 1500 * gr) * (1 + Math.max(0, G.bt - 300) / 105 * gr) * DF().ehp * dayMul();   // 5분 뒤부터 후반 강화   // 난이도: 마을에서 보낸 시간 × 선택 난이도
   const e = { id: ++eid, type, x, y, r: T.r, hp: T.hp * hm, maxHp: T.hp * hm, spd: T.spd * (1 + Math.min(0.35, G.bt / 900)) * rand(0.9, 1.1), dmg: T.dmg * DF().edmg * (1 + G.bt / 650 * gr) * Math.sqrt(dayMul()), color: T.color, xp: T.xp, gold: T.gold, flash: 0, hitT: 0, kx: 0, ky: 0, swordCd: 0, wob: Math.random() * 6, inside: Math.hypot(x, y) < WALL_R, atk: 0.5, lunge: 0, face: 1 };
-  if (Math.random() < GOLD_P) makeGolden(e);
+  if (!window.__noGold && Math.random() < GOLD_P) makeGolden(e);   // __noGold: 정확한 기록을 보는 시험용
   return e;
 }
 // ---------- 야생 지대: 적 진지 ----------
@@ -1657,7 +1671,8 @@ function campDie(e) {
   for (let i = 0; i < 4; i++) burst(e.x + rand(-30, 30), e.y + rand(-30, 30), ['#8d5524', '#ffd23f', '#e63946', '#555'][i], 30, 300, 7, 1);
   for (let i = 0; i < 20 + c.lvl * 8; i++) dropCoin(e.x + rand(-40, 40), e.y + rand(-40, 40));
   for (let i = 0; i < 12; i++) dropGem(e.x + rand(-40, 40), e.y + rand(-40, 40), 4);
-  const st = 8 + 4 * c.lvl; G.stone += st;
+  const st = 6 + 3 * c.lvl; G.stone += st;   // 작은 상자가 생겨서 돌은 8+4lv → 6+3lv
+  dropChest(e.x, e.y + 30, true);
   floatText(e.x, e.y - 70, `+🪨${st}`, '#dee2e6', 20, 1.6);
   G.shake = 14; sfx('bigBoom'); sfx('cheer'); cheerAll();
   banner('🏴 적 진지 파괴!', `적이 줄어들어요 · ${Math.round(CAMP_REBUILD / 60)}분 뒤 다시 지어져요`, '#7bed9f', 2.6);
@@ -1697,7 +1712,8 @@ function spawnBoss(bx, by) {
   if (final) { b.r = 76; b.final = true; }
   G.enemies.push(b); G.boss = b;
   // 등장 컷신: 어두워짐 → 하늘에서 쿵! → 쿵쿵 발 구르기 → 이름표 쾅! (화면을 누르면 넘김)
-  G.intro = { t: 0, dur: 2.6, spr: b.spr, name: B.name, color: B.color, hits: 0 };
+  if (!window.__noGold && Math.random() < GOLD_BOSS_P) { b.golden = true; b.hp *= 2; b.maxHp *= 2; }   // 황금 보스 (Build 66)
+  G.intro = { t: 0, dur: 2.6, spr: b.spr, name: (b.golden ? '✨황금 ' : '') + B.name, color: b.golden ? '#ffd23f' : B.color, hits: 0 };
   joy = null; G.banner = null; sfx('warn');
 }
 const INTRO_HITS = [0.55, 0.95, 1.3, 1.6];   // 떨어짐, 쿵, 쿵, 이름표 쾅
@@ -2529,8 +2545,9 @@ function bossDie(e) {
   G.boss = null; G.bossKills = (G.bossKills || 0) + 1; questEvent('boss'); stAdd('bosses'); stSet('bossT', e.name); ST.bk[e.name] = (ST.bk[e.name] || 0) + 1;
   for (let i = 0; i < 5; i++) burst(e.x + rand(-40, 40), e.y + rand(-40, 40), [e.color, '#ffd23f', '#fff', '#ff9f1c', '#222'][i], 40, 380, 8, 1.2);
   for (let i = 0; i < 15; i++) { const a = Math.random() * Math.PI * 2, d = rand(10, 90); dropGem(e.x + Math.cos(a) * d, e.y + Math.sin(a) * d, 5); }   // 상자가 생겨서 구슬은 30 → 15
-  dropChest(e.x, e.y + 20);
-  for (let i = 0; i < 40 + e.lvl * 20; i++) dropCoin(e.x + rand(-40, 40), e.y + rand(-40, 40));
+  dropChest(e.x, e.y + 20, false, e.golden);
+  for (let i = 0; i < (40 + e.lvl * 20) * (e.golden ? 3 : 1); i++) dropCoin(e.x + rand(-40, 40), e.y + rand(-40, 40));
+  if (e.golden) { stSet('goldB', e.name); goldDie(e); }
   G.hearts.push({ x: e.x, y: e.y, bob: 0 });
   G.shake = 25; G.slow = 1.3; vib([80, 40, 80, 40, 160], true); cheerAll();
   G.ebullets.length = 0; G.fists = []; G.hazards = [];
@@ -2943,7 +2960,7 @@ function update(dt) {
   G.gems = G.gems.filter(g => !g.dead);
   if (G.chests) for (const c of G.chests) {
     c.bob += dt * 3; c.t += dt;
-    if (!p.dead && c.t > 0.6 && (p.x - c.x) ** 2 + (p.y - 10 - c.y) ** 2 < 30 * 30) { c.dead = true; openChest(false); break; }
+    if (!p.dead && c.t > 0.6 && (p.x - c.x) ** 2 + (p.y - 10 - c.y) ** 2 < 30 * 30) { c.dead = true; openChest(false, c); break; }
   }
   if (G.chests) G.chests = G.chests.filter(c => !c.dead);
   for (const h of G.hearts) {
@@ -3175,8 +3192,8 @@ function drawChest(c) { // 땅의 보물 상자: 통통 튀며 빛나는 원
   const pulse = 0.5 + 0.5 * Math.sin(c.t * 5), y = c.y - 6 - Math.abs(Math.sin(c.bob)) * 6;
   ctx.fillStyle = `rgba(255,214,90,${0.18 + pulse * 0.2})`; ctx.beginPath(); ctx.ellipse(c.x, c.y, 30 + pulse * 6, 20 + pulse * 4, 0, 0, 7); ctx.fill();
   ctx.fillStyle = 'rgba(0,0,0,.22)'; ctx.beginPath(); ctx.ellipse(c.x, c.y + 2, 17, 7, 0, 0, 7); ctx.fill();
-  const ci = bakedIco('chest_big', 34);
-  if (ci) { const w = 34 * ci.width / ci.height; ctx.save(); ctx.translate(c.x, y); ctx.scale(1, IK); ctx.drawImage(ci, -w / 2, -30, w, 34); ctx.restore(); }
+  const ch = c.small ? 26 : 34, ci = bakedIco(c.small ? 'chest_small' : 'chest_big', ch);
+  if (ci) { const w = ch * ci.width / ci.height; ctx.save(); ctx.translate(c.x, y); ctx.scale(1, IK); ctx.drawImage(ci, -w / 2, 4 - ch, w, ch); ctx.restore(); }
   else { ctx.save(); ctx.translate(c.x, y); ctx.scale(1, IK); ctx.lineWidth = 2.5; ctx.strokeStyle = '#3a1a00';
   ctx.fillStyle = '#a0612b'; ctx.fillRect(-16, -14, 32, 18); ctx.strokeRect(-16, -14, 32, 18);
   ctx.fillStyle = '#b8722f'; ctx.beginPath(); ctx.moveTo(-16, -14); ctx.quadraticCurveTo(0, -30, 16, -14); ctx.closePath(); ctx.fill(); ctx.stroke();
@@ -3836,7 +3853,7 @@ function drawBossInner(e) {
   ctx.scale(pulse, 2 - pulse);
   if (SPR[e.spr]) { // 그림 보스: 바닥(발)이 e.y + r 근처, 돌진 준비 땐 하얗게 깜빡이며 부풀어 오름
     const img = SPR[e.spr], h = SPR_INFO[e.spr].h, w = h * img.width / img.height, top = e.r * 0.95 - h;
-    ctx.drawImage(img, -w / 2, top, w, h);
+    ctx.drawImage(e.golden && SPR_GOLD[e.spr] ? SPR_GOLD[e.spr] : img, -w / 2, top, w, h);
     const glow = e.mode === 'aim' || e.mode === 'punchAim' || e.mode === 'fireCast' ? 0.25 + 0.25 * Math.sin(G.t * 30) : e.flash > 0 ? 0.45 : 0; // 보스는 반투명하게만 번쩍
     if (glow > 0 && SPR_WHITE[e.spr]) { ctx.globalAlpha = glow; ctx.drawImage(SPR_WHITE[e.spr], -w / 2, top, w, h); }
     ctx.restore();

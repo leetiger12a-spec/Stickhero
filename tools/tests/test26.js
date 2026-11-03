@@ -3,13 +3,13 @@ const { chromium } = require('/opt/node22/lib/node_modules/playwright');
 (async () => {
   const b = await chromium.launch(); const errors = []; const check = (c, m) => { if (!c) errors.push(m); };
   const ctx = await b.newContext({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 2 });
-  await ctx.addInitScript(() => localStorage.setItem('stickhero_story', '1'));
+  await ctx.addInitScript(() => { localStorage.setItem('stickhero_story', '1'); window.__noGold = true; });   // 황금 보스가 나오면 업적이 달라져서
   const page = await ctx.newPage(); const OUT = process.env.OUT || 'shots';
   page.on('pageerror', e => errors.push(e.message)); page.on('console', m => { if (m.type() === 'error') errors.push(m.text()); });
   await page.goto('http://localhost:8765/index.html');
   // 시작 화면에서 열기
   await page.click('#bAchT'); await page.waitForTimeout(200);
-  const sub0 = await page.evaluate(() => document.getElementById('achSub').textContent); console.log(sub0); check(sub0.includes('0/24'), 'ach count wrong');
+  const sub0 = await page.evaluate(() => document.getElementById('achSub').textContent); console.log(sub0); check(sub0.includes('0/27'), 'ach count wrong');
   await page.click('#bAchOk'); await page.click('#bStart'); await page.waitForTimeout(300);
   // 첫 망루 · 적 잡기 · 보스 · 특수 적
   await page.evaluate(() => { const G = SH.G; G.nextBoss = 999; G.nextWave = 999; G.spawnAcc = -1e9;

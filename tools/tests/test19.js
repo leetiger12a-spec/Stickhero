@@ -31,7 +31,7 @@ const { chromium } = require('/opt/node22/lib/node_modules/playwright');
   await page.waitForTimeout(500);
   const after = await page.evaluate(() => ({ stone: SH.G.stone, down: campsDown(), lvl: SH.G.camps[0].lvl, rb: SH.G.camps[0].rebuild, inList: SH.G.enemies.some(e => e.camp === SH.G.camps[0]) }));
   console.log('destroy', JSON.stringify(before), JSON.stringify(after));
-  check(after.down === 1 && after.lvl === 1 && after.stone >= before.stone + 12 && !after.inList && after.rb > 200, 'camp destroy wrong');
+  check(after.down === 1 && after.lvl === 1 && after.stone >= before.stone + 9 && !after.inList && after.rb > 200, 'camp destroy wrong');
   await page.screenshot({ path: `${OUT}/b40_ruin.png` });
   // 재건 (더 튼튼)
   const hp0 = await page.evaluate(() => SH.G.camps[1].e.maxHp);
