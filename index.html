@@ -41,6 +41,17 @@ canvas{display:block;position:fixed;inset:0;width:100%;height:100%}
 .arow.off{opacity:.62;background:#e9e4da}.arow .ic{font-size:24px;width:30px;text-align:center}img.mi{height:1.35em;width:auto;vertical-align:-.3em}.arow .ic img{width:40px;height:40px;object-fit:contain;display:block;margin-left:-5px}.arow .tx{flex:1;font-size:14px;line-height:1.3}.arow .tx b{font-weight:400;font-size:16px}
 .arow .pb{height:5px;background:#ddd;border-radius:3px;margin-top:3px}.arow .pb i{display:block;height:100%;background:#3fa9f5;border-radius:3px}
 .arow button{font:inherit;font-size:13px;color:#2b2d42;border:2px solid #2b2d42;border-radius:9px;padding:4px 7px;background:#ffd23f;cursor:pointer;white-space:nowrap}.arow button.on{background:#7bed9f}
+#chestBox{position:relative;margin:4px 0 10px;animation:chestShake .45s ease-in-out infinite}
+#chestBox::before{content:'';position:absolute;inset:-30px;background:radial-gradient(circle,rgba(255,226,120,.75),rgba(255,226,120,0) 62%);opacity:0;transition:opacity .3s}
+#chestBox.open{animation:none}#chestBox.open::before{opacity:1;animation:chestGlow 1.2s ease-in-out infinite}
+#chestBox svg{position:relative;display:block}#chestLid{transition:transform .35s cubic-bezier(.3,1.6,.5,1);transform-origin:60px 44px}#chestBox.open #chestLid{transform:translateY(-14px) rotate(-18deg)}
+@keyframes chestShake{0%,100%{transform:rotate(0)}25%{transform:rotate(-6deg) scale(1.03)}75%{transform:rotate(6deg) scale(1.03)}}
+@keyframes chestGlow{50%{transform:scale(1.12)}}
+#chestItems{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;min-height:120px}
+.ci{width:104px;display:flex;flex-direction:column;align-items:center;gap:4px;background:linear-gradient(#fffdf7,#fff1d6);color:#2b2d42;border:3px solid #2b2d42;border-radius:16px;padding:8px 4px;box-shadow:0 4px 0 #2b2d42}
+.ci .ic{height:56px;width:56px;display:grid;place-items:center;font-size:38px}.ci .ic img{max-width:56px;max-height:56px;object-fit:contain}
+.ci .nm{font-size:15px;line-height:1.15}.ci .lv{font-size:12px;color:#fff;background:#e63946;border-radius:7px;padding:0 6px}.ci .lv.evo{background:linear-gradient(90deg,#ff9f1c,#ffd23f);color:#222}.ci .lv.new{background:#2a9d8f}.ci .lv.gold{background:#b8860b}
+.ci.spin .nm,.ci.spin .lv{visibility:hidden}.ci.done{animation:pop .3s ease-out}.ci.evo{border-color:#ffb703;background:linear-gradient(#fff8d6,#ffe9a0);box-shadow:0 4px 0 #b8860b,0 0 16px rgba(255,210,63,.9)}
 #evoList{display:flex;flex-direction:column;gap:6px;width:min(94vw,400px);max-height:60vh;overflow-y:auto}.evoNow{color:#1d6fa5;font-weight:800}
 #shopList{display:flex;flex-direction:column;gap:8px;width:min(94vw,400px);max-height:58vh;overflow-y:auto}
 .srow{display:flex;align-items:center;gap:10px;background:linear-gradient(#fffdf7,#fff1d6);color:#2b2d42;border:3px solid #2b2d42;border-radius:16px;padding:8px 10px;text-align:left;box-shadow:0 3px 0 #2b2d42}
@@ -177,6 +188,22 @@ h2 .hb{-webkit-text-stroke:0;text-shadow:none;letter-spacing:0;font-family:"Jua"
   <button class="btn" id="bAchOk">완료</button>
 </div>
 
+<div class="ov" id="ovChest">
+  <h2 id="chestTitle">보물 상자!</h2>
+  <div id="chestBox"><svg viewBox="0 0 120 100" width="150" height="125" aria-hidden="true">
+    <ellipse cx="60" cy="92" rx="46" ry="7" fill="rgba(0,0,0,.35)"/>
+    <rect x="14" y="44" width="92" height="46" rx="6" fill="#a0612b" stroke="#3a1a00" stroke-width="4"/>
+    <rect x="14" y="60" width="92" height="7" fill="#7a4419"/>
+    <rect x="22" y="44" width="10" height="46" fill="#ffc21a" stroke="#3a1a00" stroke-width="3"/><rect x="88" y="44" width="10" height="46" fill="#ffc21a" stroke="#3a1a00" stroke-width="3"/>
+    <g id="chestLid"><path d="M14 46 Q14 14 60 14 Q106 14 106 46 Z" fill="#b8722f" stroke="#3a1a00" stroke-width="4"/>
+    <rect x="22" y="18" width="10" height="28" fill="#ffc21a" stroke="#3a1a00" stroke-width="3"/><rect x="88" y="18" width="10" height="28" fill="#ffc21a" stroke="#3a1a00" stroke-width="3"/></g>
+    <rect x="50" y="38" width="20" height="22" rx="4" fill="#ffd23f" stroke="#3a1a00" stroke-width="3"/><circle cx="60" cy="48" r="3.5" fill="#3a1a00"/>
+  </svg></div>
+  <div id="chestItems"></div>
+  <div class="sub" id="chestHint" style="margin:6px 0 0;font-size:14px">화면을 누르면 바로 열려요</div>
+  <button class="btn" id="bChestOk" style="display:none">좋아!</button>
+</div>
+
 <div class="ov" id="ovEvo">
   <h2 style="margin-bottom:2px">✨ 진화 도감</h2>
   <div class="sub" id="evoSub" style="margin-bottom:6px;font-size:13px"></div>
@@ -230,7 +257,7 @@ h2 .hb{-webkit-text-stroke:0;text-shadow:none;letter-spacing:0;font-family:"Jua"
 
 <script>
 'use strict';
-const BUILD = 60;
+const BUILD = 61;
 const BOSS_INTERVAL = 180;      // 보스 등장 간격(초)
 const WAVE_INTERVAL = 60;       // 대규모 몰이 이벤트 간격(초)
 const MAX_ENEMIES = 220;
@@ -464,6 +491,7 @@ function renderAch() {
 }
 const heroTitle = () => { const id = (readJSON(META_KEY) || {}).title, A = id && ACH.find(a => a.id === id); return A ? A.title : null; };
 let heroTitleCache = undefined, heroTitleT = 0;
+$('bChestOk').onclick = e => { e.stopPropagation(); closeChest(); };
 $('bAchT').onclick = () => { audioInit(); sfx('pick'); openAch(); };
 $('bAchP').onclick = () => { sfx('pick'); openAch(); };
 $('bAchOk').onclick = () => { sfx('pick'); heroTitleCache = undefined; if (achBack === 'title' || !G) { state = 'title'; refreshTitle(); showOv('ovTitle'); } else { state = 'paused'; showOv('ovPause'); } };
@@ -897,7 +925,7 @@ function newGame() {
     t: 0, kills: 0, lvl: 1, xp: 0, need: xpNeed(1), pending: 0,
     p: { x: 0, y: 0, r: 11, logs: 0, cap: 12, chopT: 0, chop: 0, fullMsg: 0, hp: 100, maxHp: 100, speed: 150, face: 1, ax: 1, ay: 0, inv: 0, walk: 0, moving: false, magnet: 70, dmgMul: 1, cdMul: 1 },
     weapons: { pistol: 1 }, passives: {}, timers: {},
-    enemies: [], bullets: [], ebullets: [], booms: [], bombs: [], zaps: [], rings: [], fists: [], hazards: [], gems: [], hearts: [], parts: [], texts: [], coins: [], corpses: [],
+    enemies: [], bullets: [], ebullets: [], booms: [], bombs: [], zaps: [], rings: [], fists: [], hazards: [], gems: [], hearts: [], chests: [], parts: [], texts: [], coins: [], corpses: [],
     trees: [], flyers: [], pflames: [], hint: null, mode: 'base', bt: 0, diff: diffSel, stageN: 0, stars: [], st: null, stash: null, gateT: 0,
     smith: false, forge: 0, tavern: false, allies: [], raid: null, raidIn: 0, raidCount: 0, drumT: 0,
     gold: 0, base: { hp: 1500, maxHp: 1500, hitT: 0 }, respawnT: 0, squadAng: Math.random() * 7, squadT: 6,
@@ -956,6 +984,7 @@ window.addEventListener('keydown', e => {
   keys[e.key.toLowerCase()] = true;
   if (state === 'play' && G && G.intro && G.intro.t > 0.8 && (e.key === ' ' || e.key === 'Enter')) endIntro();
   if (state === 'levelup' && ['1', '2', '3'].includes(e.key)) chooseCard(+e.key - 1);
+  if (state === 'chest' && (e.key === 'Enter' || e.key === ' ')) { if (chestAnim) $('ovChest').onclick({ target: {} }); else closeChest(); }
   if ((e.key === 'e' || e.key === 'E') && state === 'play') callSos();   // PC: E키로 지원 요청
   if (state === 'allypick' && ['1', '2', '3', '4'].includes(e.key)) chooseAlly(+e.key - 1);
   if ((e.key === 'p' || e.key === 'P' || e.key === 'Escape') && (state === 'play' || state === 'paused')) togglePause();
@@ -1117,7 +1146,7 @@ function refreshTitle() {
 }
 
 // ---------- 화면 전환 ----------
-function showOv(id) { ['ovTitle', 'ovLevel', 'ovPause', 'ovOver', 'ovStory', 'ovMap', 'ovClear', 'ovWard', 'ovShop', 'ovAch', 'ovEvo'].forEach(o => $(o).classList.toggle('show', o === id)); }
+function showOv(id) { ['ovTitle', 'ovLevel', 'ovPause', 'ovOver', 'ovStory', 'ovMap', 'ovClear', 'ovWard', 'ovShop', 'ovAch', 'ovEvo', 'ovChest'].forEach(o => $(o).classList.toggle('show', o === id)); }
 function startGame() {
   audioInit(); clearSave(); newGame(); state = 'play'; joy = null; showOv(null);
   $('hudBtns').classList.add('show');
@@ -1205,7 +1234,12 @@ function openLevelUp() {
 }
 function chooseCard(i) {
   if (state !== 'levelup' || !choices[i]) return;
-  const c = choices[i];
+  applyChoice(choices[i]);
+  sfx('pick');
+  G.pending--;
+  if (G.pending > 0) openLevelUp(); else { state = 'play'; showOv(null); }
+}
+function applyChoice(c) { // 레벨업 카드·보물 상자 공통: 무기·진화·능력·치킨 적용
   if (c.kind === 'w') { G.weapons[c.id] = c.l + 1; if (c.l === 0) G.timers[c.id] = 0.2; }
   else if (c.kind === 'evo') { // 진화!
     G.weapons[c.id] = MAX_WLV + 1; G.timers[c.id] = 0.2; const E = EVO[c.id], p = G.p;
@@ -1214,10 +1248,68 @@ function chooseCard(i) {
     stSet('evoT', c.id);
   }
   else if (c.kind === 'p') { G.passives[c.id] = c.l + 1; recalcStats(); if (c.id === 'hp') G.p.hp = Math.min(G.p.maxHp, G.p.hp + 25); }
+  else if (c.kind === 'gold') { G.gold += c.n; }
   else G.p.hp = Math.min(G.p.maxHp, G.p.hp + 50);
-  sfx('pick');
-  G.pending--;
+}
+
+// ---------- 보물 상자: 보스를 쓰러뜨리면 떨어짐, 닿으면 열기 → 무기·능력 1~3개 (진화 먼저) ----------
+const CHEST_ROLL = [[1, 0.6], [2, 0.3], [3, 0.1]];   // [개수, 확률]
+function dropChest(x, y) { G.chests = G.chests || []; G.chests.push({ x, y, bob: 0, t: 0 }); }
+function chestPick() { // 지금 상태에서 상자가 줄 것 하나 (진화 → 가진 무기·능력 → 새 무기·능력 → 금화)
+  const evo = Object.keys(EVO).filter(id => canEvolve(id));
+  if (evo.length) return { kind: 'evo', id: evo[Math.floor(Math.random() * evo.length)], l: MAX_WLV };
+  const own = [], fresh = [];
+  for (const id in WEAP) { const l = G.weapons[id] || 0; if (l < MAX_WLV && (l > 0 || isUnlocked('w', id))) (l ? own : fresh).push({ kind: 'w', id, l }); }
+  for (const id in PASS) { const l = G.passives[id] || 0; if (l < PASS[id].max) (l ? own : fresh).push({ kind: 'p', id, l }); }
+  const pool = own.length ? own : fresh;
+  if (pool.length) return pool[Math.floor(Math.random() * pool.length)];
+  return { kind: 'gold', id: 'gold', n: 60 + 15 * (G.lvl || 1) };
+}
+function chestRewards() {
+  let r = Math.random(), n = 1; for (const [k, pr] of CHEST_ROLL) { if ((r -= pr) <= 0) { n = k; break; } }
+  const out = []; for (let i = 0; i < n; i++) { const c = chestPick(); applyChoice(c); out.push(c); }   // 하나씩 적용해야 다음 것이 진화 조건을 봄
+  return out;
+}
+function chestCardHtml(c) {
+  const d = c.kind === 'w' ? WEAP[c.id] : c.kind === 'p' ? PASS[c.id] : c.kind === 'evo' ? EVO[c.id] : { name: `금화 ${c.n}`, icon: '🪙' };
+  const ic = c.kind === 'w' ? wIco(c.id, 0) : c.kind === 'evo' ? wIco(c.id, 1) : c.kind === 'p' ? icoHtml('p_' + c.id, d.icon) : d.icon;
+  const lv = c.kind === 'evo' ? '<span class="lv evo">진화!</span>' : c.kind === 'gold' ? '<span class="lv gold">보너스</span>' : c.l === 0 ? '<span class="lv new">NEW</span>' : `<span class="lv">Lv ${c.l}→${c.l + 1}</span>`;
+  return `<div class="ic">${ic}</div><div class="nm">${d.name}</div>${lv}`;
+}
+let chestAnim = null;
+function openChest(auto) {
+  const items = chestRewards(); stAdd('chests');
+  if (auto) { // 스테이지를 떠날 때 못 주운 상자: 자동으로 열고 알림만
+    banner('🎁 보물 상자 자동 열기!', items.map(c => c.kind === 'gold' ? `금화 ${c.n}` : (c.kind === 'evo' ? EVO : c.kind === 'w' ? WEAP : PASS)[c.id].name).join(' · '), '#ffd23f', 2.6);
+    return;
+  }
+  state = 'chest'; joy = null;
+  const box = $('chestItems'); box.innerHTML = '';
+  const spinIcons = [...Object.keys(WEAP).map(id => wIco(id, 0)), ...Object.keys(PASS).map(id => icoHtml('p_' + id, PASS[id].icon))];
+  const els = items.map(c => { const el = document.createElement('div'); el.className = 'ci spin'; el.innerHTML = '<div class="ic"></div><div class="nm">?</div><span class="lv">?</span>'; box.appendChild(el); return el; });
+  $('chestBox').classList.remove('open'); $('bChestOk').style.display = 'none'; $('chestHint').style.display = '';
+  $('chestTitle').textContent = items.length > 1 ? `보물 상자! ×${items.length}` : '보물 상자!';
+  showOv('ovChest'); sfx('unlock'); vib([30, 30, 30]);
+  let t = 0, k = 0; const stopAt = items.map((_, i) => 0.9 + i * 0.45);
+  const done = i => { if (els[i].classList.contains('done')) return; els[i].className = 'ci done' + (items[i].kind === 'evo' ? ' evo' : ''); els[i].innerHTML = chestCardHtml(items[i]); sfx(items[i].kind === 'evo' ? 'unlock' : 'pick'); };
+  const finish = () => { clearInterval(chestAnim); chestAnim = null; items.forEach((_, i) => done(i)); $('chestBox').classList.add('open'); $('chestHint').style.display = 'none'; $('bChestOk').style.display = ''; };
+  clearInterval(chestAnim);
+  chestAnim = setInterval(() => {
+    t += 0.07; if (t > 0.45) $('chestBox').classList.add('open');
+    els.forEach((el, i) => { if (t >= stopAt[i]) done(i); else el.querySelector('.ic').innerHTML = spinIcons[(k + i * 3) % spinIcons.length]; });
+    k++; if (t >= stopAt[stopAt.length - 1]) finish();
+  }, 70);
+  $('ovChest').onclick = e => { if (chestAnim && e.target.id !== 'bChestOk') finish(); };
+}
+function closeChest() {
+  if (state !== 'chest' || chestAnim) return;
+  sfx('pick'); saveGame();
   if (G.pending > 0) openLevelUp(); else { state = 'play'; showOv(null); }
+}
+function flushChests() { // 스테이지 바뀔 때 남은 상자는 자동으로 열기
+  if (!G.chests || !G.chests.length) return;
+  for (const c of G.chests) openChest(true);
+  G.chests = [];
 }
 
 // 동료 고르기: 레벨업 카드와 같은 화면에 고양이 카드 2장
@@ -2027,6 +2119,7 @@ $('bMapClose').onclick = () => { sfx('pick'); closeMap(); };
 
 function enterStage(idx, tower) {
   if (idx === undefined) idx = Math.min(G.stageN, STAGES.length - 1);
+  flushChests();
   if (G.mode === 'base') { saveGame(); G.stash = { enemies: G.enemies, coins: G.coins, gems: G.gems, hearts: G.hearts }; }   // 탑 다음 층은 마을을 다시 넣지 않음
   // 무한 탑: 층마다 버티기, 5층마다 보스. 난이도 n = 2 + 층
   const def = tower ? { name: `무한 탑 ${tower}층`, th: Math.floor((tower - 1) / 5) % THEMES.length, goal: tower % 5 === 0 ? 'tboss' : 'survive', time: Math.min(40, 22 + Math.floor(tower / 3)) } : STAGES[idx];
@@ -2073,6 +2166,7 @@ function stageClear(x, y) {
   st.portal = { x, y, t: 0, hold: 0, on: false };
 }
 function returnBase(win) {
+  flushChests();
   const p = G.p, s = G.stash, st = G.st;
   G.enemies = s.enemies; G.coins = s.coins; G.gems = s.gems; G.hearts = s.hearts;
   G.bullets = []; G.ebullets = []; G.booms = []; G.bombs = []; G.corpses = []; G.flyers = []; G.boss = null; G.plane = null; G.fists = []; G.hazards = [];
@@ -2323,7 +2417,8 @@ function killEnemy(e) {
 function bossDie(e) {
   G.boss = null; G.bossKills = (G.bossKills || 0) + 1; questEvent('boss'); stAdd('bosses'); stSet('bossT', e.name);
   for (let i = 0; i < 5; i++) burst(e.x + rand(-40, 40), e.y + rand(-40, 40), [e.color, '#ffd23f', '#fff', '#ff9f1c', '#222'][i], 40, 380, 8, 1.2);
-  for (let i = 0; i < 30; i++) { const a = Math.random() * Math.PI * 2, d = rand(10, 90); dropGem(e.x + Math.cos(a) * d, e.y + Math.sin(a) * d, 5); }
+  for (let i = 0; i < 15; i++) { const a = Math.random() * Math.PI * 2, d = rand(10, 90); dropGem(e.x + Math.cos(a) * d, e.y + Math.sin(a) * d, 5); }   // 상자가 생겨서 구슬은 30 → 15
+  dropChest(e.x, e.y + 20);
   for (let i = 0; i < 40 + e.lvl * 20; i++) dropCoin(e.x + rand(-40, 40), e.y + rand(-40, 40));
   G.hearts.push({ x: e.x, y: e.y, bob: 0 });
   G.shake = 25; G.slow = 1.3; vib([80, 40, 80, 40, 160], true); cheerAll();
@@ -2733,6 +2828,11 @@ function update(dt) {
     if (d < 16) { g.dead = true; G.xp += g.v; sfx('gem'); }
   }
   G.gems = G.gems.filter(g => !g.dead);
+  if (G.chests) for (const c of G.chests) {
+    c.bob += dt * 3; c.t += dt;
+    if (!p.dead && c.t > 0.6 && (p.x - c.x) ** 2 + (p.y - 10 - c.y) ** 2 < 30 * 30) { c.dead = true; openChest(false); break; }
+  }
+  if (G.chests) G.chests = G.chests.filter(c => !c.dead);
   for (const h of G.hearts) {
     h.bob += dt * 4;
     if (!p.dead && (p.x - h.x) ** 2 + (p.y - 10 - h.y) ** 2 < 24 * 24) {
@@ -2957,6 +3057,17 @@ function texPat(n) {
   if (TEX_TONE[n]) { x.fillStyle = TEX_TONE[n]; x.fillRect(0, 0, px, px); }   // 색을 살짝 맞추는 덧칠은 미리 구워 둠 (매 프레임 덧칠은 느림)
   const pat = ctx.createPattern(c, 'repeat'); pat.setTransform(new DOMMatrix().scale(TEX_WORLD / px));   // 그림 1장 = 월드 TEX_WORLD
   TEX_PAT[n] = { key, p: pat }; return pat;
+}
+function drawChest(c) { // 땅의 보물 상자: 통통 튀며 빛나는 원
+  const pulse = 0.5 + 0.5 * Math.sin(c.t * 5), y = c.y - 6 - Math.abs(Math.sin(c.bob)) * 6;
+  ctx.fillStyle = `rgba(255,214,90,${0.18 + pulse * 0.2})`; ctx.beginPath(); ctx.ellipse(c.x, c.y, 30 + pulse * 6, 20 + pulse * 4, 0, 0, 7); ctx.fill();
+  ctx.fillStyle = 'rgba(0,0,0,.22)'; ctx.beginPath(); ctx.ellipse(c.x, c.y + 2, 17, 7, 0, 0, 7); ctx.fill();
+  ctx.save(); ctx.translate(c.x, y); ctx.scale(1, IK); ctx.lineWidth = 2.5; ctx.strokeStyle = '#3a1a00';
+  ctx.fillStyle = '#a0612b'; ctx.fillRect(-16, -14, 32, 18); ctx.strokeRect(-16, -14, 32, 18);
+  ctx.fillStyle = '#b8722f'; ctx.beginPath(); ctx.moveTo(-16, -14); ctx.quadraticCurveTo(0, -30, 16, -14); ctx.closePath(); ctx.fill(); ctx.stroke();
+  ctx.fillStyle = '#ffc21a'; ctx.fillRect(-12, -22, 4, 26); ctx.fillRect(8, -22, 4, 26); ctx.fillRect(-4, -16, 8, 9); ctx.strokeRect(-4, -16, 8, 9);
+  ctx.restore();
+  if (pulse > 0.9) { ctx.fillStyle = '#fff7c2'; ctx.beginPath(); ctx.arc(c.x + Math.cos(c.t * 3) * 18, y - 24 + Math.sin(c.t * 4) * 4, 2.2, 0, 7); ctx.fill(); }
 }
 function drawGround() {
   const g = 64, x0 = Math.floor((G.cam.x - VW / 2) / g) - 1, x1 = Math.ceil((G.cam.x + VW / 2) / g) + 1;
@@ -3663,6 +3774,7 @@ function drawWorld() {
     ctx.beginPath(); ctx.moveTo(g.x, y - s * 1.3); ctx.lineTo(g.x + s, y); ctx.lineTo(g.x, y + s * 1.3); ctx.lineTo(g.x - s, y); ctx.closePath(); ctx.fill(); ctx.stroke();
     ctx.fillStyle = 'rgba(255,255,255,.7)'; ctx.fillRect(g.x - 1.5, y - s * 0.7, 2, 3);
   }
+  if (G.chests) for (const c of G.chests) drawChest(c);
   for (const h of G.hearts) {
     const hi = bakedIco('i_heart', 22);
     ctx.save(); ctx.translate(h.x, h.y + Math.sin(h.bob) * 3); ctx.scale(1, IK);
@@ -4094,7 +4206,7 @@ requestAnimationFrame(frame);
 window.SH = {
   BUILD,
   get G() { return G; }, get state() { return state; },
-  start: startGame, choose: chooseCard,
+  start: startGame, choose: chooseCard, closeChest, openChest,
   addXp(n) { G.xp += n; }, spawnBoss() { spawnBoss(); }, spawnWave() { spawnWave(); },
   give(id, l) { if (WEAP[id]) G.weapons[id] = l; else { G.passives[id] = l; recalcStats(); } },
   kill() { G.p.inv = 0; hurtPlayer(99999); },

@@ -20,6 +20,7 @@ const RUNS = +process.argv[2] || 4, MINUTES = +process.argv[3] || 15, STYLE = pr
       let prevDead = false, prevMode = 'base', prevBossK = 0, prevRaid = false, steps = MINUTES * 60 * 30;
       for (let i = 0; i < steps; i++) {
         if (SH.state === 'levelup') SH.choose(Math.floor(Math.random() * 3));
+        if (SH.state === 'chest') { document.getElementById('ovChest').onclick({ target: {} }); SH.closeChest(); }   // 보물 상자 (Build 61)
         if (SH.state === 'result') SH.ok(); if (SH.state === 'map') document.getElementById('bGo').click();
         if (SH.state === 'allypick') SH.chooseAlly(Math.floor(Math.random() * 2));
         if (SH.state === 'over') { ev('게임오버 (' + (G().baseDead ? '마을 붕괴' : '?') + ')'); if (STYLE !== 'days') break; continueGame(); ev(`→ ${G().day}일째 다시 세우기`); continue; }
