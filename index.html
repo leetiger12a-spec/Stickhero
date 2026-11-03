@@ -52,6 +52,14 @@ canvas{display:block;position:fixed;inset:0;width:100%;height:100%}
 .ci .ic{height:56px;width:56px;display:grid;place-items:center;font-size:38px}.ci .ic img{max-width:56px;max-height:56px;object-fit:contain}
 .ci .nm{font-size:15px;line-height:1.15}.ci .lv{font-size:12px;color:#fff;background:#e63946;border-radius:7px;padding:0 6px}.ci .lv.evo{background:linear-gradient(90deg,#ff9f1c,#ffd23f);color:#222}.ci .lv.new{background:#2a9d8f}.ci .lv.gold{background:#b8860b}
 .ci.spin .nm,.ci.spin .lv{visibility:hidden}.ci.done{animation:pop .3s ease-out}.ci.evo{border-color:#ffb703;background:linear-gradient(#fff8d6,#ffe9a0);box-shadow:0 4px 0 #b8860b,0 0 16px rgba(255,210,63,.9)}
+#dexList{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;width:min(94vw,420px);max-height:62vh;overflow-y:auto;padding:2px 2px 6px;box-sizing:border-box}
+.dexH{grid-column:1/-1;text-align:left;color:#ffd23f;font-size:14px;margin:4px 2px 0}
+.dex{position:relative;display:flex;flex-direction:column;align-items:center;gap:2px;background:linear-gradient(#fffdf7,#fff1d6);color:#2b2d42;border:3px solid #2b2d42;border-radius:14px;padding:6px 4px 8px;box-shadow:0 3px 0 #2b2d42;min-width:0}
+.dex.boss{background:linear-gradient(#fff6f9,#ffe0ea)}.dex .pic{height:58px;display:grid;place-items:center}.dex .pic img{max-height:56px;max-width:100%;object-fit:contain}
+.dex.off .pic img{filter:brightness(0);opacity:.45}.dex.off{background:#e9e4da}
+.dex b{font-weight:400;font-size:14px;line-height:1.15}.dex small{font-size:11px;line-height:1.25;color:#6b5b4b}.dex .cnt{color:#1d6fa5}
+.dex .stars{color:#ffb703;font-size:15px;letter-spacing:1px;text-shadow:0 1px 0 #7a4a00}.dex .stars i{font-style:normal;color:#d6cdbd;text-shadow:none}
+.dex .gold{position:absolute;top:4px;right:4px;font-size:10px;padding:0 5px;border-radius:7px;background:#ddd;color:#888}.dex .gold.on{background:linear-gradient(#ffe680,#ffc21a);color:#3a1a00}
 #evoList{display:flex;flex-direction:column;gap:6px;width:min(94vw,400px);max-height:60vh;overflow-y:auto}.evoNow{color:#1d6fa5;font-weight:800}
 #shopList{display:flex;flex-direction:column;gap:8px;width:min(94vw,400px);max-height:58vh;overflow-y:auto}
 .srow{display:flex;align-items:center;gap:10px;background:linear-gradient(#fffdf7,#fff1d6);color:#2b2d42;border:3px solid #2b2d42;border-radius:16px;padding:8px 10px;text-align:left;box-shadow:0 3px 0 #2b2d42}
@@ -182,7 +190,7 @@ h2 .hb{-webkit-text-stroke:0;text-shadow:none;letter-spacing:0;font-family:"Jua"
 </div>
 
 <div class="ov" id="ovAch">
-  <h2 style="margin-bottom:2px">🏅 업적 <button class="hb" id="bEvoA" style="width:auto;padding:0 10px;font-weight:800;font-size:14px;vertical-align:middle">✨ 진화 도감</button></h2>
+  <h2 style="margin-bottom:2px">🏅 업적 <button class="hb" id="bEvoA" style="width:auto;padding:0 10px;font-weight:800;font-size:14px;vertical-align:middle">✨ 진화 도감</button> <button class="hb" id="bDexA" style="width:auto;padding:0 10px;font-weight:800;font-size:14px;vertical-align:middle">📖 몬스터</button></h2>
   <div class="sub" id="achSub" style="margin-bottom:6px;font-size:13px"></div>
   <div id="achList"></div>
   <button class="btn" id="bAchOk">완료</button>
@@ -202,6 +210,13 @@ h2 .hb{-webkit-text-stroke:0;text-shadow:none;letter-spacing:0;font-family:"Jua"
   <div id="chestItems"></div>
   <div class="sub" id="chestHint" style="margin:6px 0 0;font-size:14px">화면을 누르면 바로 열려요</div>
   <button class="btn" id="bChestOk" style="display:none">좋아!</button>
+</div>
+
+<div class="ov" id="ovDex">
+  <h2 style="margin-bottom:2px">📖 몬스터 도감</h2>
+  <div class="sub" id="dexSub" style="margin-bottom:6px;font-size:14px"></div>
+  <div id="dexList"></div>
+  <button class="btn" id="bDexOk">완료</button>
 </div>
 
 <div class="ov" id="ovEvo">
@@ -243,7 +258,7 @@ h2 .hb{-webkit-text-stroke:0;text-shadow:none;letter-spacing:0;font-family:"Jua"
   <button class="btn" id="bResume">계속하기</button>
   <button class="btn blue" id="bShopP">💪 영웅 강화</button>
   <button class="btn" id="bAchP">🏅 업적</button>
-  <div class="mrow" style="margin:6px 0 10px"><button class="hb" id="bMusicP" style="width:auto;padding:0 14px;font-weight:800">🎵 음악</button><button class="hb" id="bVibP" style="width:auto;padding:0 14px;font-weight:800">📳 진동</button><button class="hb" id="bEvoP" style="width:auto;padding:0 14px;font-weight:800">✨ 진화 도감</button></div>
+  <div class="mrow" style="margin:6px 0 10px"><button class="hb" id="bMusicP" style="width:auto;padding:0 14px;font-weight:800">🎵 음악</button><button class="hb" id="bVibP" style="width:auto;padding:0 14px;font-weight:800">📳 진동</button><button class="hb" id="bEvoP" style="width:auto;padding:0 14px;font-weight:800">✨ 진화 도감</button><button class="hb" id="bDexP" style="width:auto;padding:0 14px;font-weight:800">📖 몬스터 도감</button></div>
   <button class="btn gray" id="bQuit">처음으로</button>
 </div>
 
@@ -257,7 +272,7 @@ h2 .hb{-webkit-text-stroke:0;text-shadow:none;letter-spacing:0;font-family:"Jua"
 
 <script>
 'use strict';
-const BUILD = 63;
+const BUILD = 64;
 const BOSS_INTERVAL = 180;      // 보스 등장 간격(초)
 const WAVE_INTERVAL = 60;       // 대규모 몰이 이벤트 간격(초)
 const MAX_ENEMIES = 220;
@@ -366,7 +381,7 @@ const $ = id => document.getElementById(id);
 // ---------- 그림(스프라이트) ----------
 // img/이름.webp 가 있으면 그림으로, 없으면 코드 그림으로 그림
 const SPR = {};
-const SPR_WHITE = {};  // 맞았을 때 번쩍이는 흰 실루엣
+const SPR_WHITE = {}, SPR_GOLD = {};  // 맞았을 때 번쩍이는 흰 실루엣
 const SPR_INFO = {    // ax: 발 위치(그림 폭 대비), h: 화면 키(월드 단위)
   hero: { ax: 0.42 }, grunt: { ax: 0.45, h: 50 }, runner: { ax: 0.5, h: 42 }, tank: { ax: 0.42, h: 62 },
   boss0: { ax: 0.5, h: 140 }, boss1: { ax: 0.5, h: 140 }, boss2: { ax: 0.5, h: 150 }, boss3: { ax: 0.5, h: 140 }, boss4: { ax: 0.5, h: 120 }, boss5: { ax: 0.5, h: 150 }, boss_final: { ax: 0.5, h: 175 },
@@ -436,7 +451,10 @@ $('bShopP').onclick = () => { sfx('pick'); openShop(); };
 $('bShopOk').onclick = () => { sfx('pick'); if (shopBack === 'title' || !G) { state = 'title'; refreshTitle(); showOv('ovTitle'); } else { state = 'paused'; showOv('ovPause'); } };
 $('bWard').onclick = () => { audioInit(); sfx('pick'); openWard(); };
 // ---------- 🏅 업적 · 칭호 (게임오버·날짜와 상관없이 영원히 쌓임) ----------
-const ST = Object.assign({ kills: 0, bosses: 0, camps: 0, towers: 0, bossT: [], specT: [], vLvl: 1, wall: 1, allyLv: 1, allies: 0, day: 1, evoT: [] }, (readJSON('stickhero_meta') || {}).st || {});   // META_KEY는 아래에서 정의됨
+const ST = Object.assign({ kills: 0, bosses: 0, camps: 0, towers: 0, bossT: [], specT: [], vLvl: 1, wall: 1, allyLv: 1, allies: 0, day: 1, evoT: [], kc: {}, bk: {}, goldT: [] }, (readJSON('stickhero_meta') || {}).st || {});   // META_KEY는 아래에서 정의됨
+// 몬스터 도감(Build 64) 전 기록 이어받기: 이미 잡은 보스·특수 적은 1마리로
+for (const n of ST.bossT) if (!ST.bk[n]) ST.bk[n] = 1;
+for (const t of ST.specT) if (!ST.kc[t]) ST.kc[t] = 1;
 let stDirty = false;
 const stAdd = (k, n) => { ST[k] = (ST[k] || 0) + (n || 1); stDirty = true; };
 const stMax = (k, v) => { if (v > (ST[k] || 0)) { ST[k] = v; stDirty = true; } };
@@ -463,6 +481,9 @@ const ACH = [
   { id: 'boss30',  icon: '⚔️', name: '보스 킬러',     desc: '보스 30마리 잡기',         title: '보스 킬러',  bank: 400, p: () => [ST.bosses, 30] },
   { id: 'ending',  icon: '🏆', name: '왕관을 빼앗다', desc: '왕관 괴물 대왕 물리치기',  title: '레전드 히어로', bank: 500, p: () => [ST.bossT.includes('왕관 괴물 대왕') ? 1 : 0, 1] },
   { id: 'kill10k', icon: '☠️', name: '만 마리 전설',  desc: '적 10,000마리 잡기',       title: '만 마리 전설', bank: 500, p: () => [ST.kills, 10000] },
+  { id: 'gold1',   icon: '✨', name: '반짝반짝',     desc: '황금 몬스터 처음 잡기',     title: '행운아',     bank: 150, p: () => [ST.goldT.length, 1] },
+  { id: 'dex18',   icon: '📖', name: '몬스터 박사',   desc: '몬스터 18종 모두 발견',     title: '몬스터 박사', bank: 400, p: () => [DEX.filter(d => dexCount(d) > 0).length, DEX.length] },
+  { id: 'gold11',  icon: '👑', name: '황금 사냥꾼',   desc: '황금 몬스터 11종 모두 잡기', title: '황금 사냥꾼', bank: 800, p: () => [ST.goldT.length, 11] },
   { id: 'floor25', icon: '🌤', name: '하늘 끝까지',   desc: '무한 탑 25층 돌파',        title: '하늘 정복자', bank: 600, p: () => [metaOf('bestFloor'), 25] },
 ];
 function checkAch() { // 1초마다: 기록 저장 + 새 업적
@@ -504,6 +525,19 @@ function bakeSprite(n) {
   const wc = document.createElement('canvas'); wc.width = c.width; wc.height = c.height;
   const wx = wc.getContext('2d'); wx.drawImage(c, 0, 0); wx.globalCompositeOperation = 'source-atop'; wx.fillStyle = '#fff'; wx.fillRect(0, 0, wc.width, wc.height);
   SPR[n] = c; SPR_WHITE[n] = wc;
+  if (ETYPES[n]) { // 황금 몬스터용 금빛 그림
+    const gc = document.createElement('canvas'); gc.width = c.width; gc.height = c.height;
+    const gx = gc.getContext('2d'); gx.drawImage(c, 0, 0);
+    try { // 밝기 → 금색 (어두우면 진한 금, 밝으면 연한 금): 원래 색과 상관없이 금으로, 테두리·명암은 그대로
+      const d = gx.getImageData(0, 0, gc.width, gc.height), q = d.data;
+      for (let i = 0; i < q.length; i += 4) { if (!q[i + 3]) continue;
+        const L = Math.min(1, (0.3 * q[i] + 0.59 * q[i + 1] + 0.11 * q[i + 2]) / 255 * 1.25), k = L < 0.5 ? L * 2 : (L - 0.5) * 2;
+        const a = L < 0.5 ? [70, 40, 0] : [255, 190, 25], z = L < 0.5 ? [255, 190, 25] : [255, 248, 200];
+        q[i] = a[0] + (z[0] - a[0]) * k; q[i + 1] = a[1] + (z[1] - a[1]) * k; q[i + 2] = a[2] + (z[2] - a[2]) * k; }
+      gx.putImageData(d, 0, 0);
+    } catch (e) { gx.globalCompositeOperation = 'source-atop'; gx.fillStyle = 'rgba(255,190,20,.55)'; gx.fillRect(0, 0, gc.width, gc.height); }   // file://에서 막히면 덧칠
+    SPR_GOLD[n] = gc;
+  }
 }
 // img/ 폴더에 실제로 있는 그림만 불러옴 (없는 파일을 부르면 오류가 남)
 const SPR_FILES = ['boss3', 'boss4', 'boss5', 'boss_final', 'e_spider', 'e_skel', 'e_archer', 'e_bomber', 'e_bat', 'e_slime', 'e_shaman', 'e_charger', 'hall2', 'hall3', 'hall_broken', 'tower_broken', 'stonewall', 'repair', 'farm', 'mine', 'market', 'stone', 'rock', 'camp', 'hero', 'grunt', 'runner', 'tank', 'boss0', 'boss1', 'boss2', 'tree', 'stump', 'log', 'stake', 'tower', 'hall',
@@ -820,6 +854,32 @@ function renderEvo() {
     box.appendChild(row);
   });
 }
+// ---------- 몬스터 도감 (Build 64): 잡은 몬스터만 그림·이름, 잡은 수 별 3단계, 황금 칸 ----------
+const dexCount = d => d.boss ? (ST.bk[d.boss] || 0) : (ST.kc[d.k] || 0);
+const dexStars = d => (d.boss ? DEX_STARS.boss : DEX_STARS.mob).filter(n => dexCount(d) >= n).length;
+let dexBack = null;
+function openDex() { checkAch(); dexBack = state; state = 'dex'; renderDex(); showOv('ovDex'); }
+function renderDex() {
+  const found = DEX.filter(d => dexCount(d) > 0).length, stars = DEX.reduce((a, d) => a + dexStars(d), 0);
+  $('dexSub').innerHTML = `발견 <b>${found}/${DEX.length}</b> · 별 <b>${stars}/${DEX.length * 3}</b> · ✨황금 <b>${ST.goldT.length}/11</b>`;
+  const box = $('dexList'); box.innerHTML = '';
+  const sec = t => { const h = document.createElement('div'); h.className = 'dexH'; h.textContent = t; box.appendChild(h); };
+  DEX.forEach((d, i) => {
+    if (i === 0) sec('⚔ 적 11종 · 별: 10 / 100 / 1,000마리');
+    if (i === 11) sec('👑 보스 7종 · 별: 1 / 5 / 20번');
+    const n = dexCount(d), ok = n > 0, st = dexStars(d), g = !d.boss && ST.goldT.includes(d.k);
+    const el = document.createElement('div'); el.className = 'dex' + (ok ? '' : ' off') + (d.boss ? ' boss' : '');
+    const lim = d.boss ? DEX_STARS.boss : DEX_STARS.mob, next = lim.find(x => n < x);
+    el.innerHTML = `<div class="pic"><img src="img/${d.k}.webp?b=${BUILD}" alt=""></div><b>${ok ? d.name : '???'}</b>` +
+      `<span class="stars">${'★'.repeat(st)}<i>${'★'.repeat(3 - st)}</i></span>` +
+      `<small>${ok ? d.desc : d.where}</small><small class="cnt">${ok ? `${n.toLocaleString()}${d.boss ? '번' : '마리'}${next ? ` · 다음 별 ${next.toLocaleString()}` : ' · 완성!'}` : '아직 못 만났어요'}</small>` +
+      (d.boss ? '' : `<span class="gold${g ? ' on' : ''}" title="황금">${g ? '✨황금' : '황금 ?'}</span>`);
+    box.appendChild(el);
+  });
+}
+$('bDexA').onclick = () => { sfx('pick'); openDex(); };
+$('bDexP').onclick = () => { sfx('pick'); openDex(); };
+$('bDexOk').onclick = () => { sfx('pick'); if (dexBack === 'ach') { state = 'ach'; renderAch(); showOv('ovAch'); } else { state = 'paused'; showOv('ovPause'); } };
 $('bEvoA').onclick = () => { sfx('pick'); openEvo(); };
 $('bEvoP').onclick = () => { sfx('pick'); openEvo(); };
 $('bEvoOk').onclick = () => { sfx('pick'); if (evoBack === 'ach') { state = 'ach'; renderAch(); showOv('ovAch'); } else { state = 'paused'; showOv('ovPause'); } };
@@ -917,10 +977,6 @@ const SPECIALS = [
   ['e_charger', 300, 4, '🐗 돌격병 등장!', '가까이 가면 돌진해요'],
   ['e_shaman',  360, 5, '🔮 주술사 등장!', '주변 적을 회복시켜요 · 먼저 잡아요'],
 ];
-function pickSpecial(stageN) { // 열린 특수 적 중 하나 (없으면 null)
-  const pool = SPECIALS.filter(sp => stageN !== undefined ? stageN >= sp[2] : G.bt >= sp[1]);
-  return pool.length ? pool[Math.floor(Math.random() * pool.length)][0] : null;
-}
 const BOSSES = [
   { name: '대왕 슬라임', color: '#e63946' },
   { name: '강철 거인',   color: '#4d6cfa' },
@@ -929,6 +985,23 @@ const BOSSES = [
   { name: '거미 여왕',   color: '#7b2cbf' },
   { name: '해골 왕',     color: '#c9b38a' },
 ];
+// 몬스터 도감 목록 (SPECIALS·BOSSES 다음에 있어야 함)
+const SP_NAME = { e_slime: '분열 슬라임', e_archer: '궁수', e_bomber: '자폭병', e_bat: '박쥐병', e_charger: '돌격병', e_shaman: '주술사' };
+const DEX = [
+  { k: 'grunt', name: '빨간 졸개', desc: '휘어진 칼로 달려들어요', where: '처음부터' },
+  { k: 'runner', name: '분홍 날쌘이', desc: '단검 두 자루 · 아주 빨라요', where: '처음부터' },
+  { k: 'tank', name: '파란 거한', desc: '헬멧과 큰 총 · 아주 튼튼해요', where: '처음부터' },
+  ...SPECIALS.map(sp => ({ k: sp[0], name: SP_NAME[sp[0]], desc: sp[4], where: `마을 ${sp[1] / 60}분 뒤 · 모험 ${sp[2] + 1}칸부터` })),
+  { k: 'e_spider', name: '새끼 거미', desc: '거미 여왕이 불러내요', where: '거미 여왕과 싸울 때' },
+  { k: 'e_skel', name: '해골 병사', desc: '해골 왕이 불러내요', where: '해골 왕과 싸울 때' },
+  ...BOSSES.map((B, i) => ({ k: 'boss' + i, boss: B.name, name: B.name, desc: ['높이 뛰어올라 쿵!', '로켓 주먹을 날려요', '바닥에 불길을 깔아요', '얼음 숨결로 느리게 해요', '거미줄을 쏘고 새끼 거미를 불러요', '순간이동하고 해골 병사를 불러요'][i], where: '마을·모험·탑 보스' })),
+  { k: 'boss_final', boss: '왕관 괴물 대왕', name: '왕관 괴물 대왕', desc: '모든 보스의 기술을 다 써요', where: '모험 10칸 · 왕관 괴물의 성' },
+];
+const DEX_STARS = { mob: [10, 100, 1000], boss: [1, 5, 20] };
+function pickSpecial(stageN) { // 열린 특수 적 중 하나 (없으면 null)
+  const pool = SPECIALS.filter(sp => stageN !== undefined ? stageN >= sp[2] : G.bt >= sp[1]);
+  return pool.length ? pool[Math.floor(Math.random() * pool.length)][0] : null;
+}
 const DEATH_WORDS = ['뿅!', '으악!', '꽥!', '펑!', '히잉~', '아야!'];
 
 // ---------- 게임 상태 ----------
@@ -1159,7 +1232,7 @@ function refreshTitle() {
 }
 
 // ---------- 화면 전환 ----------
-function showOv(id) { ['ovTitle', 'ovLevel', 'ovPause', 'ovOver', 'ovStory', 'ovMap', 'ovClear', 'ovWard', 'ovShop', 'ovAch', 'ovEvo', 'ovChest'].forEach(o => $(o).classList.toggle('show', o === id)); }
+function showOv(id) { ['ovTitle', 'ovLevel', 'ovPause', 'ovOver', 'ovStory', 'ovMap', 'ovClear', 'ovWard', 'ovShop', 'ovAch', 'ovEvo', 'ovChest', 'ovDex'].forEach(o => $(o).classList.toggle('show', o === id)); }
 function startGame() {
   audioInit(); clearSave(); newGame(); state = 'play'; joy = null; showOv(null);
   $('hudBtns').classList.add('show');
@@ -1516,10 +1589,20 @@ function announceType(type) {
   G.seen[type] = true; const sp = SPECIALS.find(q => q[0] === type);
   if (sp && state === 'play') banner(sp[3], sp[4], '#ff9f1c', 2.4);
 }
+// 황금 몬스터 (Build 64): 아주 가끔 반짝이는 황금 버전 — 체력 3배, 금화·구슬 많이, 도감 황금 칸
+const GOLD_P = 1 / 1500;   // 봇 한 판 처치 750~4200마리 → 한 판에 0.5~3번
+let goldAnnT = -99;
+function makeGolden(e) {
+  e.golden = true; e.hp *= 3; e.maxHp *= 3; e.gold = e.gold * 10 + 5; e.xp *= 3;
+  if (G && state === 'play' && G.t - goldAnnT > 8) { goldAnnT = G.t; banner('✨ 황금 몬스터!', '잡으면 금화가 와르르 · 도감에 황금 칸', '#ffd23f', 2.2); sfx('reward'); }
+}
+function goldDie(e) { burst(e.x, e.y - 12, '#ffd23f', 30, 260, 5, 0.7); burst(e.x, e.y - 12, '#fff7c2', 14, 180, 4, 0.5); floatText(e.x, e.y - 40, '✨ 황금!', '#ffd23f', 18, 1); sfx('rewardEvo'); }
 function makeEnemy(type, x, y) {
   announceType(type);
   const gr = DF().grow, T = ETYPES[type], hm = (1 + G.bt / 85 * gr) * (1 + G.bt / 1500 * gr) * (1 + Math.max(0, G.bt - 300) / 105 * gr) * DF().ehp * dayMul();   // 5분 뒤부터 후반 강화   // 난이도: 마을에서 보낸 시간 × 선택 난이도
-  return { id: ++eid, type, x, y, r: T.r, hp: T.hp * hm, maxHp: T.hp * hm, spd: T.spd * (1 + Math.min(0.35, G.bt / 900)) * rand(0.9, 1.1), dmg: T.dmg * DF().edmg * (1 + G.bt / 650 * gr) * Math.sqrt(dayMul()), color: T.color, xp: T.xp, gold: T.gold, flash: 0, hitT: 0, kx: 0, ky: 0, swordCd: 0, wob: Math.random() * 6, inside: Math.hypot(x, y) < WALL_R, atk: 0.5, lunge: 0, face: 1 };
+  const e = { id: ++eid, type, x, y, r: T.r, hp: T.hp * hm, maxHp: T.hp * hm, spd: T.spd * (1 + Math.min(0.35, G.bt / 900)) * rand(0.9, 1.1), dmg: T.dmg * DF().edmg * (1 + G.bt / 650 * gr) * Math.sqrt(dayMul()), color: T.color, xp: T.xp, gold: T.gold, flash: 0, hitT: 0, kx: 0, ky: 0, swordCd: 0, wob: Math.random() * 6, inside: Math.hypot(x, y) < WALL_R, atk: 0.5, lunge: 0, face: 1 };
+  if (Math.random() < GOLD_P) makeGolden(e);
+  return e;
 }
 // ---------- 야생 지대: 적 진지 ----------
 function makeCamp(c, frac) {
@@ -2413,12 +2496,12 @@ function dropCoin(x, y) {
 function killEnemy(e) {
   e.dead = true; G.kills++;
   if (G.allies.length) allyGainXp(e.x, e.y, e.boss ? 40 : e.camp ? 20 : e.xp);
-  if (!e.boss && !e.camp) { questEvent('kill'); stAdd('kills'); if (e.type.startsWith('e_')) { questEvent('special'); if (SPECIALS.some(q => q[0] === e.type)) stSet('specT', e.type); } }
+  if (!e.boss && !e.camp) { questEvent('kill'); stAdd('kills'); ST.kc[e.type] = (ST.kc[e.type] || 0) + 1; if (e.golden) { stSet('goldT', e.type); goldDie(e); } if (e.type.startsWith('e_')) { questEvent('special'); if (SPECIALS.some(q => q[0] === e.type)) stSet('specT', e.type); } }
   if (e.boss) { bossDie(e); return; }
   if (e.camp) { campDie(e); return; }
   if (e.type === 'e_slime' && !e.small) for (let k = 0; k < 2; k++) { // 작은 슬라임 2마리로
     const m = makeEnemy('e_slime', e.x + (k ? 12 : -12), e.y + rand(-6, 6));
-    Object.assign(m, { small: true, r: 8, hp: e.maxHp * 0.35, maxHp: e.maxHp * 0.35, spd: m.spd * 1.25, dmg: e.dmg * 0.6, xp: 1, gold: 0, kx: (k ? 1 : -1) * 120, inside: e.inside });
+    Object.assign(m, { golden: false, small: true, r: 8, hp: e.maxHp * 0.35, maxHp: e.maxHp * 0.35, spd: m.spd * 1.25, dmg: e.dmg * 0.6, xp: 1, gold: 0, kx: (k ? 1 : -1) * 120, inside: e.inside });
     G.enemies.push(m);
   }
   burst(e.x, e.y - 8, e.color, e.type === 'tank' ? 16 : 8, 150, 4, 0.45);
@@ -2435,7 +2518,7 @@ function killEnemy(e) {
   if (Math.random() < 0.012) G.hearts.push({ x: e.x, y: e.y, bob: 0 });
 }
 function bossDie(e) {
-  G.boss = null; G.bossKills = (G.bossKills || 0) + 1; questEvent('boss'); stAdd('bosses'); stSet('bossT', e.name);
+  G.boss = null; G.bossKills = (G.bossKills || 0) + 1; questEvent('boss'); stAdd('bosses'); stSet('bossT', e.name); ST.bk[e.name] = (ST.bk[e.name] || 0) + 1;
   for (let i = 0; i < 5; i++) burst(e.x + rand(-40, 40), e.y + rand(-40, 40), [e.color, '#ffd23f', '#fff', '#ff9f1c', '#222'][i], 40, 380, 8, 1.2);
   for (let i = 0; i < 15; i++) { const a = Math.random() * Math.PI * 2, d = rand(10, 90); dropGem(e.x + Math.cos(a) * d, e.y + Math.sin(a) * d, 5); }   // 상자가 생겨서 구슬은 30 → 15
   dropChest(e.x, e.y + 20);
@@ -3651,7 +3734,7 @@ function drawSpriteMan(n, x, y, o) {
   const idle = o.idle ? Math.sin(performance.now() / 300 + x) * 0.025 : 0;
   const sq = (o.hit ? 1 + Math.sin(o.hitT * 40) * 0.12 : 1 + Math.abs(Math.cos(o.phase)) * 0.05) + idle;
   ctx.scale(o.face * (2 - sq) * P.sx, sq * P.sy);
-  ctx.drawImage(o.flash && SPR_WHITE[n] ? SPR_WHITE[n] : img, -w * inf.ax, -h - Math.abs(Math.sin(o.phase)) * 3, w, h);
+  ctx.drawImage(o.flash && SPR_WHITE[n] ? SPR_WHITE[n] : o.gold && SPR_GOLD[n] ? SPR_GOLD[n] : img, -w * inf.ax, -h - Math.abs(Math.sin(o.phase)) * 3, w, h);
   if (o.act) drawActFx(o.act, o.actT, w, h);
   ctx.restore();
 }
@@ -3691,7 +3774,12 @@ function drawCampRuin(c) { // 부서진 진지: 그루터기 + 다시 지어지�
 }
 function drawEnemy(e) {
   if (e.camp) { drawCamp(e); return; }
-  if (SPR[e.type]) drawSpriteMan(e.type, e.x, e.y, { face: e.face, phase: e.wob, hit: e.hitT > 0, hitT: e.hitT, flash: e.flash > 0, lunge: e.lunge, z: e.z, s: e.small ? 0.6 : 1 });
+  if (SPR[e.type]) drawSpriteMan(e.type, e.x, e.y, { face: e.face, phase: e.wob, hit: e.hitT > 0, hitT: e.hitT, flash: e.flash > 0, lunge: e.lunge, z: e.z, s: e.small ? 0.6 : 1, gold: e.golden });
+  if (e.golden) { // 반짝임 2개
+    const t = G.t * 3 + e.id, h = (SPR_INFO[e.type] && SPR_INFO[e.type].h || 40) * IK;
+    for (let k = 0; k < 2; k++) { const a = t + k * Math.PI, r = 0.6 + 0.4 * Math.sin(t * 2 + k);
+      ctx.fillStyle = `rgba(255,247,194,${r})`; ctx.beginPath(); ctx.arc(e.x + Math.cos(a) * 16, e.y - h * 0.6 + Math.sin(a) * 10, 2.5 * r + 1, 0, 7); ctx.fill(); }
+  }
   else drawStickman(e.x, e.y, { color: e.color, s: e.r / 11, face: e.face, phase: e.wob, hit: e.hitT > 0, flash: e.flash > 0, lunge: e.lunge, type: e.type });
   if ((e.type === 'tank' || e.type === 'e_shaman' || e.type === 'e_charger') && e.hp < e.maxHp) {
     const by = e.y - (SPR[e.type] ? SPR_INFO[e.type].h * IK + 6 : e.r * 2.8);
