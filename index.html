@@ -257,7 +257,7 @@ h2 .hb{-webkit-text-stroke:0;text-shadow:none;letter-spacing:0;font-family:"Jua"
 
 <script>
 'use strict';
-const BUILD = 62;
+const BUILD = 63;
 const BOSS_INTERVAL = 180;      // 보스 등장 간격(초)
 const WAVE_INTERVAL = 60;       // 대규모 몰이 이벤트 간격(초)
 const MAX_ENEMIES = 220;
@@ -609,7 +609,7 @@ function noise(dur, vol, freq, delay) {
   g.gain.setValueAtTime(vol || 0.15, t); g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
   s.connect(f); f.connect(g); g.connect(master); s.start(t); s.stop(t + dur + 0.02);
 }
-const sfxGap = { zap: 0.06, bark: 0.4, meow: 0.3, stack: 0.05, coinCombo: 0.04, bombBoom: 0.08, toss: 0.15, hit: 0.045, shoot: 0.07, thud: 0.12, chop: 0.08, coin: 0.04, pay: 0.06, arrow: 0.08, shotgun: 0.1, gem: 0.035, pop: 0.05, swing: 0.25, boom: 0.15, hurt: 0.15 };
+const sfxGap = { gatling: 0.11, flame: 0.25, thunder: 0.5, volcano: 0.2, whirl: 0.3, shing: 0.5, tick: 0.06, zap: 0.06, bark: 0.4, meow: 0.3, stack: 0.05, coinCombo: 0.04, bombBoom: 0.08, toss: 0.15, hit: 0.045, shoot: 0.07, thud: 0.12, chop: 0.08, coin: 0.04, pay: 0.06, arrow: 0.08, shotgun: 0.1, gem: 0.035, pop: 0.05, swing: 0.25, boom: 0.15, hurt: 0.15 };
 const sfxLast = {};
 // SKYFANG 효과음으로 바꿔 낼 소리들 (없으면 false → 아래 합성음)
 function sampFor(n) {
@@ -688,6 +688,19 @@ function sfx(n) {
     case 'unlock': [659, 784, 988, 1319, 1568].forEach((f, i) => tone(f, 0.18, 'square', 0.05, 0, i * 0.08)); noise(0.6, 0.06, 7000, 0.3); break;
     case 'woosh': noise(0.6, 0.12, 900); noise(0.4, 0.08, 2400, 0.2); break;
     case 'baseHit': tone(90, 0.25, 'square', 0.08, -30); break;
+    // 진화 무기 (Build 63): 기본 무기와 다른 소리
+    case 'gatling': for (let i = 0; i < 3; i++) tone(330 - i * 20, 0.03, 'square', 0.035, -140, i * 0.035); noise(0.1, 0.05, 2600); break;   // 드르륵
+    case 'flame': noise(0.35, 0.16, 1300); noise(0.25, 0.07, 3800, 0.05); tone(140, 0.3, 'sawtooth', 0.045, -60); break;   // 화르륵
+    case 'thunder': noise(0.08, 0.2, 7000); noise(0.9, 0.2, 260, 0.05); tone(55, 0.7, 'sine', 0.18, -15, 0.05); break;   // 콰르릉
+    case 'volcano': noise(0.35, 0.28, 300); tone(50, 0.45, 'sine', 0.24, -15); tone(110, 0.3, 'sawtooth', 0.06, -50); noise(0.6, 0.05, 5000, 0.15); break;   // 쿠웅 + 지글
+    case 'whirl': noise(0.5, 0.1, 1200); tone(380, 0.45, 'sine', 0.03, 520); break;   // 휘이잉
+    case 'shing': tone(2093, 0.25, 'sine', 0.04, 0); tone(3136, 0.3, 'sine', 0.03, 0, 0.02); noise(0.12, 0.035, 8000); break;   // 성검 챙
+    // 보물 상자 (Build 63)
+    case 'chestShake': for (let i = 0; i < 4; i++) { noise(0.05, 0.12, 900, i * 0.11); tone(170, 0.05, 'square', 0.035, -40, i * 0.11); } break;   // 덜컹덜컹
+    case 'chestOpen': tone(392, 0.12, 'square', 0.06, 0); tone(523, 0.12, 'square', 0.06, 0, 0.1); [659, 784, 1047].forEach(f => tone(f, 0.45, 'square', 0.04, 0, 0.22)); noise(0.6, 0.05, 7500, 0.22); break;   // 빠밤!
+    case 'tick': tone(1500, 0.025, 'square', 0.018, 0); break;   // 룰렛 똑딱
+    case 'reward': tone(1319, 0.12, 'sine', 0.07, 0); tone(1976, 0.2, 'sine', 0.06, 0, 0.06); break;   // 띠링
+    case 'rewardEvo': [784, 988, 1175, 1568, 1976].forEach((f, i) => tone(f, 0.16, 'square', 0.05, 0, i * 0.05)); noise(0.7, 0.06, 8000, 0.15); tone(2637, 0.4, 'sine', 0.04, 0, 0.28); break;   // 진화 당첨
   }
 }
 
@@ -1239,11 +1252,11 @@ function chooseCard(i) {
   G.pending--;
   if (G.pending > 0) openLevelUp(); else { state = 'play'; showOv(null); }
 }
-function applyChoice(c) { // 레벨업 카드·보물 상자 공통: 무기·진화·능력·치킨 적용
+function applyChoice(c, quiet) { // 레벨업 카드·보물 상자 공통: 무기·진화·능력·치킨 적용 (quiet: 상자 — 소리는 룰렛이 멈출 때)
   if (c.kind === 'w') { G.weapons[c.id] = c.l + 1; if (c.l === 0) G.timers[c.id] = 0.2; }
   else if (c.kind === 'evo') { // 진화!
     G.weapons[c.id] = MAX_WLV + 1; G.timers[c.id] = 0.2; const E = EVO[c.id], p = G.p;
-    banner(`✨ 진화! ${E.icon} ${E.name}`, E.desc, '#ffd23f', 2.6); sfx('unlock'); vib([40, 30, 80]);
+    banner(`✨ 진화! ${E.icon} ${E.name}`, E.desc, '#ffd23f', 2.6); if (!quiet) { sfx('unlock'); vib([40, 30, 80]); }
     burst(p.x, p.y - 20, '#ffd23f', 50, 320, 6, 0.8); burst(p.x, p.y - 20, '#fff', 24, 220, 5, 0.6); G.lvlFlash = 0.6; G.shake = 10;
     stSet('evoT', c.id);
   }
@@ -1267,7 +1280,7 @@ function chestPick() { // 지금 상태에서 상자가 줄 것 하나 (진화 �
 }
 function chestRewards() {
   let r = Math.random(), n = 1; for (const [k, pr] of CHEST_ROLL) { if ((r -= pr) <= 0) { n = k; break; } }
-  const out = []; for (let i = 0; i < n; i++) { const c = chestPick(); applyChoice(c); out.push(c); }   // 하나씩 적용해야 다음 것이 진화 조건을 봄
+  const out = []; for (let i = 0; i < n; i++) { const c = chestPick(); applyChoice(c, true); out.push(c); }   // 하나씩 적용해야 다음 것이 진화 조건을 봄
   return out;
 }
 function chestCardHtml(c) {
@@ -1291,21 +1304,22 @@ function openChest(auto) {
   if (hasImg) $('chestImg').src = `img/chest_big.webp?b=${BUILD}`;
   cb.classList.remove('open'); $('bChestOk').style.display = 'none'; $('chestHint').style.display = '';
   $('chestTitle').textContent = items.length > 1 ? `보물 상자! ×${items.length}` : '보물 상자!';
-  showOv('ovChest'); sfx('unlock'); vib([30, 30, 30]);
+  showOv('ovChest'); sfx('chestShake'); vib([30, 30, 30]);
   let t = 0, k = 0; const stopAt = items.map((_, i) => 0.9 + i * 0.45);
-  const done = i => { if (els[i].classList.contains('done')) return; els[i].className = 'ci done' + (items[i].kind === 'evo' ? ' evo' : ''); els[i].innerHTML = chestCardHtml(items[i]); sfx(items[i].kind === 'evo' ? 'unlock' : 'pick'); };
+  const done = i => { if (els[i].classList.contains('done')) return; els[i].className = 'ci done' + (items[i].kind === 'evo' ? ' evo' : ''); els[i].innerHTML = chestCardHtml(items[i]); sfx(items[i].kind === 'evo' ? 'rewardEvo' : 'reward'); };
   const finish = () => { clearInterval(chestAnim); chestAnim = null; items.forEach((_, i) => done(i)); chestOpenLook(); $('chestHint').style.display = 'none'; $('bChestOk').style.display = ''; };
   clearInterval(chestAnim);
   chestAnim = setInterval(() => {
     t += 0.07; if (t > 0.45) chestOpenLook();
     els.forEach((el, i) => { if (t >= stopAt[i]) done(i); else el.querySelector('.ic').innerHTML = spinIcons[(k + i * 3) % spinIcons.length]; });
+    if (els.some(el => el.classList.contains('spin'))) sfx('tick');
     k++; if (t >= stopAt[stopAt.length - 1]) finish();
   }, 70);
   $('ovChest').onclick = e => { if (chestAnim && e.target.id !== 'bChestOk') finish(); };
 }
 function chestOpenLook() { // 뚜껑 열린 모습 (그림이면 열린 상자 그림으로 바꿈)
   const cb = $('chestBox'); if (cb.classList.contains('open')) return;
-  cb.classList.add('open'); if (cb.classList.contains('img')) $('chestImg').src = `img/chest_big_open.webp?b=${BUILD}`;
+  cb.classList.add('open'); sfx('chestOpen'); if (cb.classList.contains('img')) $('chestImg').src = `img/chest_big_open.webp?b=${BUILD}`;
 }
 function closeChest() {
   if (state !== 'chest' || chestAnim) return;
@@ -2486,7 +2500,7 @@ function fireWeapons(dt) {
         G.bullets.push({ x: ox, y: oy, vx: Math.cos(a) * 560, vy: Math.sin(a) * 560, r: 4, dmg: s.dmg, life: 0.9, pierce: s.pierce, hits: [], kind: 'pistol' });
       }
       wPose('pistol', ang, evolved('pistol') ? 0.3 : 0.22);
-      sfx('shoot');
+      sfx(evolved('pistol') ? 'gatling' : 'shoot');
     } else if (id === 'shotgun') {
       for (let k = 0; k < s.pellets; k++) {
         const a = ang + (k / (s.pellets - 1) - 0.5) * s.spread + rand(-0.04, 0.04), v = rand(420, 520);
@@ -2495,13 +2509,13 @@ function fireWeapons(dt) {
       if (s.fire) for (let k = 0; k < 3; k++) { const a = ang + (k - 1) * 0.3, d = rand(90, 170); addFlame(ox + Math.cos(a) * d, oy + 12 + Math.sin(a) * d, 30, 2.2); }   // 용의 숨결: 땅에 불길
       burst(ox + Math.cos(ang) * 14, oy + Math.sin(ang) * 14, '#ffb347', 6, 120, 4, 0.2);
       wPose('shotgun', ang, 0.3);
-      sfx('shotgun');
+      sfx(s.fire ? 'flame' : 'shotgun');
     } else if (id === 'boomerang') {
       for (let k = 0; k < s.count; k++) {
         const a = ang + (k - (s.count - 1) / 2) * 0.7;
         G.booms.push({ x: ox, y: oy, dx: Math.cos(a), dy: Math.sin(a), spd: 380, dist: 0, range: s.range, back: false, dmg: s.dmg, rot: 0, hits: new Map(), life: 4, big: s.big });
       }
-      sfx('boom');
+      sfx(s.big ? 'whirl' : 'boom');
     } else if (id === 'bolt') { // 첫 적에서 가까운 적으로 지그재그 번개
       wPose('bolt', ang, 0.4);
       let cur = tgt, from = { x: ox + p.face * 20, y: oy - 46 }; const hit = new Set();   // 치켜든 지팡이 끝에서 번개
@@ -2520,12 +2534,12 @@ function fireWeapons(dt) {
           zap(e.x + rand(-20, 20), e.y - 320, e.x, e.y - 10); hurtEnemy(e, s.dmg * 1.2, 0, 1, 80); G.rings.push({ x: e.x, y: e.y, r: 34, life: 0.3, max: 0.3, color: '#9fd8ff' }); }
         G.shake = Math.max(G.shake, 5);
       }
-      sfx('zap');
+      sfx('zap'); if (s.sky) sfx('thunder');
     } else if (id === 'hammer') { // 내려찍기: 원 안의 적 모두 + 크게 밀쳐냄
       for (const e of G.enemies) { const dx = e.x - p.x, dy = e.y - p.y, d = Math.hypot(dx, dy) || 1; if (d < s.rad + e.r) hurtEnemy(e, s.dmg, dx / d, dy / d, 420); }
       G.rings.push({ x: p.x, y: p.y, r: s.rad, life: 0.45, max: 0.45 });
       burst(p.x, p.y, '#ff7b00', 26, s.rad * 3, 6, 0.5); burst(p.x, p.y, '#ffd23f', 14, s.rad * 2, 5, 0.4);
-      G.shake = Math.max(G.shake, 7); p.slam = 0.25; sfx('slam'); vib(30); wPose('hammer', 0, 0.4);
+      G.shake = Math.max(G.shake, 7); p.slam = 0.25; sfx(s.fire ? 'volcano' : 'slam'); vib(30); wPose('hammer', 0, 0.4);
       if (s.fire) for (let k = 0; k < 6; k++) { const a = k / 6 * Math.PI * 2 + rand(-0.2, 0.2), d = s.rad * rand(0.5, 0.85); addFlame(p.x + Math.cos(a) * d, p.y + Math.sin(a) * d, 34, 2.5); }   // 화산 망치
     }
     G.timers[id] = s.cd * p.cdMul;
@@ -2643,7 +2657,7 @@ function update(dt) {
           e.swordCd = 0.35;
           hurtEnemy(e, s.dmg, Math.cos(a), Math.sin(a), s.kb || 260);
           burst(bx, by, '#dff6ff', 3, 120, 3, 0.2);
-          sfx('swing');
+          sfx('swing'); if (evolved('sword')) sfx('shing');
         }
       }
     }
