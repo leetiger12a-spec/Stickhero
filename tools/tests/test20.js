@@ -23,7 +23,8 @@ const { chromium } = require('/opt/node22/lib/node_modules/playwright');
   const d2 = await page.evaluate(() => { const G = SH.G; return { day: G.day, vLvl: G.vLvl, towers: G.towers.map(t => t.lvl).join(''), broken: Object.keys(G.broken).filter(k => G.broken[k]).sort().join(','), lvl: G.lvl, weapons: JSON.stringify(G.weapons), gold: G.gold, stone: G.stone, stageN: G.stageN, allies: G.allies.length, base: G.base.hp, max: G.base.maxHp, bld: JSON.stringify(G.bld), forge: G.forge }; });
   console.log('day2', JSON.stringify(d2));
   check(d2.day === 2 && d2.vLvl === 2 && d2.towers === '333300' && d2.broken === 'farm,hall,mine,smith,t0,t1,t2,t3,tavern' && d2.lvl === 1 && d2.weapons === '{"pistol":1}' && d2.gold === 200 && d2.stone === 30 && d2.stageN === 2 && d2.allies === 1 && d2.base === 600 && d2.forge === 2, 'day2 state wrong');
-  const e2 = await page.evaluate(() => makeEnemy('grunt', 500, 0).maxHp); console.log('enemy hp', e1, e2); check(Math.abs(e2 / e1 - 1.25) < 0.02, 'day multiplier wrong');
+  const e2 = await page.evaluate(() => makeEnemy('grunt', 500, 0).maxHp); console.log('enemy hp', e1, e2); check(e2 === e1, 'same enemy should not get stronger on day 2');   // Build 67: 다음 날은 세기 대신 단계가 빨리 오름
+  check(await page.evaluate(() => { const G = SH.G, bt = G.bt; G.bt = 100; const k = Math.floor(tierNow()); G.bt = bt; return k === 1; }), 'day 2 tier not faster');
   await page.waitForTimeout(400); await page.screenshot({ path: `${OUT}/b41_ruin.png` });
   // 부서진 망루는 안 쏨
   const shots = await page.evaluate(() => { const G = SH.G; G.enemies.push(makeEnemy('grunt', 90, 120)); G.bullets.length = 0; return 0; });

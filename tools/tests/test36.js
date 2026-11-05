@@ -11,8 +11,8 @@ const { chromium } = require('/opt/node22/lib/node_modules/playwright');
   const sub = () => page.evaluate(() => document.getElementById('dexSub').textContent);
   // 시작 화면 → 업적 → 몬스터 도감
   await page.click('#bAchT'); await page.waitForTimeout(150); await page.click('#bDexA'); await page.waitForTimeout(300);
-  console.log(await sub()); check((await sub()).includes('0/18'), 'dex not 0/18');
-  check(await page.evaluate(() => document.querySelectorAll('#dexList .dex:not(.ally)').length === 18 && document.querySelectorAll('#dexList .dex.off:not(.ally)').length === 18 && document.querySelectorAll('#dexList .dex.ally').length === 4), 'not 18 shadows');
+  console.log(await sub()); check((await sub()).includes('0/27'), 'dex not 0/27');   // Build 67: 단계별 적 9종 추가
+  check(await page.evaluate(() => document.querySelectorAll('#dexList .dex:not(.ally)').length === 27 && document.querySelectorAll('#dexList .dex.off:not(.ally)').length === 27 && document.querySelectorAll('#dexList .dex.ally').length === 4), 'not 18 shadows');
   await page.click('#bDexOk'); await page.waitForTimeout(100);
   check(await page.evaluate(() => state === 'ach'), 'not back to ach'); await page.click('#bAchOk');
   // 확률: makeEnemy 30,000번 → 황금 약 20번
@@ -36,7 +36,7 @@ const { chromium } = require('/opt/node22/lib/node_modules/playwright');
   console.log('st', JSON.stringify(st)); check(st.g === 'runner' && st.kc >= 12 && st.bk >= 1 && st.ach, 'records wrong');
   // 일시정지 → 몬스터 도감
   await page.click('#bPause'); await page.waitForTimeout(150); await page.click('#bDexP'); await page.waitForTimeout(250);
-  console.log(await sub()); check((await sub()).includes('3/18'), 'dex not 3/18');
+  console.log(await sub()); check((await sub()).includes('3/27'), 'dex not 3/27');
   const cards = await page.evaluate(() => [...document.querySelectorAll('#dexList .dex:not(.off):not(.ally)')].map(d => d.querySelector('b').textContent + '|' + (d.querySelector('.stars').firstChild && d.querySelector('.stars').firstChild.nodeType === 3 ? d.querySelector('.stars').firstChild.textContent.length : 0) + '|' + (d.querySelector('.gold.on') ? 'G' : '')));
   console.log(cards.join(' ; ')); check(cards.some(c => c.startsWith('빨간 졸개|1|')), 'grunt card not 1 star (12 kills)'); check(cards.some(c => c.startsWith('대왕 슬라임|1|')), 'boss card not 1 star'); check(cards.some(c => c.startsWith('분홍 날쌘이') && c.endsWith('G')), 'golden badge missing');
   await page.screenshot({ path: `${OUT}/b64_dex.png` });

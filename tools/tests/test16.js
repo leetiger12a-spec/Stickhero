@@ -33,7 +33,7 @@ const { chromium } = require('/opt/node22/lib/node_modules/playwright');
   await page.evaluate(() => SH.skipIntro()); await page.waitForTimeout(800);
   await page.screenshot({ path: `${OUT}/b36_boss.png` });
   await page.evaluate(() => { SH.G.boss.hp = 1; }); await page.waitForTimeout(100);
-  await page.evaluate(() => { const bo = SH.G.boss; SH.G.p.x = bo.x; SH.G.p.y = bo.y + 40; }); 
+  await page.evaluate(() => { const bo = SH.G.boss; if (bo) { SH.G.p.x = bo.x; SH.G.p.y = bo.y + 40; } });   // 체력 1인 보스는 이미 쓰러졌을 수도
   for (let i = 0; i < 40 && await page.evaluate(() => !SH.G.st.clear); i++) await page.waitForTimeout(150);
   check(await page.evaluate(() => SH.G.st.clear && JSON.parse(localStorage.getItem('stickhero_meta')).bestFloor === 5), 'boss floor clear failed');
   // 레벨업 카드가 떠 있으면 고르기

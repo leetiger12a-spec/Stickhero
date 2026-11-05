@@ -272,7 +272,7 @@ h2 .hb{-webkit-text-stroke:0;text-shadow:none;letter-spacing:0;font-family:"Jua"
 
 <script>
 'use strict';
-const BUILD = 66;
+const BUILD = 67;
 const BOSS_INTERVAL = 180;      // 보스 등장 간격(초)
 const WAVE_INTERVAL = 60;       // 대규모 몰이 이벤트 간격(초)
 const MAX_ENEMIES = 220;
@@ -387,6 +387,7 @@ const SPR_INFO = {    // ax: 발 위치(그림 폭 대비), h: 화면 키(월드
   hero: { ax: 0.42 }, grunt: { ax: 0.45, h: 50 }, runner: { ax: 0.5, h: 42 }, tank: { ax: 0.42, h: 62 },
   boss0: { ax: 0.5, h: 140 }, boss1: { ax: 0.5, h: 140 }, boss2: { ax: 0.5, h: 150 }, boss3: { ax: 0.5, h: 140 }, boss4: { ax: 0.5, h: 120 }, boss5: { ax: 0.5, h: 150 }, boss_final: { ax: 0.5, h: 175 },
   e_spider: { ax: 0.5, h: 30 }, e_skel: { ax: 0.5, h: 46 },
+  e_agrunt: { ax: 0.45, h: 52 }, e_srunner: { ax: 0.5, h: 46 }, e_stank: { ax: 0.45, h: 70 }, e_knight: { ax: 0.5, h: 58 }, e_assassin: { ax: 0.5, h: 50 }, e_ogre: { ax: 0.5, h: 92 }, e_demon: { ax: 0.5, h: 60 }, e_ghost: { ax: 0.5, h: 56 }, e_golem: { ax: 0.5, h: 112 },
   tree: { h: 78 }, stump: { h: 20 }, log: { h: 8 }, stake: { h: 26 }, tower: { h: 76 }, hall: { h: 92 },
   smith: { h: 72 }, pillar: { h: 70 }, torch: { h: 58 }, coin: { h: 12 },
   ally_sword: { ax: 0.5, h: 52 }, ally_archer: { ax: 0.5, h: 52 }, ally_bomber: { ax: 0.45, h: 52 }, ally_shield: { ax: 0.5, h: 54 }, hero_slash: { h: 72 }, hero_walk: { h: 72 }, ally_archer_shoot: { h: 60 }, ally_bomber_toss: { h: 60 }, ally_shield_bash: { h: 60 }, ally_sword_slash: { h: 60 }, ally_sword_walk: { h: 60 }, ally_archer_walk: { h: 60 }, ally_bomber_walk: { h: 60 }, ally_shield_walk: { h: 60 }, sf_plane0: { h: 80 }, sf_plane1: { h: 80 }, sf_plane2: { h: 80 }, sf_plane3: { h: 80 }, sf_plane4: { h: 80 }, sf_pilot0: { h: 70 }, sf_pilot1: { h: 70 }, sf_pilot2: { h: 70 }, sf_pilot3: { h: 70 }, sf_pilot4: { h: 70 }, tavern: { h: 72 }, skyfang_plane: { h: 80 },
@@ -483,8 +484,8 @@ const ACH = [
   { id: 'ending',  icon: '🏆', name: '왕관을 빼앗다', desc: '왕관 괴물 대왕 물리치기',  title: '레전드 히어로', bank: 500, p: () => [ST.bossT.includes('왕관 괴물 대왕') ? 1 : 0, 1] },
   { id: 'kill10k', icon: '☠️', name: '만 마리 전설',  desc: '적 10,000마리 잡기',       title: '만 마리 전설', bank: 500, p: () => [ST.kills, 10000] },
   { id: 'gold1',   icon: '✨', name: '반짝반짝',     desc: '황금 몬스터 처음 잡기',     title: '행운아',     bank: 150, p: () => [ST.goldT.length, 1] },
-  { id: 'dex18',   icon: '📖', name: '몬스터 박사',   desc: '몬스터 18종 모두 발견',     title: '몬스터 박사', bank: 400, p: () => [DEX.filter(d => dexCount(d) > 0).length, DEX.length] },
-  { id: 'gold11',  icon: '👑', name: '황금 사냥꾼',   desc: '황금 몬스터 11종 모두 잡기', title: '황금 사냥꾼', bank: 800, p: () => [ST.goldT.length, 11] },
+  { id: 'dex18',   icon: '📖', name: '몬스터 박사',   desc: '몬스터 도감 모두 발견',     title: '몬스터 박사', bank: 400, p: () => [DEX.filter(d => dexCount(d) > 0).length, DEX.length] },
+  { id: 'gold11',  icon: '👑', name: '황금 사냥꾼',   desc: '황금 몬스터 20종 모두 잡기', title: '황금 사냥꾼', bank: 800, p: () => [ST.goldT.length, DEX.filter(d => !d.boss).length] },
   { id: 'chest10',  icon: '🎁', name: '보물 사냥꾼',   desc: '보물 상자 10개 열기',       title: '보물 사냥꾼', bank: 200, p: () => [ST.chests || 0, 10] },
   { id: 'goldB1',   icon: '🌟', name: '황금 보스',     desc: '황금 보스 쓰러뜨리기',       title: '황금 기사',  bank: 400, p: () => [ST.goldB.length, 1] },
   { id: 'stars27',  icon: '💫', name: '별 반짝',       desc: '몬스터 도감 별 27개 모으기', title: '도감 수집가', bank: 400, p: () => [DEX.reduce((a, d) => a + dexStars(d), 0), 27] },
@@ -544,7 +545,7 @@ function bakeSprite(n) {
   }
 }
 // img/ 폴더에 실제로 있는 그림만 불러옴 (없는 파일을 부르면 오류가 남)
-const SPR_FILES = ['boss3', 'boss4', 'boss5', 'boss_final', 'e_spider', 'e_skel', 'e_archer', 'e_bomber', 'e_bat', 'e_slime', 'e_shaman', 'e_charger', 'hall2', 'hall3', 'hall_broken', 'tower_broken', 'stonewall', 'repair', 'farm', 'mine', 'market', 'stone', 'rock', 'camp', 'hero', 'grunt', 'runner', 'tank', 'boss0', 'boss1', 'boss2', 'tree', 'stump', 'log', 'stake', 'tower', 'hall',
+const SPR_FILES = ['e_agrunt', 'e_srunner', 'e_stank', 'e_knight', 'e_assassin', 'e_ogre', 'e_demon', 'e_ghost', 'e_golem', 'boss3', 'boss4', 'boss5', 'boss_final', 'e_spider', 'e_skel', 'e_archer', 'e_bomber', 'e_bat', 'e_slime', 'e_shaman', 'e_charger', 'hall2', 'hall3', 'hall_broken', 'tower_broken', 'stonewall', 'repair', 'farm', 'mine', 'market', 'stone', 'rock', 'camp', 'hero', 'grunt', 'runner', 'tank', 'boss0', 'boss1', 'boss2', 'tree', 'stump', 'log', 'stake', 'tower', 'hall',
   'smith', 'pillar', 'torch', 'coin', 'ally_sword', 'ally_archer', 'tavern', 'ally_bomber', 'skyfang_plane', 'ally_shield', 'hero_slash', 'hero_walk', 'ally_archer_shoot', 'ally_bomber_toss', 'ally_shield_bash', 'ally_sword_slash', 'ally_sword_walk', 'ally_archer_walk', 'ally_bomber_walk', 'ally_shield_walk', 'sf_plane0', 'sf_plane1', 'sf_plane2', 'sf_plane3', 'sf_plane4', 'sf_pilot0', 'sf_pilot1', 'sf_pilot2', 'sf_pilot3', 'sf_pilot4'];
 SPR_FILES.forEach(n => {
   const im = new Image();
@@ -872,12 +873,12 @@ let dexBack = null;
 function openDex() { checkAch(); dexBack = state; state = 'dex'; renderDex(); showOv('ovDex'); }
 function renderDex() {
   const found = DEX.filter(d => dexCount(d) > 0).length, stars = DEX.reduce((a, d) => a + dexStars(d), 0);
-  $('dexSub').innerHTML = `발견 <b>${found}/${DEX.length}</b> · 별 <b>${stars}/${DEX.length * 3}</b> · ✨황금 <b>${ST.goldT.length + ST.goldB.length}/18</b> · 동료 <b>${Object.keys(ST.alv).length}/4</b>`;
+  $('dexSub').innerHTML = `발견 <b>${found}/${DEX.length}</b> · 별 <b>${stars}/${DEX.length * 3}</b> · ✨황금 <b>${ST.goldT.length + ST.goldB.length}/${DEX.length}</b> · 동료 <b>${Object.keys(ST.alv).length}/4</b>`;
   const box = $('dexList'); box.innerHTML = '';
   const sec = t => { const h = document.createElement('div'); h.className = 'dexH'; h.textContent = t; box.appendChild(h); };
   DEX.forEach((d, i) => {
-    if (i === 0) sec('⚔ 적 11종 · 별: 10 / 100 / 1,000마리');
-    if (i === 11) sec('👑 보스 7종 · 별: 1 / 5 / 20번');
+    if (i === 0) sec(`⚔ 적 ${DEX.filter(x => !x.boss).length}종 · 별: 10 / 100 / 1,000마리`);
+    if (d.boss && !DEX[i - 1].boss) sec('👑 보스 7종 · 별: 1 / 5 / 20번');
     const n = dexCount(d), ok = n > 0, st = dexStars(d), g = d.boss ? ST.goldB.includes(d.boss) : ST.goldT.includes(d.k);
     const el = document.createElement('div'); el.className = 'dex' + (ok ? '' : ' off') + (d.boss ? ' boss' : '');
     const lim = d.boss ? DEX_STARS.boss : DEX_STARS.mob, next = lim.find(x => n < x);
@@ -987,7 +988,38 @@ const ETYPES = {
   e_charger: { r: 13, hp: 45, spd: 55, dmg: 14, color: '#ffd23f', xp: 4, gold: 3 },
   e_spider:  { r: 8,  hp: 8,  spd: 95, dmg: 5,  color: '#7b2cbf', xp: 1, gold: 0 },   // 거미 여왕 졸개
   e_skel:    { r: 10, hp: 22, spd: 55, dmg: 8,  color: '#e9e2cf', xp: 2, gold: 1 },   // 해골 왕 졸개
+  // 단계별 적 (Build 67): 세기는 고정, 단계가 오를수록 센 종류가 나옴 — 2단계 갑옷 군단 · 3단계 기사단 · 4단계 악마 군단
+  // 구슬·금화는 예전 같은 역할(졸개 1 · 거한 5)과 비슷하게: 많이 주면 영웅이 너무 빨리 커짐 (봇 Lv 52~62)
+  e_agrunt:   { r: 12, hp: 90,   spd: 58,  dmg: 11, color: '#e63946', xp: 1,  gold: 1 },
+  e_srunner:  { r: 10, hp: 50,   spd: 110, dmg: 9,  color: '#5a189a', xp: 1,  gold: 1 },
+  e_stank:    { r: 19, hp: 450,  spd: 40,  dmg: 25, color: '#2f6fd6', xp: 5,  gold: 4 },
+  e_knight:   { r: 13, hp: 500,  spd: 55,  dmg: 16, color: '#adb5bd', xp: 2,  gold: 2 },
+  e_assassin: { r: 10, hp: 280,  spd: 120, dmg: 14, color: '#212529', xp: 1,  gold: 2 },
+  e_ogre:     { r: 24, hp: 2600, spd: 38,  dmg: 38, color: '#70a33a', xp: 6, gold: 5 },
+  e_demon:    { r: 13, hp: 2200, spd: 70,  dmg: 22, color: '#c1121f', xp: 2,  gold: 3 },
+  e_ghost:    { r: 12, hp: 1300, spd: 75,  dmg: 18, color: '#b8a9e8', xp: 2,  gold: 2 },
+  e_golem:    { r: 30, hp: 11000, spd: 32, dmg: 48, color: '#6c757d', xp: 8, gold: 8 },
 };
+// 단계: [빠른·보통 졸개, 날쌘 적, 튼튼한 적]
+const TIERS = [['grunt', 'runner', 'tank'], ['e_agrunt', 'e_srunner', 'e_stank'], ['e_knight', 'e_assassin', 'e_ogre'], ['e_demon', 'e_ghost', 'e_golem']];
+const TIER_T = [0, 150, 300, 480];   // 마을 단계 시작 시간(초) — 봇 측정으로 당김 (180·360·600은 너무 쉬웠음)
+const TIER_NAME = ['', '⚔ 2단계! 갑옷 군단이 몰려온다', '⚔ 3단계! 기사단이 나타났다', '🔥 4단계! 악마 군단이 깨어났다'];
+function tierNow() { // 지금 단계 (정수 = 단계, 소수 = 다음 단계까지 얼마나 왔는지)
+  if (G.mode === 'stage' && G.st) {
+    if (G.st.tower) { const f = G.st.tower - 1; return Math.min(3, Math.floor(f / 5)) + (f % 5) / 5; }
+    return [0, 0.5, 1, 1.5, 2, 2.3, 2.7, 3, 3.3, 3.6][Math.min(9, G.st.n)];
+  }
+  const et = (G.bt + 150 * ((G.day || 1) - 1)) * (0.6 + 0.4 * DF().grow);   // 다음 날은 단계가 더 빨리 · 쉬운 난이도는 느리게
+  let k = 0; while (k < 3 && et >= TIER_T[k + 1]) k++;
+  const span = k < 3 ? TIER_T[k + 1] - TIER_T[k] : 300;
+  return k + Math.min(0.999, (et - TIER_T[k]) / span);
+}
+function tierType(tf, roles) { // 단계 tf에서 적 하나: 지금 단계 비중이 점점 늘고, 이전 단계가 섞여 나옴
+  const k = Math.floor(tf), f = tf - k, now = k ? 0.35 + 0.45 * f : 1, r = Math.random();
+  const lv = r < now ? k : k >= 2 && r > now + (1 - now) * 0.8 ? k - 2 : Math.max(0, k - 1);
+  const w = roles || [0.55, 0.3, 0.15], q = Math.random() * (w[0] + w[1] + w[2]);
+  return TIERS[lv][q < w[0] ? 0 : q < w[0] + w[1] ? 1 : 2];
+}
 // 특수 적: [종류, 마을에서 나오기 시작(초), 스테이지·탑에서 나오기 시작(난이도 n), 처음 나올 때 안내]
 const SPECIALS = [
   ['e_slime',   120,  1, '🟢 분열 슬라임 등장!', '쓰러지면 작은 슬라임 2마리로 나뉘어요'],
@@ -1014,6 +1046,15 @@ const DEX = [
   ...SPECIALS.map(sp => ({ k: sp[0], name: SP_NAME[sp[0]], desc: sp[4], where: `마을 ${sp[1] / 60}분 뒤 · 모험 ${sp[2] + 1}칸부터` })),
   { k: 'e_spider', name: '새끼 거미', desc: '거미 여왕이 불러내요', where: '거미 여왕과 싸울 때' },
   { k: 'e_skel', name: '해골 병사', desc: '해골 왕이 불러내요', where: '해골 왕과 싸울 때' },
+  { k: 'e_agrunt', name: '갑옷 졸개', desc: '투구와 방패로 단단해요', where: '2단계 (마을 2분 반 · 모험 2칸)' },
+  { k: 'e_srunner', name: '그림자 날쌘이', desc: '보라 닌자 · 아주 빨라요', where: '2단계 (마을 2분 반 · 모험 2칸)' },
+  { k: 'e_stank', name: '강철 거한', desc: '강철 갑옷 + 쌍둥이 대포', where: '2단계 (마을 2분 반 · 모험 2칸)' },
+  { k: 'e_knight', name: '기사', desc: '긴 칼과 십자 방패', where: '3단계 (마을 5분 · 모험 4칸)' },
+  { k: 'e_assassin', name: '암살자', desc: '두 칼날 · 번개처럼 빨라요', where: '3단계 (마을 5분 · 모험 4칸)' },
+  { k: 'e_ogre', name: '오우거', desc: '가시 몽둥이 · 엄청 튼튼해요', where: '3단계 (마을 5분 · 모험 4칸)' },
+  { k: 'e_demon', name: '악마 병사', desc: '날개와 삼지창', where: '4단계 (마을 8분 · 모험 8칸)' },
+  { k: 'e_ghost', name: '유령 기사', desc: '녹슨 쇠사슬을 휘둘러요', where: '4단계 (마을 8분 · 모험 8칸)' },
+  { k: 'e_golem', name: '바위 골렘', desc: '용암 바위 거인 · 가장 커요', where: '4단계 (마을 8분 · 모험 8칸)' },
   ...BOSSES.map((B, i) => ({ k: 'boss' + i, boss: B.name, name: B.name, desc: ['높이 뛰어올라 쿵!', '로켓 주먹을 날려요', '바닥에 불길을 깔아요', '얼음 숨결로 느리게 해요', '거미줄을 쏘고 새끼 거미를 불러요', '순간이동하고 해골 병사를 불러요'][i], where: '마을·모험·탑 보스' })),
   { k: 'boss_final', boss: '왕관 괴물 대왕', name: '왕관 괴물 대왕', desc: '모든 보스의 기술을 다 써요', where: '모험 10칸 · 왕관 괴물의 성' },
 ];
@@ -1481,7 +1522,7 @@ function gameOver() {
   $('ovOver').querySelector('h2').textContent = G.baseDead ? '마을이 무너졌다!' : '게임 오버';
   $('overStats').innerHTML = `⏱ 버틴 시간 <b>${fmtTime(G.t)}</b><br>💀 처치 <b>${G.kills}</b><br>⭐ 레벨 <b>${G.lvl}</b><br>👑 보스 처치 <b>${G.bossKills || 0}</b>`;
   $('overRec').innerHTML = (rec ? '<div class="newrec">🎉 새 기록! 🎉</div>' : '') +
-    `<div class="hint" style="opacity:.95">🏚 지은 건물은 부서진 채로 남아요 → 🔨 고쳐서 다시!<br>🌅 다음은 <b>${(G.day || 1) + 1}일째</b> · 적이 더 강해져요 (+25%)</div>`;
+    `<div class="hint" style="opacity:.95">🏚 지은 건물은 부서진 채로 남아요 → 🔨 고쳐서 다시!<br>🌅 다음은 <b>${(G.day || 1) + 1}일째</b> · 더 센 적이 더 빨리 나와요</div>`;
   $('bRetry').textContent = `🔨 마을 다시 세우기 (${(G.day || 1) + 1}일째)`;
   $('bestOver').innerHTML = bestText(b) + (G.bankAdd > 0 ? `<br>🏦 금고에 금화 <b>${G.bankAdd}</b> 저장 → 시작 화면 '💪 강화'에서 써요` : '');
   $('hudBtns').classList.remove('show');
@@ -1621,8 +1662,8 @@ function makeGolden(e) {
 function goldDie(e) { burst(e.x, e.y - 12, '#ffd23f', 30, 260, 5, 0.7); burst(e.x, e.y - 12, '#fff7c2', 14, 180, 4, 0.5); floatText(e.x, e.y - 40, '✨ 황금!', '#ffd23f', 18, 1); sfx('rewardEvo'); }
 function makeEnemy(type, x, y) {
   announceType(type);
-  const gr = DF().grow, T = ETYPES[type], hm = (1 + G.bt / 85 * gr) * (1 + G.bt / 1500 * gr) * (1 + Math.max(0, G.bt - 300) / 105 * gr) * DF().ehp * dayMul();   // 5분 뒤부터 후반 강화   // 난이도: 마을에서 보낸 시간 × 선택 난이도
-  const e = { id: ++eid, type, x, y, r: T.r, hp: T.hp * hm, maxHp: T.hp * hm, spd: T.spd * (1 + Math.min(0.35, G.bt / 900)) * rand(0.9, 1.1), dmg: T.dmg * DF().edmg * (1 + G.bt / 650 * gr) * Math.sqrt(dayMul()), color: T.color, xp: T.xp, gold: T.gold, flash: 0, hitT: 0, kx: 0, ky: 0, swordCd: 0, wob: Math.random() * 6, inside: Math.hypot(x, y) < WALL_R, atk: 0.5, lunge: 0, face: 1 };
+  const T = ETYPES[type], hm = DF().ehp;   // Build 67: 같은 적은 세기 고정 (시간이 지나면 센 종류가 나옴 — tierType)
+  const e = { id: ++eid, type, x, y, r: T.r, hp: T.hp * hm, maxHp: T.hp * hm, spd: T.spd * rand(0.9, 1.1), dmg: T.dmg * DF().edmg, color: T.color, xp: T.xp, gold: T.gold, flash: 0, hitT: 0, kx: 0, ky: 0, swordCd: 0, wob: Math.random() * 6, inside: Math.hypot(x, y) < WALL_R, atk: 0.5, lunge: 0, face: 1 };
   if (!window.__noGold && Math.random() < GOLD_P) makeGolden(e);   // __noGold: 정확한 기록을 보는 시험용
   return e;
 }
@@ -1686,15 +1727,13 @@ function spawnEnemy(type) {
 function pickType() {
   const r = Math.random(), t = G.bt;
   if (Math.random() < Math.min(0.15 + Math.max(0, t - 420) / 3000 * DF().grow, Math.max(0, (t - 120) / 1200))) { const sp = pickSpecial(); if (sp) return sp; }   // 2분부터 서서히, 5분에 15%
-  if (t > 90 && r < 0.1 + Math.min(0.1, t / 3000)) return 'tank';
-  if (t > 35 && r < 0.38) return 'runner';
-  return 'grunt';
+  return tierType(tierNow(), t < 35 ? [1, 0, 0] : t < 90 ? [0.62, 0.38, 0] : [0.55, 0.3, 0.15]);   // 처음엔 졸개만, 35초 날쌘이, 90초 튼튼한 적
 }
 function spawnWave() {
   const n = 20 + Math.floor(G.bt / 15), dirs = G.bt > 120 ? 3 : 2, a0 = Math.random() * 7;
   for (let i = 0; i < n && G.enemies.length < MAX_ENEMIES + 40; i++) {
     const a = a0 + (i % dirs) / dirs * Math.PI * 2 + rand(-0.25, 0.25), R = WORLD_R - rand(0, 60);
-    G.enemies.push(makeEnemy(i % 4 === 0 && G.bt > 90 ? 'runner' : 'grunt', Math.cos(a) * R, Math.sin(a) * R));
+    G.enemies.push(makeEnemy(tierType(tierNow(), G.bt > 90 ? [0.75, 0.25, 0] : [1, 0, 0]), Math.cos(a) * R, Math.sin(a) * R));
   }
   banner('적군이 몰려온다!', dirs + '방향에서 쳐들어와!', '#ff6b6b', 2);
   sfx('wave');
@@ -2176,7 +2215,7 @@ function updRaid(dt) {
       r.acc--;
       if (G.enemies.length >= MAX_ENEMIES + 60) break;
       const a = r.dirs[Math.floor(Math.random() * r.dirs.length)] + rand(-0.2, 0.2), R = WORLD_R - rand(10, 50);
-      const q = Math.random(), type = q < 0.12 + r.n * 0.04 ? 'tank' : q < 0.45 ? 'runner' : 'grunt';
+      const type = tierType(tierNow(), [0.55, 0.33, 0.12 + r.n * 0.04]);
       const e = makeEnemy(type, Math.cos(a) * R, Math.sin(a) * R); e.raid = true;
       G.enemies.push(e);
     }
@@ -2358,9 +2397,8 @@ function updStage(dt) {
     g.done = true;
     const n = 4 + Math.min(10, Math.round(st.n * 1.3)) + Math.floor(rand(0, 3));
     for (let i = 0; i < n; i++) {
-      const r = Math.random(), type = (Math.random() < 0.22 && pickSpecial(st.n)) || (st.n >= 2 && r < 0.15 ? 'tank' : st.n >= 1 && r < 0.45 ? 'runner' : 'grunt');
+      const type = (Math.random() < 0.22 && pickSpecial(st.n)) || tierType(tierNow(), st.n >= 2 ? [0.55, 0.3, 0.15] : st.n >= 1 ? [0.55, 0.45, 0] : [1, 0, 0]);
       const e = makeEnemy(type, rand(-STAGE_HW + 25, STAGE_HW - 25), g.y + rand(-70, 70));
-      e.hp *= 1 + st.n * stGrow(); e.maxHp = e.hp; e.dmg *= 1 + st.n * 0.06 * DF().grow;
       G.enemies.push(e);
     }
   }
@@ -2370,9 +2408,8 @@ function updStage(dt) {
     st.acc += (1.6 + st.n * 0.25) * DF().rate * dt;
     while (st.acc >= 1 && G.enemies.length < 120) {
       st.acc--;
-      const r = Math.random(), type = (Math.random() < 0.22 && pickSpecial(st.n)) || (r < 0.12 + st.n * 0.01 ? 'tank' : r < 0.5 ? 'runner' : 'grunt'), up = Math.random() < 0.5;
-      const e = makeEnemy(type, rand(-STAGE_HW + 25, STAGE_HW - 25), p.y + (up ? -1 : 1) * rand(380, 460));
-      e.hp *= 1 + st.n * stGrow(); e.maxHp = e.hp; e.dmg *= 1 + st.n * 0.06 * DF().grow; e.awake = true;
+      const type = (Math.random() < 0.22 && pickSpecial(st.n)) || tierType(tierNow(), [0.5, 0.38, 0.12 + st.n * 0.01]), up = Math.random() < 0.5;
+      const e = makeEnemy(type, rand(-STAGE_HW + 25, STAGE_HW - 25), p.y + (up ? -1 : 1) * rand(380, 460)); e.awake = true;
       G.enemies.push(e);
     }
     if (st.timer <= 0) { // 버티기 성공: 남은 적이 모두 펑!
@@ -2752,6 +2789,7 @@ function update(dt) {
   if (p.slam > 0) p.slam -= dt;
   if (G.wfx) for (const id in G.wfx) if ((G.wfx[id].t -= dt) <= 0) delete G.wfx[id];
   if (G.mode === 'base') { G.saveT = (G.saveT === undefined ? 10 : G.saveT) - dt; if (G.saveT <= 0) saveGame(); }
+  if (G.mode === 'base') { const k = Math.floor(tierNow()); if (k > (G.tierShown || 0)) { G.tierShown = k; banner(TIER_NAME[k], '더 센 적이 섞여 나와요 · 도감에 새 몬스터', '#ff6b6b', 2.8); sfx('bossIn'); } }   // 단계 오름 알림
 
   // 회전 칼
   if (G.weapons.sword && !p.dead) {
@@ -3802,12 +3840,12 @@ function drawCampRuin(c) { // 부서진 진지: 그루터기 + 다시 지어지�
 function drawEnemy(e) {
   if (e.camp) { drawCamp(e); return; }
   if (SPR[e.type]) drawSpriteMan(e.type, e.x, e.y, { face: e.face, phase: e.wob, hit: e.hitT > 0, hitT: e.hitT, flash: e.flash > 0, lunge: e.lunge, z: e.z, s: e.small ? 0.6 : 1, gold: e.golden });
+  else drawStickman(e.x, e.y, { color: e.color, s: e.r / 11, face: e.face, phase: e.wob, hit: e.hitT > 0, flash: e.flash > 0, lunge: e.lunge, type: e.type });   // 그림이 없을 때만 막대 인간
   if (e.golden) { // 반짝임 2개
     const t = G.t * 3 + e.id, h = (SPR_INFO[e.type] && SPR_INFO[e.type].h || 40) * IK;
     for (let k = 0; k < 2; k++) { const a = t + k * Math.PI, r = 0.6 + 0.4 * Math.sin(t * 2 + k);
       ctx.fillStyle = `rgba(255,247,194,${r})`; ctx.beginPath(); ctx.arc(e.x + Math.cos(a) * 16, e.y - h * 0.6 + Math.sin(a) * 10, 2.5 * r + 1, 0, 7); ctx.fill(); }
   }
-  else drawStickman(e.x, e.y, { color: e.color, s: e.r / 11, face: e.face, phase: e.wob, hit: e.hitT > 0, flash: e.flash > 0, lunge: e.lunge, type: e.type });
   if ((e.type === 'tank' || e.type === 'e_shaman' || e.type === 'e_charger') && e.hp < e.maxHp) {
     const by = e.y - (SPR[e.type] ? SPR_INFO[e.type].h * IK + 6 : e.r * 2.8);
     ctx.fillStyle = '#222'; ctx.fillRect(e.x - 16, by, 32, 5);
