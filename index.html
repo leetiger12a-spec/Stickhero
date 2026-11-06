@@ -285,7 +285,7 @@ h2 .hb{-webkit-text-stroke:0;text-shadow:none;letter-spacing:0;font-family:"Jua"
 
 <script>
 'use strict';
-const BUILD = 71;
+const BUILD = 72;
 const BOSS_INTERVAL = 180;      // 보스 등장 간격(초)
 const WAVE_INTERVAL = 60;       // 대규모 몰이 이벤트 간격(초)
 const MAX_ENEMIES = 220;
@@ -478,7 +478,7 @@ const metaOf = k => (readJSON(META_KEY) || {})[k] || 0;
 const ACH = [
   { id: 'tower1',  icon: '🏹', name: '첫 망루',       desc: '망루를 처음 지었다',       title: '새내기 영웅', bank: 50,  p: () => [ST.towers, 1] },
   { id: 'evo1',    icon: '✨', name: '첫 진화',       desc: '무기 하나 진화시키기',     title: '진화 마법사', bank: 150, p: () => [ST.evoT.length, 1] },
-  { id: 'evo6',    icon: '🌟', name: '진화 도감',     desc: '무기 6종 모두 진화시키기', title: '무기 박사',  bank: 500, p: () => [ST.evoT.length, 6] },
+  { id: 'evo6',    icon: '🌟', name: '진화 도감',     desc: '무기 8종 모두 진화시키기', title: '무기 박사',  bank: 500, p: () => [ST.evoT.length, 8] },
   { id: 'boss1',   icon: '👑', name: '첫 보스',       desc: '보스 1마리 잡기',          title: '보스 사냥꾼', bank: 100, p: () => [ST.bosses, 1] },
   { id: 'camp1',   icon: '🏴', name: '진지 파괴자',   desc: '적 진지 1개 부수기',       title: '돌격대장',   bank: 100, p: () => [ST.camps, 1] },
   { id: 'kill1k',  icon: '💀', name: '천 마리 사냥',  desc: '적 1,000마리 잡기',        title: '사냥꾼',     bank: 150, p: () => [ST.kills, 1000] },
@@ -695,8 +695,8 @@ function sampFor(n) {
 }
 // 효과음 크기 맞추기 (Build 71): 소리마다 녹음해 잰 음량(tools/perf/loudness.js)을 중요 −20 · 보통 −26 · 잔잔 −35dB 근처로
 // SFX_TARGET: 목표 음량(dB) · SFX_GAIN: 목표에 맞추는 배율 (소리 모양은 그대로, 크기만)
-const SFX_TARGET = { arrow: -35, bark: -26, baseHit: -24, bigBoom: -20, bombBoom: -26, boom: -28, bossIn: -20, break: -26, build: -24, cheer: -22, chestOpen: -20, chestShake: -26, chop: -28, coin: -35, coinCombo: -35, dash: -26, drum: -28, flame: -26, gatling: -30, gem: -35, heal: -24, hit: -33, hurt: -24, level: -20, meow: -26, over: -20, pay: -35, pick: -26, plane: -22, pop: -30, reward: -22, rewardEvo: -20, shing: -28, shoot: -30, shotgun: -26, slam: -26, stack: -33, swing: -35, thud: -26, thunder: -26, tick: -35, toss: -26, unlock: -20, volcano: -26, warn: -20, wave: -22, whirl: -26, woosh: -26, zap: -26 };
-const SFX_GAIN = { arrow: 5.37, bark: 4.03, baseHit: 2.63, bigBoom: 0.86, bombBoom: 0.79, boom: 4.37, bossIn: 0.78, break: 0.84, build: 0.82, cheer: 5.5, chestOpen: 3.43, chestShake: 8.71, chop: 3.8, coin: 2.69, coinCombo: 2.57, dash: 1.1, drum: 0.32, flame: 3.98, gatling: 4.95, gem: 4.12, heal: 3.94, hit: 0.86, hurt: 4.52, level: 1.11, meow: 4.52, over: 0.95, pay: 5.25, pick: 0.83, plane: 0.77, pop: 0.79, reward: 5.69, rewardEvo: 5.56, shing: 2.95, shoot: 4.95, shotgun: 2.48, slam: 0.91, stack: 2.51, swing: 6.24, thud: 0.72, thunder: 0.85, tick: 9.02, toss: 1.0, unlock: 5.82, volcano: 0.69, warn: 1.1, wave: 5.43, whirl: 4.07, woosh: 5.62, zap: 3.94 };
+const SFX_TARGET = { arrow: -35, bark: -26, baseHit: -24, bigBoom: -20, bombBoom: -26, boom: -28, bossIn: -20, break: -26, build: -24, cheer: -22, chestOpen: -20, chestShake: -26, chop: -28, coin: -35, coinCombo: -35, dash: -26, drum: -28, flame: -26, gatling: -30, iceShot: -30, blizzard: -35, xbowShot: -30, gem: -35, heal: -24, hit: -33, hurt: -24, level: -20, meow: -26, over: -20, pay: -35, pick: -26, plane: -22, pop: -30, reward: -22, rewardEvo: -20, shing: -28, shoot: -30, shotgun: -26, slam: -26, stack: -33, swing: -35, thud: -26, thunder: -26, tick: -35, toss: -26, unlock: -20, volcano: -26, warn: -20, wave: -22, whirl: -26, woosh: -26, zap: -26 };
+const SFX_GAIN = { arrow: 5.37, bark: 4.03, baseHit: 2.63, bigBoom: 0.86, bombBoom: 0.79, boom: 4.37, bossIn: 0.78, break: 0.84, build: 0.82, cheer: 5.5, chestOpen: 3.43, chestShake: 8.71, chop: 3.8, coin: 2.69, coinCombo: 2.57, dash: 1.1, drum: 0.32, flame: 3.98, gatling: 4.95, iceShot: 3.09, blizzard: 2.11, xbowShot: 3.31, gem: 4.12, heal: 3.94, hit: 0.86, hurt: 4.52, level: 1.11, meow: 4.52, over: 0.95, pay: 5.25, pick: 0.83, plane: 0.77, pop: 0.79, reward: 5.69, rewardEvo: 5.56, shing: 2.95, shoot: 4.95, shotgun: 2.48, slam: 0.91, stack: 2.51, swing: 6.24, thud: 0.72, thunder: 0.85, tick: 9.02, toss: 1.0, unlock: 5.82, volcano: 0.69, warn: 1.1, wave: 5.43, whirl: 4.07, woosh: 5.62, zap: 3.94 };
 let sfxK = 1;   // 지금 내는 소리의 배율 (tone·noise·samp가 곱함)
 function sfx(n) { sfxK = SFX_GAIN[n] || 1; try { sfxRaw(n); } finally { sfxK = 1; } }
 function sfxRaw(n) {
@@ -758,6 +758,9 @@ function sfxRaw(n) {
     case 'thunder': noise(0.08, 0.2, 7000); noise(0.9, 0.2, 260, 0.05); tone(55, 0.7, 'sine', 0.18, -15, 0.05); break;   // 콰르릉
     case 'volcano': noise(0.35, 0.28, 300); tone(50, 0.45, 'sine', 0.24, -15); tone(110, 0.3, 'sawtooth', 0.06, -50); noise(0.6, 0.05, 5000, 0.15); break;   // 쿠웅 + 지글
     case 'whirl': noise(0.5, 0.1, 1200); tone(380, 0.45, 'sine', 0.03, 520); break;   // 휘이잉
+    case 'iceShot': tone(1760, 0.09, 'sine', 0.05, -500); tone(2637, 0.12, 'sine', 0.03, 0, 0.03); noise(0.08, 0.04, 7000); break;   // 챙그랑 (얼음)
+    case 'blizzard': noise(0.45, 0.06, 2600); tone(900, 0.35, 'sine', 0.015, -300); break;   // 쉬이익 (눈보라)
+    case 'xbowShot': tone(520, 0.1, 'triangle', 0.06, -260); noise(0.05, 0.08, 2500); tone(160, 0.06, 'square', 0.03, -60); break;   // 팅! (시위)
     case 'shing': tone(2093, 0.25, 'sine', 0.04, 0); tone(3136, 0.3, 'sine', 0.03, 0, 0.02); noise(0.12, 0.035, 8000); break;   // 성검 챙
     // 보물 상자 (Build 63)
     case 'chestShake': for (let i = 0; i < 4; i++) { noise(0.05, 0.12, 900, i * 0.11); tone(170, 0.05, 'square', 0.035, -40, i * 0.11); } break;   // 덜컹덜컹
@@ -781,11 +784,15 @@ const WEAP = {
   boomerang: { name: '부메랑',   icon: '🪃', desc: l => l === 0 ? '날아갔다 돌아오며 모두 관통' : l === 2 || l === 4 ? '부메랑 +1개!' : '공격력·사거리 증가' },
   bolt:      { name: '번개 지팡이', icon: '⚡', desc: l => l === 0 ? '번개가 적에서 적으로 튀어요!' : '번개가 한 마리 더 튀고 더 세짐' },
   hammer:    { name: '불꽃 망치',   icon: '🔨', desc: l => l === 0 ? '쾅! 땅을 내려쳐 주변을 불태워요' : '더 넓고 더 뜨겁게!' },
+  ice:       { name: '얼음 지팡이', icon: '❄️', desc: l => l === 0 ? '얼음 조각이 적을 꽁꽁 — 맞으면 느려져요' : l === 2 ? '얼음 조각 +1개!' : '더 세고 더 오래 느려짐' },
+  xbow:      { name: '석궁',       icon: '🏹', desc: l => l === 0 ? '강한 화살이 적 여러 마리를 꿰뚫어요' : l === 3 ? '화살 2발!' : '공격력·관통 증가' },
 };
 // 스테이지를 깨면 열리는 것들 (깬 칸 수 기준, 게임오버 뒤에도 유지)
 const UNLOCKS = [
   { at: 3, kind: 'w', id: 'bolt',   name: '⚡ 번개 지팡이', desc: '레벨업 카드에 새 무기가 나와요' },
+  { at: 4, kind: 'w', id: 'ice',    name: '❄️ 얼음 지팡이', desc: '레벨업 카드에 새 무기가 나와요' },
   { at: 5, kind: 'a', id: 'shield', name: '🐶 강아지 방패병', desc: '영웅 숙소에서 고용할 수 있어요' },
+  { at: 6, kind: 'w', id: 'xbow',   name: '🏹 석궁',       desc: '레벨업 카드에 새 무기가 나와요' },
   { at: 7, kind: 'w', id: 'hammer', name: '🔨 불꽃 망치',   desc: '레벨업 카드에 새 무기가 나와요' },
 ];
 const bestStage = () => Math.max(G ? G.stageN : 0, (readJSON(META_KEY) || {}).maxStage || 0);
@@ -807,6 +814,8 @@ const EVO = {
   boomerang: { need: 'speed',  name: '회오리 부메랑', icon: '🌀', desc: '커다란 부메랑 5개가 휘몰아쳐요' },
   bolt:      { need: 'hp',     name: '천둥 신',      icon: '🌩️', desc: '하늘에서 낙뢰가 여러 적에게 쾅!' },
   hammer:    { need: 'bag',    name: '화산 망치',    icon: '🌋', desc: '더 크게 쾅! 주변에 불길이 솟아요' },
+  ice:       { need: 'magnet', name: '눈보라 왕관',  icon: '❄️', desc: '영웅 주변 눈보라 — 가까운 적 모두 느려지고 아파요' },
+  xbow:      { need: 'speed',  name: '폭풍 석궁',    icon: '🏹', desc: '화살 5발 부채꼴 · 끝까지 꿰뚫어요' },
 };
 // 무기 그림 아이콘 (img/w_무기.webp, 진화는 w_무기_evo.webp) — 못 불러오면 이모지
 const WICON = {};
@@ -834,7 +843,7 @@ function bakedIco(n, h) {
 }
 const wIco = (id, ev) => { const n = id + (ev ? '_evo' : ''); return WICON[n] ? `<img src="img/w_${n}.webp?b=${BUILD}" alt="">` : ev ? EVO[id].icon : WEAP[id].icon; };
 // 무기 그림을 세상 속에 그리기: 그림마다 날 끝 방향(도, 그림 기준)을 맞춰 aim 쪽으로 돌림, 왼쪽을 볼 땐 뒤집어 거꾸로 안 보이게
-const WTIP = { sword: -56, sword_evo: -58, pistol: -35, pistol_evo: -30, shotgun: -38, shotgun_evo: -25, boomerang: -65, boomerang_evo: -59, bolt: -60, bolt_evo: -66, hammer: -60, hammer_evo: -62 };
+const WTIP = { sword: -56, sword_evo: -58, pistol: -35, pistol_evo: -30, shotgun: -38, shotgun_evo: -25, boomerang: -65, boomerang_evo: -59, bolt: -60, bolt_evo: -66, hammer: -60, hammer_evo: -62, ice: -57, ice_evo: -55, xbow: -45, xbow_evo: -40 };
 const wName = id => id + (G.weapons[id] > MAX_WLV ? '_evo' : '');
 function drawWImg(n, x, y, aim, size, o) {
   const im = WICON[n]; if (!im) return false;
@@ -854,14 +863,14 @@ function drawWPoses() {
   for (const id in G.wfx) {
     const f = G.wfx[id], k = 1 - f.t / f.max, n = wName(id), ev = n.endsWith('_evo'), hx = p.x, hy = p.y - 16;
     const fade = Math.min(1, f.t / 0.08);
-    if (id === 'pistol' || id === 'shotgun') {
-      const big = id === 'shotgun' ? 40 : 30, rec = Math.max(0, 1 - k * 3) * 7, d = 20 - rec;
+    if (id === 'pistol' || id === 'shotgun' || id === 'xbow') {
+      const big = id === 'shotgun' ? 40 : id === 'xbow' ? 36 : 30, rec = Math.max(0, 1 - k * 3) * 7, d = 20 - rec;
       drawWImg(n, hx + Math.cos(f.aim) * d, hy + Math.sin(f.aim) * d, f.aim, ev ? big + 10 : big, { flip: true, alpha: fade });
-      if (k < 0.35) { const md = d + (ev ? big + 10 : big) * 0.5; ctx.fillStyle = id === 'shotgun' && ev ? 'rgba(255,120,0,.9)' : 'rgba(255,230,120,.95)';
+      if (k < 0.35 && id !== 'xbow') { const md = d + (ev ? big + 10 : big) * 0.5; ctx.fillStyle = id === 'shotgun' && ev ? 'rgba(255,120,0,.9)' : 'rgba(255,230,120,.95)';
         ctx.beginPath(); ctx.arc(hx + Math.cos(f.aim) * md, hy + Math.sin(f.aim) * md, (ev ? 9 : 6) * (1 - k * 2), 0, 7); ctx.fill(); }
-    } else if (id === 'bolt') { // 지팡이를 머리 위로 치켜듦
+    } else if (id === 'bolt' || id === 'ice') { // 지팡이를 머리 위로 치켜듦
       const up = -Math.PI / 2 + p.face * 0.35, lift = Math.min(1, k * 4) * 10;
-      drawWImg(n, hx + p.face * 14, hy - 14 - lift, up, ev ? 46 : 38, { alpha: fade, glow: ev ? '#ffe066' : '#9fd8ff' });
+      drawWImg(n, hx + p.face * 14, hy - 14 - lift, up, ev ? 46 : 38, { alpha: fade, glow: id === 'ice' ? '#bde8ff' : ev ? '#ffe066' : '#9fd8ff' });
     } else if (id === 'hammer') { // 머리 위에서 앞쪽 땅으로 쾅
       const sw = Math.min(1, k / 0.35), a0 = p.face > 0 ? -Math.PI * 0.85 : -Math.PI * 0.15, a1 = p.face > 0 ? Math.PI * 0.2 : Math.PI * 0.8;
       const a = a0 + (a1 - a0) * sw * sw, L = ev ? 30 : 24;
@@ -940,6 +949,8 @@ function wStat(id) {
     case 'boomerang': return { cd: 1.2, count: 5, dmg: 52, range: 270, big: true };
     case 'bolt': return { cd: 0.9, dmg: 50, chain: 9, reach: 150, sky: 5 };
     case 'hammer': return { cd: 1.6, dmg: 95, rad: 175, fire: true };
+    case 'ice': return { cd: 0.5, dmg: 22, count: 1, slow: 2, aura: 130 };
+    case 'xbow': return { cd: 0.8, dmg: 60, shots: 5, pierce: 99, spread: 0.55 };
   }
   switch (id) {
     case 'sword': return { n: 1 + l, dmg: 8 + 4 * l, rad: 50 + 6 * l, spd: 3.2 + 0.3 * l };
@@ -948,6 +959,8 @@ function wStat(id) {
     case 'boomerang': return { cd: 1.8 - 0.1 * l, count: l >= 5 ? 3 : l >= 3 ? 2 : 1, dmg: 14 + 5 * l, range: 170 + 15 * l };
     case 'bolt': return { cd: 1.5 - 0.1 * l, dmg: 16 + 6 * l, chain: 2 + l, reach: 130 };
     case 'hammer': return { cd: 2.8 - 0.2 * l, dmg: 26 + 10 * l, rad: 70 + 12 * l };
+    case 'ice': return { cd: 1.0 - 0.06 * l, dmg: 12 + 5 * l, count: l >= 3 ? 2 : 1, slow: 1.2 + 0.15 * l };
+    case 'xbow': return { cd: 1.1 - 0.07 * l, dmg: 22 + 8 * l, shots: l >= 4 ? 2 : 1, pierce: 2 + Math.floor(l / 2), spread: 0.14 };
   }
 }
 function recalcStats() {
@@ -1398,7 +1411,7 @@ let choices = [];
 function openLevelUp() {
   state = 'levelup'; joy = null;
   const pool = [];
-  for (const id in WEAP) { const l = G.weapons[id] || 0; if (l < MAX_WLV && (l > 0 || isUnlocked('w', id))) pool.push({ kind: 'w', id, l, w: l === 0 ? 1.3 : 1 }); }
+  for (const id in WEAP) { const l = G.weapons[id] || 0; if (l < MAX_WLV && (l > 0 || isUnlocked('w', id))) pool.push({ kind: 'w', id, l, w: l === 0 ? 1.1 : 1.3 }); }
   for (const id in PASS) { const l = G.passives[id] || 0; if (l < PASS[id].max) pool.push({ kind: 'p', id, l, w: 0.8 }); }
   const evo = Object.keys(EVO).filter(id => canEvolve(id));   // 진화 카드는 꼭 먼저 보여줌
   choices = evo.slice(0, 2).map(id => ({ kind: 'evo', id, l: MAX_WLV }));
@@ -2745,6 +2758,24 @@ function fireWeapons(dt) {
       burst(p.x, p.y, '#ff7b00', 26, s.rad * 3, 6, 0.5); burst(p.x, p.y, '#ffd23f', 14, s.rad * 2, 5, 0.4);
       G.shake = Math.max(G.shake, 7); p.slam = 0.25; sfx(s.fire ? 'volcano' : 'slam'); vib(30); wPose('hammer', 0, 0.4);
       if (s.fire) for (let k = 0; k < 6; k++) { const a = k / 6 * Math.PI * 2 + rand(-0.2, 0.2), d = s.rad * rand(0.5, 0.85); addFlame(p.x + Math.cos(a) * d, p.y + Math.sin(a) * d, 34, 2.5); }   // 화산 망치
+    } else if (id === 'ice') { // 얼음 조각: 맞은 적은 잠깐 느려짐 / 눈보라 왕관: 주변 적 모두
+      if (s.aura) {
+        for (const e of G.enemies) { if (e.dead || e.camp) continue; const dx = e.x - p.x, dy = e.y - p.y; if (dx * dx + dy * dy < (s.aura + e.r) ** 2) { e.slowT = Math.max(e.slowT || 0, 1); hurtEnemy(e, s.dmg, 0, 0, 0); } }
+        G.iceK = ((G.iceK || 0) + 1) % 2;
+      }
+      if (!s.aura || G.iceK === 0) {
+        for (let k = 0; k < s.count; k++) {
+          const a = ang + (k - (s.count - 1) / 2) * 0.22;
+          G.bullets.push({ x: ox, y: oy - 20, vx: Math.cos(a) * 430, vy: Math.sin(a) * 430, r: 6, dmg: s.dmg * (s.aura ? 1.5 : 1), life: 1.0, pierce: 0, hits: [], kind: 'ice', slow: s.slow });
+        }
+        wPose('ice', ang, 0.35); sfx('iceShot');
+      } else sfx('blizzard');
+    } else if (id === 'xbow') { // 석궁: 굵은 화살이 여러 마리 관통
+      for (let k = 0; k < s.shots; k++) {
+        const a = ang + (k - (s.shots - 1) / 2) * (s.shots > 1 ? s.spread / Math.max(1, (s.shots - 1) / 2) / 2 : 0);
+        G.bullets.push({ x: ox, y: oy, vx: Math.cos(a) * 640, vy: Math.sin(a) * 640, r: 5, dmg: s.dmg, life: 0.8, pierce: s.pierce, hits: [], kind: 'xbow', big: s.shots >= 5 });
+      }
+      wPose('xbow', ang, 0.3); sfx('xbowShot');
     }
     G.timers[id] = s.cd * p.cdMul;
   }
@@ -2879,7 +2910,8 @@ function update(dt) {
       if ((e.x - b.x) ** 2 + (e.y - b.y) ** 2 < rr * rr && !b.hits.includes(e.id)) {
         b.hits.push(e.id);
         const l = Math.hypot(b.vx, b.vy);
-        hurtEnemy(e, b.dmg, b.vx / l, b.vy / l, b.kind === 'shot' || b.kind === 'flame' ? 220 : 140);
+        if (b.slow) { e.slowT = Math.max(e.slowT || 0, b.slow); burst(b.x, b.y, '#dff6ff', 5, 100, 3, 0.25); }   // 얼음: 느려짐
+        hurtEnemy(e, b.dmg, b.vx / l, b.vy / l, b.kind === 'shot' || b.kind === 'flame' ? 220 : b.kind === 'xbow' ? 90 : 140);
         if (b.pierce-- <= 0) b.life = 0;
       }
     }
@@ -2912,7 +2944,7 @@ function update(dt) {
   // 적
   for (const e of G.enemies) {
     if (e.dead) continue;
-    e.flash -= dt; e.hitT -= dt; e.swordCd -= dt; e.lunge -= dt; e.wob += dt * (e.hitT > 0 ? 3 : 9);
+    e.flash -= dt; e.hitT -= dt; e.swordCd -= dt; e.lunge -= dt; e.wob += dt * (e.hitT > 0 ? 3 : 9); if (e.slowT > 0) e.slowT -= dt;
     if (e.camp) continue;   // 적 진지는 움직이지 않음
     const pdx = p.x - e.x, pdy = p.y - 6 - e.y, pd = Math.hypot(pdx, pdy) || 1;
     // 마을: 영웅이 가까우면 영웅을, 아니면 마을을 노림 / 스테이지: 영웅을 발견하면 쫓아옴
@@ -2991,7 +3023,7 @@ function update(dt) {
       if (T === 'e_demon') e.z = 16 + Math.sin(e.wob * 0.7) * 5;
       if (T === 'e_ghost') e.z = 8 + Math.sin(e.wob * 0.5) * 6;
       if (T === 'e_bomber' && chase && pd < e.r + p.r + 12) { bomberBoom(e); continue; }
-      const sp = (e.hitT > 0 ? 0.35 : 1) * (idle ? 0.15 : 1) * e.spd * far * spm;
+      const sp = (e.hitT > 0 ? 0.35 : 1) * (idle ? 0.15 : 1) * (e.slowT > 0 ? 0.5 : 1) * e.spd * far * spm;   // 얼음 맞으면 절반 속도
       e.x += mx * sp * dt; e.y += my * sp * dt;
     }
     e.x += e.kx * dt; e.y += e.ky * dt;
@@ -3135,7 +3167,8 @@ function update(dt) {
 function updBoss(e, dt, dx, dy, d) {
   e.st -= dt;
   if (e.mode === 'walk') {
-    e.x += dx / d * e.spd * dt; e.y += dy / d * e.spd * dt;
+    const sl = e.slowT > 0 ? 0.75 : 1;   // 보스는 얼음에 덜 느려짐
+    e.x += dx / d * e.spd * sl * dt; e.y += dy / d * e.spd * sl * dt;
     if (e.st <= 0) {
       const r = Math.random();
       if (r < 0.38) { startSpecial(e, dx, dy, d); }
@@ -3938,6 +3971,7 @@ function drawEnemy(e) {
   if (e.camp) { drawCamp(e); return; }
   if (e.slamT > 0) { const k = 1 - e.slamT / 0.85; ctx.fillStyle = `rgba(255,40,40,${0.12 + 0.18 * k})`; ctx.strokeStyle = `rgba(255,40,40,${0.5 + 0.4 * Math.sin(G.t * 30)})`; ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(e.x, e.y, 95, 0, 7); ctx.fill(); ctx.stroke(); }   // 오우거 내려찍기 경고
   if (e.aimT > 0) { ctx.strokeStyle = `rgba(255,40,40,${0.4 + 0.35 * Math.sin(G.t * 30)})`; ctx.lineWidth = e.r * 1.4; ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(e.x, e.y); ctx.lineTo(e.x + e.ddx * 200, e.y + e.ddy * 200); ctx.stroke(); }   // 기사 돌진 경고선
+  if (e.slowT > 0 && !(e.hideT > 0)) { ctx.fillStyle = 'rgba(190,232,255,.55)'; ctx.strokeStyle = 'rgba(255,255,255,.8)'; ctx.lineWidth = 2; ctx.beginPath(); ctx.ellipse(e.x, e.y, e.r * 1.3, e.r * 0.9, 0, 0, 7); ctx.fill(); ctx.stroke(); }   // 얼음에 느려진 적: 발밑 얼음
   if (e.hideT > 0) { ctx.globalAlpha = 0.18; }   // 숨은 암살자: 거의 안 보임
   if (SPR[e.type]) drawSpriteMan(e.type, e.x, e.y, { face: e.face, phase: e.wob, hit: e.hitT > 0, hitT: e.hitT, flash: e.flash > 0, lunge: e.lunge, z: e.z, s: e.scale || (e.small ? 0.6 : 1), gold: e.golden });
   else drawStickman(e.x, e.y, { color: e.color, s: e.r / 11, face: e.face, phase: e.wob, hit: e.hitT > 0, flash: e.flash > 0, lunge: e.lunge, type: e.type });   // 그림이 없을 때만 막대 인간
@@ -4130,6 +4164,20 @@ function drawWorld() {
       ctx.fillStyle = '#ddd'; ctx.beginPath(); ctx.moveTo(b.x + ux * 5, b.y + uy * 5); ctx.lineTo(b.x - uy * 3, b.y + ux * 3); ctx.lineTo(b.x + uy * 3, b.y - ux * 3); ctx.fill();
       continue;
     }
+    if (b.kind === 'ice') { // 얼음 조각: 빙글 도는 다이아몬드
+      ctx.save(); ctx.translate(b.x, b.y); ctx.rotate(G.t * 10 + b.x * 0.01);
+      ctx.fillStyle = '#bde8ff'; ctx.strokeStyle = '#fff'; ctx.lineWidth = 2; ctx.shadowColor = '#7cc8ff'; ctx.shadowBlur = 8;
+      ctx.beginPath(); ctx.moveTo(0, -9); ctx.lineTo(6, 0); ctx.lineTo(0, 9); ctx.lineTo(-6, 0); ctx.closePath(); ctx.fill(); ctx.stroke(); ctx.restore(); continue;
+    }
+    if (b.kind === 'xbow') { // 석궁 화살 (폭풍 석궁은 금빛 + 번개 꼬리)
+      const ux = b.vx / l, uy = b.vy / l, L = b.big ? 30 : 24;
+      if (b.big) { ctx.strokeStyle = 'rgba(159,216,255,.6)'; ctx.lineWidth = 7; ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(b.x - ux * L * 1.6, b.y - uy * L * 1.6); ctx.lineTo(b.x, b.y); ctx.stroke(); }
+      ctx.strokeStyle = b.big ? '#c98a00' : '#6b4226'; ctx.lineWidth = 3.5; ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(b.x - ux * L, b.y - uy * L); ctx.lineTo(b.x, b.y); ctx.stroke();
+      ctx.fillStyle = b.big ? '#ffd23f' : '#dfe6ee'; ctx.strokeStyle = '#2b2d42'; ctx.lineWidth = 1.5;
+      ctx.beginPath(); ctx.moveTo(b.x + ux * 8, b.y + uy * 8); ctx.lineTo(b.x - uy * 5, b.y + ux * 5); ctx.lineTo(b.x + uy * 5, b.y - ux * 5); ctx.closePath(); ctx.fill(); ctx.stroke();
+      ctx.fillStyle = '#e63946'; ctx.beginPath(); ctx.moveTo(b.x - ux * L, b.y - uy * L); ctx.lineTo(b.x - ux * (L - 7) - uy * 5, b.y - uy * (L - 7) + ux * 5); ctx.lineTo(b.x - ux * (L - 7) + uy * 5, b.y - uy * (L - 7) - ux * 5); ctx.fill();
+      continue;
+    }
     if (b.kind === 'flame') { // 용의 숨결 불꽃
       ctx.fillStyle = `rgba(255,${120 + Math.floor(b.life * 200)},0,.85)`; ctx.beginPath(); ctx.arc(b.x, b.y, 7 + (0.42 - b.life) * 14, 0, 7); ctx.fill(); continue;
     }
@@ -4146,6 +4194,12 @@ function drawWorld() {
     ctx.strokeStyle = '#c77d3a'; ctx.lineWidth = 5.5;
     ctx.beginPath(); ctx.moveTo(-13, 9); ctx.lineTo(0, -4); ctx.lineTo(13, 9); ctx.stroke();
     ctx.restore();
+  }
+  if (G.weapons.ice > MAX_WLV && !G.p.dead) { // 눈보라 왕관: 영웅 주변 눈발
+    const p = G.p, R = wStat('ice').aura;
+    ctx.fillStyle = 'rgba(190,232,255,.10)'; ctx.strokeStyle = 'rgba(220,242,255,.45)'; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(p.x, p.y, R, 0, 7); ctx.fill(); ctx.stroke();
+    ctx.fillStyle = 'rgba(255,255,255,.9)';
+    for (let k = 0; k < 14; k++) { const a = G.t * (k % 2 ? 1.6 : -1.1) + k * 0.45, rr = R * (0.45 + 0.5 * ((k * 37) % 10) / 10); ctx.beginPath(); ctx.arc(p.x + Math.cos(a) * rr, p.y + Math.sin(a) * rr, 2.5, 0, 7); ctx.fill(); }
   }
   drawWPoses(); drawFists(); drawFlames();
   for (const b of G.ebullets) {
