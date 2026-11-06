@@ -285,7 +285,7 @@ h2 .hb{-webkit-text-stroke:0;text-shadow:none;letter-spacing:0;font-family:"Jua"
 
 <script>
 'use strict';
-const BUILD = 70;
+const BUILD = 71;
 const BOSS_INTERVAL = 180;      // 보스 등장 간격(초)
 const WAVE_INTERVAL = 60;       // 대규모 몰이 이벤트 간격(초)
 const MAX_ENEMIES = 220;
@@ -583,7 +583,9 @@ function applyVol() { if (master) master.gain.value = 0.75 * vol.s; if (musicBus
 function audioInit() {
   if (!AC) {
     try {
-      AC = new (window.AudioContext || window.webkitAudioContext)(); master = AC.createGain(); master.gain.value = 0.6; master.connect(AC.destination);
+      AC = new (window.AudioContext || window.webkitAudioContext)(); master = AC.createGain(); master.gain.value = 0.6;
+      const lim = AC.createDynamicsCompressor(); lim.threshold.value = -8; lim.knee.value = 6; lim.ratio.value = 8; lim.attack.value = 0.003; lim.release.value = 0.15;   // 효과음이 한꺼번에 많이 나도 찢어지지 않게 (Build 71)
+      master.connect(lim); lim.connect(AC.destination);
       musicBus = AC.createGain(); musicBus.gain.value = 0.32; musicBus.connect(AC.destination); applyVol();
       loadAudio();
     } catch (e) { AC = null; }
@@ -609,7 +611,7 @@ function loadAudio() {
 function samp(n, vol, rate, delay) {
   if (!AC || muted || !AUD[n]) return false;
   const s = AC.createBufferSource(), g = AC.createGain();
-  s.buffer = AUD[n]; s.playbackRate.value = rate || 1; g.gain.value = vol === undefined ? 0.5 : vol;
+  s.buffer = AUD[n]; s.playbackRate.value = rate || 1; g.gain.value = (vol === undefined ? 0.5 : vol) * sfxK;
   s.connect(g); g.connect(master); s.start(AC.currentTime + (delay || 0));
   return true;
 }
@@ -648,7 +650,7 @@ function tone(freq, dur, type, vol, slide, delay) {
   o.type = type || 'square';
   o.frequency.setValueAtTime(freq, t);
   if (slide) o.frequency.exponentialRampToValueAtTime(Math.max(20, freq + slide), t + dur);
-  g.gain.setValueAtTime(vol || 0.08, t);
+  g.gain.setValueAtTime((vol || 0.08) * sfxK, t);
   g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
   o.connect(g); g.connect(master); o.start(t); o.stop(t + dur + 0.02);
 }
@@ -662,7 +664,7 @@ function noise(dur, vol, freq, delay) {
   const t = AC.currentTime + (delay || 0);
   const s = AC.createBufferSource(), f = AC.createBiquadFilter(), g = AC.createGain();
   s.buffer = noiseBuf; f.type = 'lowpass'; f.frequency.value = freq || 1200;
-  g.gain.setValueAtTime(vol || 0.15, t); g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+  g.gain.setValueAtTime((vol || 0.15) * sfxK, t); g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
   s.connect(f); f.connect(g); g.connect(master); s.start(t); s.stop(t + dur + 0.02);
 }
 const sfxGap = { gatling: 0.11, flame: 0.25, thunder: 0.5, volcano: 0.2, whirl: 0.3, shing: 0.5, tick: 0.06, zap: 0.06, bark: 0.4, meow: 0.3, stack: 0.05, coinCombo: 0.04, bombBoom: 0.08, toss: 0.15, hit: 0.045, shoot: 0.07, thud: 0.12, chop: 0.08, coin: 0.04, pay: 0.06, arrow: 0.08, shotgun: 0.1, gem: 0.035, pop: 0.05, swing: 0.25, boom: 0.15, hurt: 0.15 };
@@ -691,7 +693,13 @@ function sampFor(n) {
   }
   return false;
 }
-function sfx(n) {
+// 효과음 크기 맞추기 (Build 71): 소리마다 녹음해 잰 음량(tools/perf/loudness.js)을 중요 −20 · 보통 −26 · 잔잔 −35dB 근처로
+// SFX_TARGET: 목표 음량(dB) · SFX_GAIN: 목표에 맞추는 배율 (소리 모양은 그대로, 크기만)
+const SFX_TARGET = { arrow: -35, bark: -26, baseHit: -24, bigBoom: -20, bombBoom: -26, boom: -28, bossIn: -20, break: -26, build: -24, cheer: -22, chestOpen: -20, chestShake: -26, chop: -28, coin: -35, coinCombo: -35, dash: -26, drum: -28, flame: -26, gatling: -30, gem: -35, heal: -24, hit: -33, hurt: -24, level: -20, meow: -26, over: -20, pay: -35, pick: -26, plane: -22, pop: -30, reward: -22, rewardEvo: -20, shing: -28, shoot: -30, shotgun: -26, slam: -26, stack: -33, swing: -35, thud: -26, thunder: -26, tick: -35, toss: -26, unlock: -20, volcano: -26, warn: -20, wave: -22, whirl: -26, woosh: -26, zap: -26 };
+const SFX_GAIN = { arrow: 5.37, bark: 4.03, baseHit: 2.63, bigBoom: 0.86, bombBoom: 0.79, boom: 4.37, bossIn: 0.78, break: 0.84, build: 0.82, cheer: 5.5, chestOpen: 3.43, chestShake: 8.71, chop: 3.8, coin: 2.69, coinCombo: 2.57, dash: 1.1, drum: 0.32, flame: 3.98, gatling: 4.95, gem: 4.12, heal: 3.94, hit: 0.86, hurt: 4.52, level: 1.11, meow: 4.52, over: 0.95, pay: 5.25, pick: 0.83, plane: 0.77, pop: 0.79, reward: 5.69, rewardEvo: 5.56, shing: 2.95, shoot: 4.95, shotgun: 2.48, slam: 0.91, stack: 2.51, swing: 6.24, thud: 0.72, thunder: 0.85, tick: 9.02, toss: 1.0, unlock: 5.82, volcano: 0.69, warn: 1.1, wave: 5.43, whirl: 4.07, woosh: 5.62, zap: 3.94 };
+let sfxK = 1;   // 지금 내는 소리의 배율 (tone·noise·samp가 곱함)
+function sfx(n) { sfxK = SFX_GAIN[n] || 1; try { sfxRaw(n); } finally { sfxK = 1; } }
+function sfxRaw(n) {
   if (!AC || muted) return;
   const now = AC.currentTime;
   if (sfxGap[n] && sfxLast[n] && now - sfxLast[n] < sfxGap[n]) return;
@@ -728,7 +736,7 @@ function sfx(n) {
       const t = AC.currentTime, o = AC.createOscillator(), f = AC.createBiquadFilter(), g = AC.createGain(), p = 1 + Math.random() * 0.3;
       o.type = 'sawtooth'; o.frequency.setValueAtTime(420 * p, t); o.frequency.linearRampToValueAtTime(820 * p, t + 0.12); o.frequency.linearRampToValueAtTime(520 * p, t + 0.38);
       f.type = 'bandpass'; f.Q.value = 4; f.frequency.setValueAtTime(900, t); f.frequency.linearRampToValueAtTime(1800, t + 0.12); f.frequency.linearRampToValueAtTime(1000, t + 0.38);
-      g.gain.setValueAtTime(0.0001, t); g.gain.linearRampToValueAtTime(0.16, t + 0.05); g.gain.exponentialRampToValueAtTime(0.0001, t + 0.42);
+      g.gain.setValueAtTime(0.0001, t); g.gain.linearRampToValueAtTime(0.16 * sfxK, t + 0.05); g.gain.exponentialRampToValueAtTime(0.0001, t + 0.42);
       o.connect(f); f.connect(g); g.connect(master); o.start(t); o.stop(t + 0.45);
       break;
     }
