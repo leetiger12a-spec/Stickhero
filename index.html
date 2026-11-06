@@ -52,6 +52,9 @@ canvas{display:block;position:fixed;inset:0;width:100%;height:100%}
 .ci .ic{height:56px;width:56px;display:grid;place-items:center;font-size:38px}.ci .ic img{max-width:56px;max-height:56px;object-fit:contain}
 .ci .nm{font-size:15px;line-height:1.15}.ci .lv{font-size:12px;color:#fff;background:#e63946;border-radius:7px;padding:0 6px}.ci .lv.evo{background:linear-gradient(90deg,#ff9f1c,#ffd23f);color:#222}.ci .lv.new{background:#2a9d8f}.ci .lv.gold{background:#b8860b}
 .ci.spin .nm,.ci.spin .lv{visibility:hidden}.ci.done{animation:pop .3s ease-out}.ci.evo{border-color:#ffb703;background:linear-gradient(#fff8d6,#ffe9a0);box-shadow:0 4px 0 #b8860b,0 0 16px rgba(255,210,63,.9)}
+.volBox{display:flex;flex-direction:column;gap:8px;width:min(88vw,340px);background:linear-gradient(#fffdf7,#fff1d6);color:#2b2d42;border:3px solid #2b2d42;border-radius:16px;padding:14px 16px;box-shadow:0 4px 0 #2b2d42;text-align:left;margin-bottom:6px}
+.volBox label{font-size:17px;display:flex;justify-content:space-between}.volBox b{font-weight:400;color:#1d6fa5}
+.volBox input{width:100%;accent-color:#ff9a00;height:28px}.volBox small{font-size:12px;color:#6b5b4b;line-height:1.4}
 #dexList{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;width:min(94vw,420px);max-height:62vh;overflow-y:auto;padding:2px 2px 6px;box-sizing:border-box}
 .dexH{grid-column:1/-1;text-align:left;color:#ffd23f;font-size:14px;margin:4px 2px 0}
 .dex{position:relative;display:flex;flex-direction:column;align-items:center;gap:2px;background:linear-gradient(#fffdf7,#fff1d6);color:#2b2d42;border:3px solid #2b2d42;border-radius:14px;padding:6px 4px 8px;box-shadow:0 3px 0 #2b2d42;min-width:0}
@@ -169,7 +172,7 @@ h2 .hb{-webkit-text-stroke:0;text-shadow:none;letter-spacing:0;font-family:"Jua"
    <button class="btn big" id="bStart">⚔ 출전!</button>
   </div>
   <div class="best" id="bestTitle"></div>
-  <div class="mrow"><button class="hb" id="bHelp">❓ 조작법</button><button class="hb" id="bStory" style="display:none">📖 이야기</button><button class="hb" id="bMusicT">🎵 음악</button><button class="hb" id="bWard">🎨 꾸미기</button><button class="hb" id="bShopT">💪 강화</button><button class="hb" id="bAchT">🏅 업적</button></div>
+  <div class="mrow"><button class="hb" id="bHelp">❓ 조작법</button><button class="hb" id="bStory" style="display:none">📖 이야기</button><button class="hb" id="bMusicT">🎵 음악</button><button class="hb" id="bVolT">🔈 소리 크기</button><button class="hb" id="bWard">🎨 꾸미기</button><button class="hb" id="bShopT">💪 강화</button><button class="hb" id="bAchT">🏅 업적</button></div>
   <div class="hint" id="helpBox" style="display:none">📱 화면을 끌어서 이동 · 공격은 자동<br>🌳 나무 옆에 서면 통나무를 모아요 → 🪵 동그라미 위에 서면 건설!<br>⚔ 출격 문으로 모험 → 보스를 잡고 금화를 가져와요<br>📻 위험할 땐 지원 버튼! SKYFANG 비행기가 폭격 (60초마다)<br>💻 WASD / 방향키 이동 · E 지원 요청 · P 일시정지</div>
  </div>
 </div>
@@ -210,6 +213,16 @@ h2 .hb{-webkit-text-stroke:0;text-shadow:none;letter-spacing:0;font-family:"Jua"
   <div id="chestItems"></div>
   <div class="sub" id="chestHint" style="margin:6px 0 0;font-size:14px">화면을 누르면 바로 열려요</div>
   <button class="btn" id="bChestOk" style="display:none">좋아!</button>
+</div>
+
+<div class="ov" id="ovVol">
+  <h2 style="margin-bottom:10px">🔈 소리 크기</h2>
+  <div class="volBox">
+    <label for="volM">🎵 음악 <b id="volMv"></b></label><input type="range" id="volM" min="0" max="100" step="5">
+    <label for="volS">🔊 효과음 <b id="volSv"></b></label><input type="range" id="volS" min="0" max="100" step="5">
+    <small>효과음 막대를 움직이면 "띠링" 소리로 크기를 들어볼 수 있어요 · 휴대폰 음량이 먼저예요</small>
+  </div>
+  <button class="btn" id="bVolOk">완료</button>
 </div>
 
 <div class="ov" id="ovDex">
@@ -258,7 +271,7 @@ h2 .hb{-webkit-text-stroke:0;text-shadow:none;letter-spacing:0;font-family:"Jua"
   <button class="btn" id="bResume">계속하기</button>
   <button class="btn blue" id="bShopP">💪 영웅 강화</button>
   <button class="btn" id="bAchP">🏅 업적</button>
-  <div class="mrow" style="margin:6px 0 10px"><button class="hb" id="bMusicP" style="width:auto;padding:0 14px;font-weight:800">🎵 음악</button><button class="hb" id="bVibP" style="width:auto;padding:0 14px;font-weight:800">📳 진동</button><button class="hb" id="bEvoP" style="width:auto;padding:0 14px;font-weight:800">✨ 진화 도감</button><button class="hb" id="bDexP" style="width:auto;padding:0 14px;font-weight:800">📖 몬스터 도감</button></div>
+  <div class="mrow" style="margin:6px 0 10px"><button class="hb" id="bMusicP" style="width:auto;padding:0 14px;font-weight:800">🎵 음악</button><button class="hb" id="bVolP" style="width:auto;padding:0 14px;font-weight:800">🔈 소리 크기</button><button class="hb" id="bVibP" style="width:auto;padding:0 14px;font-weight:800">📳 진동</button><button class="hb" id="bEvoP" style="width:auto;padding:0 14px;font-weight:800">✨ 진화 도감</button><button class="hb" id="bDexP" style="width:auto;padding:0 14px;font-weight:800">📖 몬스터 도감</button></div>
   <button class="btn gray" id="bQuit">처음으로</button>
 </div>
 
@@ -272,7 +285,7 @@ h2 .hb{-webkit-text-stroke:0;text-shadow:none;letter-spacing:0;font-family:"Jua"
 
 <script>
 'use strict';
-const BUILD = 69;
+const BUILD = 70;
 const BOSS_INTERVAL = 180;      // 보스 등장 간격(초)
 const WAVE_INTERVAL = 60;       // 대규모 몰이 이벤트 간격(초)
 const MAX_ENEMIES = 220;
@@ -563,11 +576,15 @@ let AC = null, master = null, muted = false;
 let musicOn = true, vibOn = true;
 try { musicOn = localStorage.getItem('stickhero_music') !== '0'; vibOn = localStorage.getItem('stickhero_vib') !== '0'; muted = localStorage.getItem('stickhero_mute') === '1'; } catch (e) {}
 let musicBus = null;
+// 소리 크기 (Build 70): 효과음·음악 따로 0~100% (기본 80% · 70%)
+let vol = { s: 0.8, m: 0.7 };
+try { const v = JSON.parse(localStorage.getItem('stickhero_vol')); if (v && v.s >= 0 && v.m >= 0) vol = { s: Math.min(1, v.s), m: Math.min(1, v.m) }; } catch (e) {}
+function applyVol() { if (master) master.gain.value = 0.75 * vol.s; if (musicBus) musicBus.gain.value = 0.457 * vol.m; }   // 기본값이 예전 크기(0.6·0.32)와 같게
 function audioInit() {
   if (!AC) {
     try {
       AC = new (window.AudioContext || window.webkitAudioContext)(); master = AC.createGain(); master.gain.value = 0.6; master.connect(AC.destination);
-      musicBus = AC.createGain(); musicBus.gain.value = 0.32; musicBus.connect(AC.destination);
+      musicBus = AC.createGain(); musicBus.gain.value = 0.32; musicBus.connect(AC.destination); applyVol();
       loadAudio();
     } catch (e) { AC = null; }
   }
@@ -1307,7 +1324,7 @@ function refreshTitle() {
 }
 
 // ---------- 화면 전환 ----------
-function showOv(id) { ['ovTitle', 'ovLevel', 'ovPause', 'ovOver', 'ovStory', 'ovMap', 'ovClear', 'ovWard', 'ovShop', 'ovAch', 'ovEvo', 'ovChest', 'ovDex'].forEach(o => $(o).classList.toggle('show', o === id)); }
+function showOv(id) { ['ovTitle', 'ovLevel', 'ovPause', 'ovOver', 'ovStory', 'ovMap', 'ovClear', 'ovWard', 'ovShop', 'ovAch', 'ovEvo', 'ovChest', 'ovDex', 'ovVol'].forEach(o => $(o).classList.toggle('show', o === id)); }
 function startGame() {
   audioInit(); clearSave(); newGame(); state = 'play'; joy = null; showOv(null);
   $('hudBtns').classList.add('show');
@@ -1356,6 +1373,14 @@ function refreshSettings() {
 const toggleMusic = () => { audioInit(); musicOn = !musicOn; try { localStorage.setItem('stickhero_music', musicOn ? '1' : '0'); } catch (e) {} if (!musicOn && bgmCur) { const k = bgmCur.key; playBgm('__none'); bgmWant = k; } refreshSettings(); };
 $('bMusicT').onclick = toggleMusic; $('bMusicP').onclick = toggleMusic;
 $('bVibP').onclick = () => { vibOn = !vibOn; try { localStorage.setItem('stickhero_vib', vibOn ? '1' : '0'); } catch (e) {} if (vibOn) vib(40, true); refreshSettings(); };
+let volBack = null, volPingT = 0;
+function openVol() { audioInit(); volBack = state; state = 'vol'; showVol(); showOv('ovVol'); }
+function showVol() { $('volM').value = Math.round(vol.m * 100); $('volS').value = Math.round(vol.s * 100); $('volMv').textContent = Math.round(vol.m * 100) + '%'; $('volSv').textContent = Math.round(vol.s * 100) + '%'; }
+function setVol(k, v) { vol[k] = v / 100; applyVol(); showVol(); try { localStorage.setItem('stickhero_vol', JSON.stringify(vol)); } catch (e) {} }
+$('volM').oninput = e => setVol('m', +e.target.value);
+$('volS').oninput = e => { setVol('s', +e.target.value); const t = performance.now(); if (t - volPingT > 180) { volPingT = t; delete sfxLast.reward; sfx('reward'); } };
+$('bVolT').onclick = () => { sfx('pick'); openVol(); }; $('bVolP').onclick = () => { sfx('pick'); openVol(); };
+$('bVolOk').onclick = () => { sfx('pick'); if (volBack === 'title' || !G) { state = 'title'; refreshTitle(); showOv('ovTitle'); } else { state = 'paused'; showOv('ovPause'); } };
 refreshSettings();
 document.addEventListener('visibilitychange', () => { if (document.hidden) { saveGame(); if (state === 'play') togglePause(); } });
 window.addEventListener('pagehide', saveGame);
