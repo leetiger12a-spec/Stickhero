@@ -20,7 +20,7 @@ const { chromium } = require('/opt/node22/lib/node_modules/playwright');
   await page.evaluate(() => { SH.G.p.x = 2000; SH.G.p.y = 0; keys.d = true; }); await page.waitForTimeout(200);
   const pr = await page.evaluate(() => { keys.d = false; return Math.hypot(SH.G.p.x, SH.G.p.y); }); console.log('edge', pr); check(pr > 1000 && pr < 1100, 'world edge clamp wrong');
   // 진지 앞으로
-  const n0 = await page.evaluate(() => { const c = SH.G.camps[0]; SH.G.p.x = c.x * 0.86; SH.G.p.y = c.y * 0.86; SH.G.spawnAcc = -1e9; SH.G.bt = 200; c.spawnT = 0.05; return SH.G.enemies.filter(e => !e.camp).length; });
+  const n0 = await page.evaluate(() => { const c = SH.G.camps[0]; SH.G.p.x = c.x * 0.86; SH.G.p.y = c.y * 0.86; SH.G.spawnAcc = -1e9; SH.G.bt = 200; SH.G.weapons = {}; c.spawnT = 0.05; return SH.G.enemies.filter(e => !e.camp).length; });
   await page.waitForTimeout(500);
   const guards = await page.evaluate(n0 => SH.G.enemies.filter(e => !e.camp).length - n0, n0);
   console.log('guards', guards); check(guards >= 2, 'camp spawned no squad');

@@ -272,7 +272,7 @@ h2 .hb{-webkit-text-stroke:0;text-shadow:none;letter-spacing:0;font-family:"Jua"
 
 <script>
 'use strict';
-const BUILD = 67;
+const BUILD = 68;
 const BOSS_INTERVAL = 180;      // 보스 등장 간격(초)
 const WAVE_INTERVAL = 60;       // 대규모 몰이 이벤트 간격(초)
 const MAX_ENEMIES = 220;
@@ -1002,6 +1002,19 @@ const ETYPES = {
 };
 // 단계: [빠른·보통 졸개, 날쌘 적, 튼튼한 적]
 const TIERS = [['grunt', 'runner', 'tank'], ['e_agrunt', 'e_srunner', 'e_stank'], ['e_knight', 'e_assassin', 'e_ogre'], ['e_demon', 'e_ghost', 'e_golem']];
+// 단계 적 특기 안내 (처음 나올 때) — [종류, -, -, 제목, 설명] (SPECIALS와 같은 모양)
+const TIER_INFO = {
+  e_agrunt: [0, 0, 0, '🛡 갑옷 졸개 등장!', '방패로 앞을 막아요 · 옆이나 뒤에서 공격'],
+  e_srunner: [0, 0, 0, '💨 그림자 날쌘이 등장!', '가끔 휙! 순간 질주해요'],
+  e_stank: [0, 0, 0, '💣 강철 거한 등장!', '멀리서 대포알을 쏴요 · 가까이 가서 잡기'],
+  e_knight: [0, 0, 0, '⚔ 기사 등장!', '가까이 오면 칼 돌진 · 빨간 줄을 피해요'],
+  e_assassin: [0, 0, 0, '🥷 암살자 등장!', '숨었다가 뒤에서 나타나요'],
+  e_ogre: [0, 0, 0, '👹 오우거 등장!', '몽둥이 쾅! 빨간 원에서 나와요'],
+  e_demon: [0, 0, 0, '😈 악마 병사 등장!', '날아서 울타리를 넘어와요'],
+  e_ghost: [0, 0, 0, '👻 유령 기사 등장!', '울타리를 통과 · 쇠사슬에 맞으면 느려져요'],
+  e_golem: [0, 0, 0, '🪨 바위 골렘 등장!', '쓰러지면 작은 바위 3개로 나뉘어요'],
+};
+const FLYERS = ['e_bat', 'e_demon', 'e_ghost'];   // 울타리를 넘거나 통과
 const TIER_T = [0, 150, 300, 480];   // 마을 단계 시작 시간(초) — 봇 측정으로 당김 (180·360·600은 너무 쉬웠음)
 const TIER_NAME = ['', '⚔ 2단계! 갑옷 군단이 몰려온다', '⚔ 3단계! 기사단이 나타났다', '🔥 4단계! 악마 군단이 깨어났다'];
 function tierNow() { // 지금 단계 (정수 = 단계, 소수 = 다음 단계까지 얼마나 왔는지)
@@ -1046,15 +1059,15 @@ const DEX = [
   ...SPECIALS.map(sp => ({ k: sp[0], name: SP_NAME[sp[0]], desc: sp[4], where: `마을 ${sp[1] / 60}분 뒤 · 모험 ${sp[2] + 1}칸부터` })),
   { k: 'e_spider', name: '새끼 거미', desc: '거미 여왕이 불러내요', where: '거미 여왕과 싸울 때' },
   { k: 'e_skel', name: '해골 병사', desc: '해골 왕이 불러내요', where: '해골 왕과 싸울 때' },
-  { k: 'e_agrunt', name: '갑옷 졸개', desc: '투구와 방패로 단단해요', where: '2단계 (마을 2분 반 · 모험 2칸)' },
-  { k: 'e_srunner', name: '그림자 날쌘이', desc: '보라 닌자 · 아주 빨라요', where: '2단계 (마을 2분 반 · 모험 2칸)' },
-  { k: 'e_stank', name: '강철 거한', desc: '강철 갑옷 + 쌍둥이 대포', where: '2단계 (마을 2분 반 · 모험 2칸)' },
-  { k: 'e_knight', name: '기사', desc: '긴 칼과 십자 방패', where: '3단계 (마을 5분 · 모험 4칸)' },
-  { k: 'e_assassin', name: '암살자', desc: '두 칼날 · 번개처럼 빨라요', where: '3단계 (마을 5분 · 모험 4칸)' },
-  { k: 'e_ogre', name: '오우거', desc: '가시 몽둥이 · 엄청 튼튼해요', where: '3단계 (마을 5분 · 모험 4칸)' },
-  { k: 'e_demon', name: '악마 병사', desc: '날개와 삼지창', where: '4단계 (마을 8분 · 모험 8칸)' },
-  { k: 'e_ghost', name: '유령 기사', desc: '녹슨 쇠사슬을 휘둘러요', where: '4단계 (마을 8분 · 모험 8칸)' },
-  { k: 'e_golem', name: '바위 골렘', desc: '용암 바위 거인 · 가장 커요', where: '4단계 (마을 8분 · 모험 8칸)' },
+  { k: 'e_agrunt', name: '갑옷 졸개', desc: '방패로 앞을 막아요 · 옆·뒤를 노려요', where: '2단계 (마을 2분 반 · 모험 2칸)' },
+  { k: 'e_srunner', name: '그림자 날쌘이', desc: '가끔 휙! 순간 질주', where: '2단계 (마을 2분 반 · 모험 2칸)' },
+  { k: 'e_stank', name: '강철 거한', desc: '멀리서 대포알을 쏴요', where: '2단계 (마을 2분 반 · 모험 2칸)' },
+  { k: 'e_knight', name: '기사', desc: '빨간 줄 → 칼 돌진', where: '3단계 (마을 5분 · 모험 4칸)' },
+  { k: 'e_assassin', name: '암살자', desc: '숨었다가 뒤에서 나타나요', where: '3단계 (마을 5분 · 모험 4칸)' },
+  { k: 'e_ogre', name: '오우거', desc: '빨간 원 → 몽둥이 쾅!', where: '3단계 (마을 5분 · 모험 4칸)' },
+  { k: 'e_demon', name: '악마 병사', desc: '날아서 울타리를 넘어요', where: '4단계 (마을 8분 · 모험 8칸)' },
+  { k: 'e_ghost', name: '유령 기사', desc: '울타리 통과 · 쇠사슬은 느리게', where: '4단계 (마을 8분 · 모험 8칸)' },
+  { k: 'e_golem', name: '바위 골렘', desc: '쓰러지면 작은 바위 3개로', where: '4단계 (마을 8분 · 모험 8칸)' },
   ...BOSSES.map((B, i) => ({ k: 'boss' + i, boss: B.name, name: B.name, desc: ['높이 뛰어올라 쿵!', '로켓 주먹을 날려요', '바닥에 불길을 깔아요', '얼음 숨결로 느리게 해요', '거미줄을 쏘고 새끼 거미를 불러요', '순간이동하고 해골 병사를 불러요'][i], where: '마을·모험·탑 보스' })),
   { k: 'boss_final', boss: '왕관 괴물 대왕', name: '왕관 괴물 대왕', desc: '모든 보스의 기술을 다 써요', where: '모험 10칸 · 왕관 괴물의 성' },
 ];
@@ -1649,7 +1662,7 @@ function attackTarget(e, dt, onHit) {
 const dayMul = () => 1 + 0.25 * ((G && G.day || 1) - 1);   // 마을이 무너졌다 다시 세울 때마다(하루) 적 +25%
 function announceType(type) {
   if (!G || !type.startsWith('e_') || (G.seen || (G.seen = {}))[type]) return;
-  G.seen[type] = true; const sp = SPECIALS.find(q => q[0] === type);
+  G.seen[type] = true; const sp = SPECIALS.find(q => q[0] === type) || TIER_INFO[type];
   if (sp && state === 'play') banner(sp[3], sp[4], '#ff9f1c', 2.4);
 }
 // 황금 몬스터 (Build 64): 아주 가끔 반짝이는 황금 버전 — 체력 3배, 금화·구슬 많이, 도감 황금 칸
@@ -2536,6 +2549,7 @@ function hurtEnemy(e, dmg, fx, fy, kb) {
   if (e.dead) return;
   const crit = Math.random() < 0.1;
   dmg = Math.round(dmg * G.p.dmgMul * (crit ? 2 : 1));
+  if (e.type === 'e_agrunt' && fx * e.face < 0) { dmg = Math.round(dmg * 0.7); if (Math.random() < 0.15) floatText(e.x, e.y - 50, '막음!', '#dee2e6', 12, 0.5); }   // 갑옷 졸개: 앞(보는 쪽)에서 맞으면 방패로 −30%
   e.hp -= dmg; e.flash = 0.1; e.hitT = 0.25; e.hx = fx; e.hy = fy;
   const k = e.boss ? kb * 0.05 : kb;
   e.kx += fx * k; e.ky += fy * k;
@@ -2560,6 +2574,11 @@ function killEnemy(e) {
   if (!e.boss && !e.camp) { questEvent('kill'); stAdd('kills'); ST.kc[e.type] = (ST.kc[e.type] || 0) + 1; if (e.golden) { stSet('goldT', e.type); goldDie(e); } if (e.type.startsWith('e_')) { questEvent('special'); if (SPECIALS.some(q => q[0] === e.type)) stSet('specT', e.type); } }
   if (e.boss) { bossDie(e); return; }
   if (e.camp) { campDie(e); return; }
+  if (e.type === 'e_golem' && !e.small) for (let k = 0; k < 3; k++) { // 바위 골렘 → 작은 바위 3개
+    const a = k / 3 * Math.PI * 2, m = makeEnemy('e_golem', e.x + Math.cos(a) * 22, e.y + Math.sin(a) * 22);
+    Object.assign(m, { golden: false, small: true, scale: 0.42, r: 13, hp: e.maxHp * 0.1, maxHp: e.maxHp * 0.1, spd: m.spd * 1.6, dmg: e.dmg * 0.4, xp: 1, gold: 0, kx: Math.cos(a) * 140, ky: Math.sin(a) * 140, inside: e.inside });
+    G.enemies.push(m);
+  }
   if (e.type === 'e_slime' && !e.small) for (let k = 0; k < 2; k++) { // 작은 슬라임 2마리로
     const m = makeEnemy('e_slime', e.x + (k ? 12 : -12), e.y + rand(-6, 6));
     Object.assign(m, { golden: false, small: true, r: 8, hp: e.maxHp * 0.35, maxHp: e.maxHp * 0.35, spd: m.spd * 1.25, dmg: e.dmg * 0.6, xp: 1, gold: 0, kx: (k ? 1 : -1) * 120, inside: e.inside });
@@ -2893,13 +2912,51 @@ function update(dt) {
         else if (chase && pd < 190 && e.dashCd <= 0) { e.dashT = 0.55; e.dashCd = 3; e.ddx = pdx / pd; e.ddy = pdy / pd; e.lunge = 0.3; floatText(e.x, e.y - 40, '돌진!', '#ffd23f', 14, 0.7); }
       }
       if (T === 'e_bat') e.z = 18 + Math.sin(e.wob * 0.8) * 5;   // 날아다님
+      // ---- 단계 적 특기 (Build 68) ----
+      if (T === 'e_srunner') { // 가끔 순간 질주
+        e.sprCd = (e.sprCd === undefined ? rand(1, 3) : e.sprCd) - dt;
+        if (e.sprT > 0) { e.sprT -= dt; spm = 2.6; } else if (chase && pd < 240 && e.sprCd <= 0) { e.sprT = 0.5; e.sprCd = rand(2.5, 3.5); burst(e.x, e.y - 10, '#5a189a', 5, 90, 3, 0.3); }
+      }
+      if (T === 'e_stank') { // 대포알: 멀리서 멈춰 쏘기 (울타리도 쏨)
+        if (chase ? pd < 230 : rB < WALL_R + 130) spm = 0.25;
+        e.shotT = (e.shotT === undefined ? rand(1, 2.5) : e.shotT) - dt;
+        if (spm < 1 && e.shotT <= 0 && !idle) {
+          e.shotT = 3.2;
+          const tx = chase ? p.x : e.x / rB * WALL_R, ty = chase ? p.y - 8 : e.y / rB * WALL_R, a = Math.atan2(ty - (e.y - 20), tx - e.x);
+          G.ebullets.push({ x: e.x + Math.cos(a) * 20, y: e.y - 20, vx: Math.cos(a) * 200, vy: Math.sin(a) * 200, r: 8, dmg: e.dmg * 0.9, life: 2.6, cannon: true, wall: !chase });
+          e.lunge = 0.25; sfx('shotgun');
+        }
+      }
+      if (T === 'e_knight') { // 칼 돌진 (돌격병처럼, 빨간 줄 먼저)
+        e.dashCd = (e.dashCd === undefined ? rand(1, 3) : e.dashCd) - dt;
+        if (e.aimT > 0) { e.aimT -= dt; spm = 0; if (e.aimT <= 0) { e.dashT = 0.5; e.lunge = 0.3; } }
+        else if (e.dashT > 0) { e.dashT -= dt; mx = e.ddx; my = e.ddy; spm = 3.4; }
+        else if (chase && pd < 180 && e.dashCd <= 0) { e.aimT = 0.45; e.dashCd = 4; e.ddx = pdx / pd; e.ddy = pdy / pd; floatText(e.x, e.y - 50, '돌진!', '#ff6b6b', 13, 0.6); }
+      }
+      if (T === 'e_assassin') { // 숨었다가 영웅 뒤에 나타남
+        e.hideCd = (e.hideCd === undefined ? rand(1, 2.5) : e.hideCd) - dt;
+        if (e.hideT > 0) { e.hideT -= dt; spm = 0; if (e.hideT <= 0) {
+          const ax = p.ax || 1, ay = p.ay || 0, al = Math.hypot(ax, ay) || 1;   // 영웅이 가는 방향의 반대쪽(뒤)
+          e.x = p.x - ax / al * 70; e.y = p.y - ay / al * 70; if (G.mode === 'stage') e.x = clamp(e.x, -STAGE_HW + 20, STAGE_HW - 20);
+          e.inside = G.mode === 'base' && Math.hypot(e.x, e.y) < WALL_R; e.lunge = 0.35; burst(e.x, e.y - 14, '#343a40', 12, 140, 4, 0.4); sfx('woosh'); } }
+        else if (chase && pd < 260 && e.hideCd <= 0) { e.hideT = 0.7; e.hideCd = rand(4, 6); burst(e.x, e.y - 14, '#343a40', 12, 140, 4, 0.4); }
+      }
+      if (T === 'e_ogre') { // 몽둥이 내려찍기: 빨간 원 경고 → 쾅
+        e.slamCd = (e.slamCd === undefined ? rand(1, 2) : e.slamCd) - dt;
+        if (e.slamT > 0) { e.slamT -= dt; spm = 0; if (e.slamT <= 0) {
+          const R = 95; G.rings.push({ x: e.x, y: e.y, r: R, life: 0.4, max: 0.4, color: '#c8a27a' }); burst(e.x, e.y, '#8d5524', 20, 220, 5, 0.5); G.shake = Math.max(G.shake, 7); sfx('slam');
+          if (!p.dead && Math.hypot(p.x - e.x, p.y - e.y) < R + p.r) hurtPlayer(e.dmg * 1.3); } }
+        else if (chase && pd < 110 && e.slamCd <= 0) { e.slamT = 0.85; e.slamCd = 3.5; }
+      }
+      if (T === 'e_demon') e.z = 16 + Math.sin(e.wob * 0.7) * 5;
+      if (T === 'e_ghost') e.z = 8 + Math.sin(e.wob * 0.5) * 6;
       if (T === 'e_bomber' && chase && pd < e.r + p.r + 12) { bomberBoom(e); continue; }
       const sp = (e.hitT > 0 ? 0.35 : 1) * (idle ? 0.15 : 1) * e.spd * far * spm;
       e.x += mx * sp * dt; e.y += my * sp * dt;
     }
     e.x += e.kx * dt; e.y += e.ky * dt;
     const decay = Math.exp(-9 * dt); e.kx *= decay; e.ky *= decay;
-    if (!p.dead && pd < e.r + p.r + 2 && !(e.z > 30)) hurtPlayer(e.dmg);   // 공중에 뜬 보스는 안 닿음
+    if (!p.dead && pd < e.r + p.r + 2 && !(e.z > 30) && !(e.hideT > 0)) { hurtPlayer(e.dmg); if (e.type === 'e_ghost') slowHero(1.2); }   // 공중에 뜬 보스·숨은 암살자는 안 닿음, 유령 기사 쇠사슬은 느리게
   }
   // 겹침 방지
   const es = G.enemies;
@@ -2924,7 +2981,7 @@ function update(dt) {
     if (e.camp) continue;
     const dB = Math.hypot(e.x, e.y) || 1, w = G.walls[segOf(e.x, e.y)], m = e.r * 0.6;
     let blocked = false;
-    if (e.type === 'e_bat') e.inside = dB < WALL_R;   // 박쥐는 울타리를 넘어감
+    if (FLYERS.includes(e.type)) e.inside = dB < WALL_R;   // 박쥐·악마 병사·유령 기사는 울타리를 넘거나 통과
     else if (w.hp > 0) {
       if (!e.inside && dB < WALL_R + m) { const k = (WALL_R + m) / dB; e.x *= k; e.y *= k; blocked = true; }
       else if (e.inside && dB > WALL_R - m) { const k = (WALL_R - m) / dB; e.x *= k; e.y *= k; blocked = true; }
@@ -3839,8 +3896,12 @@ function drawCampRuin(c) { // 부서진 진지: 그루터기 + 다시 지어지�
 }
 function drawEnemy(e) {
   if (e.camp) { drawCamp(e); return; }
-  if (SPR[e.type]) drawSpriteMan(e.type, e.x, e.y, { face: e.face, phase: e.wob, hit: e.hitT > 0, hitT: e.hitT, flash: e.flash > 0, lunge: e.lunge, z: e.z, s: e.small ? 0.6 : 1, gold: e.golden });
+  if (e.slamT > 0) { const k = 1 - e.slamT / 0.85; ctx.fillStyle = `rgba(255,40,40,${0.12 + 0.18 * k})`; ctx.strokeStyle = `rgba(255,40,40,${0.5 + 0.4 * Math.sin(G.t * 30)})`; ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(e.x, e.y, 95, 0, 7); ctx.fill(); ctx.stroke(); }   // 오우거 내려찍기 경고
+  if (e.aimT > 0) { ctx.strokeStyle = `rgba(255,40,40,${0.4 + 0.35 * Math.sin(G.t * 30)})`; ctx.lineWidth = e.r * 1.4; ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(e.x, e.y); ctx.lineTo(e.x + e.ddx * 200, e.y + e.ddy * 200); ctx.stroke(); }   // 기사 돌진 경고선
+  if (e.hideT > 0) { ctx.globalAlpha = 0.18; }   // 숨은 암살자: 거의 안 보임
+  if (SPR[e.type]) drawSpriteMan(e.type, e.x, e.y, { face: e.face, phase: e.wob, hit: e.hitT > 0, hitT: e.hitT, flash: e.flash > 0, lunge: e.lunge, z: e.z, s: e.scale || (e.small ? 0.6 : 1), gold: e.golden });
   else drawStickman(e.x, e.y, { color: e.color, s: e.r / 11, face: e.face, phase: e.wob, hit: e.hitT > 0, flash: e.flash > 0, lunge: e.lunge, type: e.type });   // 그림이 없을 때만 막대 인간
+  ctx.globalAlpha = 1;
   if (e.golden) { // 반짝임 2개
     const t = G.t * 3 + e.id, h = (SPR_INFO[e.type] && SPR_INFO[e.type].h || 40) * IK;
     for (let k = 0; k < 2; k++) { const a = t + k * Math.PI, r = 0.6 + 0.4 * Math.sin(t * 2 + k);
@@ -4051,7 +4112,7 @@ function drawWorld() {
     if (b.arrow) { const a = Math.atan2(b.vy, b.vx); ctx.save(); ctx.translate(b.x, b.y); ctx.rotate(a);
       ctx.strokeStyle = '#6b3e1a'; ctx.lineWidth = 2.5; ctx.beginPath(); ctx.moveTo(-12, 0); ctx.lineTo(6, 0); ctx.stroke();
       ctx.fillStyle = '#aaa'; ctx.beginPath(); ctx.moveTo(10, 0); ctx.lineTo(4, -3.5); ctx.lineTo(4, 3.5); ctx.fill(); ctx.restore(); continue; }
-    ctx.fillStyle = b.slime ? '#e63946' : b.ice ? '#a2d2ff' : b.skull ? '#7bed9f' : '#b5179e'; ctx.strokeStyle = '#222'; ctx.lineWidth = 2;
+    ctx.fillStyle = b.slime ? '#e63946' : b.ice ? '#a2d2ff' : b.skull ? '#7bed9f' : b.cannon ? '#343a40' : '#b5179e'; ctx.strokeStyle = '#222'; ctx.lineWidth = 2;
     ctx.beginPath(); ctx.arc(b.x, b.y, b.r, 0, 7); ctx.fill(); ctx.stroke();
     ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(b.x - 2, b.y - 2, b.r * 0.35, 0, 7); ctx.fill();
   }
