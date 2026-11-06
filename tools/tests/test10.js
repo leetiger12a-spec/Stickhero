@@ -20,7 +20,7 @@ const { chromium } = require('/opt/node22/lib/node_modules/playwright');
     const G = SH.G; SH.ok(); enterStage(idx); G.p.hp = G.p.maxHp = 1e6;
     let shot = null;
     for (let i = 0; i < 30 * 200; i++) {
-      while (SH.state === 'levelup' || SH.state === 'allypick') { if (SH.state === 'allypick') SH.chooseAlly(0); else SH.choose(0); }
+      while (SH.state === 'levelup' || SH.state === 'allypick' || SH.state === 'chest') { if (SH.state === 'allypick') SH.chooseAlly(0); else if (SH.state === 'chest') { document.getElementById('ovChest').onclick({ target: {} }); SH.closeChest(); } else SH.choose(0); }   // 보스 상자가 영웅 근처에 떨어질 수 있음 (Build 69)
       if (SH.state !== 'play') break;
       if (G.intro) endIntro();
       G.p.hp = G.p.maxHp;   // 영웅은 죽지 않게 (Build 46부터 체력이 최대치로 맞춰짐)
