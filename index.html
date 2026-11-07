@@ -285,7 +285,7 @@ h2 .hb{-webkit-text-stroke:0;text-shadow:none;letter-spacing:0;font-family:"Jua"
 
 <script>
 'use strict';
-const BUILD = 73;
+const BUILD = 74;
 const BOSS_INTERVAL = 180;      // 보스 등장 간격(초)
 const WAVE_INTERVAL = 60;       // 대규모 몰이 이벤트 간격(초)
 const MAX_ENEMIES = 220;
@@ -817,11 +817,14 @@ const EVO = {
   ice:       { need: 'magnet', name: '눈보라 왕관',  icon: '❄️', desc: '영웅 주변 눈보라 — 가까운 적 모두 느려지고 아파요' },
   xbow:      { need: 'speed',  name: '폭풍 석궁',    icon: '🏹', desc: '화살 5발 부채꼴 · 끝까지 꿰뚫어요' },
 };
+// 땅 장식 그림 (Build 74, img/d_*.webp): 이름 → 세상 속 높이 / 테마(땅 무늬)별로 쓰는 장식
+const DECAL_H = { d_daisy: 24, d_butter: 24, d_mush: 24, d_pebble: 15, d_moss: 30, d_bones: 24, d_lava: 28, d_bricks: 28 };
+const DECAL_TH = { grass: ['d_daisy', 'd_butter', 'd_mush', 'd_pebble'], ruins: ['d_moss', 'd_moss', 'd_pebble'], dungeon: ['d_bones', 'd_bones', 'd_pebble'], volcano: ['d_lava'], castle: ['d_bricks'] };
 // 무기 그림 아이콘 (img/w_무기.webp, 진화는 w_무기_evo.webp) — 못 불러오면 이모지
 const WICON = {};
 for (const id in WEAP) for (const ev of [0, 1]) { const n = id + (ev ? '_evo' : ''), im = new Image(); im.onload = () => { WICON[n] = im; }; im.src = `img/w_${n}.webp?b=${BUILD}`; }
 // 능력·회복·경험치 구슬 그림 (img/p_능력.webp, i_chicken, i_heart, gem_b/g/r)
-for (const n of [...Object.keys(PASS).map(id => 'p_' + id), 'i_chicken', 'i_heart', 'gem_b', 'gem_g', 'gem_r', 'chest_big', 'chest_big_open', 'chest_small', 'chest_small_open']) { const im = new Image(); im.onload = () => { WICON[n] = im; }; im.src = `img/${n}.webp?b=${BUILD}`; }
+for (const n of [...Object.keys(PASS).map(id => 'p_' + id), 'i_chicken', 'i_heart', 'gem_b', 'gem_g', 'gem_r', 'chest_big', 'chest_big_open', 'chest_small', 'chest_small_open', ...Object.keys(DECAL_H)]) { const im = new Image(); im.onload = () => { WICON[n] = im; }; im.src = `img/${n}.webp?b=${BUILD}`; }
 const icoHtml = (n, alt) => WICON[n] ? `<img src="img/${n}.webp?b=${BUILD}" alt="">` : alt;
 const mIco = (n, alt) => WICON[n] ? `<img class="mi" src="img/${n}.webp?b=${BUILD}" alt="">` : alt;   // 글자 줄 안의 작은 그림
 const pMini = id => mIco('p_' + id, PASS[id].icon), wMini = (id, ev) => { const n = id + (ev ? '_evo' : ''); return WICON[n] ? `<img class="mi" src="img/w_${n}.webp?b=${BUILD}" alt="">` : ev ? EVO[id].icon : WEAP[id].icon; };   // 무기 그림 키는 w_ 없이
@@ -840,6 +843,11 @@ function bakedIco(n, h) {
   if (!c) { const px = Math.max(8, Math.round(h * SCALE * DPR)); c = document.createElement('canvas'); c.height = px; c.width = Math.round(px * im.width / im.height);
     const x = c.getContext('2d'); x.imageSmoothingQuality = 'high'; x.drawImage(im, 0, 0, c.width, c.height); ICO_BAKE[key] = c; }
   return c;
+}
+function drawDecal(n, x, y, s) { // 땅에 놓인 작은 장식 (바닥 가운데가 x,y)
+  const h = DECAL_H[n], c = bakedIco(n, h); if (!c) return false;
+  const hh = h * (s || 1), w = hh * c.width / c.height;
+  ctx.drawImage(c, x - w / 2, y - hh * IK + 3, w, hh * IK); return true;   // 위에서 비스듬히 보는 시점: 세로만 K배 (save/restore 없이)
 }
 const wIco = (id, ev) => { const n = id + (ev ? '_evo' : ''); return WICON[n] ? `<img src="img/w_${n}.webp?b=${BUILD}" alt="">` : ev ? EVO[id].icon : WEAP[id].icon; };
 // 무기 그림을 세상 속에 그리기: 그림마다 날 끝 방향(도, 그림 기준)을 맞춰 aim 쪽으로 돌림, 왼쪽을 볼 땐 뒤집어 거꾸로 안 보이게
@@ -2560,8 +2568,10 @@ function drawStageGround() {
   // 보스 결투장
   ctx.strokeStyle = 'rgba(255,60,60,.35)'; ctx.lineWidth = 6; ctx.setLineDash([14, 10]);
   ctx.beginPath(); ctx.arc(0, -st.L - 120, 170, 0, 7); ctx.stroke(); ctx.setLineDash([]);
-  for (const r of st.rocks) {
+  const dl = DECAL_TH[th.tex];
+  for (let i = 0; i < st.rocks.length; i++) { const r = st.rocks[i];
     if (r.y < G.cam.y - VH * IK || r.y > G.cam.y + VH * IK) continue;
+    if (dl && drawDecal(dl[i % dl.length], r.x, r.y, 0.75 + r.s * 0.3)) continue;   // 테마 땅 장식 그림
     ctx.fillStyle = 'rgba(0,0,0,.18)'; ctx.beginPath(); ctx.ellipse(r.x, r.y, 9 * r.s, 6 * r.s, 0, 0, 7); ctx.fill();
   }
 }
@@ -3422,6 +3432,7 @@ function drawGround() {
       continue;
     }
     if (r < WALL_R + 10 || r > WORLD_R - 10) continue;
+    if (h >= 0.22 && h < 0.34 && drawDecal(h < 0.26 ? 'd_daisy' : h < 0.3 ? 'd_butter' : h < 0.315 ? 'd_mush' : 'd_pebble', px, py, 0.85 + (h * 997 % 1) * 0.35)) continue;   // 꽃·버섯·조약돌 그림
     if (h < 0.22) {
       if (gp) continue;   // 풀밭 그림에 풀이 이미 있음
       ctx.strokeStyle = 'rgba(40,110,40,.55)'; ctx.lineWidth = 2; ctx.beginPath();
