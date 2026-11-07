@@ -285,7 +285,7 @@ h2 .hb{-webkit-text-stroke:0;text-shadow:none;letter-spacing:0;font-family:"Jua"
 
 <script>
 'use strict';
-const BUILD = 74;
+const BUILD = 75;
 const BOSS_INTERVAL = 180;      // 보스 등장 간격(초)
 const WAVE_INTERVAL = 60;       // 대규모 몰이 이벤트 간격(초)
 const MAX_ENEMIES = 220;
@@ -809,7 +809,7 @@ const MAX_WLV = 5;
 // 무기 진화: Lv5 무기 + 짝 능력 → 레벨업 카드에 진화 카드 (진화하면 무기 Lv6으로 저장)
 const EVO = {
   sword:     { need: 'power',  name: '성검 폭풍',    icon: '⚔️', desc: '칼 8자루 · 넓게 돌며 세게 밀쳐내요' },
-  pistol:    { need: 'haste',  name: '개틀링',       icon: '🔫', desc: '드르륵! 아주 빠른 연사 · 2마리 관통' },
+  pistol:    { need: 'haste',  name: '개틀링',       icon: '🔫', desc: '드르륵! 아주 빠른 연사 · 3마리 관통' },
   shotgun:   { need: 'magnet', name: '용의 숨결',    icon: '🐲', desc: '부채꼴 불꽃 · 땅에 불길이 남아요' },
   boomerang: { need: 'speed',  name: '회오리 부메랑', icon: '🌀', desc: '커다란 부메랑 5개가 휘몰아쳐요' },
   bolt:      { need: 'hp',     name: '천둥 신',      icon: '🌩️', desc: '하늘에서 낙뢰가 여러 적에게 쾅!' },
@@ -952,12 +952,12 @@ function wStat(id) {
   const l = G.weapons[id];
   if (l > MAX_WLV) switch (id) { // 진화 무기
     case 'sword': return { n: 8, dmg: 38, rad: 96, spd: 4.8, kb: 420 };
-    case 'pistol': return { cd: 0.11, dmg: 24, shots: 1, pierce: 2, jitter: 0.07 };
+    case 'pistol': return { cd: 0.11, dmg: 44, shots: 1, pierce: 3, jitter: 0.07 };   // Build 75: 진화 전(Lv5)보다 약하던 것 고침
     case 'shotgun': return { cd: 1.0, pellets: 13, dmg: 18, spread: 1.0, fire: true };
     case 'boomerang': return { cd: 1.2, count: 5, dmg: 52, range: 270, big: true };
     case 'bolt': return { cd: 0.9, dmg: 50, chain: 9, reach: 150, sky: 5 };
     case 'hammer': return { cd: 1.6, dmg: 95, rad: 175, fire: true };
-    case 'ice': return { cd: 0.5, dmg: 22, count: 1, slow: 2, aura: 130 };
+    case 'ice': return { cd: 0.5, dmg: 34, count: 1, slow: 2, aura: 140 };   // Build 75: 진화 중 가장 약하던 것 올림
     case 'xbow': return { cd: 0.8, dmg: 60, shots: 5, pierce: 99, spread: 0.55 };
   }
   switch (id) {
