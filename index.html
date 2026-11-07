@@ -136,7 +136,7 @@ h2{margin:0 0 14px;font:400 clamp(30px,9vw,46px) "BHS","Jua",system-ui,-apple-sy
 #hudBtns{position:fixed;right:8px;top:140px;z-index:4;display:none;flex-direction:column;gap:8px}
 #hudBtns.show{display:flex}
 #questBox{position:fixed;left:8px;top:164px;z-index:4;display:none;background:rgba(20,20,30,.55);border:2px solid rgba(255,255,255,.35);border-radius:10px;padding:5px 8px;color:#fff;font:inherit;font-size:12px;max-width:190px;cursor:pointer;touch-action:none;user-select:none;-webkit-user-select:none}
-#questBox.show{display:block}#questBox .qh{color:#ffd23f;font-size:12px}#questBox .q{margin-top:3px;display:flex;align-items:center;gap:4px}#questBox .q>span{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}#questBox .qh{white-space:nowrap}#questBox .qh small{color:#9fd8ff;font-size:10px}#questBox .qsw{flex:none;font-weight:400;font-size:14px;line-height:1;padding:3px 4px;margin:-3px -4px -3px 0;border-radius:6px;background:rgba(159,216,255,.25)}#questBox .q.done{color:#7bed9f;text-decoration:line-through}
+#questBox.show{display:block}#questBox .qh{color:#ffd23f;font-size:12px}#questBox .q{margin-top:3px;display:flex;align-items:center;gap:4px}#questBox .q>span{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}#questBox .qh{white-space:nowrap}#questBox .qh small{color:#9fd8ff;font-size:10px}#questBox.sw .q{margin-top:9px}#questBox .qsw::after{content:'';position:absolute;left:-18px;right:-7px;top:-7px;bottom:-7px}#questBox .qsw{position:relative;flex:none;font-weight:400;font-size:14px;line-height:1;padding:3px 4px;margin:-3px -4px -3px 0;border-radius:6px;background:rgba(159,216,255,.25)}#questBox .q.done{color:#7bed9f;text-decoration:line-through}
 #questBox .bar{height:4px;background:rgba(255,255,255,.25);border-radius:2px;margin-top:2px}#questBox .bar i{display:block;height:100%;background:#ffd23f;border-radius:2px}
 #bSos{position:fixed;right:10px;bottom:190px;z-index:4;width:66px;height:66px;border-radius:50%;border:4px solid #222;padding:0;cursor:pointer;display:none;
   background:conic-gradient(#3fa9f5 var(--k,100%),#555 0);box-shadow:0 4px 0 #111;color:#fff;font-weight:900;font-family:inherit;touch-action:none}
@@ -285,7 +285,7 @@ h2 .hb{-webkit-text-stroke:0;text-shadow:none;letter-spacing:0;font-family:"Jua"
 
 <script>
 'use strict';
-const BUILD = 75;
+const BUILD = 76;
 const BOSS_INTERVAL = 180;      // 보스 등장 간격(초)
 const WAVE_INTERVAL = 60;       // 대규모 몰이 이벤트 간격(초)
 const MAX_ENEMIES = 220;
@@ -2208,8 +2208,9 @@ function updQuestBox() {
   const key = G.quests.map(q => q.id + q.prog + q.done).join() + questOpen + G.day + !!G.questSwap;
   if (key === questShown) return; questShown = key;
   const nd = G.quests.filter(q => q.done).length;
-  if (!questOpen) { box.innerHTML = `<div class="qh">📜 퀘스트 ${nd}/${G.quests.length} ▸</div>`; return; }
+  if (!questOpen) { box.classList.remove('sw'); box.innerHTML = `<div class="qh">📜 퀘스트 ${nd}/${G.quests.length} ▸</div>`; return; }
   const sw = !G.questSwap && nd < G.quests.length;   // 오늘 바꾸기를 아직 안 썼으면 🔄
+  box.classList.toggle('sw', sw);   // 🔄가 있을 땐 줄 간격을 넓혀 손가락으로 누르기 쉽게 (Build 76)
   box.innerHTML = `<div class="qh">📜 ${G.day || 1}일째 퀘스트 ${nd}/${G.quests.length} ▾${sw ? '<small> · 🔄 오늘 1번</small>' : ''}</div>` + G.quests.map((q, i) => { const Q = QUESTS.find(x => x.id === q.id);
     return `<div class="q${q.done ? ' done' : ''}"><span>${Q.txt(q.goal)} ${q.done ? '✔' : `<small>${q.prog}/${q.goal}</small>`}</span>${sw && !q.done ? `<b class="qsw" data-i="${i}" aria-label="퀘스트 바꾸기">🔄</b>` : ''}</div>` + (q.done ? '' : `<div class="bar"><i style="width:${Math.round(q.prog / q.goal * 100)}%"></i></div>`); }).join('');
 }

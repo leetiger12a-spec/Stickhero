@@ -1,4 +1,4 @@
-// 퀘스트 바꾸기 (Build 73): 하루 1번 안 끝난 퀘스트 하나를 🔄로 바꿈, 진행도 0, 끝난 퀘스트는 못 바꿈, 저장 유지, 다음 날 다시 가능
+// 퀘스트 바꾸기 (Build 73, 누르는 칸 넓힘 Build 76): 하루 1번 안 끝난 퀘스트 하나를 🔄로 바꿈, 진행도 0, 끝난 퀘스트는 못 바꿈, 저장 유지, 다음 날 다시 가능
 const { chromium } = require('/opt/node22/lib/node_modules/playwright');
 (async () => {
   const b = await chromium.launch(); const errors = []; const check = (c, m) => { if (!c) errors.push(m); };
@@ -13,6 +13,13 @@ const { chromium } = require('/opt/node22/lib/node_modules/playwright');
   const btn = async () => page.evaluate(() => [...document.querySelectorAll('#questBox .qsw')].map(x => +x.dataset.i));
   let bs = await btn(); console.log('swap buttons', bs.join()); check(bs.join() === '1,2', 'swap buttons should be on unfinished quests only');
   await page.screenshot({ path: `${OUT}/b73_quest_before.png`, clip: { x: 0, y: 150, width: 260, height: 150 } });
+  // Build 76: 손가락용 누르는 칸 — 점마다 어떤 🔄가 잡히는지 훑어서 칸 크기 재기 (그림 크기는 그대로)
+  const hit = await page.evaluate(() => { const out = {};
+    for (let x = 120; x < 240; x++) for (let y = 160; y < 300; y++) { const el = document.elementFromPoint(x, y), q = el && el.closest && el.closest('.qsw'); if (!q) continue;
+      const k = q.dataset.i, o = out[k] || (out[k] = { x0: 1e9, x1: -1, y0: 1e9, y1: -1 }); o.x0 = Math.min(o.x0, x); o.x1 = Math.max(o.x1, x); o.y0 = Math.min(o.y0, y); o.y1 = Math.max(o.y1, y); }
+    return Object.fromEntries(Object.entries(out).map(([k, o]) => [k, [o.x1 - o.x0 + 1, o.y1 - o.y0 + 1]])); });
+  console.log('tap areas (w,h)', JSON.stringify(hit));
+  check(Object.keys(hit).length === 2 && Object.values(hit).every(([w, h]) => w >= 44 && h >= 30), 'tap area too small');
   // 실제 손가락으로 🔄 누르기 (상자 접기가 아니라 바꾸기)
   const bb = await page.locator('#questBox .qsw[data-i="1"]').boundingBox(); check(bb && bb.width >= 18 && bb.height >= 18, 'swap button too small: ' + JSON.stringify(bb));
   await page.mouse.click(bb.x + bb.width / 2, bb.y + bb.height / 2); await page.waitForTimeout(200);
