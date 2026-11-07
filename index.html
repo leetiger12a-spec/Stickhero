@@ -136,7 +136,7 @@ h2{margin:0 0 14px;font:400 clamp(30px,9vw,46px) "BHS","Jua",system-ui,-apple-sy
 #hudBtns{position:fixed;right:8px;top:140px;z-index:4;display:none;flex-direction:column;gap:8px}
 #hudBtns.show{display:flex}
 #questBox{position:fixed;left:8px;top:164px;z-index:4;display:none;background:rgba(20,20,30,.55);border:2px solid rgba(255,255,255,.35);border-radius:10px;padding:5px 8px;color:#fff;font:inherit;font-size:12px;max-width:190px;cursor:pointer;touch-action:none;user-select:none;-webkit-user-select:none}
-#questBox.show{display:block}#questBox .qh{color:#ffd23f;font-size:12px}#questBox .q{margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}#questBox .q.done{color:#7bed9f;text-decoration:line-through}
+#questBox.show{display:block}#questBox .qh{color:#ffd23f;font-size:12px}#questBox .q{margin-top:3px;display:flex;align-items:center;gap:4px}#questBox .q>span{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}#questBox .qh{white-space:nowrap}#questBox .qh small{color:#9fd8ff;font-size:10px}#questBox .qsw{flex:none;font-weight:400;font-size:14px;line-height:1;padding:3px 4px;margin:-3px -4px -3px 0;border-radius:6px;background:rgba(159,216,255,.25)}#questBox .q.done{color:#7bed9f;text-decoration:line-through}
 #questBox .bar{height:4px;background:rgba(255,255,255,.25);border-radius:2px;margin-top:2px}#questBox .bar i{display:block;height:100%;background:#ffd23f;border-radius:2px}
 #bSos{position:fixed;right:10px;bottom:190px;z-index:4;width:66px;height:66px;border-radius:50%;border:4px solid #222;padding:0;cursor:pointer;display:none;
   background:conic-gradient(#3fa9f5 var(--k,100%),#555 0);box-shadow:0 4px 0 #111;color:#fff;font-weight:900;font-family:inherit;touch-action:none}
@@ -285,7 +285,7 @@ h2 .hb{-webkit-text-stroke:0;text-shadow:none;letter-spacing:0;font-family:"Jua"
 
 <script>
 'use strict';
-const BUILD = 72;
+const BUILD = 73;
 const BOSS_INTERVAL = 180;      // 보스 등장 간격(초)
 const WAVE_INTERVAL = 60;       // 대규모 몰이 이벤트 간격(초)
 const MAX_ENEMIES = 220;
@@ -1294,7 +1294,7 @@ function buildSave() {
     rocks: G.rocks.map(o => [Math.round(o.x), Math.round(o.y), o.s, Math.round(o.regrow)]),
     camps: G.camps.map(c => [Math.round(c.x), Math.round(c.y), c.lvl, Math.round(c.rebuild), c.e && !c.e.dead ? Math.round(c.e.hp / c.e.maxHp * 100) / 100 : 0]),
     nextBoss: G.boss ? 15 : G.nextBoss, nextWave: G.nextWave, raidCount: G.raidCount - (G.raid ? 1 : 0), raidPending: !!(G.raid || G.raidIn > 0),
-    day: G.day, broken: Object.keys(G.broken).filter(k => G.broken[k]), quests: G.quests, questBonus: G.questBonus,
+    day: G.day, broken: Object.keys(G.broken).filter(k => G.broken[k]), quests: G.quests, questBonus: G.questBonus, questSwap: !!G.questSwap,
   };
 }
 function loadGame(d) {
@@ -1317,7 +1317,7 @@ function loadGame(d) {
   G.base.maxHp = 1500 + VILLAGE.slice(1, G.vLvl).reduce((a, v) => a + v.hp, 0);
   G.day = d.day || 1; G.broken = {}; for (const k of d.broken || []) G.broken[k] = true;
   G.chests = (d.chests || []).map(([x, y, sm, gd]) => ({ x, y, bob: 0, t: 1, small: !!sm, gold: !!gd }));   // 줍기 전에 끈 마을 보물 상자
-  if (d.quests && d.quests.length) { G.quests = d.quests; G.questBonus = !!d.questBonus; } else newQuests();   // 새 날(또는 예전 저장)은 새 퀘스트
+  if (d.quests && d.quests.length) { G.quests = d.quests; G.questBonus = !!d.questBonus; G.questSwap = !!d.questSwap; } else newQuests();   // 새 날(또는 예전 저장)은 새 퀘스트
   if (d.rocks) G.rocks = d.rocks.map(([x, y, s, rg]) => ({ x, y, s, max: 6, regrow: rg, shake: 0 }));
   if (d.camps) { G.enemies = G.enemies.filter(e => !e.camp); G.camps = d.camps.map(([x, y, lvl, rebuild, hp]) => ({ x, y, lvl, rebuild, spawnT: rand(8, 16), e: null })); G.camps.forEach((c, i) => { if (d.camps[i][4] > 0) makeCamp(c, d.camps[i][4]); }); }
   G.allies = [];
@@ -2160,7 +2160,18 @@ function newQuests() {
   while (out.length < 3 && pool.length) { const q = pool.splice(Math.floor(Math.random() * pool.length), 1)[0]; out.push({ id: q.id, goal: q.goal(d), prog: 0, done: false }); }
   // 고치기 퀘스트가 있으면 맨 앞에 (아침에 할 일)
   out.sort((a, b) => (b.id === 'repair') - (a.id === 'repair'));
-  G.quests = out; G.questBonus = false; questShown = '';
+  G.quests = out; G.questBonus = false; G.questSwap = false; questShown = '';
+}
+// 🔄 하루 1번: 안 끝난 퀘스트 하나를 다른 퀘스트로 바꾸기 (진행도는 0부터)
+function swapQuest(i) {
+  const q = G && G.quests && G.quests[i];
+  if (!q || q.done || G.questSwap) { sfx('hurt'); return false; }
+  const have = G.quests.map(x => x.id), pool = QUESTS.filter(Q => !have.includes(Q.id) && (!Q.ok || Q.ok()));
+  if (!pool.length) { sfx('hurt'); return false; }
+  const Q = pool[Math.floor(Math.random() * pool.length)];
+  G.quests[i] = { id: Q.id, goal: Q.goal(G.day || 1), prog: 0, done: false }; G.questSwap = true;
+  banner('🔄 퀘스트 바꿈!', `${Q.txt(G.quests[i].goal)} · 내일 또 바꿀 수 있어요`, '#9fd8ff', 1.8); sfx('pick');
+  questShown = ''; updQuestBox(); return true;
 }
 const questReward = () => ({ g: 40 + 20 * (G.day || 1), s: 3 + (G.day || 1) });
 function questEvent(id, n) {
@@ -2186,14 +2197,17 @@ function updQuestBox() {
   const box = $('questBox'), on = G && G.quests && G.quests.length && $('hudBtns').classList.contains('show') && state !== 'title';
   box.classList.toggle('show', !!on); if (!on) return;
   box.style.top = G.mode === 'base' ? '164px' : '86px';   // 마을에선 작은 지도 아래
-  const key = G.quests.map(q => q.id + q.prog + q.done).join() + questOpen + G.day;
+  const key = G.quests.map(q => q.id + q.prog + q.done).join() + questOpen + G.day + !!G.questSwap;
   if (key === questShown) return; questShown = key;
   const nd = G.quests.filter(q => q.done).length;
   if (!questOpen) { box.innerHTML = `<div class="qh">📜 퀘스트 ${nd}/${G.quests.length} ▸</div>`; return; }
-  box.innerHTML = `<div class="qh">📜 ${G.day || 1}일째 퀘스트 ${nd}/${G.quests.length} ▾</div>` + G.quests.map(q => { const Q = QUESTS.find(x => x.id === q.id);
-    return `<div class="q${q.done ? ' done' : ''}">${Q.txt(q.goal)} ${q.done ? '✔' : `<small>${q.prog}/${q.goal}</small>`}</div>` + (q.done ? '' : `<div class="bar"><i style="width:${Math.round(q.prog / q.goal * 100)}%"></i></div>`); }).join('');
+  const sw = !G.questSwap && nd < G.quests.length;   // 오늘 바꾸기를 아직 안 썼으면 🔄
+  box.innerHTML = `<div class="qh">📜 ${G.day || 1}일째 퀘스트 ${nd}/${G.quests.length} ▾${sw ? '<small> · 🔄 오늘 1번</small>' : ''}</div>` + G.quests.map((q, i) => { const Q = QUESTS.find(x => x.id === q.id);
+    return `<div class="q${q.done ? ' done' : ''}"><span>${Q.txt(q.goal)} ${q.done ? '✔' : `<small>${q.prog}/${q.goal}</small>`}</span>${sw && !q.done ? `<b class="qsw" data-i="${i}" aria-label="퀘스트 바꾸기">🔄</b>` : ''}</div>` + (q.done ? '' : `<div class="bar"><i style="width:${Math.round(q.prog / q.goal * 100)}%"></i></div>`); }).join('');
 }
-$('questBox').addEventListener('pointerdown', e => { e.preventDefault(); e.stopPropagation(); questOpen = !questOpen; try { localStorage.setItem('stickhero_questfold', questOpen ? '0' : '1'); } catch (err) {} sfx('pick'); updQuestBox(); });
+$('questBox').addEventListener('pointerdown', e => { e.preventDefault(); e.stopPropagation();
+  const sb = e.target.closest && e.target.closest('.qsw'); if (sb) { swapQuest(+sb.dataset.i); return; }
+  questOpen = !questOpen; try { localStorage.setItem('stickhero_questfold', questOpen ? '0' : '1'); } catch (err) {} sfx('pick'); updQuestBox(); });
 
 // 📻 지원 요청 버튼: 원할 때 SKYFANG을 부름 (60초마다)
 const SOS_CD = 60;
