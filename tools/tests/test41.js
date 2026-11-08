@@ -26,7 +26,7 @@ const { chromium } = require('/opt/node22/lib/node_modules/playwright');
   check(r.village.slice(0, 6).map(x => x[0]).join() === BOSS_NAMES, 'village boss order wrong');
   const v = r.village.slice(0, 6).map(x => x[1]); check(v.every((h, i) => !i || h > v[i - 1]), 'later bosses not stronger');
   check(r.stage[5][0] === '왕관 괴물 대왕' && r.stage[5][1] > v[5], 'final boss not strongest');
-  check(r.day3[1] === v[1], 'day 3 boss got stronger');
+  check(r.day3[1] >= v[1] && v.includes(r.day3[1]), 'day 3 boss not a fixed-strength boss');   // Build 79: 다음 날은 단계가 빨라 더 센 보스 종류가 나올 수 있음 (보스마다 체력은 그대로)
   // 보스가 갈 수 없는 곳(스테이지 뒤쪽 밖)에서 쓰러져도 포털·상자는 갈 수 있는 곳에 (봇이 15분 갇혔던 문제)
   const pt = await page.evaluate(() => { const G = SH.G; enterStage(0); G.intro = null; SH.spawnBoss(0, 600); endIntro(); const e = G.boss; e.x = 900; e.y = 700; hurtEnemy(e, 1e13, 0, 1, 0);
     const P = G.st.portal, c = G.chests[G.chests.length - 1]; return { px: P.x, py: P.y, cx: c.x, cy: c.y, hw: STAGE_HW, L: G.st.L }; });
