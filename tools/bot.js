@@ -58,7 +58,10 @@ const RUNS = +process.argv[2] || 4, MINUTES = +process.argv[3] || 15, STYLE = pr
         if (g2.mode !== prevMode) { ev(g2.mode === 'stage' ? `출격 → 스테이지 ${g2.stageN + 1}` : '귀환'); prevMode = g2.mode; }
         if (g2.stageN > st.lastStage) { st.stages = g2.stageN; st.lastStage = g2.stageN; ev(`스테이지 ${g2.stageN} 클리어`); }
         if (!!g2.raid !== prevRaid) { ev(g2.raid ? '대습격 시작' : '대습격 끝(방어 성공)'); if (!g2.raid) st.raidsWon++; prevRaid = !!g2.raid; }
-        if ((g2.bossKills || 0) > prevBossK) { prevBossK = g2.bossKills; ev('보스 처치'); }
+        const bz = g2.boss && !g2.boss.dead ? g2.boss : null;   // 보스 등장·싸운 시간·영웅이 잃은 체력 (보스 세기 확인용)
+        if (bz && bz !== st.boss) { st.boss = bz; st.bossT = g2.t; st.bossHurt = 0; st.prevHp = p2.hp; ev(`보스 등장: ${bz.name} 체력 ${Math.round(bz.maxHp)} (영웅Lv ${g2.lvl})`); }
+        if (st.boss && p2.hp < st.prevHp) st.bossHurt += st.prevHp - p2.hp; if (st.boss) st.prevHp = p2.hp;
+        if ((g2.bossKills || 0) > prevBossK) { prevBossK = g2.bossKills; ev('보스 처치' + (st.boss ? ` — ${Math.round(g2.t - st.bossT)}초, 영웅이 잃은 체력 ${Math.round(st.bossHurt)}` : '')); st.boss = null; }
         if (g2.mode === 'base') st.minBase = Math.min(st.minBase, g2.base.hp);
         if (i % 900 === 0 && g2.mode === 'base') { const inside = g2.enemies.filter(e => Math.hypot(e.x, e.y) < WALL_R).length, broken = g2.walls.filter(w => w.hp <= 0).length;
           ev(`[상태] 마을 ${Math.round(g2.base.hp)} · 적 ${g2.enemies.length}(안 ${inside}) · 부서진 울타리 ${broken}/16 · 망루 ${g2.towers.map(t => t.lvl).join('')} · 🪵${p2.logs} 🪙${g2.gold} · 영웅Lv ${g2.lvl}`); }
