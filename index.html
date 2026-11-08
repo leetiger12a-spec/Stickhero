@@ -285,7 +285,7 @@ h2 .hb{-webkit-text-stroke:0;text-shadow:none;letter-spacing:0;font-family:"Jua"
 
 <script>
 'use strict';
-const BUILD = 77;
+const BUILD = 78;
 const BOSS_INTERVAL = 180;      // 보스 등장 간격(초)
 const WAVE_INTERVAL = 60;       // 대규모 몰이 이벤트 간격(초)
 const MAX_ENEMIES = 220;
@@ -1044,7 +1044,7 @@ const ETYPES = {
   e_ogre:     { r: 24, hp: 2600, spd: 38,  dmg: 38, color: '#70a33a', xp: 6, gold: 5 },
   e_demon:    { r: 13, hp: 2200, spd: 70,  dmg: 22, color: '#c1121f', xp: 2,  gold: 3 },
   e_ghost:    { r: 12, hp: 1300, spd: 75,  dmg: 18, color: '#b8a9e8', xp: 2,  gold: 2 },
-  e_golem:    { r: 30, hp: 11000, spd: 32, dmg: 48, color: '#6c757d', xp: 8, gold: 8 },
+  e_golem:    { r: 30, hp: 3000, spd: 32, dmg: 36, color: '#6c757d', xp: 8, gold: 8 },   // Build 78: 11000·48은 보스(800~11000·25~65)보다 셌음 → 나뉜 조각까지 3900
 };
 // 단계: [빠른·보통 졸개, 날쌘 적, 튼튼한 적]
 const TIERS = [['grunt', 'runner', 'tank'], ['e_agrunt', 'e_srunner', 'e_stank'], ['e_knight', 'e_assassin', 'e_ogre'], ['e_demon', 'e_ghost', 'e_golem']];
