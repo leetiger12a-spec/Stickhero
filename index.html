@@ -285,7 +285,7 @@ h2 .hb{-webkit-text-stroke:0;text-shadow:none;letter-spacing:0;font-family:"Jua"
 
 <script>
 'use strict';
-const BUILD = 79;
+const BUILD = 80;
 const BOSS_INTERVAL = 180;      // 보스 등장 간격(초)
 const WAVE_INTERVAL = 60;       // 대규모 몰이 이벤트 간격(초)
 const MAX_ENEMIES = 220;
@@ -1806,7 +1806,7 @@ function spawnWave() {
   sfx('wave');
 }
 // 보스 세기 (보통 난이도): 대왕 슬라임 → 강철 거인 → 불꽃 대마왕 → 얼음 용 → 거미 여왕 → 해골 왕 → 왕관 괴물 대왕
-const BOSS_HP = [800, 2400, 4000, 6000, 8500, 11000], BOSS_FINAL = { hp: 22000, dmg: 65, spd: 80 };
+const BOSS_HP = [800, 2400, 9000, 14000, 20000, 26000], BOSS_FINAL = { hp: 45000, dmg: 65, spd: 80 };   // Build 80: 후반 보스가 6~7초 만에 쓰러져서 올림 (목표 약 15초, 봇 84번 측정)
 const STAGE_BOSS = [0, 1, 1, 2, 3, 3, 4, 5, 5];   // 모험 1~9칸 보스 (10칸은 왕관 괴물 대왕)
 const BOSS_MIN_TIER = [0, 1, 3, 4];   // 적 단계(1~4)별 마을 최소 보스: 슬라임 · 강철 거인 · 얼음 용 · 거미 여왕
 function spawnBoss(bx, by) {
