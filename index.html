@@ -285,7 +285,7 @@ h2 .hb{-webkit-text-stroke:0;text-shadow:none;letter-spacing:0;font-family:"Jua"
 
 <script>
 'use strict';
-const BUILD = 82;
+const BUILD = 83;
 const BOSS_INTERVAL = 180;      // 보스 등장 간격(초)
 const WAVE_INTERVAL = 60;       // 대규모 몰이 이벤트 간격(초)
 const MAX_ENEMIES = 220;
@@ -1808,6 +1808,7 @@ function spawnWave() {
 // 보스 세기 (보통 난이도): 대왕 슬라임 → 강철 거인 → 불꽃 대마왕 → 얼음 용 → 거미 여왕 → 해골 왕 → 왕관 괴물 대왕
 const BOSS_HP = [800, 2400, 12000, 24000, 32000, 40000], BOSS_FINAL = { hp: 70000, dmg: 65, spd: 80 };   // Build 80~82: 후반 보스가 6~7초 만에 쓰러져서 올림 (목표 약 15초, 봇 측정) · 불꽃 대마왕은 15000에서 모험 4칸 벽이 되어 12000
 const STAGE_BOSS = [0, 1, 1, 2, 3, 3, 4, 5, 5];   // 모험 1~9칸 보스 (10칸은 왕관 괴물 대왕)
+const BOSS_DMG = [25, 33, 41, 40, 45, 50];   // 보스 공격력 (Build 83: 얼음 용 49→40 · 거미 여왕 57→45 · 해골 왕 65→50 — 체력을 올려 싸움이 길어진 만큼 덜 아프게)
 const BOSS_MIN_TIER = [0, 1, 3, 4];   // 적 단계(1~4)별 마을 최소 보스: 슬라임 · 강철 거인 · 얼음 용 · 거미 여왕
 function spawnBoss(bx, by) {
   // 마을 보스와 스테이지 보스는 따로 센다 (스테이지를 깬다고 마을 보스가 갑자기 세지지 않게)
@@ -1822,7 +1823,7 @@ function spawnBoss(bx, by) {
   if (bx === undefined) { bx = Math.cos(a) * R; by = Math.sin(a) * R; }
   // 스테이지 보스는 스테이지 번호로, 마을 보스는 등장 횟수로 체력이 정해짐
   const hp = DF().boss * (final ? BOSS_FINAL.hp : BOSS_HP[n]);
-  const b = { id: ++eid, type: 'boss', boss: true, name: B.name, x: bx, y: by, inside: false, atk: 0, lunge: 0, r: 58, hp, maxHp: hp, spd: final ? BOSS_FINAL.spd : 50 + n * 6, dmg: (final ? BOSS_FINAL.dmg : 25 + n * 8) * DF().edmg, color: B.color, xp: 0, flash: 0, hitT: 0, kx: 0, ky: 0, swordCd: 0, wob: 0, mode: 'walk', st: 3, rings: 0, ax: 0, ay: 0, lvl: n, spr: final ? (SPR.boss_final ? 'boss_final' : 'boss0') : 'boss' + BOSSES.indexOf(B) };
+  const b = { id: ++eid, type: 'boss', boss: true, name: B.name, x: bx, y: by, inside: false, atk: 0, lunge: 0, r: 58, hp, maxHp: hp, spd: final ? BOSS_FINAL.spd : 50 + n * 6, dmg: (final ? BOSS_FINAL.dmg : BOSS_DMG[n]) * DF().edmg, color: B.color, xp: 0, flash: 0, hitT: 0, kx: 0, ky: 0, swordCd: 0, wob: 0, mode: 'walk', st: 3, rings: 0, ax: 0, ay: 0, lvl: n, spr: final ? (SPR.boss_final ? 'boss_final' : 'boss0') : 'boss' + BOSSES.indexOf(B) };
   if (final) { b.r = 76; b.final = true; }
   G.enemies.push(b); G.boss = b;
   // 등장 컷신: 어두워짐 → 하늘에서 쿵! → 쿵쿵 발 구르기 → 이름표 쾅! (화면을 누르면 넘김)

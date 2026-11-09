@@ -12,7 +12,7 @@ const { chromium } = require('/opt/node22/lib/node_modules/playwright');
     const cmp = [BOSS_HP[1], BOSS_HP[2], BOSS_HP[3], BOSS_HP[3]];
     TIERS.forEach((ts, k) => ts.forEach(t => { const T = ETYPES[t], hp = T.hp * (1 + (split[t] || 0)); out.push({ t, k, hp: Math.round(hp), boss: cmp[k], dmg: T.dmg }); }));
     for (const t in ETYPES) if (!out.some(o => o.t === t)) { const T = ETYPES[t]; out.push({ t, k: -1, hp: Math.round(T.hp * (1 + (split[t] || 0))), boss: BOSS_HP[0], dmg: T.dmg }); }
-    return { out, maxBossDmg: 25 + 5 * 8 };
+    return { out, maxBossDmg: Math.max(...BOSS_DMG) };
   });
   for (const o of r.out) {
     const okH = o.hp < o.boss, okD = o.dmg < r.maxBossDmg;
