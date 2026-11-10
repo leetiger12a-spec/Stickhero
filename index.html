@@ -321,7 +321,7 @@ h2 .hb{-webkit-text-stroke:0;text-shadow:none;letter-spacing:0;font-family:"Jua"
 
 <script>
 'use strict';
-const BUILD = 116;
+const BUILD = 117;
 const BOSS_INTERVAL = 180;      // 보스 등장 간격(초)
 const WAVE_INTERVAL = 60;       // 대규모 몰이 이벤트 간격(초)
 const MAX_ENEMIES = 220;
@@ -1563,6 +1563,10 @@ function renderPauseStats() { const p = G.p, pct = v => `${v >= 1 ? '+' : ''}${M
 function runSummary() { const ws = Object.keys(G.weapons).map(id => `${wMini(id, G.weapons[id] > MAX_WLV)}${G.weapons[id] > MAX_WLV ? '✨' : G.weapons[id]}`).join(' ');
   const L = [['🔥 최고 콤보', G.bestCombo || 0], ['💥 치명타', G.crits || 0], ['👻 유령 상자', G.ghostCaught || 0], ['🧲💣 아이템', G.itemsUsed || 0], ['🌈 무지개 구슬', G.rainbows || 0], ['🌙 버틴 밤', G.nights || 0]];
   return `<div class="runSum">${L.map(([k, v]) => `<span>${k} <b>${v}</b></span>`).join('')}<div class="runW">${ws}</div></div>`; }
+// 🎖 레벨 축하 (Build 117): 레벨 20·40·60·80·100에 금고 보상 + 축하 (판마다)
+const LVL_GIFT = { 20: 50, 40: 100, 60: 200, 80: 300, 100: 500 };
+function lvlMilestone(l) { const v = LVL_GIFT[l]; if (!v) return; const m = readJSON(META_KEY) || {}; m.bank = (m.bank || 0) + v; writeJSON(META_KEY, m); G.lvlGifts = (G.lvlGifts || 0) + 1;
+  const p = G.p; banner(`🎖 레벨 ${l} 돌파!`, `금고에 🪙${v}`, '#ffd23f', 2.6); sfx('unlock'); burst(p.x, p.y - 30, '#ffd23f', 40, 300, 6, 0.8); burst(p.x, p.y - 30, '#ff6bd6', 20, 240, 5, 0.7); G.lvlFlash = 0.5; }
 function togglePause() {
   if (state === 'play') { state = 'paused'; joy = null; renderPauseStats(); showOv('ovPause'); }
   else if (state === 'paused') { state = 'play'; showOv(null); }
@@ -3572,7 +3576,7 @@ function update(dt) {
 
   // 레벨업
   while (G.xp >= G.need) {
-    G.xp -= G.need; G.lvl++; G.need = xpNeed(G.lvl); G.pending++;
+    G.xp -= G.need; G.lvl++; G.need = xpNeed(G.lvl); G.pending++; lvlMilestone(G.lvl);
   }
 
   // 이펙트
