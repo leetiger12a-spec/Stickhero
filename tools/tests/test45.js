@@ -8,7 +8,7 @@ const { chromium } = require('/opt/node22/lib/node_modules/playwright');
   page.on('pageerror', e => errors.push(e.message)); page.on('console', m => { if (m.type() === 'error') errors.push(m.text()); });
   await page.goto('http://localhost:8765/index.html'); await page.waitForTimeout(800);
   await page.click('#bStart'); await page.waitForTimeout(500);
-  const n = await page.evaluate(() => Object.keys(DECAL_H).filter(k => WICON[k]).length); console.log('decal images', n); check(n === 8, 'decal images not 8');
+  const n = await page.evaluate(() => Object.keys(DECAL_H).filter(k => WICON[k]).length); console.log('decal images', n); check(n === 12, 'decal images not 12');   // Build 94: 얼음 4개 추가
   // 그린 장식 세기: drawDecal을 감싸서 한 프레임 동안 이름별로 셈
   await page.evaluate(() => { const real = window.drawDecal; window.__dc = {}; window.drawDecal = (nm, x, y, s) => { const ok = real(nm, x, y, s); if (ok) __dc[nm] = (__dc[nm] || 0) + 1; return ok; }; });
   const count = async () => { await page.evaluate(() => { __dc = {}; }); await page.waitForTimeout(120); return page.evaluate(() => { const c = __dc; __dc = {}; return c; }); };

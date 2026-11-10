@@ -287,7 +287,7 @@ h2 .hb{-webkit-text-stroke:0;text-shadow:none;letter-spacing:0;font-family:"Jua"
 
 <script>
 'use strict';
-const BUILD = 93;
+const BUILD = 94;
 const BOSS_INTERVAL = 180;      // 보스 등장 간격(초)
 const WAVE_INTERVAL = 60;       // 대규모 몰이 이벤트 간격(초)
 const MAX_ENEMIES = 220;
@@ -362,6 +362,7 @@ const THEMES = [
   { name: '던전', tex: 'dungeon', edgeTex: 'dungeon_dark', ground: '#5d4d70', check: 'rgba(0,0,0,.12)',       edge: '#231a2e', deco: 'torch',  bgm: 'd', map: '#5d4d70' },
   { name: '화산', tex: 'volcano', edgeTex: 'volcano_dark', ground: '#7a4a3a', check: 'rgba(255,90,0,.08)',    edge: '#2a1410', deco: 'torch',  bgm: 'c', map: '#b5482e' },
   { name: '성',   tex: 'castle', edgeTex: 'castle_dark', ground: '#8d8fa3', check: 'rgba(0,0,0,.08)',       edge: '#2b2d42', deco: 'pillar', bgm: 'boss', map: '#4a4e69' },
+  { name: '얼음', tex: 'ice', ground: '#dfeefa', check: 'rgba(110,150,200,.08)', edge: '#5f7fa8', deco: 'ice', bgm: 'b', map: '#7fb8e8' },   // Build 94: 얼음 나라 (바닥 그림은 받으면 TEX_IMG에 추가)
 ];
 // 모험 지도 10칸. goal: boss(보스 잡기) / rescue(갇힌 고양이 구출 후 보스) / survive(정해진 시간 버티기) / final(마지막 성)
 const STAGES = [
@@ -375,7 +376,14 @@ const STAGES = [
   { name: '불타는 길',       th: 3, goal: 'rescue' },
   { name: '화산 분화구',     th: 3, goal: 'survive', time: 70 },
   { name: '왕관 괴물의 성',  th: 4, goal: 'final' },
+  // Build 94: ❄️ 얼음 나라 (마지막 성 다음) — 칸 보스는 골렘들
+  { name: '눈 덮인 숲',      th: 5, goal: 'boss', boss: 9 },
+  { name: '얼음 동굴',       th: 5, goal: 'rescue', boss: 8 },
+  { name: '눈보라 언덕',     th: 5, goal: 'survive', time: 80 },
+  { name: '얼어붙은 화산',   th: 5, goal: 'boss', boss: 7 },
+  { name: '황금 얼음 궁전',  th: 5, goal: 'boss', boss: 10 },
 ];
+const FINAL_IDX = STAGES.findIndex(d => d.goal === 'final');
 const GOAL_TXT = { boss: '👑 끝까지 가서 보스를 물리쳐라', rescue: '🐱 갇힌 고양이 3마리를 구하고 보스를 물리쳐라', survive: '⏱ 몰려오는 적을 버텨라', final: '🏰 왕관 괴물 대왕을 쓰러뜨려라!' };
 const GOAL_ICON = { boss: '👑', rescue: '🐱', survive: '⏱', final: '🏰' };
 
@@ -405,7 +413,7 @@ const SPR_INFO = {    // ax: 발 위치(그림 폭 대비), h: 화면 키(월드
   e_spider: { ax: 0.5, h: 30 }, e_skel: { ax: 0.5, h: 46 },
   e_agrunt: { ax: 0.45, h: 52 }, e_srunner: { ax: 0.5, h: 46 }, e_stank: { ax: 0.45, h: 70 }, e_knight: { ax: 0.5, h: 58 }, e_assassin: { ax: 0.5, h: 50 }, e_ogre: { ax: 0.5, h: 92 }, e_demon: { ax: 0.5, h: 60 }, e_ghost: { ax: 0.5, h: 56 }, e_golem: { ax: 0.5, h: 112 },
   tree: { h: 78 }, stump: { h: 20 }, log: { h: 8 }, stake: { h: 26 }, tower: { h: 76 }, hall: { h: 92 },
-  smith: { h: 72 }, pillar: { h: 70 }, torch: { h: 58 }, coin: { h: 12 },
+  smith: { h: 72 }, pillar: { h: 70 }, icepillar: { ax: 0.5, h: 70 }, snowman: { ax: 0.5, h: 46 }, snowtree: { ax: 0.5, h: 72 }, torch: { h: 58 }, coin: { h: 12 },
   ally_sword: { ax: 0.5, h: 52 }, ally_archer: { ax: 0.5, h: 52 }, ally_bomber: { ax: 0.45, h: 52 }, ally_shield: { ax: 0.5, h: 54 }, ally_golem: { ax: 0.5, h: 58 }, ally_golem_walk: { h: 60 }, ally_golem_slam: { h: 60 }, hero_slash: { h: 72 }, hero_walk: { h: 72 }, ally_archer_shoot: { h: 60 }, ally_bomber_toss: { h: 60 }, ally_shield_bash: { h: 60 }, ally_sword_slash: { h: 60 }, ally_sword_walk: { h: 60 }, ally_archer_walk: { h: 60 }, ally_bomber_walk: { h: 60 }, ally_shield_walk: { h: 60 }, sf_plane0: { h: 80 }, sf_plane1: { h: 80 }, sf_plane2: { h: 80 }, sf_plane3: { h: 80 }, sf_plane4: { h: 80 }, sf_pilot0: { h: 70 }, sf_pilot1: { h: 70 }, sf_pilot2: { h: 70 }, sf_pilot3: { h: 70 }, sf_pilot4: { h: 70 }, tavern: { h: 72 }, skyfang_plane: { h: 80 },
   e_archer: { ax: 0.45, h: 50 }, e_bomber: { ax: 0.42, h: 50 }, e_bat: { ax: 0.5, h: 48 }, e_slime: { ax: 0.5, h: 42 }, e_shaman: { ax: 0.42, h: 56 }, e_charger: { ax: 0.5, h: 52 },
   farm: { h: 72 }, mine: { h: 74 }, market: { h: 76 }, stone: { h: 14 }, rock: { h: 64 }, camp: { h: 100 }, hall2: { h: 100 }, hall3: { h: 108 }, hall_broken: { h: 96 }, tower_broken: { h: 70 }, stonewall: { h: 34 }, repair: { h: 40 },
@@ -509,6 +517,7 @@ const ACH = [
   { id: 'golem1',  icon: '🗿', name: '첫 골렘',       desc: '골렘 보스 처음 잡기',       title: '골렘 사냥꾼', bank: 150, p: () => [GOLEMS.filter(n => ST.bossT.includes(n)).length, 1] },
   { id: 'golemG',  icon: '💰', name: '황금을 잡아라',  desc: '도망가기 전에 황금 골렘 잡기', title: '황금 손',   bank: 300, p: () => [ST.bossT.includes('황금 골렘') ? 1 : 0, 1] },
   { id: 'golem5',  icon: '⛰', name: '골렘 왕국',     desc: '골렘 보스 5종 모두 잡기',   title: '골렘 대왕',  bank: 600, p: () => [GOLEMS.filter(n => ST.bossT.includes(n)).length, 5] },
+  { id: 'ice15',   icon: '❄️', name: '얼음 나라 정복', desc: '모험 지도 15칸 모두 깨기',   title: '얼음 영웅',  bank: 800, p: () => [bestStage(), 15] },   // Build 94
   { id: 'floor25', icon: '🌤', name: '하늘 끝까지',   desc: '무한 탑 25층 돌파',        title: '하늘 정복자', bank: 600, p: () => [metaOf('bestFloor'), 25] },
 ];
 function checkAch() { // 1초마다: 기록 저장 + 새 업적
@@ -566,7 +575,7 @@ function bakeSprite(n) {
 }
 // img/ 폴더에 실제로 있는 그림만 불러옴 (없는 파일을 부르면 오류가 남)
 const SPR_FILES = ['e_agrunt', 'e_srunner', 'e_stank', 'e_knight', 'e_assassin', 'e_ogre', 'e_demon', 'e_ghost', 'e_golem', 'boss3', 'boss4', 'boss5', 'boss6', 'boss7', 'boss8', 'boss9', 'boss10', 'boss_final', 'e_spider', 'e_skel', 'e_archer', 'e_bomber', 'e_bat', 'e_slime', 'e_shaman', 'e_charger', 'hall2', 'hall3', 'hall_broken', 'tower_broken', 'stonewall', 'repair', 'farm', 'mine', 'market', 'stone', 'rock', 'camp', 'hero', 'grunt', 'runner', 'tank', 'boss0', 'boss1', 'boss2', 'tree', 'stump', 'log', 'stake', 'tower', 'hall',
-  'smith', 'pillar', 'torch', 'coin', 'ally_sword', 'ally_archer', 'tavern', 'ally_bomber', 'skyfang_plane', 'ally_shield', 'hero_slash', 'hero_walk', 'ally_archer_shoot', 'ally_bomber_toss', 'ally_shield_bash', 'ally_sword_slash', 'ally_sword_walk', 'ally_archer_walk', 'ally_bomber_walk', 'ally_shield_walk', 'ally_golem', 'ally_golem_walk', 'ally_golem_slam', 'sf_plane0', 'sf_plane1', 'sf_plane2', 'sf_plane3', 'sf_plane4', 'sf_pilot0', 'sf_pilot1', 'sf_pilot2', 'sf_pilot3', 'sf_pilot4'];
+  'smith', 'pillar', 'icepillar', 'snowman', 'snowtree', 'torch', 'coin', 'ally_sword', 'ally_archer', 'tavern', 'ally_bomber', 'skyfang_plane', 'ally_shield', 'hero_slash', 'hero_walk', 'ally_archer_shoot', 'ally_bomber_toss', 'ally_shield_bash', 'ally_sword_slash', 'ally_sword_walk', 'ally_archer_walk', 'ally_bomber_walk', 'ally_shield_walk', 'ally_golem', 'ally_golem_walk', 'ally_golem_slam', 'sf_plane0', 'sf_plane1', 'sf_plane2', 'sf_plane3', 'sf_plane4', 'sf_pilot0', 'sf_pilot1', 'sf_pilot2', 'sf_pilot3', 'sf_pilot4'];
 SPR_FILES.forEach(n => {
   const im = new Image();
   im.onload = () => { SPR_ORIG[n] = im; SPR_SRC[n] = HERO_SPR.includes(n) ? recolorHero(im) : im; bakeSprite(n); };
@@ -827,8 +836,8 @@ const EVO = {
 };
 // 땅 장식 그림 (Build 74, img/d_*.webp): 이름 → 세상 속 높이 / 테마(땅 무늬)별로 쓰는 장식
 const PROJ_IMG = ['pj_slime', 'pj_ice', 'pj_skull', 'pj_cannon', 'pj_rock', 'pj_orb', 'pj_fist', 'pj_bolt'];   // 공격 그림 (Build 87, 모두 오른쪽을 향함)
-const DECAL_H = { d_daisy: 24, d_butter: 24, d_mush: 24, d_pebble: 15, d_moss: 30, d_bones: 24, d_lava: 28, d_bricks: 28 };
-const DECAL_TH = { grass: ['d_daisy', 'd_butter', 'd_mush', 'd_pebble'], ruins: ['d_moss', 'd_moss', 'd_pebble'], dungeon: ['d_bones', 'd_bones', 'd_pebble'], volcano: ['d_lava'], castle: ['d_bricks'] };
+const DECAL_H = { d_daisy: 24, d_butter: 24, d_mush: 24, d_pebble: 15, d_moss: 30, d_bones: 24, d_lava: 28, d_bricks: 28, d_snowball: 20, d_icecrys: 22, d_icepud: 18, d_snowrock: 20 };
+const DECAL_TH = { grass: ['d_daisy', 'd_butter', 'd_mush', 'd_pebble'], ruins: ['d_moss', 'd_moss', 'd_pebble'], dungeon: ['d_bones', 'd_bones', 'd_pebble'], volcano: ['d_lava'], castle: ['d_bricks'], ice: ['d_snowball', 'd_icecrys', 'd_icepud', 'd_snowrock'] };
 // 무기 그림 아이콘 (img/w_무기.webp, 진화는 w_무기_evo.webp) — 못 불러오면 이모지
 const WICON = {};
 for (const id in WEAP) for (const ev of [0, 1]) { const n = id + (ev ? '_evo' : ''), im = new Image(); im.onload = () => { WICON[n] = im; }; im.src = `img/w_${n}.webp?b=${BUILD}`; }
@@ -1850,7 +1859,7 @@ function spawnBoss(bx, by) {
   const top = () => 3 + Math.floor(Math.random() * 7);   // 6번째 뒤로는 센 보스 중 하나 (Build 84: 골렘 4종 포함)
   // Build 69: 보스마다 세기 고정 — 나중에 나오는 보스일수록 센 보스 (같은 보스는 언제 나와도 같음)
   // Build 79: 마을 보스는 적 단계에 맞춰 최소 보스가 정해짐 (4단계에 체력 800 보스가 나오지 않게) — 보스마다 세기는 그대로
-  let n = inStage ? (G.st.tower ? (G.st.tower / 5 <= 9 ? G.st.tower / 5 : G.st.tower === 50 ? GOLD_GOLEM : top()) : STAGE_BOSS[Math.min(8, si)]) : Math.max(G.bossCount < 6 ? G.bossCount : top(), BOSS_MIN_TIER[Math.min(3, Math.floor(tierNow()))]);
+  let n = inStage ? (G.st.tower ? (G.st.tower / 5 <= 9 ? G.st.tower / 5 : G.st.tower === 50 ? GOLD_GOLEM : top()) : G.st.def.boss !== undefined ? G.st.def.boss : STAGE_BOSS[Math.min(8, si)]) : Math.max(G.bossCount < 6 ? G.bossCount : top(), BOSS_MIN_TIER[Math.min(3, Math.floor(tierNow()))]);
   if (!inStage && n >= 3 && pr === undefined && !window.__noGold && Math.random() < GOLD_GOLEM_P) n = GOLD_GOLEM;   // 황금 골렘은 마을에서만 아주 드물게 (__noGold: 정확한 기록을 보는 시험용)
   if (pr !== undefined && pr !== 'final') n = pr;
   if (window.__bossN !== undefined) n = window.__bossN;   // 시험용
@@ -1866,7 +1875,7 @@ function spawnBoss(bx, by) {
   if (pr !== undefined && G.st.hard) { b.hard = true; b.hp *= 2; b.maxHp *= 2; b.dmg *= 1.5; }   // 🔥 도전: 체력 2배 · 공격 1.5배   // 보스 연습 기록용 (등장 장면 동안은 G.t가 멈춤)
   G.enemies.push(b); G.boss = b;
   // 등장 컷신: 어두워짐 → 하늘에서 쿵! → 쿵쿵 발 구르기 → 이름표 쾅! (화면을 누르면 넘김)
-  if (n === GOLD_GOLEM) { b.goldG = true; b.fleeT = GOLD_GOLEM_FLEE; }
+  if (n === GOLD_GOLEM) { b.goldG = true; b.fleeT = inStage && G.st.def.boss === GOLD_GOLEM ? 1e9 : GOLD_GOLEM_FLEE; }   // 15칸 황금 얼음 궁전에서는 도망 안 감
   else if (pr === undefined && !window.__noGold && Math.random() < GOLD_BOSS_P) { b.golden = true; b.hp *= 2; b.maxHp *= 2; }   // 황금 보스 (Build 66)
   G.intro = { t: 0, dur: 2.6, spr: b.spr, name: (b.golden ? '✨황금 ' : '') + B.name, color: b.golden ? '#ffd23f' : B.color, hits: 0 };
   joy = null; G.banner = null; sfx('warn');
@@ -2548,13 +2557,13 @@ function returnBase(win) {
 }
 function showClear(st, prize, first, old) {
   state = 'result'; joy = null;
-  const all = G.stageN >= STAGES.length && first;
-  $('clrTitle').textContent = all ? '🏆 모든 모험 완료! 🏆' : `${st.n + 1}. ${st.def.name} 클리어!`;
+  const all = first && st.def.goal === 'final', iceAll = first && G.stageN >= STAGES.length;   // 엔딩은 왕관 괴물의 성 · 얼음 나라 끝은 따로
+  $('clrTitle').textContent = all ? '🏆 왕관 괴물 대왕 격파! 🏆' : iceAll ? '❄️ 얼음 나라 정복! ❄️' : `${st.n + 1}. ${st.def.name} 클리어!`;
   $('clrStars').innerHTML = [0, 1, 2].map(k => `<span class="${k < st.stars ? '' : 'off'}" style="animation-delay:${0.2 + k * 0.25}s">⭐</span>`).join('');
   [0, 1, 2].forEach(k => { if (k < st.stars) setTimeout(() => tone(880 + k * 220, 0.15, 'square', 0.06, 200), 200 + k * 250); });
   const tm = fmtTime(st.t);
   $('clrInfo').innerHTML = `⏱ 걸린 시간 <b>${tm}</b><br>🪙 보상 <b>+${prize}</b>${first ? ' (첫 클리어)' : ''}${st.stars > old && old > 0 ? '<br>✨ 별 기록 갱신!' : ''}` +
-    (all ? '<br><br>왕관 괴물 대왕을 물리쳤다!<br>마을에 평화가 찾아왔어요 🎉' : first && G.stageN < STAGES.length ? `<br>🔓 다음 스테이지 <b>${STAGES[G.stageN].name}</b> 열림!` : '') +
+    (all ? '<br><br>왕관 괴물 대왕을 물리쳤다!<br>마을에 평화가 찾아왔어요 🎉<br><br>❄️ 북쪽에 새 땅 <b>얼음 나라</b>가 열렸어요!' : iceAll ? '<br><br>황금 골렘까지 물리쳤다!<br>진짜 레전드 히어로 🏆' : first && G.stageN < STAGES.length ? `<br>🔓 다음 스테이지 <b>${STAGES[G.stageN].name}</b> 열림!` : '') +
     (st.newUnlock ? `<div class="unlock">🎁 새로 열림! <b>${st.newUnlock.name}</b><br><small>${st.newUnlock.desc}</small></div>` : '') +
     (st.newBand ? `<div class="unlock">🎨 새 머리띠! <b>${st.newBand.name}</b><br><small>시작 화면 '꾸미기'에서 바꿀 수 있어요</small></div>` : '') +
     (G.raidIn > 0 ? '<br><span style="color:#ff9f1c">⚠ 적의 대군이 다가온다… 마을을 지켜라!</span>' : '');
@@ -2672,6 +2681,7 @@ function drawDeco(d) {
   ctx.save(); ctx.translate(d.x, d.y); ctx.scale(1, IK); ctx.scale(d.sz, d.sz);
   ctx.fillStyle = 'rgba(0,0,0,.2)'; ctx.beginPath(); ctx.ellipse(0, 3, 16, 6, 0, 0, 7); ctx.fill();
   if (d.kind === 'pillar' && SPR.pillar) { spr('pillar', 50 + (d.ph % 1) * 30); ctx.restore(); return; }
+  if (d.kind === 'ice') { const n = ['icepillar', 'snowman', 'snowtree'][Math.floor(d.ph) % 3]; if (SPR[n]) { spr(n, n === 'snowman' ? 46 : n === 'snowtree' ? 72 : 60 + (d.ph % 1) * 20); ctx.restore(); return; } ctx.restore(); return; }   // 얼음 기둥·눈사람·눈 나무
   if (d.kind === 'torch' && SPR.torch) { // 횃불 받침은 그림, 불꽃은 코드로 일렁임
     const h = 58; spr('torch', h);
     const f = Math.sin(G.t * 12 + d.ph) * 2, fy = -h * 0.9;
@@ -4544,7 +4554,7 @@ function drawHUD() {
     roundRect(bx, by, bw, 18, 9); ctx.fillStyle = '#222'; ctx.fill();
     roundRect(bx + 2, by + 2, (bw - 4) * Math.max(0, b.hp / b.maxHp), 14, 7); ctx.fillStyle = b.color; ctx.fill();
     hudText('👑 ' + b.name + (b.phase2 ? ' · 진짜 모습' : ''), W / 2, by + 9, 12, '#fff', 'center');
-    if (b.goldG && b.fleeT > 0) { const s = Math.ceil(b.fleeT), hurry = s <= 10; hudText(`💰 도망까지 ${s}초`, W / 2, by + 30, hurry ? 15 : 13, hurry && Math.floor(G.t * 4) % 2 ? '#ff6b6b' : '#ffd23f', 'center'); }   // 황금 골렘 남은 시간 (Build 85)
+    if (b.goldG && b.fleeT > 0 && b.fleeT < 1e8) { const s = Math.ceil(b.fleeT), hurry = s <= 10; hudText(`💰 도망까지 ${s}초`, W / 2, by + 30, hurry ? 15 : 13, hurry && Math.floor(G.t * 4) % 2 ? '#ff6b6b' : '#ffd23f', 'center'); }   // 황금 골렘 남은 시간 (Build 85)
     // 화면 밖 보스 화살표
     const sx = (b.x - G.cam.x) * SCALE + W / 2, sy = (b.y - G.cam.y) * SCALE * K + H / 2;
     if (sx < 0 || sx > W || sy < 0 || sy > H) {

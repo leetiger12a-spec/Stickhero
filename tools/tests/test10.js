@@ -11,7 +11,7 @@ const { chromium } = require('/opt/node22/lib/node_modules/playwright');
   // 지도: 처음엔 1칸만 열림
   await page.evaluate(() => { SH.G.p.hp = SH.G.p.maxHp = 1e6; SH.give('sword', 4); SH.give('shotgun', 3); SH.openMap(); });
   await page.waitForTimeout(300);
-  check(await page.evaluate(() => document.querySelectorAll('.mnode.lock').length === 9), 'lock count wrong');
+  check(await page.evaluate(() => document.querySelectorAll('.mnode.lock').length === STAGES.length - 1), 'lock count wrong');   // Build 94: 얼음 나라 5칸 추가
   await page.tap('.mnode >> nth=3'); await page.waitForTimeout(100);
   check(await page.evaluate(() => document.querySelector('#mapCard .t').textContent.startsWith('1.')), 'locked stage selectable');
   await page.screenshot({ path: `${process.env.OUT||OUT||'.'}/b24_map_first.png` });
@@ -58,7 +58,7 @@ const { chromium } = require('/opt/node22/lib/node_modules/playwright');
   const f = await run(9);
   console.log('final', JSON.stringify(f));
   check(f.stageN === 10 && f.state === 'result', 'final not cleared');
-  check(await page.evaluate(() => document.getElementById('clrTitle').textContent.includes('모든 모험')), 'all-clear title missing');
+  check(await page.evaluate(() => document.getElementById('clrTitle').textContent.includes('왕관 괴물 대왕 격파')), 'all-clear title missing');   // Build 94: 얼음 나라가 이어져서 제목 바꿈
   await page.screenshot({ path: `${process.env.OUT||OUT||'.'}/b24_final.png` });
   await page.evaluate(() => { SH.ok(); SH.openMap(); }); await page.waitForTimeout(300);
   await page.screenshot({ path: `${process.env.OUT||OUT||'.'}/b24_map_full.png` });
