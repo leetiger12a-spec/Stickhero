@@ -29,6 +29,7 @@ canvas{display:block;position:fixed;inset:0;width:100%;height:100%}
 @keyframes shine{0%,55%{left:-60%}100%{left:130%}}
 .mrow{display:flex;gap:8px;margin-top:6px}
 #bDaily{position:relative}#bDaily.new::after{content:'';position:absolute;top:-4px;right:-4px;width:12px;height:12px;border-radius:50%;background:#ff3b3b;border:2px solid #fff}
+#statList{width:min(92vw,360px);margin:10px 0;display:grid;grid-template-columns:1fr 1fr;gap:8px}#statList .st{background:#fffaf0;color:#222;border:3px solid #222;border-radius:12px;padding:7px 8px;font-size:12px;font-weight:800}#statList .st b{display:block;font-size:19px;color:#d35400}
 #dailyGrid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;width:min(92vw,360px);margin:10px 0}
 #dailyGrid .dd{border:3px solid #222;border-radius:12px;background:#fffaf0;color:#222;padding:6px 2px;font-weight:800;font-size:12px;display:flex;flex-direction:column;align-items:center;gap:2px}
 #dailyGrid .dd b{font-size:20px}#dailyGrid .dd.got{opacity:.45}#dailyGrid .dd.now{outline:4px solid #ffd23f;transform:scale(1.06)}#dailyGrid .dd.big{grid-column:span 2;background:#fff3c4}
@@ -181,7 +182,7 @@ h2 .hb{-webkit-text-stroke:0;text-shadow:none;letter-spacing:0;font-family:"Jua"
    <button class="btn big" id="bStart">⚔ 출전!</button>
   </div>
   <div class="best" id="bestTitle"></div>
-  <div class="mrow"><button class="hb" id="bHelp">❓ 조작법</button><button class="hb" id="bStory" style="display:none">📖 이야기</button><button class="hb" id="bMusicT">🎵 음악</button><button class="hb" id="bVolT">🔈 소리 크기</button><button class="hb" id="bWard">🎨 꾸미기</button><button class="hb" id="bShopT">💪 강화</button><button class="hb" id="bAchT">🏅 업적</button><button class="hb" id="bDaily">📅 출석</button></div>
+  <div class="mrow"><button class="hb" id="bHelp">❓ 조작법</button><button class="hb" id="bStory" style="display:none">📖 이야기</button><button class="hb" id="bMusicT">🎵 음악</button><button class="hb" id="bVolT">🔈 소리 크기</button><button class="hb" id="bWard">🎨 꾸미기</button><button class="hb" id="bShopT">💪 강화</button><button class="hb" id="bAchT">🏅 업적</button><button class="hb" id="bDaily">📅 출석</button><button class="hb" id="bStats">📊 기록</button></div>
   <div class="hint" id="helpBox" style="display:none">📱 화면을 끌어서 이동 · 공격은 자동<br>🌳 나무 옆에 서면 통나무를 모아요 → 🪵 동그라미 위에 서면 건설!<br>⚔ 출격 문으로 모험 → 보스를 잡고 금화를 가져와요<br>📻 위험할 땐 지원 버튼! SKYFANG 비행기가 폭격 (60초마다)<br>💻 WASD / 방향키 이동 · E 지원 요청 · P 일시정지</div>
  </div>
 </div>
@@ -222,6 +223,13 @@ h2 .hb{-webkit-text-stroke:0;text-shadow:none;letter-spacing:0;font-family:"Jua"
   <div id="chestItems"></div>
   <div class="sub" id="chestHint" style="margin:6px 0 0;font-size:14px">화면을 누르면 바로 열려요</div>
   <button class="btn" id="bChestOk" style="display:none">좋아!</button>
+</div>
+
+<div class="ov" id="ovStats">
+  <h2 style="margin-bottom:4px">📊 기록실</h2>
+  <div class="sub">지금까지 모든 판을 합친 기록이에요</div>
+  <div id="statList"></div>
+  <button class="btn" id="bStatsOk">닫기</button>
 </div>
 
 <div class="ov" id="ovDaily">
@@ -305,7 +313,7 @@ h2 .hb{-webkit-text-stroke:0;text-shadow:none;letter-spacing:0;font-family:"Jua"
 
 <script>
 'use strict';
-const BUILD = 102;
+const BUILD = 103;
 const BOSS_INTERVAL = 180;      // 보스 등장 간격(초)
 const WAVE_INTERVAL = 60;       // 대규모 몰이 이벤트 간격(초)
 const MAX_ENEMIES = 220;
@@ -539,6 +547,16 @@ function openDaily() {
   $('bDailyOk').onclick = () => { sfx('pick'); state = 'title'; refreshTitle(); showOv('ovTitle'); };
 }
 $('bDaily').onclick = () => { audioInit(); sfx('pick'); openDaily(); };
+// ---------- 📊 기록실 (Build 103) ----------
+const fmtT = t => { const h = Math.floor(t / 3600), m = Math.floor(t % 3600 / 60); return h ? `${h}시간 ${m}분` : `${m}분`; };
+function statRows() { const b = loadBest(), m = readJSON(META_KEY) || {};
+  return [['⏱ 놀이 시간', fmtT(ST.playT || 0)], ['💀 잡은 적', (ST.kills || 0).toLocaleString()], ['👑 잡은 보스', ST.bosses || 0], ['🏴 부순 진지', ST.camps || 0],
+    ['✨ 진화한 무기', `${ST.evoT.length}/${Object.keys(EVO).length}`], ['🗺 모험 지도', `${bestStage()}/${STAGES.length}칸`], ['🌤 무한 탑 최고', `${m.bestFloor || 0}층`], ['📅 버틴 날', `${ST.day || 1}일`],
+    ['🌙 버틴 밤', ST.nightsAll || 0], ['👻 잡은 유령 상자', ST.ghosts || 0], ['⭐ 모은 별', totalStars()], ['🏅 업적', `${ACH.filter(A => (m.ach || {})[A.id]).length}/${ACH.length}`],
+    ['🎚 최고 레벨', `Lv ${b.lvl || 0}`], ['🏦 금고', `🪙${m.bank || 0}`]]; }
+function openStats() { state = 'stats'; showOv('ovStats'); $('statList').innerHTML = statRows().map(([k, v]) => `<div class="st">${k}<b>${v}</b></div>`).join('');
+  $('bStatsOk').onclick = () => { sfx('pick'); state = 'title'; refreshTitle(); showOv('ovTitle'); }; }
+$('bStats').onclick = () => { audioInit(); sfx('pick'); openStats(); };
 $('bShopP').onclick = () => { sfx('pick'); openShop(); };
 $('bShopOk').onclick = () => { sfx('pick'); if (shopBack === 'title' || !G) { state = 'title'; refreshTitle(); showOv('ovTitle'); } else { state = 'paused'; showOv('ovPause'); } };
 $('bWard').onclick = () => { audioInit(); sfx('pick'); openWard(); };
@@ -597,6 +615,7 @@ function checkAch() { // 1초마다: 기록 저장 + 새 업적
   const m = readJSON(META_KEY) || {}; m.ach = m.ach || {};
   let got = null;
   for (const A of ACH) { if (m.ach[A.id]) continue; const [v, goal] = A.p(); if (v >= goal) { m.ach[A.id] = true; m.bank = (m.bank || 0) + A.bank; got = got || A; } }
+  if (G && state === 'play') { ST.playT = (ST.playT || 0) + 1; if (ST.playT % 10 === 0) stDirty = true; }   // 놀이 시간 (초, 10초마다 저장)
   if (stDirty || got) { m.st = ST; writeJSON(META_KEY, m); stDirty = false; }
   if (got && G && state === 'play') { banner(`🏅 업적: ${got.name}!`, `칭호 '${got.title}' · 금고 🪙${got.bank}`, '#ffd23f', 2.6); sfx('unlock'); }
 }
@@ -1492,7 +1511,7 @@ function refreshTitle() {
 }
 
 // ---------- 화면 전환 ----------
-function showOv(id) { ['ovTitle', 'ovLevel', 'ovPause', 'ovOver', 'ovStory', 'ovMap', 'ovClear', 'ovWard', 'ovShop', 'ovAch', 'ovEvo', 'ovChest', 'ovDex', 'ovVol', 'ovDaily'].forEach(o => $(o).classList.toggle('show', o === id)); }
+function showOv(id) { ['ovTitle', 'ovLevel', 'ovPause', 'ovOver', 'ovStory', 'ovMap', 'ovClear', 'ovWard', 'ovShop', 'ovAch', 'ovEvo', 'ovChest', 'ovDex', 'ovVol', 'ovDaily', 'ovStats'].forEach(o => $(o).classList.toggle('show', o === id)); }
 function startGame() {
   audioInit(); clearSave(); newGame(); state = 'play'; joy = null; showOv(null);
   $('hudBtns').classList.add('show');
