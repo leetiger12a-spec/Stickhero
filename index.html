@@ -293,7 +293,7 @@ h2 .hb{-webkit-text-stroke:0;text-shadow:none;letter-spacing:0;font-family:"Jua"
 
 <script>
 'use strict';
-const BUILD = 99;
+const BUILD = 100;
 const BOSS_INTERVAL = 180;      // 보스 등장 간격(초)
 const WAVE_INTERVAL = 60;       // 대규모 몰이 이벤트 간격(초)
 const MAX_ENEMIES = 220;
@@ -2006,7 +2006,7 @@ function updNight(dt) {
   const ph = nightPh(), on = ph >= 0 && ph < NIGHT_LEN, p = G.p;
   if (on && !G.nightOn) { G.nightOn = true; banner('🌙 밤이 됐다!', '적이 더 많이 몰려와요 · 아침까지 버텨라!', '#9fb4ff', 2.6); sfx('wave'); }
   if (!on && G.nightOn) {
-    G.nightOn = false; G.nights = (G.nights || 0) + 1; const bonus = 40 + 20 * G.nights; G.gold += bonus;
+    G.nightOn = false; G.nights = (G.nights || 0) + 1; questEvent('night'); ST.nightsAll = (ST.nightsAll || 0) + 1; const bonus = 40 + 20 * G.nights; G.gold += bonus;
     banner('☀️ 아침이다!', `밤을 버텼다! 🪙${bonus}`, '#ffd23f', 2.6); sfx('cheer'); cheerAll(); floatText(p.x, p.y - 60, `+🪙${bonus}`, '#ffd23f', 20, 1.4);
   }
   updGhostChest(dt, on, ph);
@@ -2318,7 +2318,7 @@ function updAllies(dt) {
 
 function updMeteors(dt) { // 별똥별: 0.5초 동안 하늘에서 떨어져 쾅 (원 안 적 모두)
   for (const m of G.meteors) { m.t += dt; if (m.t >= m.dur && !m.done) { m.done = true;
-    for (const e of G.enemies) { const dx = e.x - m.x, dy = e.y - m.y, d = Math.hypot(dx, dy); if (d < m.rad + e.r) hurtEnemy(e, m.dmg, dx / (d || 1), dy / (d || 1), 160); }
+    for (const e of G.enemies) { const dx = e.x - m.x, dy = e.y - m.y, d = Math.hypot(dx, dy); if (d < m.rad + e.r) { G.hitSrc = 'star'; hurtEnemy(e, m.dmg, dx / (d || 1), dy / (d || 1), 160); G.hitSrc = null; } }
     G.rings.push({ x: m.x, y: m.y, r: m.rad, life: 0.35, max: 0.35, color: '#ffe066' }); burst(m.x, m.y - 6, '#ffe066', 18, 220, 5, 0.45); burst(m.x, m.y - 6, '#fff', 8, 160, 4, 0.35); G.shake = Math.max(G.shake, 3); sfx('bombBoom'); } }
   G.meteors = G.meteors.filter(m => !m.done);
 }
@@ -2373,6 +2373,11 @@ const QUESTS = [ // id, 글, 목표(날짜 d), 나올 수 있는지
   { id: 'repair',  txt: n => `🔨 건물 ${n}개 고치기`,          goal: () => 3, ok: () => Object.values(G.broken).filter(Boolean).length >= 3 },
   { id: 'tower',   txt: n => `🗼 무한 탑 ${n}층 오르기`,       goal: d => 2 + d, ok: () => bestStage() >= 3 },
   { id: 'build',   txt: n => `🏗 짓기·강화 ${n}번`,            goal: () => 4 },
+  // Build 100: 새 퀘스트 4종
+  { id: 'night',   txt: () => '🌙 밤 1번 버티기',              goal: () => 1 },
+  { id: 'ghost',   txt: () => '👻 유령 보물 상자 잡기',         goal: () => 1 },
+  { id: 'poison',  txt: n => `🧪 독 웅덩이로 적 ${n}마리 잡기`,  goal: d => 25 + 5 * d, ok: () => isUnlocked('w', 'poison') },
+  { id: 'meteor',  txt: n => `⭐ 별똥별로 적 ${n}마리 잡기`,    goal: d => 25 + 5 * d, ok: () => isUnlocked('w', 'star') },
 ];
 function newQuests() {
   const d = G.day || 1, pool = QUESTS.filter(q => !q.ok || q.ok()), out = [];
@@ -2853,7 +2858,7 @@ function hurtEnemy(e, dmg, fx, fy, kb) {
   const crit = Math.random() < 0.1;
   dmg = Math.round(dmg * G.p.dmgMul * (crit ? 2 : 1));
   if (e.type === 'e_agrunt' && fx * e.face < 0) { dmg = Math.round(dmg * 0.7); if (Math.random() < 0.15) floatText(e.x, e.y - 50, '막음!', '#dee2e6', 12, 0.5); }   // 갑옷 졸개: 앞(보는 쪽)에서 맞으면 방패로 −30%
-  e.hp -= dmg; e.flash = 0.1; e.hitT = 0.25; e.hx = fx; e.hy = fy;
+  e.hp -= dmg; e.flash = 0.1; e.hitT = 0.25; e.hx = fx; e.hy = fy; e.lastSrc = G.hitSrc || null;   // 마지막으로 때린 것 (퀘스트용)
   if (e.goldG && G.t - (e.coinAt || 0) > 0.25) { e.coinAt = G.t; dropCoin(e.x + rand(-40, 40), e.y + rand(-30, 30)); }   // 황금 골렘: 맞을 때 금화 (1초에 최대 4개)
   const k = e.boss ? kb * 0.05 : kb;
   e.kx += fx * k; e.ky += fy * k;
@@ -2881,7 +2886,7 @@ function dropCoin(x, y) {
   G.coins.push({ x, y, vx: Math.cos(a) * 60, vy: Math.sin(a) * 60, z: 0, vz: rand(80, 140), pull: false, age: 0 });
 }
 function killEnemy(e) {
-  e.dead = true; G.kills++;
+  e.dead = true; G.kills++; if (e.lastSrc === 'poison') questEvent('poison'); else if (e.lastSrc === 'star') questEvent('meteor');
   if (G.allies.length) allyGainXp(e.x, e.y, e.boss ? 40 : e.camp ? 20 : e.xp);
   if (!e.boss && !e.camp) { questEvent('kill'); stAdd('kills'); ST.kc[e.type] = (ST.kc[e.type] || 0) + 1; if (e.golden) { stSet('goldT', e.type); goldDie(e); } if (e.type.startsWith('e_')) { questEvent('special'); if (SPECIALS.some(q => q[0] === e.type)) stSet('specT', e.type); } }
   if (e.boss) { bossDie(e); return; }
@@ -3063,7 +3068,7 @@ function addFlame(x, y, r, life, o) { if (G.pflames.length < 60) G.pflames.push(
 function updFlames(dt) { // 영웅 쪽 불길: 0.4초마다 위에 있는 적에게 피해
   for (const f of G.pflames) {
     f.life -= dt; f.tick -= dt;
-    if (f.tick <= 0) { f.tick = 0.4; for (const e of G.enemies) if (!e.dead && (e.x - f.x) ** 2 + ((e.y - f.y) / 0.8) ** 2 < (f.r + e.r) ** 2) hurtEnemy(e, f.dmg !== undefined ? f.dmg : 10 + 2 * G.lvl, 0, 0, 0); }
+    if (f.tick <= 0) { f.tick = 0.4; for (const e of G.enemies) if (!e.dead && (e.x - f.x) ** 2 + ((e.y - f.y) / 0.8) ** 2 < (f.r + e.r) ** 2) { G.hitSrc = f.poison ? 'poison' : null; hurtEnemy(e, f.dmg !== undefined ? f.dmg : 10 + 2 * G.lvl, 0, 0, 0); G.hitSrc = null; } }
     if (Math.random() < 0.25) G.parts.push({ x: f.x + rand(-f.r, f.r) * 0.7, y: f.y + rand(-f.r, f.r) * 0.4, vx: 0, vy: -rand(30, 70), life: 0.45, max: 0.45, color: f.poison ? (Math.random() < 0.5 ? '#7bed9f' : '#b388ff') : Math.random() < 0.5 ? '#ff7b00' : '#ffd23f', size: 4 });
   }
   G.pflames = G.pflames.filter(f => f.life > 0);
