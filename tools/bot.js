@@ -4,7 +4,7 @@ const { chromium } = require('/opt/node22/lib/node_modules/playwright');
 const RUNS = +process.argv[2] || 4, MINUTES = +process.argv[3] || 15, STYLE = process.argv[4] || 'normal';
 (async () => {
   const browser = await chromium.launch();
-  { const _nc = browser.newContext.bind(browser); browser.newContext = async o => { const c = await _nc(o); await c.addInitScript(() => { try { localStorage.setItem('stickhero_story', '1'); } catch (e) {} }); return c; }; } const results = []; const errors = [];
+  { const _nc = browser.newContext.bind(browser); browser.newContext = async o => { const c = await _nc(o); await c.addInitScript(st => { try { localStorage.setItem('stickhero_story', '1'); if (st) localStorage.setItem('stickhero_meta', JSON.stringify({ maxStage: st })); } catch (e) {} }, +process.env.BOT_STAGE || 0); /* BOT_STAGE: 모험 칸을 이만큼 깬 것으로 시작 (열린 무기·동료 시험용) */ return c; }; } const results = []; const errors = [];
   for (let run = 0; run < RUNS; run++) {
     const page = await (await browser.newContext({ viewport: { width: 390, height: 844 } })).newPage();
     page.on('pageerror', e => errors.push(`run${run}: ${e.message}`));
@@ -22,7 +22,7 @@ const RUNS = +process.argv[2] || 4, MINUTES = +process.argv[3] || 15, STYLE = pr
         if (SH.state === 'levelup') SH.choose(Math.floor(Math.random() * 3));
         if (SH.state === 'chest') { document.getElementById('ovChest').onclick({ target: {} }); SH.closeChest(); }   // 보물 상자 (Build 61)
         if (SH.state === 'result') SH.ok(); if (SH.state === 'map') document.getElementById('bGo').click();
-        if (SH.state === 'allypick') SH.chooseAlly(Math.floor(Math.random() * 2));
+        if (SH.state === 'allypick') SH.chooseAlly(Math.floor(Math.random() * Math.max(1, document.querySelectorAll('#cards .card').length))); /* 열린 동료 중 무작위 (Build 92: 예전엔 앞 2종만) */
         if (SH.state === 'over') { ev('게임오버 (' + (G().baseDead ? '마을 붕괴' : '?') + ')'); if (STYLE !== 'days') break; continueGame(); ev(`→ ${G().day}일째 다시 세우기`); continue; }
         const g = G(), p = g.p;
         if (i % 3 === 0 && !p.dead) {
