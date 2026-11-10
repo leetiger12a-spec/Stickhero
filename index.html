@@ -321,7 +321,7 @@ h2 .hb{-webkit-text-stroke:0;text-shadow:none;letter-spacing:0;font-family:"Jua"
 
 <script>
 'use strict';
-const BUILD = 117;
+const BUILD = 118;
 const BOSS_INTERVAL = 180;      // 보스 등장 간격(초)
 const WAVE_INTERVAL = 60;       // 대규모 몰이 이벤트 간격(초)
 const MAX_ENEMIES = 220;
@@ -1552,8 +1552,14 @@ function continueGame() {
   $('hudBtns').classList.add('show');
   if (G.broken.hall) { banner(`🌅 ${G.day}일째 아침`, '부서진 건물에 서서 🔨 고쳐요 · 마을회관부터!', '#ffd23f', 3.2); sfx('cheer'); }
   else banner('이어하기!', `${G.day > 1 ? G.day + '일째 · ' : ''}스테이지 ${G.stageN} 클리어한 마을로 돌아왔다`, '#7bed9f', 2.5);
+  dayMilestone(G.day);
   if (G.pending > 0) openLevelUp();
 }
+// 📆 버틴 날 축하 (Build 118): 5·10·20·30·50일째 아침에 한 번만 (영원히) 금고 보상
+const DAY_GIFT = { 5: 100, 10: 200, 20: 400, 30: 600, 50: 1000 };
+function dayMilestone(d) { const v = DAY_GIFT[d]; if (!v) return false; const m = readJSON(META_KEY) || {}; m.dayGift = m.dayGift || []; if (m.dayGift.includes(d)) return false;
+  m.dayGift.push(d); m.bank = (m.bank || 0) + v; writeJSON(META_KEY, m); G.dayGiftT = 3.5;
+  setTimeout(() => { if (G && state === 'play') { banner(`📆 ${d}일째! 대단해요!`, `${d}일을 버텼다 · 금고에 🪙${v}`, '#ffd23f', 3); sfx('unlock'); heroSay('morning', true); } }, 3300); return true; }
 // 📋 일시정지 화면 능력치 (Build 115)
 function renderPauseStats() { const p = G.p, pct = v => `${v >= 1 ? '+' : ''}${Math.round((v - 1) * 100)}%`;
   const ws = Object.keys(G.weapons).map(id => `${wMini(id, G.weapons[id] > MAX_WLV)} ${G.weapons[id] > MAX_WLV ? '✨진화' : 'Lv' + G.weapons[id]}`).join(' · ');
