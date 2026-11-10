@@ -12,7 +12,7 @@ const { chromium } = require('/opt/node22/lib/node_modules/playwright');
   // 시작 화면 → 업적 → 몬스터 도감
   await page.click('#bAchT'); await page.waitForTimeout(150); await page.click('#bDexA'); await page.waitForTimeout(300);
   console.log(await sub()); check((await sub()).includes('0/32'), 'dex not 0/32');   // Build 67: 단계별 적 9종, Build 84: 골렘 보스 5종 추가
-  check(await page.evaluate(() => document.querySelectorAll('#dexList .dex:not(.ally)').length === 32 && document.querySelectorAll('#dexList .dex.off:not(.ally)').length === 32 && document.querySelectorAll('#dexList .dex.ally').length === 4), 'not 18 shadows');
+  check(await page.evaluate(() => document.querySelectorAll('#dexList .dex:not(.ally)').length === 32 && document.querySelectorAll('#dexList .dex.off:not(.ally)').length === 32 && document.querySelectorAll('#dexList .dex.ally').length === 5), 'not 18 shadows');   // Build 92: 동료 5종
   await page.click('#bDexOk'); await page.waitForTimeout(100);
   check(await page.evaluate(() => state === 'ach'), 'not back to ach'); await page.click('#bAchOk');
   // 확률: makeEnemy 30,000번 → 황금 약 20번

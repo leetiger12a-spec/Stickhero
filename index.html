@@ -287,7 +287,7 @@ h2 .hb{-webkit-text-stroke:0;text-shadow:none;letter-spacing:0;font-family:"Jua"
 
 <script>
 'use strict';
-const BUILD = 91;
+const BUILD = 92;
 const BOSS_INTERVAL = 180;      // 보스 등장 간격(초)
 const WAVE_INTERVAL = 60;       // 대규모 몰이 이벤트 간격(초)
 const MAX_ENEMIES = 220;
@@ -325,7 +325,7 @@ const ALLY_MAX = 4, ALLY_COST = [60, 120, 200, 300, 420];
 const allyMax = () => ALLY_MAX + (G && G.vLvl >= 3 ? 1 : 0);   // 마을 Lv3이면 동료 5명
 const ALLY_NEED = [0, 60, 180, 360, 600];  // 다음 레벨까지 경험치 (Lv1→2: 60 …)
 const ALLY_TRAIN = l => 50 + 60 * l;       // 숙소 훈련 비용 (금화)
-const ALLY_SKILL = { sword: '회전 베기', archer: '화살 3발', bomber: '두 번 펑', shield: '든든한 방패(주변 피해 −25%)' };
+const ALLY_SKILL = { sword: '회전 베기', archer: '화살 3발', bomber: '두 번 펑', shield: '든든한 방패(주변 피해 −25%)', golem: '도발! 가까운 적이 골렘을 노려요' };
 function makeAlly(type, lvl, xp) {
   if ((ST.alv[type] || 0) < (lvl || 1)) { ST.alv[type] = lvl || 1; stDirty = true; }   // 동료 도감: 만난 동료·최고 레벨
   const T = ALLY_TYPES[type], l = lvl || 1, hp = Math.round(T.hp * (1 + 0.2 * (l - 1)));
@@ -353,6 +353,7 @@ const ALLY_TYPES = {
   archer: { name: '고양이 궁수', color: '#2ecc71', hp: 80,  icon: '🏹', desc: '멀리서 화살을 쏴요 · 안전하게' },
   bomber: { name: '고양이 폭탄병', color: '#ffd23f', hp: 90, icon: '💣', desc: '느리지만 폭탄 펑! 여러 마리를 한꺼번에' },
   shield: { name: '강아지 방패병', color: '#c68642', hp: 260, icon: '🛡️', desc: '아주 튼튼! 영웅 앞을 막고 방패로 밀쳐내요' },
+  golem:  { name: '꼬마 골렘', color: '#a3b18a', hp: 420, icon: '🗿', desc: '제일 튼튼! 땅을 쾅 내려쳐 주변 적을 밀어내요 · 느림' },   // Build 92 (아들 생각)
 };
 const STAGE_HW = 200;           // 스테이지 길 반폭
 const THEMES = [
@@ -405,7 +406,7 @@ const SPR_INFO = {    // ax: 발 위치(그림 폭 대비), h: 화면 키(월드
   e_agrunt: { ax: 0.45, h: 52 }, e_srunner: { ax: 0.5, h: 46 }, e_stank: { ax: 0.45, h: 70 }, e_knight: { ax: 0.5, h: 58 }, e_assassin: { ax: 0.5, h: 50 }, e_ogre: { ax: 0.5, h: 92 }, e_demon: { ax: 0.5, h: 60 }, e_ghost: { ax: 0.5, h: 56 }, e_golem: { ax: 0.5, h: 112 },
   tree: { h: 78 }, stump: { h: 20 }, log: { h: 8 }, stake: { h: 26 }, tower: { h: 76 }, hall: { h: 92 },
   smith: { h: 72 }, pillar: { h: 70 }, torch: { h: 58 }, coin: { h: 12 },
-  ally_sword: { ax: 0.5, h: 52 }, ally_archer: { ax: 0.5, h: 52 }, ally_bomber: { ax: 0.45, h: 52 }, ally_shield: { ax: 0.5, h: 54 }, hero_slash: { h: 72 }, hero_walk: { h: 72 }, ally_archer_shoot: { h: 60 }, ally_bomber_toss: { h: 60 }, ally_shield_bash: { h: 60 }, ally_sword_slash: { h: 60 }, ally_sword_walk: { h: 60 }, ally_archer_walk: { h: 60 }, ally_bomber_walk: { h: 60 }, ally_shield_walk: { h: 60 }, sf_plane0: { h: 80 }, sf_plane1: { h: 80 }, sf_plane2: { h: 80 }, sf_plane3: { h: 80 }, sf_plane4: { h: 80 }, sf_pilot0: { h: 70 }, sf_pilot1: { h: 70 }, sf_pilot2: { h: 70 }, sf_pilot3: { h: 70 }, sf_pilot4: { h: 70 }, tavern: { h: 72 }, skyfang_plane: { h: 80 },
+  ally_sword: { ax: 0.5, h: 52 }, ally_archer: { ax: 0.5, h: 52 }, ally_bomber: { ax: 0.45, h: 52 }, ally_shield: { ax: 0.5, h: 54 }, ally_golem: { ax: 0.5, h: 58 }, ally_golem_walk: { h: 60 }, ally_golem_slam: { h: 60 }, hero_slash: { h: 72 }, hero_walk: { h: 72 }, ally_archer_shoot: { h: 60 }, ally_bomber_toss: { h: 60 }, ally_shield_bash: { h: 60 }, ally_sword_slash: { h: 60 }, ally_sword_walk: { h: 60 }, ally_archer_walk: { h: 60 }, ally_bomber_walk: { h: 60 }, ally_shield_walk: { h: 60 }, sf_plane0: { h: 80 }, sf_plane1: { h: 80 }, sf_plane2: { h: 80 }, sf_plane3: { h: 80 }, sf_plane4: { h: 80 }, sf_pilot0: { h: 70 }, sf_pilot1: { h: 70 }, sf_pilot2: { h: 70 }, sf_pilot3: { h: 70 }, sf_pilot4: { h: 70 }, tavern: { h: 72 }, skyfang_plane: { h: 80 },
   e_archer: { ax: 0.45, h: 50 }, e_bomber: { ax: 0.42, h: 50 }, e_bat: { ax: 0.5, h: 48 }, e_slime: { ax: 0.5, h: 42 }, e_shaman: { ax: 0.42, h: 56 }, e_charger: { ax: 0.5, h: 52 },
   farm: { h: 72 }, mine: { h: 74 }, market: { h: 76 }, stone: { h: 14 }, rock: { h: 64 }, camp: { h: 100 }, hall2: { h: 100 }, hall3: { h: 108 }, hall_broken: { h: 96 }, tower_broken: { h: 70 }, stonewall: { h: 34 }, repair: { h: 40 },
 };
@@ -565,7 +566,7 @@ function bakeSprite(n) {
 }
 // img/ 폴더에 실제로 있는 그림만 불러옴 (없는 파일을 부르면 오류가 남)
 const SPR_FILES = ['e_agrunt', 'e_srunner', 'e_stank', 'e_knight', 'e_assassin', 'e_ogre', 'e_demon', 'e_ghost', 'e_golem', 'boss3', 'boss4', 'boss5', 'boss6', 'boss7', 'boss8', 'boss9', 'boss10', 'boss_final', 'e_spider', 'e_skel', 'e_archer', 'e_bomber', 'e_bat', 'e_slime', 'e_shaman', 'e_charger', 'hall2', 'hall3', 'hall_broken', 'tower_broken', 'stonewall', 'repair', 'farm', 'mine', 'market', 'stone', 'rock', 'camp', 'hero', 'grunt', 'runner', 'tank', 'boss0', 'boss1', 'boss2', 'tree', 'stump', 'log', 'stake', 'tower', 'hall',
-  'smith', 'pillar', 'torch', 'coin', 'ally_sword', 'ally_archer', 'tavern', 'ally_bomber', 'skyfang_plane', 'ally_shield', 'hero_slash', 'hero_walk', 'ally_archer_shoot', 'ally_bomber_toss', 'ally_shield_bash', 'ally_sword_slash', 'ally_sword_walk', 'ally_archer_walk', 'ally_bomber_walk', 'ally_shield_walk', 'sf_plane0', 'sf_plane1', 'sf_plane2', 'sf_plane3', 'sf_plane4', 'sf_pilot0', 'sf_pilot1', 'sf_pilot2', 'sf_pilot3', 'sf_pilot4'];
+  'smith', 'pillar', 'torch', 'coin', 'ally_sword', 'ally_archer', 'tavern', 'ally_bomber', 'skyfang_plane', 'ally_shield', 'hero_slash', 'hero_walk', 'ally_archer_shoot', 'ally_bomber_toss', 'ally_shield_bash', 'ally_sword_slash', 'ally_sword_walk', 'ally_archer_walk', 'ally_bomber_walk', 'ally_shield_walk', 'ally_golem', 'ally_golem_walk', 'ally_golem_slam', 'sf_plane0', 'sf_plane1', 'sf_plane2', 'sf_plane3', 'sf_plane4', 'sf_pilot0', 'sf_pilot1', 'sf_pilot2', 'sf_pilot3', 'sf_pilot4'];
 SPR_FILES.forEach(n => {
   const im = new Image();
   im.onload = () => { SPR_ORIG[n] = im; SPR_SRC[n] = HERO_SPR.includes(n) ? recolorHero(im) : im; bakeSprite(n); };
@@ -800,6 +801,7 @@ const UNLOCKS = [
   { at: 5, kind: 'a', id: 'shield', name: '🐶 강아지 방패병', desc: '영웅 숙소에서 고용할 수 있어요' },
   { at: 6, kind: 'w', id: 'xbow',   name: '🏹 석궁',       desc: '레벨업 카드에 새 무기가 나와요' },
   { at: 7, kind: 'w', id: 'hammer', name: '🔨 불꽃 망치',   desc: '레벨업 카드에 새 무기가 나와요' },
+  { at: 8, kind: 'a', id: 'golem',  name: '🗿 꼬마 골렘',   desc: '영웅 숙소에서 고용할 수 있어요' },
 ];
 const bestStage = () => Math.max(G ? G.stageN : 0, (readJSON(META_KEY) || {}).maxStage || 0);
 const isUnlocked = (kind, id) => { const u = UNLOCKS.find(u => u.kind === kind && u.id === id); return !u || bestStage() >= u.at; };
@@ -933,7 +935,7 @@ function startPractice(k, hard) {
 }
 function renderDex() {
   const found = DEX.filter(d => dexCount(d) > 0).length, stars = DEX.reduce((a, d) => a + dexStars(d), 0);
-  $('dexSub').innerHTML = `발견 <b>${found}/${DEX.length}</b> · 별 <b>${stars}/${DEX.length * 3}</b> · ✨황금 <b>${ST.goldT.length + ST.goldB.length}/${DEX.length}</b> · 동료 <b>${Object.keys(ST.alv).length}/4</b>`;
+  $('dexSub').innerHTML = `발견 <b>${found}/${DEX.length}</b> · 별 <b>${stars}/${DEX.length * 3}</b> · ✨황금 <b>${ST.goldT.length + ST.goldB.length}/${DEX.length}</b> · 동료 <b>${Object.keys(ST.alv).length}/${Object.keys(ALLY_TYPES).length}</b>`;
   const box = $('dexList'); box.innerHTML = '';
   const sec = t => { const h = document.createElement('div'); h.className = 'dexH'; h.textContent = t; box.appendChild(h); };
   DEX.forEach((d, i) => {
@@ -952,7 +954,7 @@ function renderDex() {
   });
   box.querySelectorAll('.dexFight').forEach(b => { b.onclick = ev => { ev.stopPropagation(); startPractice(b.dataset.k, !!b.dataset.h); }; });
   // 동료 (만난 동료 · 별: Lv1 / Lv3 / Lv5)
-  sec('🐾 동료 4종 · 별: 고용 / Lv3 / Lv5');
+  sec(`🐾 동료 ${Object.keys(ALLY_TYPES).length}종 · 별: 고용 / Lv3 / Lv5`);
   for (const t in ALLY_TYPES) {
     const T = ALLY_TYPES[t], l = ST.alv[t] || 0, st = [1, 3, 5].filter(x => l >= x).length, el = document.createElement('div');
     el.className = 'dex ally' + (l ? '' : ' off');
@@ -2089,7 +2091,7 @@ function hireAlly(type) {
   const T = ALLY_TYPES[type];
   G.allies.push(makeAlly(type)); stMax('allies', G.allies.length);
   banner(`${T.name} 합류!`, '영웅을 따라다니며 함께 싸워요', '#3fa9f5', 1.8);
-  setTimeout(() => sfx(type === 'shield' ? 'bark' : 'meow'), 250);
+  setTimeout(() => sfx(type === 'shield' ? 'bark' : type === 'golem' ? 'thud' : 'meow'), 250);
   startAct(G.allies[G.allies.length - 1], 'cheer');
   sfx('level');
 }
@@ -2116,11 +2118,11 @@ function updAllies(dt) {
     let foe = null, fd = 1e12;
     for (const e of G.enemies) { const d = (e.x - a.x) ** 2 + (e.y - a.y) ** 2; if (d < fd && (e.x - hx) ** 2 + (e.y - hy) ** 2 < 230 * 230) { fd = d; foe = e; } }
     fd = Math.sqrt(fd);
-    if (a.type === 'shield' && foe && fd < 110) { tx = foe.x - Math.sign(foe.x - a.x || 1) * (foe.r + 10); ty = foe.y; }
+    if ((a.type === 'shield' || a.type === 'golem') && foe && fd < 110) { tx = foe.x - Math.sign(foe.x - a.x || 1) * (foe.r + 10); ty = foe.y; }
     if (a.type === 'sword' && foe && fd < 160) { tx = foe.x - Math.sign(foe.x - a.x || 1) * (foe.r + 8); ty = foe.y; }
     const dx = tx - a.x, dy = ty - a.y, d = Math.hypot(dx, dy);
     a.moving = d > 4 && !(a.act && a.act !== 'cheer');
-    if (a.moving) { const sp = Math.min(d * 6, 165); a.x += dx / d * sp * dt; a.y += dy / d * sp * dt; a.wob += dt * 10; if (Math.abs(dx) > 2) a.face = dx > 0 ? 1 : -1; }
+    if (a.moving) { const sp = Math.min(d * 6, a.type === 'golem' ? 115 : 165); /* 골렘은 느림 */ a.x += dx / d * sp * dt; a.y += dy / d * sp * dt; a.wob += dt * 10; if (Math.abs(dx) > 2) a.face = dx > 0 ? 1 : -1; }
     if (G.mode === 'stage') a.x = clamp(a.x, -STAGE_HW + 10, STAGE_HW - 10);
     // 공격
     if (foe && a.cd <= 0) {
@@ -2143,6 +2145,12 @@ function updAllies(dt) {
       } else if (a.type === 'shield' && fd < foe.r + 26) { // 웅크렸다가 방패로 쾅!
         startAct(a, 'bash'); a.cd = 0.9; a.face = ux > 0 ? 1 : -1;
         later(SPR.ally_shield_bash ? 0.18 : 0.14, () => { if (!foe.dead) hurtEnemy(foe, 10 * fm, ux, uy, 520); sfx('thud'); G.shake = Math.max(G.shake, 2); if (Math.random() < 0.15) sfx('bark'); });
+      } else if (a.type === 'golem' && fd < foe.r + 40) { // 주먹을 치켜들었다가 땅을 쾅! (주변 모두 밀어냄)
+        startAct(a, 'slam'); a.cd = 1.7; a.face = ux > 0 ? 1 : -1;
+        later(SPR.ally_golem_slam ? 0.33 : 0.25, () => { const R = 72, gx = a.x + a.face * 14;
+          for (const e of G.enemies) { const ex = e.x - gx, ey = e.y - a.y, ed = Math.hypot(ex, ey); if (ed < R + e.r) hurtEnemy(e, 18 * fm, ex / (ed || 1), ey / (ed || 1), 460); }
+          G.rings.push({ x: gx, y: a.y, r: R, life: 0.35, max: 0.35, color: '#a3b18a' }); burst(gx, a.y, '#a3b18a', 14, 180, 5, 0.4);
+          sfx('thud'); G.shake = Math.max(G.shake, 4); });
       } else if (a.type === 'bomber' && fd < 230) { // 크게 뒤로 젖혔다가 휙 던지기 (손에서 출발)
         startAct(a, 'toss'); a.cd = 2.2; a.face = ux > 0 ? 1 : -1;
         const fx = foe.x, fy = foe.y;
@@ -2152,7 +2160,7 @@ function updAllies(dt) {
     // 맞기
     if (a.inv <= 0) for (const e of G.enemies) {
       if ((e.x - a.x) ** 2 + (e.y - a.y) ** 2 < (e.r + 10) ** 2) {
-        a.hp -= e.dmg * (a.type === 'shield' ? 0.5 : shieldGuard(a.x, a.y)); a.inv = 0.8; burst(a.x, a.y - 12, '#e63946', 6, 100, 3, 0.3);
+        a.hp -= e.dmg * (a.type === 'golem' ? 0.4 : a.type === 'shield' ? 0.5 : shieldGuard(a.x, a.y)); /* 골렘은 돌이라 덜 아픔 */ a.inv = 0.8; burst(a.x, a.y - 12, '#e63946', 6, 100, 3, 0.3);
         if (a.hp <= 0) { a.dead = true; a.reviveT = 12; burst(a.x, a.y - 12, ALLY_TYPES[a.type].color, 20, 180, 4, 0.6); floatText(a.x, a.y - 40, '으앙!', '#fff', 16, 1); }
         break;
       }
@@ -3028,6 +3036,7 @@ function update(dt) {
   G.booms = G.booms.filter(b => b.life > 0);
 
   // 적
+  const taunt = G.allies.filter(a => a.type === 'golem' && !a.dead && a.lvl >= 3);
   for (const e of G.enemies) {
     if (e.dead) continue;
     e.flash -= dt; e.hitT -= dt; e.swordCd -= dt; e.lunge -= dt; e.wob += dt * (e.hitT > 0 ? 3 : 9); if (e.slowT > 0) e.slowT -= dt;
@@ -3037,7 +3046,9 @@ function update(dt) {
     let chase = !p.dead && pd < (e.boss ? 260 : 170);
     if (G.mode === 'stage') { if (pd < 300) e.awake = true; chase = !p.dead && (e.awake || e.boss); }
     const idle = G.mode === 'stage' && !chase;
-    const dx = idle ? Math.cos(e.wob * 0.05) : chase ? pdx : -e.x, dy = idle ? Math.sin(e.wob * 0.07) : chase ? pdy : -e.y, d = Math.hypot(dx, dy) || 1;
+    let dx = idle ? Math.cos(e.wob * 0.05) : chase ? pdx : -e.x, dy = idle ? Math.sin(e.wob * 0.07) : chase ? pdy : -e.y;
+    if (taunt.length && !e.boss) for (const g of taunt) { const gx = g.x - e.x, gy = g.y - e.y; if (gx * gx + gy * gy < 130 * 130) { dx = gx; dy = gy; break; } }   // 꼬마 골렘 Lv3 도발
+    const d = Math.hypot(dx, dy) || 1;
     if (Math.abs(dx) > 2) e.face = dx > 0 ? 1 : -1;
     if (e.boss) updBoss(e, dt, dx, dy, d);
     else {
@@ -3965,11 +3976,13 @@ const SHEETS = {
   ally_archer_walk:  { n: 4, ax: 0.5455, ay: 0.9861, body: 0.943, seq: [0, 1, 2, 3] },   // 4칸 평균 귀~발끝 키
   ally_bomber_walk:  { n: 4, ax: 0.4103, ay: 0.9861, body: 0.941, seq: [0, 1, 2, 3] },
   ally_shield_walk:  { n: 4, ax: 0.3943, ay: 0.9859, body: 0.937, seq: [0, 1, 2, 3] },   // 1·2번 칸은 칼을 치켜들어 빼고, 칼이 낮은 3·4번 칸으로 걷기
+  ally_golem_walk:   { n: 4, ax: 0.5722, ay: 0.9679, body: 0.9358, seq: [0, 1, 2, 3] },   // Build 92
+  ally_golem_slam:   { n: 4, ax: 0.5026, ay: 0.9688, body: 0.9375 },
 };
 // 게임 속 한 장 그림에서 같은 기준으로 잰 몸 키 비율 (시트 크기를 맞추는 데 씀)
-const STATIC_BODY = { ally_sword: 0.9531, hero: 0.9375, ally_archer: 0.9531, ally_bomber: 0.9531, ally_shield: 0.9531 };
-const WALK_SHEET = { ally_sword: 'ally_sword_walk', ally_archer: 'ally_archer_walk', ally_bomber: 'ally_bomber_walk', ally_shield: 'ally_shield_walk' };   // 걸을 때 쓸 연속 그림
-const ACT_SHEET = { ally_sword: { slash: 'ally_sword_slash' }, ally_archer: { shoot: 'ally_archer_shoot' }, ally_bomber: { toss: 'ally_bomber_toss' }, ally_shield: { bash: 'ally_shield_bash' } };
+const STATIC_BODY = { ally_sword: 0.9531, hero: 0.9375, ally_archer: 0.9531, ally_bomber: 0.9531, ally_shield: 0.9531, ally_golem: 0.9531 };
+const WALK_SHEET = { ally_sword: 'ally_sword_walk', ally_archer: 'ally_archer_walk', ally_bomber: 'ally_bomber_walk', ally_shield: 'ally_shield_walk', ally_golem: 'ally_golem_walk' };   // 걸을 때 쓸 연속 그림
+const ACT_SHEET = { ally_sword: { slash: 'ally_sword_slash' }, ally_archer: { shoot: 'ally_archer_shoot' }, ally_bomber: { toss: 'ally_bomber_toss' }, ally_shield: { bash: 'ally_shield_bash' }, ally_golem: { slam: 'ally_golem_slam' } };
 // 시트의 k(0~1) 시점 칸을, 발이 원점에 오도록 그림. bodyPx = 화면에서의 몸 키
 function drawSheetFrame(name, f, bodyPx) { const S = SHEETS[name]; return drawSheet(name, (f + 0.5) / S.n, bodyPx); }
 function drawSheet(name, k, bodyPx) {
@@ -3978,7 +3991,7 @@ function drawSheet(name, k, bodyPx) {
   ctx.drawImage(img, f * cwI, 0, cwI, img.height, -cw * S.ax, -ch * S.ay, cw, ch);
   return true;
 }
-const ACTS = { slash: 0.32, shoot: 0.45, toss: 0.5, bash: 0.36, cheer: 0.6 };
+const ACTS = { slash: 0.32, shoot: 0.45, toss: 0.5, bash: 0.36, slam: 0.6, cheer: 0.6 };
 const ease = k => k * k * (3 - 2 * k);
 function startAct(o, type) { o.act = type; o.actT = 0; }
 function actPose(act, t) {
