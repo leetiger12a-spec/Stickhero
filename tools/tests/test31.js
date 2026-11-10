@@ -8,7 +8,7 @@ const { chromium } = require('/opt/node22/lib/node_modules/playwright');
   page.on('pageerror', e => errors.push(e.message)); page.on('console', m => { if (m.type() === 'error') errors.push(m.text()); });
   page.on('requestfailed', r => errors.push('fail ' + r.url()));
   await page.goto('http://localhost:8765/index.html'); await page.waitForTimeout(800);
-  const n = await page.evaluate(() => Object.keys(WICON).filter(k => !k.startsWith('chest_')).length); console.log('icons', n); check(n === 35, 'icons not 35');   // 상자 그림 4개(Build 62)는 따로, 새 무기 4개(Build 72)·땅 장식 8개(Build 74) 포함
+  const n = await page.evaluate(() => Object.keys(WICON).filter(k => !k.startsWith('chest_')).length); console.log('icons', n); check(n === 43, 'icons not 43');   // 상자 그림 4개(Build 62)는 따로, 새 무기 4개(Build 72)·땅 장식 8개(Build 74)·공격 그림 8개(Build 87) 포함
   await page.click('#bStart'); await page.waitForTimeout(300);
   // 땅에 구슬 3색 + 하트
   await page.evaluate(() => { const G = SH.G; G.nextBoss = 999; G.nextWave = 999; G.spawnAcc = -1e9; G.p.magnet = 0;

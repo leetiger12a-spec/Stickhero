@@ -285,7 +285,7 @@ h2 .hb{-webkit-text-stroke:0;text-shadow:none;letter-spacing:0;font-family:"Jua"
 
 <script>
 'use strict';
-const BUILD = 86;
+const BUILD = 87;
 const BOSS_INTERVAL = 180;      // 보스 등장 간격(초)
 const WAVE_INTERVAL = 60;       // 대규모 몰이 이벤트 간격(초)
 const MAX_ENEMIES = 220;
@@ -822,13 +822,14 @@ const EVO = {
   xbow:      { need: 'speed',  name: '폭풍 석궁',    icon: '🏹', desc: '화살 5발 부채꼴 · 끝까지 꿰뚫어요' },
 };
 // 땅 장식 그림 (Build 74, img/d_*.webp): 이름 → 세상 속 높이 / 테마(땅 무늬)별로 쓰는 장식
+const PROJ_IMG = ['pj_slime', 'pj_ice', 'pj_skull', 'pj_cannon', 'pj_rock', 'pj_orb', 'pj_fist', 'pj_bolt'];   // 공격 그림 (Build 87, 모두 오른쪽을 향함)
 const DECAL_H = { d_daisy: 24, d_butter: 24, d_mush: 24, d_pebble: 15, d_moss: 30, d_bones: 24, d_lava: 28, d_bricks: 28 };
 const DECAL_TH = { grass: ['d_daisy', 'd_butter', 'd_mush', 'd_pebble'], ruins: ['d_moss', 'd_moss', 'd_pebble'], dungeon: ['d_bones', 'd_bones', 'd_pebble'], volcano: ['d_lava'], castle: ['d_bricks'] };
 // 무기 그림 아이콘 (img/w_무기.webp, 진화는 w_무기_evo.webp) — 못 불러오면 이모지
 const WICON = {};
 for (const id in WEAP) for (const ev of [0, 1]) { const n = id + (ev ? '_evo' : ''), im = new Image(); im.onload = () => { WICON[n] = im; }; im.src = `img/w_${n}.webp?b=${BUILD}`; }
 // 능력·회복·경험치 구슬 그림 (img/p_능력.webp, i_chicken, i_heart, gem_b/g/r)
-for (const n of [...Object.keys(PASS).map(id => 'p_' + id), 'i_chicken', 'i_heart', 'gem_b', 'gem_g', 'gem_r', 'chest_big', 'chest_big_open', 'chest_small', 'chest_small_open', ...Object.keys(DECAL_H)]) { const im = new Image(); im.onload = () => { WICON[n] = im; }; im.src = `img/${n}.webp?b=${BUILD}`; }
+for (const n of [...Object.keys(PASS).map(id => 'p_' + id), 'i_chicken', 'i_heart', 'gem_b', 'gem_g', 'gem_r', 'chest_big', 'chest_big_open', 'chest_small', 'chest_small_open', ...Object.keys(DECAL_H), ...PROJ_IMG]) { const im = new Image(); im.onload = () => { WICON[n] = im; }; im.src = `img/${n}.webp?b=${BUILD}`; }
 const icoHtml = (n, alt) => WICON[n] ? `<img src="img/${n}.webp?b=${BUILD}" alt="">` : alt;
 const mIco = (n, alt) => WICON[n] ? `<img class="mi" src="img/${n}.webp?b=${BUILD}" alt="">` : alt;   // 글자 줄 안의 작은 그림
 const pMini = id => mIco('p_' + id, PASS[id].icon), wMini = (id, ev) => { const n = id + (ev ? '_evo' : ''); return WICON[n] ? `<img class="mi" src="img/w_${n}.webp?b=${BUILD}" alt="">` : ev ? EVO[id].icon : WEAP[id].icon; };   // 무기 그림 키는 w_ 없이
@@ -847,6 +848,11 @@ function bakedIco(n, h) {
   if (!c) { const px = Math.max(8, Math.round(h * SCALE * DPR)); c = document.createElement('canvas'); c.height = px; c.width = Math.round(px * im.width / im.height);
     const x = c.getContext('2d'); x.imageSmoothingQuality = 'high'; x.drawImage(im, 0, 0, c.width, c.height); ICO_BAKE[key] = c; }
   return c;
+}
+function drawProj(n, x, y, ang, h) { // 날아가는 공격 그림: 진행 방향(ang)으로 돌림, h = 세로 크기
+  const c = bakedIco(n, h); if (!c) return false;
+  const w = h * c.width / c.height;
+  ctx.save(); ctx.translate(x, y); ctx.rotate(ang); ctx.drawImage(c, -w / 2, -h / 2, w, h); ctx.restore(); return true;
 }
 function drawDecal(n, x, y, s) { // 땅에 놓인 작은 장식 (바닥 가운데가 x,y)
   const h = DECAL_H[n], c = bakedIco(n, h); if (!c) return false;
@@ -1829,7 +1835,7 @@ function spawnBoss(bx, by) {
   // Build 69: 보스마다 세기 고정 — 나중에 나오는 보스일수록 센 보스 (같은 보스는 언제 나와도 같음)
   // Build 79: 마을 보스는 적 단계에 맞춰 최소 보스가 정해짐 (4단계에 체력 800 보스가 나오지 않게) — 보스마다 세기는 그대로
   let n = inStage ? (G.st.tower ? (G.st.tower / 5 <= 9 ? G.st.tower / 5 : G.st.tower === 50 ? GOLD_GOLEM : top()) : STAGE_BOSS[Math.min(8, si)]) : Math.max(G.bossCount < 6 ? G.bossCount : top(), BOSS_MIN_TIER[Math.min(3, Math.floor(tierNow()))]);
-  if (!inStage && n >= 3 && Math.random() < GOLD_GOLEM_P) n = GOLD_GOLEM;   // 황금 골렘은 마을에서만 아주 드물게
+  if (!inStage && n >= 3 && !window.__noGold && Math.random() < GOLD_GOLEM_P) n = GOLD_GOLEM;   // 황금 골렘은 마을에서만 아주 드물게 (__noGold: 정확한 기록을 보는 시험용)
   if (window.__bossN !== undefined) n = window.__bossN;   // 시험용
   if (!inStage) G.bossCount++;
   const B = final ? { name: '왕관 괴물 대왕', color: '#b5179e' } : BOSSES[n];
@@ -3320,7 +3326,7 @@ function updSpecial(e, dt, dx, dy, d) {
       const pd = Math.hypot(p.x - e.x, p.y - e.y);
       if (!p.dead && pd < R + p.r) { hurtPlayer(e.dmg * 1.1); p.x += (p.x - e.x) / (pd || 1) * 60; p.y += (p.y - e.y) / (pd || 1) * 60; }
       if (G.mode === 'base' && Math.hypot(e.x, e.y) < R + BASE_R) hurtBase(e.dmg);
-      for (let i = 0; i < 10; i++) { const a = i / 10 * Math.PI * 2; G.ebullets.push({ x: e.x, y: e.y, vx: Math.cos(a) * 160, vy: Math.sin(a) * 160, r: 9, dmg: 12 * DF().edmg, life: 3, cannon: true }); }
+      for (let i = 0; i < 10; i++) { const a = i / 10 * Math.PI * 2; G.ebullets.push({ x: e.x, y: e.y, vx: Math.cos(a) * 160, vy: Math.sin(a) * 160, r: 9, dmg: 12 * DF().edmg, life: 3, cannon: true, rock: true }); }
     }
   } else if (e.mode === 'punchAim') { // 조준선 → 주먹 발사
     e.ax = dx / d; e.ay = dy / d;
@@ -3405,6 +3411,7 @@ function drawHazards() {
 }
 function drawFists() {
   for (const f of G.fists) {
+    if (drawProj('pj_fist', f.x, f.y, f.rot, 28)) continue;   // 로켓 주먹 그림 (Build 87)
     ctx.save(); ctx.translate(f.x, f.y); ctx.rotate(f.rot);
     ctx.fillStyle = '#ff9f1c'; ctx.beginPath(); ctx.moveTo(-14, -7); ctx.lineTo(-34 - Math.random() * 10, 0); ctx.lineTo(-14, 7); ctx.fill();
     ctx.fillStyle = '#8d9bb5'; ctx.strokeStyle = '#222'; ctx.lineWidth = 2.5;
@@ -4242,6 +4249,7 @@ function drawWorld() {
       ctx.fillStyle = '#ddd'; ctx.beginPath(); ctx.moveTo(b.x + ux * 5, b.y + uy * 5); ctx.lineTo(b.x - uy * 3, b.y + ux * 3); ctx.lineTo(b.x + uy * 3, b.y - ux * 3); ctx.fill();
       continue;
     }
+    if (b.kind === 'ice' && drawProj('pj_ice', b.x, b.y, Math.atan2(b.vy, b.vx), 16)) continue;   // 영웅 얼음 조각 그림
     if (b.kind === 'ice') { // 얼음 조각: 빙글 도는 다이아몬드
       ctx.save(); ctx.translate(b.x, b.y); ctx.rotate(G.t * 10 + b.x * 0.01);
       ctx.fillStyle = '#bde8ff'; ctx.strokeStyle = '#fff'; ctx.lineWidth = 2; ctx.shadowColor = '#7cc8ff'; ctx.shadowBlur = 8;
@@ -4250,6 +4258,7 @@ function drawWorld() {
     if (b.kind === 'xbow') { // 석궁 화살 (폭풍 석궁은 금빛 + 번개 꼬리)
       const ux = b.vx / l, uy = b.vy / l, L = b.big ? 30 : 24;
       if (b.big) { ctx.strokeStyle = 'rgba(159,216,255,.6)'; ctx.lineWidth = 7; ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(b.x - ux * L * 1.6, b.y - uy * L * 1.6); ctx.lineTo(b.x, b.y); ctx.stroke(); }
+      if (drawProj('pj_bolt', b.x - ux * L * 0.35, b.y - uy * L * 0.35, Math.atan2(b.vy, b.vx), b.big ? 11 : 9)) continue;   // 석궁 화살 그림 (폭풍 석궁은 위 번개 꼬리 + 화살)
       ctx.strokeStyle = b.big ? '#c98a00' : '#6b4226'; ctx.lineWidth = 3.5; ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(b.x - ux * L, b.y - uy * L); ctx.lineTo(b.x, b.y); ctx.stroke();
       ctx.fillStyle = b.big ? '#ffd23f' : '#dfe6ee'; ctx.strokeStyle = '#2b2d42'; ctx.lineWidth = 1.5;
       ctx.beginPath(); ctx.moveTo(b.x + ux * 8, b.y + uy * 8); ctx.lineTo(b.x - uy * 5, b.y + ux * 5); ctx.lineTo(b.x + uy * 5, b.y - ux * 5); ctx.closePath(); ctx.fill(); ctx.stroke();
@@ -4281,6 +4290,8 @@ function drawWorld() {
   }
   drawWPoses(); drawFists(); drawFlames();
   for (const b of G.ebullets) {
+    { const pn = b.arrow ? 'pj_bolt' : b.slime ? 'pj_slime' : b.ice ? 'pj_ice' : b.skull ? 'pj_skull' : b.rock ? 'pj_rock' : b.cannon ? 'pj_cannon' : 'pj_orb';
+      if (drawProj(pn, b.x, b.y, Math.atan2(b.vy, b.vx), b.arrow ? 7 : b.r * (b.cannon && !b.rock ? 2.3 : 2.8))) continue; }   // 그림이 없을 때만 아래 코드 그림
     if (b.arrow) { const a = Math.atan2(b.vy, b.vx); ctx.save(); ctx.translate(b.x, b.y); ctx.rotate(a);
       ctx.strokeStyle = '#6b3e1a'; ctx.lineWidth = 2.5; ctx.beginPath(); ctx.moveTo(-12, 0); ctx.lineTo(6, 0); ctx.stroke();
       ctx.fillStyle = '#aaa'; ctx.beginPath(); ctx.moveTo(10, 0); ctx.lineTo(4, -3.5); ctx.lineTo(4, 3.5); ctx.fill(); ctx.restore(); continue; }
