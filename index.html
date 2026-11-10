@@ -34,6 +34,7 @@ canvas{display:block;position:fixed;inset:0;width:100%;height:100%}
 #dailyGrid .dd{border:3px solid #222;border-radius:12px;background:#fffaf0;color:#222;padding:6px 2px;font-weight:800;font-size:12px;display:flex;flex-direction:column;align-items:center;gap:2px}
 #dailyGrid .dd b{font-size:20px}#dailyGrid .dd.got{opacity:.45}#dailyGrid .dd.now{outline:4px solid #ffd23f;transform:scale(1.06)}#dailyGrid .dd.big{grid-column:span 2;background:#fff3c4}
 .mrow .hb{width:auto;padding:0 10px;font-size:14px;white-space:nowrap}
+#bWeekly{display:block;width:100%;max-width:340px;margin:2px auto 8px;padding:7px 10px;border:3px solid #222;border-radius:14px;background:#fff3c4;color:#222;font:inherit;font-size:13px;font-weight:800;line-height:1.35;white-space:normal;cursor:pointer}#bWeekly small{font-size:11px;font-weight:700;opacity:.8}
 .mrow{flex-wrap:wrap;justify-content:center}
 #logoImg{width:min(88vw,460px);filter:drop-shadow(0 6px 10px rgba(0,0,0,.55));animation:titleBob 2.4s ease-in-out infinite}
 #ovStory{background:#000;z-index:8;padding:0;justify-content:center}
@@ -177,6 +178,7 @@ h2 .hb{-webkit-text-stroke:0;text-shadow:none;letter-spacing:0;font-family:"Jua"
    <div class="plabel">난이도</div>
    <div class="pills" id="diffPills"></div>
    <div id="diffDesc"></div>
+   <button id="bWeekly"></button>
    <button class="btn big" id="bContinue" style="display:none">▶ 이어하기</button>
    <div class="best" id="saveInfo" style="margin-top:0"></div>
    <button class="btn big" id="bStart">⚔ 출전!</button>
@@ -313,7 +315,7 @@ h2 .hb{-webkit-text-stroke:0;text-shadow:none;letter-spacing:0;font-family:"Jua"
 
 <script>
 'use strict';
-const BUILD = 104;
+const BUILD = 105;
 const BOSS_INTERVAL = 180;      // 보스 등장 간격(초)
 const WAVE_INTERVAL = 60;       // 대규모 몰이 이벤트 간격(초)
 const MAX_ENEMIES = 220;
@@ -1127,7 +1129,7 @@ function recalcStats() {
   p.maxHp = Math.round((100 + 25 * (ps.hp || 0)) * (1 + 0.1 * U('hp')));
   if (p.maxHp > oldMax) p.hp += p.maxHp - oldMax;
   p.hp = Math.min(p.hp, p.maxHp);
-  p.speed = 150 * (1 + 0.1 * (ps.speed || 0)) * (1 + 0.04 * U('spd'));
+  p.speed = 150 * (1 + 0.1 * (ps.speed || 0)) * (1 + 0.04 * U('spd')) * (WK('swift') ? 1.15 : 1);
   p.magnet = 70 * (1 + 0.4 * (ps.magnet || 0)) * (1 + 0.12 * U('mag'));
   p.dmgMul = (1 + 0.15 * (ps.power || 0)) * (1 + 0.1 * (G.forge || 0)) * (1 + 0.06 * U('atk'));
   p.cdMul = Math.max(0.5, 1 - 0.1 * (ps.haste || 0));
@@ -1459,7 +1461,7 @@ function buildSave() {
     rocks: G.rocks.map(o => [Math.round(o.x), Math.round(o.y), o.s, Math.round(o.regrow)]),
     camps: G.camps.map(c => [Math.round(c.x), Math.round(c.y), c.lvl, Math.round(c.rebuild), c.e && !c.e.dead ? Math.round(c.e.hp / c.e.maxHp * 100) / 100 : 0]),
     nextBoss: G.boss ? 15 : G.nextBoss, nextWave: G.nextWave, raidCount: G.raidCount - (G.raid ? 1 : 0), raidPending: !!(G.raid || G.raidIn > 0),
-    day: G.day, broken: Object.keys(G.broken).filter(k => G.broken[k]), quests: G.quests, questBonus: G.questBonus, questSwap: !!G.questSwap, nights: G.nights || 0,
+    day: G.day, broken: Object.keys(G.broken).filter(k => G.broken[k]), quests: G.quests, questBonus: G.questBonus, questSwap: !!G.questSwap, nights: G.nights || 0, weekly: G.weekly || null, weeklyB: G.weeklyB || 0,
   };
 }
 function loadGame(d) {
@@ -1483,7 +1485,7 @@ function loadGame(d) {
   G.day = d.day || 1; G.broken = {}; for (const k of d.broken || []) G.broken[k] = true;
   G.chests = (d.chests || []).map(([x, y, sm, gd]) => ({ x, y, bob: 0, t: 1, small: !!sm, gold: !!gd }));   // 줍기 전에 끈 마을 보물 상자
   if (d.quests && d.quests.length) { G.quests = d.quests; G.questBonus = !!d.questBonus; G.questSwap = !!d.questSwap; } else newQuests();
-  G.nights = d.nights || 0;   // 새 날(또는 예전 저장)은 새 퀘스트
+  G.nights = d.nights || 0; G.weekly = d.weekly || null; G.weeklyB = d.weeklyB || 0;   // 새 날(또는 예전 저장)은 새 퀘스트
   if (d.rocks) G.rocks = d.rocks.map(([x, y, s, rg]) => ({ x, y, s, max: 6, regrow: rg, shake: 0 }));
   if (d.camps) { G.enemies = G.enemies.filter(e => !e.camp); G.camps = d.camps.map(([x, y, lvl, rebuild, hp]) => ({ x, y, lvl, rebuild, spawnT: rand(8, 16), e: null })); G.camps.forEach((c, i) => { if (d.camps[i][4] > 0) makeCamp(c, d.camps[i][4]); }); }
   G.allies = [];
@@ -1496,7 +1498,7 @@ function saveSummary(d) {
   return `[${DIFFS[d.diff !== undefined ? d.diff : 2].name}] 스테이지 ${d.stageN} 클리어 · 영웅 Lv ${d.lvl} · 동료 ${d.allies.length}명 · 🪙${d.gold}<br><span style="opacity:.7">${ago < 1 ? '방금' : ago < 60 ? ago + '분 전' : Math.round(ago / 60) + '시간 전'} 저장</span>`;
 }
 function refreshTitle() {
-  renderDiff(); refreshDaily();
+  renderDiff(); refreshDaily(); refreshWeekly();
   if (HAS_LOGO) { $('logoImg').src = `img/logo.webp?b=${BUILD}`; $('logoImg').style.display = ''; $('logoText').style.display = 'none'; $('logoKr').style.display = 'none'; }
   $('bStory').style.display = STORY.some(s => STORY_FILES.includes(s.img)) ? '' : 'none';
   $('bestTitle').innerHTML = bestText(loadBest());
@@ -1512,6 +1514,23 @@ function refreshTitle() {
 
 // ---------- 화면 전환 ----------
 function showOv(id) { ['ovTitle', 'ovLevel', 'ovPause', 'ovOver', 'ovStory', 'ovMap', 'ovClear', 'ovWard', 'ovShop', 'ovAch', 'ovEvo', 'ovChest', 'ovDex', 'ovVol', 'ovDaily', 'ovStats'].forEach(o => $(o).classList.toggle('show', o === id)); }
+// ---------- 🎯 이번 주 도전 (Build 105): 매주 규칙 1개, 켜고 시작하면 그 규칙으로 — 한 판에 보스 3마리 잡으면 주 1번 금고 🪙300 ----------
+const WEEKLY = [
+  { id: 'giant', name: '🏔 거인 주간',  desc: '적 체력 1.6배 · 적 금화 2배' },
+  { id: 'swift', name: '💨 번개발 주간', desc: '적이 25% 빨라요 · 영웅도 15% 빨라요' },
+  { id: 'magic', name: '🔮 마법 주간',  desc: '번개 지팡이·얼음 지팡이를 들고 시작' },
+  { id: 'swarm', name: '🐜 개미떼 주간', desc: '적이 1.6배 많이 · 대신 체력 60%' },
+];
+const weekNo = (t = Date.now()) => Math.floor((t / 86400000 + 3) / 7);
+let WEEKLY_FORCE = null;   // 시험용: 규칙 고정
+const weekNow = () => WEEKLY_FORCE ? WEEKLY.find(w => w.id === WEEKLY_FORCE) : WEEKLY[weekNo() % WEEKLY.length];
+const WK = id => G && G.weekly === id;
+function refreshWeekly() { const m = readJSON(META_KEY) || {}, w = weekNow(), done = m.weeklyDone === weekNo();
+  $('bWeekly').innerHTML = `🎯 이번 주 도전: <b>${w.name}</b> ${m.weeklyOn ? '✅ 켜짐' : '⬜ 꺼짐'}${done ? ' · 🏆 보상 받음' : ''}<br><small>${w.desc} · 보스 3마리 = 금고 🪙300</small>`; }
+$('bWeekly').onclick = () => { audioInit(); sfx('pick'); const m = readJSON(META_KEY) || {}; m.weeklyOn = !m.weeklyOn; writeJSON(META_KEY, m); refreshWeekly(); };
+function weeklyBoss() { if (!G || !G.weekly) return; G.weeklyB = (G.weeklyB || 0) + 1; const m = readJSON(META_KEY) || {};
+  if (G.weeklyB >= 3 && m.weeklyDone !== weekNo()) { m.weeklyDone = weekNo(); m.bank = (m.bank || 0) + 300; writeJSON(META_KEY, m); banner('🏆 이번 주 도전 성공!', '금고에 🪙300', '#ffd23f', 3); sfx('unlock'); }
+  else if (G.weeklyB < 3) floatText(G.p.x, G.p.y - 70, `🎯 도전 보스 ${G.weeklyB}/3`, '#ffd23f', 15, 1.4); }
 function startGame() {
   audioInit(); clearSave(); newGame(); state = 'play'; joy = null; showOv(null);
   $('hudBtns').classList.add('show');
@@ -1519,6 +1538,7 @@ function startGame() {
   G.gold += 25 * upLv('start');
   if (meta && meta.forge > 0) { G.forge = meta.forge; recalcStats(); banner('마을을 지켜라!', `⚒ 무기 강화 Lv ${G.forge} 그대로 유지!`, '#ffd23f', 3); }
   else banner('마을을 지켜라!', '나무를 베어 망루를 짓자', '#ffd23f', 3);
+  if ((meta || {}).weeklyOn) { const w = weekNow(); G.weekly = w.id; G.weeklyB = 0; if (w.id === 'magic') { G.weapons.bolt = 1; G.weapons.ice = 1; G.timers.bolt = G.timers.ice = 1; } recalcStats(); banner(`🎯 ${w.name}`, w.desc, '#ffd23f', 3); }
 }
 function continueGame() {
   const d = readJSON(SAVE_KEY); if (!d) { startGame(); return; }
@@ -1889,6 +1909,7 @@ function makeEnemy(type, x, y) {
   announceType(type);
   const T = ETYPES[type], hm = DF().ehp;   // Build 67: 같은 적은 세기 고정 (시간이 지나면 센 종류가 나옴 — tierType)
   const e = { id: ++eid, type, x, y, r: T.r, hp: T.hp * hm, maxHp: T.hp * hm, spd: T.spd * rand(0.9, 1.1), dmg: T.dmg * DF().edmg, color: T.color, xp: T.xp, gold: T.gold, flash: 0, hitT: 0, kx: 0, ky: 0, swordCd: 0, wob: Math.random() * 6, inside: Math.hypot(x, y) < WALL_R, atk: 0.5, lunge: 0, face: 1 };
+  if (G && G.weekly) { if (WK('giant')) { e.hp *= 1.6; e.maxHp *= 1.6; e.gold *= 2; } else if (WK('swift')) e.spd *= 1.25; else if (WK('swarm')) { e.hp *= 0.6; e.maxHp *= 0.6; } }   // 이번 주 도전
   if (!window.__noGold && Math.random() < GOLD_P) makeGolden(e);   // __noGold: 정확한 기록을 보는 시험용
   return e;
 }
@@ -2282,6 +2303,7 @@ function updBase(dt) {
   if (G.boss) rate *= 0.35;
   rate *= 1 - 0.15 * campsDown();   // 부순 진지 하나마다 -15%
   rate *= 1 + 0.5 * nightK();   // 밤에는 적 +50%
+  if (WK('swarm')) rate *= 1.6;
   G.spawnAcc += rate * dt;
   while (G.spawnAcc >= 1) { G.spawnAcc--; spawnEnemy(pickType()); }
 
@@ -2980,7 +3002,7 @@ function bossDie(e) {
     banner(rec ? `⏱ 신기록! ${sec}초` : `⚔ 연습 승리! ${sec}초`, rec ? (old ? `${key} · 전 기록 ${old}초` : `${key} 첫 기록`) : `${key} · 최고 ${old}초`, '#ffd23f', 3);
     sfx(rec ? 'rewardEvo' : 'bigBoom'); stageClear(e.x, e.y + 60); return;
   }
-  G.boss = null; G.bossKills = (G.bossKills || 0) + 1; questEvent('boss'); stAdd('bosses'); stSet('bossT', e.name); ST.bk[e.name] = (ST.bk[e.name] || 0) + 1;
+  G.boss = null; G.bossKills = (G.bossKills || 0) + 1; questEvent('boss'); weeklyBoss(); stAdd('bosses'); stSet('bossT', e.name); ST.bk[e.name] = (ST.bk[e.name] || 0) + 1;
   for (let i = 0; i < 5; i++) burst(e.x + rand(-40, 40), e.y + rand(-40, 40), [e.color, '#ffd23f', '#fff', '#ff9f1c', '#222'][i], 40, 380, 8, 1.2);
   for (let i = 0; i < 15; i++) { const a = Math.random() * Math.PI * 2, d = rand(10, 90); dropGem(e.x + Math.cos(a) * d, e.y + Math.sin(a) * d, 5); }   // 상자가 생겨서 구슬은 30 → 15
   dropChest(G.mode === 'stage' ? clamp(e.x, -STAGE_HW + 30, STAGE_HW - 30) : e.x, G.mode === 'stage' ? clamp(e.y + 20, -G.st.L - 350, 80) : e.y + 20, false, e.golden || e.goldG);
