@@ -57,6 +57,7 @@ canvas{display:block;position:fixed;inset:0;width:100%;height:100%}
 .volBox input{width:100%;accent-color:#ff9a00;height:44px}.volBox small{font-size:12px;color:#6b5b4b;line-height:1.4}
 #dexList{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;width:min(94vw,420px);max-height:62vh;overflow-y:auto;padding:2px 2px 6px;box-sizing:border-box}
 .dexH{grid-column:1/-1;text-align:left;color:#ffd23f;font-size:14px;margin:4px 2px 0}
+.dexFight{font:inherit;font-size:13px;min-height:44px;margin-top:4px;padding:0 10px;border-radius:12px;border:3px solid #3a1a00;background:linear-gradient(#ffe680,#ffc21a 55%,#ff9a00);color:#3a1a00;box-shadow:0 3px 0 #3a1a00;cursor:pointer}
 .dex{position:relative;display:flex;flex-direction:column;align-items:center;gap:2px;background:linear-gradient(#fffdf7,#fff1d6);color:#2b2d42;border:3px solid #2b2d42;border-radius:14px;padding:6px 4px 8px;box-shadow:0 3px 0 #2b2d42;min-width:0}
 .dex.boss{background:linear-gradient(#fff6f9,#ffe0ea)}.dex.ally{background:linear-gradient(#f4fff6,#dff7e5)}.dex .pic{height:58px;display:grid;place-items:center}.dex .pic img{max-height:56px;max-width:100%;object-fit:contain}
 .dex.off .pic img{filter:brightness(0);opacity:.45}.dex.off{background:#e9e4da}
@@ -285,7 +286,7 @@ h2 .hb{-webkit-text-stroke:0;text-shadow:none;letter-spacing:0;font-family:"Jua"
 
 <script>
 'use strict';
-const BUILD = 88;
+const BUILD = 89;
 const BOSS_INTERVAL = 180;      // 보스 등장 간격(초)
 const WAVE_INTERVAL = 60;       // 대규모 몰이 이벤트 간격(초)
 const MAX_ENEMIES = 220;
@@ -923,6 +924,11 @@ const dexCount = d => d.boss ? (ST.bk[d.boss] || 0) : (ST.kc[d.k] || 0);
 const dexStars = d => (d.boss ? DEX_STARS.boss : DEX_STARS.mob).filter(n => dexCount(d) >= n).length;
 let dexBack = null;
 function openDex() { checkAch(); dexBack = state; state = 'dex'; renderDex(); showOv('ovDex'); }
+const canPractice = () => G && G.mode === 'base' && !G.boss && !G.raid && dexBack === 'paused' && !G.p.dead && !(G.deadT > 0);   // 마을에서 일시정지 → 도감일 때만
+function startPractice(k) {
+  const pr = k === 'boss_final' ? 'final' : +k.slice(4); if (!canPractice()) return;
+  sfx('pick'); state = 'play'; showOv(null); enterStage(undefined, 0, pr);
+}
 function renderDex() {
   const found = DEX.filter(d => dexCount(d) > 0).length, stars = DEX.reduce((a, d) => a + dexStars(d), 0);
   $('dexSub').innerHTML = `발견 <b>${found}/${DEX.length}</b> · 별 <b>${stars}/${DEX.length * 3}</b> · ✨황금 <b>${ST.goldT.length + ST.goldB.length}/${DEX.length}</b> · 동료 <b>${Object.keys(ST.alv).length}/4</b>`;
@@ -937,9 +943,11 @@ function renderDex() {
     el.innerHTML = `<div class="pic"><img src="img/${d.k}.webp?b=${BUILD}" alt=""></div><b>${ok ? d.name : '???'}</b>` +
       `<span class="stars">${'★'.repeat(st)}<i>${'★'.repeat(3 - st)}</i></span>` +
       `<small>${ok ? d.desc : d.where}</small><small class="cnt">${ok ? `${n.toLocaleString()}${d.boss ? '번' : '마리'}${next ? ` · 다음 별 ${next.toLocaleString()}` : ' · 완성!'}` : '아직 못 만났어요'}</small>` +
-      `<span class="gold${g ? ' on' : ''}" title="황금">${g ? '✨황금' : '황금 ?'}</span>`;
+      `<span class="gold${g ? ' on' : ''}" title="황금">${g ? '✨황금' : '황금 ?'}</span>` +
+      (d.boss && ok && canPractice() ? `<button class="dexFight" data-k="${d.k}">⚔ 다시 싸우기</button>` : '');
     box.appendChild(el);
   });
+  box.querySelectorAll('.dexFight').forEach(b => { b.onclick = ev => { ev.stopPropagation(); startPractice(b.dataset.k); }; });
   // 동료 (만난 동료 · 별: Lv1 / Lv3 / Lv5)
   sec('🐾 동료 4종 · 별: 고용 / Lv3 / Lv5');
   for (const t in ALLY_TYPES) {
@@ -1827,15 +1835,18 @@ function spawnWave() {
 const BOSS_HP = [800, 2400, 12000, 24000, 32000, 40000, 50000, 50000, 50000, 50000, 40000], BOSS_FINAL = { hp: 70000, dmg: 65, spd: 80 };   // Build 80~82: 후반 보스가 6~7초 만에 쓰러져서 올림 (목표 약 15초, 봇 측정) · 불꽃 대마왕은 15000에서 모험 4칸 벽이 되어 12000
 const STAGE_BOSS = [0, 1, 1, 2, 3, 3, 4, 5, 5];   // 모험 1~9칸 보스 (10칸은 왕관 괴물 대왕)
 const BOSS_DMG = [25, 33, 41, 40, 45, 50, 55, 55, 55, 55, 45];   // 보스 공격력 (Build 83: 얼음 용 49→40 · 거미 여왕 57→45 · 해골 왕 65→50 — 체력을 올려 싸움이 길어진 만큼 덜 아프게)
-const BOSS_MIN_TIER = [0, 1, 3, 4];   // 적 단계(1~4)별 마을 최소 보스: 슬라임 · 강철 거인 · 얼음 용 · 거미 여왕
+const BOSS_MIN_TIER = [0, 1, 3, 4];
+const PRACTICE_TH = [0, 0, 3, 2, 2, 1, 1, 3, 2, 0, 4];   // 보스 연습 땅 테마 (숲·폐허·던전·화산·성)   // 적 단계(1~4)별 마을 최소 보스: 슬라임 · 강철 거인 · 얼음 용 · 거미 여왕
 function spawnBoss(bx, by) {
   // 마을 보스와 스테이지 보스는 따로 센다 (스테이지를 깬다고 마을 보스가 갑자기 세지지 않게)
-  const inStage = G.mode === 'stage', si = inStage ? G.st.n : 0, final = inStage && G.st.def.goal === 'final';
+  const pr = G.mode === 'stage' && G.st && G.st.practice !== undefined ? G.st.practice : undefined;   // 보스 연습
+  const inStage = G.mode === 'stage', si = inStage ? G.st.n : 0, final = inStage && (G.st.def.goal === 'final' || pr === 'final');
   const top = () => 3 + Math.floor(Math.random() * 7);   // 6번째 뒤로는 센 보스 중 하나 (Build 84: 골렘 4종 포함)
   // Build 69: 보스마다 세기 고정 — 나중에 나오는 보스일수록 센 보스 (같은 보스는 언제 나와도 같음)
   // Build 79: 마을 보스는 적 단계에 맞춰 최소 보스가 정해짐 (4단계에 체력 800 보스가 나오지 않게) — 보스마다 세기는 그대로
   let n = inStage ? (G.st.tower ? (G.st.tower / 5 <= 9 ? G.st.tower / 5 : G.st.tower === 50 ? GOLD_GOLEM : top()) : STAGE_BOSS[Math.min(8, si)]) : Math.max(G.bossCount < 6 ? G.bossCount : top(), BOSS_MIN_TIER[Math.min(3, Math.floor(tierNow()))]);
-  if (!inStage && n >= 3 && !window.__noGold && Math.random() < GOLD_GOLEM_P) n = GOLD_GOLEM;   // 황금 골렘은 마을에서만 아주 드물게 (__noGold: 정확한 기록을 보는 시험용)
+  if (!inStage && n >= 3 && pr === undefined && !window.__noGold && Math.random() < GOLD_GOLEM_P) n = GOLD_GOLEM;   // 황금 골렘은 마을에서만 아주 드물게 (__noGold: 정확한 기록을 보는 시험용)
+  if (pr !== undefined && pr !== 'final') n = pr;
   if (window.__bossN !== undefined) n = window.__bossN;   // 시험용
   if (!inStage) G.bossCount++;
   const B = final ? { name: '왕관 괴물 대왕', color: '#b5179e' } : BOSSES[n];
@@ -1848,7 +1859,7 @@ function spawnBoss(bx, by) {
   G.enemies.push(b); G.boss = b;
   // 등장 컷신: 어두워짐 → 하늘에서 쿵! → 쿵쿵 발 구르기 → 이름표 쾅! (화면을 누르면 넘김)
   if (n === GOLD_GOLEM) { b.goldG = true; b.fleeT = GOLD_GOLEM_FLEE; }
-  else if (!window.__noGold && Math.random() < GOLD_BOSS_P) { b.golden = true; b.hp *= 2; b.maxHp *= 2; }   // 황금 보스 (Build 66)
+  else if (pr === undefined && !window.__noGold && Math.random() < GOLD_BOSS_P) { b.golden = true; b.hp *= 2; b.maxHp *= 2; }   // 황금 보스 (Build 66)
   G.intro = { t: 0, dur: 2.6, spr: b.spr, name: (b.golden ? '✨황금 ' : '') + B.name, color: b.golden ? '#ffd23f' : B.color, hits: 0 };
   joy = null; G.banner = null; sfx('warn');
 }
@@ -2395,16 +2406,16 @@ $('bTower').onclick = () => {
 };
 $('bMapClose').onclick = () => { sfx('pick'); closeMap(); };
 
-function enterStage(idx, tower) {
+function enterStage(idx, tower, practice) {   // practice: 보스 연습 (보스 번호 또는 'final')
   if (idx === undefined) idx = Math.min(G.stageN, STAGES.length - 1);
   flushChests();
   if (G.mode === 'base') { saveGame(); G.stash = { enemies: G.enemies, coins: G.coins, gems: G.gems, hearts: G.hearts }; }   // 탑 다음 층은 마을을 다시 넣지 않음
   // 무한 탑: 층마다 버티기, 5층마다 보스. 난이도 n = 2 + 층
-  const def = tower ? { name: `무한 탑 ${tower}층`, th: Math.floor((tower - 1) / 5) % THEMES.length, goal: tower % 5 === 0 ? 'tboss' : 'survive', time: Math.min(40, 22 + Math.floor(tower / 3)) } : STAGES[idx];
-  const p = G.p, n = tower ? 1 + tower : idx, th = THEMES[def.th];
+  const def = practice !== undefined ? { name: '⚔ 보스 연습', th: practice === 'final' ? 4 : PRACTICE_TH[practice], goal: 'tboss', time: 30 } : tower ? { name: `무한 탑 ${tower}층`, th: Math.floor((tower - 1) / 5) % THEMES.length, goal: tower % 5 === 0 ? 'tboss' : 'survive', time: Math.min(40, 22 + Math.floor(tower / 3)) } : STAGES[idx];
+  const p = G.p, n = practice !== undefined ? 5 : tower ? 1 + tower : idx, th = THEMES[def.th];
   G.enemies = []; G.coins = []; G.gems = []; G.hearts = []; G.bullets = []; G.ebullets = []; G.booms = []; G.bombs = []; G.corpses = []; G.flyers = []; G.plane = null; G.fists = []; G.hazards = []; G.boss = null; G.intro = null;
   const surv = def.goal === 'survive' || def.goal === 'tboss', L = surv ? 600 : def.goal === 'final' ? 2600 : 1700 + 120 * n;
-  const st = { tower: tower || 0, n, def, th, L, groups: [], deco: [], rocks: [], cages: [], bossOn: false, portal: null, clear: false, t: 0, hits: 0, acc: 0, timer: def.time || 0 };
+  const st = { tower: tower || 0, practice, n, def, th, L, groups: [], deco: [], rocks: [], cages: [], bossOn: false, portal: null, clear: false, t: 0, hits: 0, acc: 0, timer: def.time || 0 };
   if (!surv) for (let y = -380; y > -L + 520; y -= rand(240, 320)) st.groups.push({ y, done: false });
   if (def.goal === 'rescue') for (let k = 0; k < 3; k++) st.cages.push({ x: rand(-STAGE_HW + 60, STAGE_HW - 60), y: -L * (0.22 + k * 0.25), hold: 0, freed: false, cat: ['ally_sword', 'ally_archer', 'ally_bomber'][k], shake: 0 });
   // 길 가장자리(폰 화면 안쪽에 보이게)와 길 안쪽 군데군데에 테마 장식
@@ -2417,7 +2428,8 @@ function enterStage(idx, tower) {
   G.st = st; G.mode = 'stage';
   p.x = 0; p.y = surv ? -L / 2 : -40; G.cam.x = 0; G.cam.y = p.y - 12; joy = null;
   placeAllies();
-  if (tower) banner(`🗼 ${tower}층`, def.goal === 'tboss' ? '👑 보스 층! 보스를 물리쳐라' : `⏱ ${def.time}초 버텨라!`, tower % 5 === 0 ? '#ff6b6b' : '#9fd8ff', 2.2);
+  if (practice !== undefined) banner('⚔ 보스 연습', '기록·업적엔 안 남아요 · 져도 괜찮아!', '#9fd8ff', 2.2);
+  else if (tower) banner(`🗼 ${tower}층`, def.goal === 'tboss' ? '👑 보스 층! 보스를 물리쳐라' : `⏱ ${def.time}초 버텨라!`, tower % 5 === 0 ? '#ff6b6b' : '#9fd8ff', 2.2);
   else banner(`${n + 1}. ${def.name}`, def.goal === 'survive' ? `⏱ ${def.time}초 버텨라!` : GOAL_TXT[def.goal], '#ffd23f', 2.6);
   sfx('wave');
 }
@@ -2426,6 +2438,7 @@ function stageClear(x, y) {
   const st = G.st, p = G.p; if (st.clear) return;
   x = clamp(x, -STAGE_HW + 40, STAGE_HW - 40); y = clamp(y, -st.L - 340, 60);   // 영웅이 갈 수 있는 곳에만 포털 (보스가 밖에서 쓰러져도)
   st.clear = true;
+  if (st.practice !== undefined) { st.portal = { x, y, t: 0, hold: 0, on: false }; return; }   // 연습: 마을로 가는 포털만
   if (st.tower) {
     questEvent('tower');
     const f = st.tower, prize = 15 + f * 6 + (f % 5 === 0 ? 60 + f * 4 : 0);
@@ -2452,6 +2465,7 @@ function returnBase(win) {
   G.mode = 'base'; G.st = null; G.stash = null; G.gateT = 0;
   p.x = GATE.x; p.y = GATE.y - 40; G.cam.x = p.x; G.cam.y = p.y - 12;
   placeAllies();
+  if (st && st.practice !== undefined) { banner(win ? '🏠 연습 끝!' : '연습에서 쓰러졌다', win ? '또 도전해 봐요' : '괜찮아, 다시 해 보자!', win ? '#7bed9f' : '#9fd8ff', 2.4); saveGame(); return; }
   if (st && st.tower) {
     const reached = st.clear ? st.tower : st.tower - 1;
     banner(win ? '🏠 탑에서 귀환!' : '탑에서 쓰러졌다!', `🗼 ${reached}층까지 · 얻은 금화 🪙${G.towerGold || 0}`, win ? '#7bed9f' : '#ff6b6b', 3);
@@ -2709,6 +2723,12 @@ function killEnemy(e) {
   if (Math.random() < 0.012) G.hearts.push({ x: e.x, y: e.y, bob: 0 });
 }
 function bossDie(e) {
+  if (G.mode === 'stage' && G.st && G.st.practice !== undefined) { // 보스 연습: 기록·상자 없이 금화 조금
+    G.boss = null; G.shake = 25; G.slow = 1.3; cheerAll(); G.ebullets.length = 0; G.fists = []; G.hazards = [];
+    for (let i = 0; i < 5; i++) burst(e.x + rand(-40, 40), e.y + rand(-40, 40), [e.color, '#ffd23f', '#fff', '#ff9f1c', '#222'][i], 40, 380, 8, 1.2);
+    for (let i = 0; i < 20; i++) dropCoin(e.x + rand(-40, 40), e.y + rand(-40, 40));
+    banner('⚔ 연습 승리!', e.name + ' 쓰러뜨렸다!', '#ffd23f', 3); sfx('bigBoom'); stageClear(e.x, e.y + 60); return;
+  }
   G.boss = null; G.bossKills = (G.bossKills || 0) + 1; questEvent('boss'); stAdd('bosses'); stSet('bossT', e.name); ST.bk[e.name] = (ST.bk[e.name] || 0) + 1;
   for (let i = 0; i < 5; i++) burst(e.x + rand(-40, 40), e.y + rand(-40, 40), [e.color, '#ffd23f', '#fff', '#ff9f1c', '#222'][i], 40, 380, 8, 1.2);
   for (let i = 0; i < 15; i++) { const a = Math.random() * Math.PI * 2, d = rand(10, 90); dropGem(e.x + Math.cos(a) * d, e.y + Math.sin(a) * d, 5); }   // 상자가 생겨서 구슬은 30 → 15
