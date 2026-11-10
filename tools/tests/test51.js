@@ -26,11 +26,18 @@ const { chromium } = require('/opt/node22/lib/node_modules/playwright');
   await page.screenshot({ path: `${OUT}/b89_fight.png` });
   const w = await page.evaluate(async () => { const G = SH.G, e = G.boss; G.p.hp = G.p.maxHp = 1e6; hurtEnemy(e, 1e9, 0, 1, 0); await new Promise(r => setTimeout(r, 400)); return { clear: G.st.clear, portal: !!G.st.portal, portal2: !!G.st.portal2, chests: (G.chests || []).length, coins: G.coins.length }; });
   console.log('win', JSON.stringify(w)); check(w.clear && w.portal && !w.portal2 && w.chests === 0 && w.coins > 0, 'practice win wrong');
+  // Build 90: 연습 최고 기록
+  const pb = await page.evaluate(() => ({ rec: (JSON.parse(localStorage.getItem('stickhero_meta')).pbest || {})['바위 골렘 왕'], banner: SH.G.banner && SH.G.banner.t }));
+  console.log('practice best', JSON.stringify(pb)); check(pb.rec >= 1, 'practice best time not saved');
   const k1 = await page.evaluate(() => ({ bk: ST.bk['바위 골렘 왕'] || 0, bosses: ST.bosses || 0 }));
   check(k1.bk === k0.bk && k1.bosses === k0.bosses, 'practice changed records');
   await page.evaluate(() => returnBase(true)); await page.waitForTimeout(200);
   const r = await page.evaluate(() => ({ mode: SH.G.mode, stageN: SH.G.stageN, banner: SH.G.banner && SH.G.banner.t }));
   console.log('home', JSON.stringify(r)); check(r.mode === 'base' && r.stageN === 0, 'practice return wrong');
+  // 도감 카드에 기록 표시
+  await page.evaluate(() => { togglePause(); $('bDexP').click(); }); await page.waitForTimeout(200);
+  check(await page.evaluate(() => [...document.querySelectorAll('#dexList .dex.boss')].some(el => el.textContent.includes('바위 골렘 왕') && /연습 최고 \d+초/.test(el.textContent))), 'best time not shown in dex');
+  await page.evaluate(() => { $('bDexOk').click(); togglePause(); }); await page.waitForTimeout(150);
   // 마지막 보스 연습: 변신까지, 지면 마을로
   await page.evaluate(() => { togglePause(); $('bDexP').click(); }); await page.waitForTimeout(200);
   await page.evaluate(() => startPractice('boss_final')); await page.waitForTimeout(2200);
