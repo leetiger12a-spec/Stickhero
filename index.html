@@ -127,6 +127,7 @@ h2{margin:0 0 14px;font:400 clamp(30px,9vw,46px) "BHS","Jua",system-ui,-apple-sy
 .best{margin-top:14px;font-size:15px;opacity:.85;line-height:1.6}
 .hint{margin-top:14px;font-size:13px;opacity:.65;line-height:1.5}
 #cards{display:flex;flex-direction:column;gap:12px;width:min(92vw,420px)}
+#pauseStats{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;width:min(92vw,380px);margin:4px 0 10px}#pauseStats .ps{background:rgba(255,250,240,.95);color:#222;border:2px solid #222;border-radius:10px;padding:4px 2px;font-size:11px;font-weight:800;text-align:center}#pauseStats .ps b{display:block;font-size:15px;color:#d35400}#pauseStats .pw{grid-column:1/-1;font-size:12px;line-height:1.6}
 #cardTools{display:flex;gap:10px;margin-top:12px}#cardTools button{font:inherit;font-size:14px;font-weight:800;border:3px solid #222;border-radius:14px;background:#fffaf0;color:#222;padding:8px 14px;min-height:44px;cursor:pointer}#cardTools button:disabled{opacity:.4}#cardTools button.on{background:#ffd6d6;outline:3px solid #ff4d6d}#cards .card.banable{outline:4px dashed #ff4d6d}
 .card{display:flex;align-items:center;gap:14px;text-align:left;font:inherit;color:#2b2d42;background:linear-gradient(#fffdf7,#fff1d6);border:3px solid #2b2d42;border-radius:18px;padding:12px 14px;cursor:pointer;box-shadow:inset 0 2px 0 #fff,0 5px 0 #2b2d42,0 10px 18px rgba(0,0,0,.3);animation:pop .25s ease-out backwards}
 .card:nth-child(2){animation-delay:.07s}.card:nth-child(3){animation-delay:.14s}
@@ -301,6 +302,7 @@ h2 .hb{-webkit-text-stroke:0;text-shadow:none;letter-spacing:0;font-family:"Jua"
 
 <div class="ov" id="ovPause">
   <h2>일시정지</h2>
+  <div id="pauseStats"></div>
   <button class="btn" id="bResume">계속하기</button>
   <button class="btn blue" id="bShopP">💪 영웅 강화</button>
   <button class="btn" id="bAchP">🏅 업적</button>
@@ -318,7 +320,7 @@ h2 .hb{-webkit-text-stroke:0;text-shadow:none;letter-spacing:0;font-family:"Jua"
 
 <script>
 'use strict';
-const BUILD = 114;
+const BUILD = 115;
 const BOSS_INTERVAL = 180;      // 보스 등장 간격(초)
 const WAVE_INTERVAL = 60;       // 대규모 몰이 이벤트 간격(초)
 const MAX_ENEMIES = 220;
@@ -1551,8 +1553,13 @@ function continueGame() {
   else banner('이어하기!', `${G.day > 1 ? G.day + '일째 · ' : ''}스테이지 ${G.stageN} 클리어한 마을로 돌아왔다`, '#7bed9f', 2.5);
   if (G.pending > 0) openLevelUp();
 }
+// 📋 일시정지 화면 능력치 (Build 115)
+function renderPauseStats() { const p = G.p, pct = v => `${v >= 1 ? '+' : ''}${Math.round((v - 1) * 100)}%`;
+  const ws = Object.keys(G.weapons).map(id => `${wMini(id, G.weapons[id] > MAX_WLV)} ${G.weapons[id] > MAX_WLV ? '✨진화' : 'Lv' + G.weapons[id]}`).join(' · ');
+  const cells = [['⚔ 공격력', pct(p.dmgMul)], ['⏱ 공격 빠르기', pct(1 / p.cdMul)], ['💨 이동 속도', Math.round(p.speed)], ['❤ 최대 체력', p.maxHp], ['🧲 자석 범위', Math.round(p.magnet)], ['🎒 통나무', `${p.cap}개`]];
+  $('pauseStats').innerHTML = cells.map(([k, v]) => `<div class="ps">${k}<b>${v}</b></div>`).join('') + `<div class="ps pw">${ws || '무기 없음'}${G.combo ? '' : ''}<br><small>🔥 최고 콤보 ${G.bestCombo || 0} · 🔁 ${G.rerolls ?? 2} · 🚫 ${G.bans ?? 2}</small></div>`; }
 function togglePause() {
-  if (state === 'play') { state = 'paused'; joy = null; showOv('ovPause'); }
+  if (state === 'play') { state = 'paused'; joy = null; renderPauseStats(); showOv('ovPause'); }
   else if (state === 'paused') { state = 'play'; showOv(null); }
 }
 function toTitle() { saveGame(); state = 'title'; $('hudBtns').classList.remove('show'); refreshTitle(); showOv('ovTitle'); }
