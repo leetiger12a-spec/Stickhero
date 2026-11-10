@@ -11,6 +11,7 @@ const RUNS = +process.argv[2] || 4, MINUTES = +process.argv[3] || 15, STYLE = pr
     page.on('console', m => { if (m.type() === 'error') errors.push(`run${run}: ${m.text()}`); });
     await page.goto(process.env.BOT_URL || 'file:///home/user/Stickhero/index.html');   // BOT_URL: 고정 사본으로 돌릴 때
     await page.click('#bStart');
+    if (process.env.BOT_ALLIES) await page.evaluate(list => { const G = SH.G; G.tavern = true; const pd = G.pads.find(q => q.kind === 'tavern'); if (pd) pd.built = true; for (const t of list.split(',')) hireAlly(t); }, process.env.BOT_ALLIES);   // BOT_ALLIES=golem,golem: 숙소를 지은 채 이 동료들로 시작 (동료 비교용)
     const r = await page.evaluate(([MINUTES, STYLE]) => {
       const log = [], ev = (t) => log.push(`${Math.floor(SH.G.t / 60)}:${String(Math.floor(SH.G.t % 60)).padStart(2, '0')} ${t}`);
       const G = () => SH.G; const st = { firstTower: null, stages: 0, retreats: 0, deaths: 0, raidsWon: 0, minBase: 1e9, bossKills: 0, lastStage: 0, lastRaidCount: 0 };
