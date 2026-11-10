@@ -285,7 +285,7 @@ h2 .hb{-webkit-text-stroke:0;text-shadow:none;letter-spacing:0;font-family:"Jua"
 
 <script>
 'use strict';
-const BUILD = 85;
+const BUILD = 86;
 const BOSS_INTERVAL = 180;      // 보스 등장 간격(초)
 const WAVE_INTERVAL = 60;       // 대규모 몰이 이벤트 간격(초)
 const MAX_ENEMIES = 220;
@@ -1126,7 +1126,7 @@ const DEX = [
   { k: 'e_demon', name: '악마 병사', desc: '날아서 울타리를 넘어요', where: '4단계 (마을 8분 · 모험 8칸)' },
   { k: 'e_ghost', name: '유령 기사', desc: '울타리 통과 · 쇠사슬은 느리게', where: '4단계 (마을 8분 · 모험 8칸)' },
   { k: 'e_golem', name: '바위 골렘', desc: '쓰러지면 작은 바위 3개로', where: '4단계 (마을 8분 · 모험 8칸)' },
-  ...BOSSES.map((B, i) => ({ k: 'boss' + i, boss: B.name, name: B.name, desc: ['높이 뛰어올라 쿵!', '로켓 주먹을 날려요', '바닥에 불길을 깔아요', '얼음 숨결로 느리게 해요', '거미줄을 쏘고 새끼 거미를 불러요', '순간이동하고 해골 병사를 불러요', '땅을 쾅! 충격파 · 반쯤 다치면 작은 골렘을 불러요', '걸으며 불길을 남기고 불바다를 깔아요', '얼음 숨결로 느리게 해요', '뿌리로 발을 묶고 조금씩 회복해요', '때리면 금화가 튀어요 · 40초 뒤 도망!'][i], where: i < 6 ? '마을·모험·탑 보스' : i === 10 ? '마을 (아주 드물게)' : `마을·무한 탑 ${(i) * 5}층` })),
+  ...BOSSES.map((B, i) => ({ k: 'boss' + i, boss: B.name, name: B.name, desc: ['높이 뛰어올라 쿵!', '로켓 주먹을 날려요', '바닥에 불길을 깔아요', '얼음 숨결로 느리게 해요', '거미줄을 쏘고 새끼 거미를 불러요', '순간이동하고 해골 병사를 불러요', '땅을 쾅! 충격파 · 반쯤 다치면 작은 골렘을 불러요', '걸으며 불길을 남기고 불바다를 깔아요', '얼음 숨결로 느리게 해요', '뿌리로 발을 묶고 조금씩 회복해요', '때리면 금화가 튀어요 · 40초 뒤 도망!'][i], where: i < 6 ? '마을·모험·탑 보스' : i === 10 ? '마을 (아주 드물게) · 무한 탑 50층' : `마을·무한 탑 ${(i) * 5}층` })),
   { k: 'boss_final', boss: '왕관 괴물 대왕', name: '왕관 괴물 대왕', desc: '모든 보스의 기술을 다 써요', where: '모험 10칸 · 왕관 괴물의 성' },
 ];
 const DEX_STARS = { mob: [10, 100, 1000], boss: [1, 5, 20] };
@@ -1828,7 +1828,7 @@ function spawnBoss(bx, by) {
   const top = () => 3 + Math.floor(Math.random() * 7);   // 6번째 뒤로는 센 보스 중 하나 (Build 84: 골렘 4종 포함)
   // Build 69: 보스마다 세기 고정 — 나중에 나오는 보스일수록 센 보스 (같은 보스는 언제 나와도 같음)
   // Build 79: 마을 보스는 적 단계에 맞춰 최소 보스가 정해짐 (4단계에 체력 800 보스가 나오지 않게) — 보스마다 세기는 그대로
-  let n = inStage ? (G.st.tower ? (G.st.tower / 5 <= 9 ? G.st.tower / 5 : top()) : STAGE_BOSS[Math.min(8, si)]) : Math.max(G.bossCount < 6 ? G.bossCount : top(), BOSS_MIN_TIER[Math.min(3, Math.floor(tierNow()))]);
+  let n = inStage ? (G.st.tower ? (G.st.tower / 5 <= 9 ? G.st.tower / 5 : G.st.tower === 50 ? GOLD_GOLEM : top()) : STAGE_BOSS[Math.min(8, si)]) : Math.max(G.bossCount < 6 ? G.bossCount : top(), BOSS_MIN_TIER[Math.min(3, Math.floor(tierNow()))]);
   if (!inStage && n >= 3 && Math.random() < GOLD_GOLEM_P) n = GOLD_GOLEM;   // 황금 골렘은 마을에서만 아주 드물게
   if (window.__bossN !== undefined) n = window.__bossN;   // 시험용
   if (!inStage) G.bossCount++;
@@ -3255,6 +3255,7 @@ function updBoss(e, dt, dx, dy, d) {
       e.dead = true; G.boss = null; G.ebullets.length = 0; G.fists = [];
       for (let i = 0; i < 3; i++) burst(e.x + rand(-30, 30), e.y + rand(-30, 30), '#ffd23f', 30, 300, 6, 1);
       banner('황금 골렘이 도망갔다!', '다음엔 꼭 잡자 · 튄 금화는 내 거!', '#ffd23f', 2.6); sfx('woosh');
+      if (G.mode === 'stage') stageClear(e.x, e.y + 60);   // 무한 탑 50층: 도망가도 층은 통과 (상자는 없음)
     }
   }
   // 불꽃 대마왕은 걸으며 불씨를 흘림

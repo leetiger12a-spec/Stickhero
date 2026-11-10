@@ -52,5 +52,8 @@ const { chromium } = require('/opt/node22/lib/node_modules/playwright');
   // 무한 탑 30~45층 = 골렘 4종
   const tw = await page.evaluate(() => { const G = SH.G, out = []; const m = G.mode; G.mode = 'stage'; for (const f of [30, 35, 40, 45]) { G.st = { n: 1 + f, tower: f, def: { goal: 'tboss' } }; SH.spawnBoss(0, 0); out.push(G.boss.name); G.enemies = G.enemies.filter(x => x !== G.boss); G.boss = null; G.intro = null; } G.mode = m; G.st = null; return out; });
   console.log('tower', tw.join()); check(tw.join() === '바위 골렘 왕,용암 골렘,얼음 골렘,숲 골렘', 'tower golem floors wrong');
+  // Build 86: 무한 탑 50층 = 황금 골렘, 도망가도 층은 통과
+  const t50 = await page.evaluate(async () => { const G = SH.G; while (SH.state === 'levelup') SH.choose(0); G.pending = 0; G.gems = []; G.slow = 0; if (SH.state !== 'play') { state = 'play'; showOv(null); } SH.tower(50); G.intro = null; G.enemies = []; G.st.bossOn = true; SH.spawnBoss(0, G.p.y - 200); SH.skipIntro(); const e = G.boss, name = e.name; e.fleeT = 0.2; await new Promise(r => setTimeout(r, 500)); return { name, clear: !!G.st.clear, portal: !!G.st.portal, boss: !!G.boss, st: SH.state, ft: e.fleeT, chest: SH.G.chests && SH.G.chests.length }; });
+  console.log('tower 50', JSON.stringify(t50)); check(t50.name === '황금 골렘' && t50.clear && t50.portal && !t50.boss, 'tower 50 gold golem flee wrong');
   console.log(errors.length ? 'ERRORS:\n' + errors.join('\n') : 'OK'); await b.close(); process.exit(errors.length ? 1 : 0);
 })();
