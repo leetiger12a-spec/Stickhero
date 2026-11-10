@@ -315,7 +315,7 @@ h2 .hb{-webkit-text-stroke:0;text-shadow:none;letter-spacing:0;font-family:"Jua"
 
 <script>
 'use strict';
-const BUILD = 106;
+const BUILD = 107;
 const BOSS_INTERVAL = 180;      // 보스 등장 간격(초)
 const WAVE_INTERVAL = 60;       // 대규모 몰이 이벤트 간격(초)
 const MAX_ENEMIES = 220;
@@ -1100,23 +1100,23 @@ function wStat(id) {
   if (l > MAX_WLV) switch (id) { // 진화 무기
     case 'sword': return { n: 8, dmg: 38, rad: 96, spd: 4.8, kb: 420 };
     case 'pistol': return { cd: 0.11, dmg: 44, shots: 1, pierce: 3, jitter: 0.07 };   // Build 75: 진화 전(Lv5)보다 약하던 것 고침
-    case 'shotgun': return { cd: 1.0, pellets: 13, dmg: 18, spread: 1.0, fire: true };
+    case 'shotgun': return { cd: 1.0, pellets: 13, dmg: 27, spread: 1.0, fire: true };   // Build 107: 진화 중 가장 약해서 +50%
     case 'boomerang': return { cd: 1.2, count: 5, dmg: 52, range: 270, big: true };
     case 'bolt': return { cd: 0.9, dmg: 50, chain: 9, reach: 150, sky: 5 };
     case 'hammer': return { cd: 1.6, dmg: 95, rad: 175, fire: true };
     case 'ice': return { cd: 0.5, dmg: 34, count: 1, slow: 2, aura: 140 };   // Build 75: 진화 중 가장 약하던 것 올림
     case 'xbow': return { cd: 0.8, dmg: 60, shots: 5, pierce: 99, spread: 0.55 };
     case 'poison': return { cd: 1.3, dmg: 20, tick: 22, rad: 80, life: 5, n: 3 };
-    case 'star': return { cd: 0.9, dmg: 80, n: 6, rad: 60 };
+    case 'star': return { cd: 0.9, dmg: 100, n: 6, rad: 60 };   // Build 107: +25%
   }
   switch (id) {
     case 'sword': return { n: 1 + l, dmg: 8 + 4 * l, rad: 50 + 6 * l, spd: 3.2 + 0.3 * l };
     case 'pistol': return { cd: 0.6 - 0.05 * l, dmg: 10 + 4 * l, shots: l >= 5 ? 3 : l >= 3 ? 2 : 1, pierce: l >= 4 ? 1 : 0 };
     case 'shotgun': return { cd: 1.35 - 0.08 * l, pellets: 3 + 2 * l, dmg: 6 + 2 * l, spread: 0.5 + 0.06 * l };
     case 'boomerang': return { cd: 1.8 - 0.1 * l, count: l >= 5 ? 3 : l >= 3 ? 2 : 1, dmg: 14 + 5 * l, range: 170 + 15 * l };
-    case 'bolt': return { cd: 1.5 - 0.1 * l, dmg: 16 + 6 * l, chain: 2 + l, reach: 130 };
+    case 'bolt': return { cd: 1.5 - 0.1 * l, dmg: 20 + 8 * l, chain: 2 + l, reach: 130 };   // Build 107: 진화 전 약해서 +30%
     case 'hammer': return { cd: 2.8 - 0.2 * l, dmg: 26 + 10 * l, rad: 70 + 12 * l };
-    case 'ice': return { cd: 1.0 - 0.06 * l, dmg: 12 + 5 * l, count: l >= 3 ? 2 : 1, slow: 1.2 + 0.15 * l };
+    case 'ice': return { cd: 1.0 - 0.06 * l, dmg: 16 + 6.5 * l, count: l >= 3 ? 2 : 1, slow: 1.2 + 0.15 * l };   // Build 107: +30%
     case 'xbow': return { cd: 1.1 - 0.07 * l, dmg: 22 + 8 * l, shots: l >= 4 ? 2 : 1, pierce: 2 + Math.floor(l / 2), spread: 0.14 };
     case 'poison': return { cd: 2.2 - 0.15 * l, dmg: 10 + 4 * l, tick: 6 + 3 * l, rad: 40 + 5 * l, life: 3, n: l >= 3 ? 2 : 1 };
     case 'star': return { cd: 1.6 - 0.1 * l, dmg: 30 + 12 * l, n: l >= 4 ? 3 : l >= 2 ? 2 : 1, rad: 45 };
