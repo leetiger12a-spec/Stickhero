@@ -46,7 +46,7 @@ const { chromium } = require('/opt/node22/lib/node_modules/playwright');
   check(await page.evaluate(() => (SH.G.chests || []).some(c => c.gold)), 'gold golem no golden chest');
   // Build 85: 골렘 업적 (황금 골렘을 잡았으니 첫 골렘·황금을 잡아라)
   const ach = await page.evaluate(() => { checkAch(); const m = JSON.parse(localStorage.getItem('stickhero_meta')); return { g1: !!m.ach.golem1, gG: !!m.ach.golemG, g5: !!m.ach.golem5, n: ACH.length }; });
-  console.log('golem ach', JSON.stringify(ach)); check(ach.g1 && ach.gG && !ach.g5 && ach.n === 31, 'golem achievements wrong');   // Build 94: 업적 31개
+  console.log('golem ach', JSON.stringify(ach)); check(ach.g1 && ach.gG && !ach.g5 && ach.n === 37, 'golem achievements wrong');   // Build 94: 업적 31개
   // 도감: 보스 12종
   const dx = await page.evaluate(() => DEX.filter(d => d.boss).length); console.log('dex bosses', dx); check(dx === 12, 'dex bosses not 12');
   // 무한 탑 30~45층 = 골렘 4종

@@ -293,7 +293,7 @@ h2 .hb{-webkit-text-stroke:0;text-shadow:none;letter-spacing:0;font-family:"Jua"
 
 <script>
 'use strict';
-const BUILD = 100;
+const BUILD = 101;
 const BOSS_INTERVAL = 180;      // 보스 등장 간격(초)
 const WAVE_INTERVAL = 60;       // 대규모 몰이 이벤트 간격(초)
 const MAX_ENEMIES = 220;
@@ -555,6 +555,13 @@ const ACH = [
   { id: 'golem5',  icon: '⛰', name: '골렘 왕국',     desc: '골렘 보스 5종 모두 잡기',   title: '골렘 대왕',  bank: 600, p: () => [GOLEMS.filter(n => ST.bossT.includes(n)).length, 5] },
   { id: 'ice15',   icon: '❄️', name: '얼음 나라 정복', desc: '모험 지도 15칸 모두 깨기',   title: '얼음 영웅',  bank: 800, p: () => [bestStage(), 15] },   // Build 94
   { id: 'floor25', icon: '🌤', name: '하늘 끝까지',   desc: '무한 탑 25층 돌파',        title: '하늘 정복자', bank: 600, p: () => [metaOf('bestFloor'), 25] },
+  // Build 101: 새 업적 6개
+  { id: 'ghost1',  icon: '👻', name: '유령 잡기',     desc: '유령 보물 상자 잡기',        title: '유령 사냥꾼', bank: 100, p: () => [ST.ghosts || 0, 1] },
+  { id: 'ghost10', icon: '🎃', name: '유령 수집가',   desc: '유령 보물 상자 10개 잡기',   title: '유령 대장',  bank: 400, p: () => [ST.ghosts || 0, 10] },
+  { id: 'night10', icon: '🌙', name: '밤의 수호자',   desc: '밤 10번 버티기',             title: '달빛 영웅',  bank: 250, p: () => [ST.nightsAll || 0, 10] },
+  { id: 'hat1',    icon: '🎩', name: '첫 모자',       desc: '모자 하나 열기 (별 4개)',     title: '멋쟁이',     bank: 80,  p: () => [HATS.filter(h => h.id && totalStars() >= h.need).length, 1] },
+  { id: 'hat8',    icon: '🐉', name: '모자 부자',     desc: '모자 8개 모두 열기',          title: '패션 왕',    bank: 500, p: () => [HATS.filter(h => h.id && totalStars() >= h.need).length, 8] },
+  { id: 'newevo',  icon: '🌠', name: '독과 별',       desc: '독 늪 가마솥·유성우 지팡이 진화', title: '별빛 연금술사', bank: 300, p: () => [['poison', 'star'].filter(x => ST.evoT.includes(x)).length, 2] },
 ];
 function checkAch() { // 1초마다: 기록 저장 + 새 업적
   const m = readJSON(META_KEY) || {}; m.ach = m.ach || {};
@@ -2006,7 +2013,7 @@ function updNight(dt) {
   const ph = nightPh(), on = ph >= 0 && ph < NIGHT_LEN, p = G.p;
   if (on && !G.nightOn) { G.nightOn = true; banner('🌙 밤이 됐다!', '적이 더 많이 몰려와요 · 아침까지 버텨라!', '#9fb4ff', 2.6); sfx('wave'); }
   if (!on && G.nightOn) {
-    G.nightOn = false; G.nights = (G.nights || 0) + 1; questEvent('night'); ST.nightsAll = (ST.nightsAll || 0) + 1; const bonus = 40 + 20 * G.nights; G.gold += bonus;
+    G.nightOn = false; G.nights = (G.nights || 0) + 1; questEvent('night'); stAdd('nightsAll'); const bonus = 40 + 20 * G.nights; G.gold += bonus;
     banner('☀️ 아침이다!', `밤을 버텼다! 🪙${bonus}`, '#ffd23f', 2.6); sfx('cheer'); cheerAll(); floatText(p.x, p.y - 60, `+🪙${bonus}`, '#ffd23f', 20, 1.4);
   }
   updGhostChest(dt, on, ph);
@@ -2026,7 +2033,7 @@ function updGhostChest(dt, on, ph) {
   const g = G.ghost; if (!g) return; g.t += dt;
   const dx = g.x - p.x, dy = g.y - p.y, d = Math.hypot(dx, dy) || 1;
   if (!p.dead && d < 34) { // 잡았다!
-    G.ghost = null; G.ghostCaught = (G.ghostCaught || 0) + 1; ST.ghosts = (ST.ghosts || 0) + 1; questEvent('ghost');
+    G.ghost = null; G.ghostCaught = (G.ghostCaught || 0) + 1; stAdd('ghosts'); questEvent('ghost');
     const gold = 80 + 20 * G.ghostCaught; G.gold += gold; dropChest(g.x, g.y);
     burst(g.x, g.y - 20, '#b8f2ff', 24, 200, 5, 0.7); burst(g.x, g.y - 20, '#ffd23f', 12, 160, 4, 0.6); floatText(g.x, g.y - 50, `👻 잡았다! +🪙${gold}`, '#ffd23f', 20, 1.6); sfx('cheer'); return; }
   if (g.rest > 0) g.rest -= dt;   // 헥헥 쉬는 중 (이때 잡기 쉬움)
