@@ -315,7 +315,7 @@ h2 .hb{-webkit-text-stroke:0;text-shadow:none;letter-spacing:0;font-family:"Jua"
 
 <script>
 'use strict';
-const BUILD = 107;
+const BUILD = 108;
 const BOSS_INTERVAL = 180;      // 보스 등장 간격(초)
 const WAVE_INTERVAL = 60;       // 대규모 몰이 이벤트 간격(초)
 const MAX_ENEMIES = 220;
@@ -2963,8 +2963,13 @@ function dropCoin(x, y) {
   const a = Math.random() * 7;
   G.coins.push({ x, y, vx: Math.cos(a) * 60, vy: Math.sin(a) * 60, z: 0, vz: rand(80, 140), pull: false, age: 0 });
 }
+// 🔥 콤보 (Build 108): 2.5초 안에 다음 적을 잡으면 이어짐, 10·50·100·200·500 콤보마다 금화
+const COMBO_GIFT = { 10: 10, 50: 50, 100: 120, 200: 300, 500: 800 };
+function addCombo() { G.combo = (G.comboT > 0 ? G.combo || 0 : 0) + 1; G.comboT = 2.5; G.comboPop = 0.25; if (G.combo > (G.bestCombo || 0)) G.bestCombo = G.combo; stMax('bestCombo', G.combo);
+  const gift = COMBO_GIFT[G.combo]; if (gift) { G.gold += gift; floatText(G.p.x, G.p.y - 74, `🔥 ${G.combo} 콤보! +🪙${gift}`, '#ff9f1c', 20, 1.4); sfx('coin'); if (G.combo >= 100) heroSay('combo', true); } }
+function updCombo(dt) { if (G.comboT > 0) { G.comboT -= dt; if (G.comboT <= 0) G.combo = 0; } if (G.comboPop > 0) G.comboPop -= dt; }
 function killEnemy(e) {
-  e.dead = true; G.kills++; if (e.lastSrc === 'poison') questEvent('poison'); else if (e.lastSrc === 'star') questEvent('meteor');
+  e.dead = true; G.kills++; if (!e.boss && !e.camp) addCombo(); if (e.lastSrc === 'poison') questEvent('poison'); else if (e.lastSrc === 'star') questEvent('meteor');
   if (G.allies.length) allyGainXp(e.x, e.y, e.boss ? 40 : e.camp ? 20 : e.xp);
   if (!e.boss && !e.camp) { questEvent('kill'); stAdd('kills'); ST.kc[e.type] = (ST.kc[e.type] || 0) + 1; if (e.golden) { stSet('goldT', e.type); goldDie(e); } if (e.type.startsWith('e_')) { questEvent('special'); if (SPECIALS.some(q => q[0] === e.type)) stSet('specT', e.type); } }
   if (e.boss) { bossDie(e); return; }
@@ -3239,7 +3244,7 @@ function update(dt) {
     sfx('swing');
     for (const e of G.enemies) { const dx = e.x - p.x, dy = e.y - p.y, d = Math.hypot(dx, dy) || 1; if (d < 66 + e.r && dx * p.face > -12) hurtEnemy(e, 12, dx / d, dy / d, 240); }
   } }
-  updAllies(dt); updBombs(dt); updMeteors(dt); updPlane(dt); updSay(dt);
+  updAllies(dt); updBombs(dt); updMeteors(dt); updPlane(dt); updSay(dt); updCombo(dt);
   if (G.sosCd > 0) { G.sosCd -= dt; if (G.sosCd <= 0) { G.sosCd = 0; sfx('pick'); } }
   if (G.radio) { G.radio.t += dt; if (G.radio.t >= G.radio.dur) G.radio = null; else if (Math.floor(G.radio.t * 26) !== Math.floor((G.radio.t - dt) * 26) && G.radio.t * 26 < SKY_SQUAD[G.radio.k].line.length && Math.floor(G.radio.t * 26) % 3 === 0) tone(1300 + Math.random() * 300, 0.025, 'square', 0.015, 0); }
   for (const z of G.zaps) z.life -= dt; G.zaps = G.zaps.filter(z => z.life > 0);
@@ -4689,7 +4694,7 @@ function hudText(t, x, y, size, color, align, big) {   // big: 제목 글꼴(검
 }
 // 💬 영웅 말풍선 (Build 104): 보스·진화·밤·유령 상자·체력 낮음 때 짧은 말
 const SAY = { boss: ['덤벼라!', '보스다! 간다!', '이번엔 안 진다!'], evo: ['진화다! 엄청 세졌어!', '우와, 반짝반짝!'], low: ['아야… 조심해야지', '하트가 필요해!'],
-  night: ['밤이다… 반딧불이 예쁘다', '어두워도 안 무서워!'], morning: ['아침이다! 해냈다!', '휴, 버텼다!'], ghost: ['앗! 유령 상자다!', '거기 서!'], bats: ['박쥐다! 조심!'], catch: ['잡았다!', '내 보물이야!'] };
+  night: ['밤이다… 반딧불이 예쁘다', '어두워도 안 무서워!'], morning: ['아침이다! 해냈다!', '휴, 버텼다!'], ghost: ['앗! 유령 상자다!', '거기 서!'], combo: ['멈출 수 없어!', '콤보 최고!'], bats: ['박쥐다! 조심!'], catch: ['잡았다!', '내 보물이야!'] };
 function heroSay(kind, force) { if (!G) return; const L = SAY[kind]; if (!L) return; if (!force && G.say && G.t - G.say.at < 3) return;
   G.say = { txt: L[Math.floor(Math.random() * L.length)], at: G.t, t: 0, dur: 2.2, kind }; }
 function updSay(dt) { const p = G.p;
@@ -4753,6 +4758,9 @@ function drawHUD() {
   hudText(`❤ ${Math.ceil(p.hp)}/${p.maxHp}`, 14, top + 33, 12, '#fff');
   // 시간 / 처치
   hudText(fmtTime(G.t), W / 2, top + 36, 22, '#fff', 'center');
+  if (G.combo >= 5 && G.comboT > 0) { const k = G.comboT / 2.5, sz = 17 + (G.comboPop > 0 ? 6 : 0) + Math.min(6, G.combo / 40), x = W / 2, y = top + 86;   // 콤보 숫자 + 남은 시간 막대
+    hudText(`🔥 ${G.combo} 콤보`, x, y, sz, G.combo >= 100 ? '#ff4d6d' : G.combo >= 50 ? '#ff9f1c' : '#ffd23f', 'center', true);
+    roundRect(x - 40, y + 14, 80, 6, 3); ctx.fillStyle = 'rgba(0,0,0,.45)'; ctx.fill(); roundRect(x - 40, y + 14, 80 * k, 6, 3); ctx.fillStyle = '#ff9f1c'; ctx.fill(); }
   if (G.mode === 'base' && !G.boss) { const ph = nightPh(); if (ph >= 0 && ph < NIGHT_LEN) hudText(`🌙 밤 ${Math.ceil(NIGHT_LEN - ph)}초`, W / 2, top + 60, 13, '#c9d6ff', 'center'); else if (ph >= NIGHT_CYCLE - 15) hudText(`🌙 곧 밤이 와요 ${Math.ceil(NIGHT_CYCLE - ph)}`, W / 2, top + 60, 13, '#c9d6ff', 'center'); }
   hudText('💀 ' + G.kills, W - 12, top + 34, 18, '#fff', 'right');
   // 마을 체력 / 금화
