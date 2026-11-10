@@ -287,7 +287,7 @@ h2 .hb{-webkit-text-stroke:0;text-shadow:none;letter-spacing:0;font-family:"Jua"
 
 <script>
 'use strict';
-const BUILD = 92;
+const BUILD = 93;
 const BOSS_INTERVAL = 180;      // 보스 등장 간격(초)
 const WAVE_INTERVAL = 60;       // 대규모 몰이 이벤트 간격(초)
 const MAX_ENEMIES = 220;
@@ -1333,7 +1333,7 @@ function buildSave() {
     rocks: G.rocks.map(o => [Math.round(o.x), Math.round(o.y), o.s, Math.round(o.regrow)]),
     camps: G.camps.map(c => [Math.round(c.x), Math.round(c.y), c.lvl, Math.round(c.rebuild), c.e && !c.e.dead ? Math.round(c.e.hp / c.e.maxHp * 100) / 100 : 0]),
     nextBoss: G.boss ? 15 : G.nextBoss, nextWave: G.nextWave, raidCount: G.raidCount - (G.raid ? 1 : 0), raidPending: !!(G.raid || G.raidIn > 0),
-    day: G.day, broken: Object.keys(G.broken).filter(k => G.broken[k]), quests: G.quests, questBonus: G.questBonus, questSwap: !!G.questSwap,
+    day: G.day, broken: Object.keys(G.broken).filter(k => G.broken[k]), quests: G.quests, questBonus: G.questBonus, questSwap: !!G.questSwap, nights: G.nights || 0,
   };
 }
 function loadGame(d) {
@@ -1356,7 +1356,8 @@ function loadGame(d) {
   G.base.maxHp = 1500 + VILLAGE.slice(1, G.vLvl).reduce((a, v) => a + v.hp, 0);
   G.day = d.day || 1; G.broken = {}; for (const k of d.broken || []) G.broken[k] = true;
   G.chests = (d.chests || []).map(([x, y, sm, gd]) => ({ x, y, bob: 0, t: 1, small: !!sm, gold: !!gd }));   // 줍기 전에 끈 마을 보물 상자
-  if (d.quests && d.quests.length) { G.quests = d.quests; G.questBonus = !!d.questBonus; G.questSwap = !!d.questSwap; } else newQuests();   // 새 날(또는 예전 저장)은 새 퀘스트
+  if (d.quests && d.quests.length) { G.quests = d.quests; G.questBonus = !!d.questBonus; G.questSwap = !!d.questSwap; } else newQuests();
+  G.nights = d.nights || 0;   // 새 날(또는 예전 저장)은 새 퀘스트
   if (d.rocks) G.rocks = d.rocks.map(([x, y, s, rg]) => ({ x, y, s, max: 6, regrow: rg, shake: 0 }));
   if (d.camps) { G.enemies = G.enemies.filter(e => !e.camp); G.camps = d.camps.map(([x, y, lvl, rebuild, hp]) => ({ x, y, lvl, rebuild, spawnT: rand(8, 16), e: null })); G.camps.forEach((c, i) => { if (d.camps[i][4] > 0) makeCamp(c, d.camps[i][4]); }); }
   G.allies = [];
@@ -1924,10 +1925,48 @@ function drawIntro() {
   ctx.restore();
 }
 
+// ---------- 🌙 밤과 낮 (Build 93): 마을에서 3분 뒤부터 4분마다 1분씩 밤 — 어두워지고 적이 더 오고, 버티면 아침 보너스 ----------
+const NIGHT_START = 180, NIGHT_CYCLE = 240, NIGHT_LEN = 60;
+const nightPh = () => G && G.bt >= NIGHT_START ? (G.bt - NIGHT_START) % NIGHT_CYCLE : -1;   // 0~60 = 밤
+function nightK() { // 0(낮) ~ 1(한밤), 4초 동안 서서히
+  if (!G || G.mode !== 'base') return 0; const ph = nightPh();
+  return ph < 0 || ph >= NIGHT_LEN ? 0 : Math.min(1, ph / 4, (NIGHT_LEN - ph) / 4);
+}
+function updNight(dt) {
+  const ph = nightPh(), on = ph >= 0 && ph < NIGHT_LEN, p = G.p;
+  if (on && !G.nightOn) { G.nightOn = true; banner('🌙 밤이 됐다!', '적이 더 많이 몰려와요 · 아침까지 버텨라!', '#9fb4ff', 2.6); sfx('wave'); }
+  if (!on && G.nightOn) {
+    G.nightOn = false; G.nights = (G.nights || 0) + 1; const bonus = 40 + 20 * G.nights; G.gold += bonus;
+    banner('☀️ 아침이다!', `밤을 버텼다! 🪙${bonus}`, '#ffd23f', 2.6); sfx('cheer'); cheerAll(); floatText(p.x, p.y - 60, `+🪙${bonus}`, '#ffd23f', 20, 1.4);
+  }
+  const k = nightK(); G.flies = (G.flies || []).filter(f => (f.life -= dt) > 0);
+  if (k > 0.3 && G.flies.length < 26 && Math.random() < dt * 8) G.flies.push({ x: p.x + rand(-260, 260), y: p.y + rand(-220, 220), vx: rand(-14, 14), vy: rand(-14, 6), life: rand(2, 4), max: 4, ph: Math.random() * 7 });   // 반딧불이
+  for (const f of G.flies) { f.x += f.vx * dt; f.y += f.vy * dt; f.vx += rand(-20, 20) * dt; }
+}
+let nightCv = null;
+function drawNight() { // 화면 위에 어둠을 덮고, 빛나는 곳(영웅·마을 회관·망루)만 구멍을 냄 (1/4 크기로 그려 늘림)
+  const k = nightK(); if (k <= 0) return;
+  const w = Math.ceil(W / 4), h = Math.ceil(H / 4);
+  if (!nightCv) nightCv = document.createElement('canvas');
+  if (nightCv.width !== w || nightCv.height !== h) { nightCv.width = w; nightCv.height = h; }
+  const c = nightCv.getContext('2d'), sp = (x, y) => [((x - G.cam.x) * SCALE + W / 2) / 4, ((y - G.cam.y) * SCALE * K + H / 2) / 4];
+  c.globalCompositeOperation = 'source-over'; c.clearRect(0, 0, w, h); c.fillStyle = `rgba(10,14,42,${0.62 * k})`; c.fillRect(0, 0, w, h);
+  c.globalCompositeOperation = 'destination-out';
+  const hole = (x, y, r) => { const [a, b] = sp(x, y), rr = r * SCALE / 4, g = c.createRadialGradient(a, b, rr * 0.25, a, b, rr); g.addColorStop(0, 'rgba(0,0,0,1)'); g.addColorStop(1, 'rgba(0,0,0,0)'); c.fillStyle = g; c.beginPath(); c.arc(a, b, rr, 0, 7); c.fill(); };
+  if (!G.p.dead) hole(G.p.x, G.p.y - 12, 150);
+  hole(0, -10, 150);   // 마을 회관 등불
+  for (const t of G.towers) if (t.lvl > 0) hole(t.x, t.y - 30, 70);
+  ctx.drawImage(nightCv, 0, 0, W, H);
+  ctx.save(); ctx.globalCompositeOperation = 'lighter';   // 반딧불이 (어둠 위에서 반짝)
+  for (const f of G.flies) { const x = (f.x - G.cam.x) * SCALE + W / 2, y = (f.y - G.cam.y) * SCALE * K + H / 2, a = k * Math.min(1, f.life) * (0.5 + 0.5 * Math.sin(G.t * 6 + f.ph));
+    ctx.fillStyle = `rgba(200,255,120,${0.35 * a})`; ctx.beginPath(); ctx.arc(x, y, 6, 0, 7); ctx.fill(); ctx.fillStyle = `rgba(240,255,190,${a})`; ctx.beginPath(); ctx.arc(x, y, 2, 0, 7); ctx.fill(); }
+  ctx.restore();
+}
+
 // ---------- 마을에서만 일어나는 일 ----------
 function updBase(dt) {
   const p = G.p;
-  G.bt += dt;
+  G.bt += dt; updNight(dt);
   // SKYFANG 지원 폭격: 적이 많이 몰려오면 가끔 하늘에서 날아와 폭탄을 떨굼
   if (G.planeT === undefined) G.planeT = 70;
   G.planeT -= dt;
@@ -2078,6 +2117,7 @@ function updBase(dt) {
   let rate = ((G.bt < 10 ? 0.35 : 0.5) + G.bt * 0.016) * DF().rate;
   if (G.boss) rate *= 0.35;
   rate *= 1 - 0.15 * campsDown();   // 부순 진지 하나마다 -15%
+  rate *= 1 + 0.5 * nightK();   // 밤에는 적 +50%
   G.spawnAcc += rate * dt;
   while (G.spawnAcc >= 1) { G.spawnAcc--; spawnEnemy(pickType()); }
 
@@ -4444,6 +4484,7 @@ function drawHUD() {
   hudText(`❤ ${Math.ceil(p.hp)}/${p.maxHp}`, 14, top + 33, 12, '#fff');
   // 시간 / 처치
   hudText(fmtTime(G.t), W / 2, top + 36, 22, '#fff', 'center');
+  if (G.mode === 'base' && !G.boss) { const ph = nightPh(); if (ph >= 0 && ph < NIGHT_LEN) hudText(`🌙 밤 ${Math.ceil(NIGHT_LEN - ph)}초`, W / 2, top + 60, 13, '#c9d6ff', 'center'); else if (ph >= NIGHT_CYCLE - 15) hudText(`🌙 곧 밤이 와요 ${Math.ceil(NIGHT_CYCLE - ph)}`, W / 2, top + 60, 13, '#c9d6ff', 'center'); }
   hudText('💀 ' + G.kills, W - 12, top + 34, 18, '#fff', 'right');
   // 마을 체력 / 금화
   const bb = G.base;
@@ -4662,6 +4703,7 @@ function render() {
   if (G.mode === 'stage') drawStageGround(); else drawGround();
   drawWorld();
   ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+  if (G.mode === 'base') drawNight();
   drawHUD();
 }
 
