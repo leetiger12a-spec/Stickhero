@@ -11,8 +11,8 @@ const { chromium } = require('/opt/node22/lib/node_modules/playwright');
   const rows = () => page.evaluate(() => [...document.querySelectorAll('#evoList .arow')].map(r => r.textContent));
   // 시작 화면 → 업적 → 진화 도감 → 업적으로 돌아오기
   await page.click('#bAchT'); await page.waitForTimeout(150); await page.click('#bEvoA'); await page.waitForTimeout(150);
-  console.log(await sub()); check((await sub()).includes('0/8'), 'count not 0/8');
-  let r = await rows(); check(r.length === 8 && r.every(t => t.includes('???')), 'rows wrong');
+  console.log(await sub()); check((await sub()).includes('0/10'), 'count not 0/10');
+  let r = await rows(); check(r.length === 10 && r.every(t => t.includes('???')), 'rows wrong');
   check(r[0].includes('회전 칼') && r[0].includes('힘'), 'combo missing');
   check(r.some(t => t.includes('🔒')), 'lock note missing');
   await page.screenshot({ path: `${OUT}/b51_evo_title.png` });
@@ -22,7 +22,7 @@ const { chromium } = require('/opt/node22/lib/node_modules/playwright');
   // 게임 중: 검 Lv5 + 힘, 권총 진화 완료
   await page.evaluate(() => { const G = SH.G; G.weapons.sword = 5; G.passives.power = 1; G.weapons.pistol = 6; stSet('evoT', 'pistol'); });
   await page.click('#bPause'); await page.waitForTimeout(150); await page.click('#bEvoP'); await page.waitForTimeout(150);
-  console.log(await sub()); check((await sub()).includes('1/8'), 'count not 1/8');
+  console.log(await sub()); check((await sub()).includes('1/10'), 'count not 1/10');
   r = await rows(); console.log(r.slice(0, 2).join(' | '));
   check(r[0].includes('Lv5/5') && r[0].includes('있음'), 'sword now state wrong');
   check(r[1].includes('개틀링') && r[1].includes('진화 완료') && !r[1].includes('???'), 'pistol not shown');
@@ -33,6 +33,6 @@ const { chromium } = require('/opt/node22/lib/node_modules/playwright');
   // 새로고침해도 기록 유지
   await page.reload(); await page.waitForTimeout(600);
   await page.click('#bAchT'); await page.click('#bEvoA'); await page.waitForTimeout(150);
-  check((await sub()).includes('1/8'), 'record lost after reload');
+  check((await sub()).includes('1/10'), 'record lost after reload');
   await b.close(); console.log('ERRORS:', errors.length); errors.forEach(e => console.log(e)); process.exit(errors.length ? 1 : 0);
 })();

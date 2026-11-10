@@ -1,4 +1,4 @@
-// 무기 그림 아이콘 16개: 불러오기, 레벨업 카드·진화 카드·진화 도감·화면 아래 무기 칸에 그림
+// 무기 그림 아이콘 20개: 불러오기, 레벨업 카드·진화 카드·진화 도감·화면 아래 무기 칸에 그림
 const { chromium } = require('/opt/node22/lib/node_modules/playwright');
 (async () => {
   const b = await chromium.launch(); const errors = []; const check = (c, m) => { if (!c) errors.push(m); };
@@ -8,7 +8,7 @@ const { chromium } = require('/opt/node22/lib/node_modules/playwright');
   page.on('pageerror', e => errors.push(e.message)); page.on('console', m => { if (m.type() === 'error') errors.push(m.text()); });
   page.on('requestfailed', r => errors.push('fail ' + r.url()));
   await page.goto('http://localhost:8765/index.html'); await page.waitForTimeout(800);
-  const n = await page.evaluate(() => Object.keys(WICON).filter(k => k in WEAP || k.endsWith('_evo')).length); console.log('weapon icons', n); check(n === 16, 'weapon icons not 16');   // WICON에는 능력·아이템 그림도 있음 (Build 54)
+  const n = await page.evaluate(() => Object.keys(WICON).filter(k => k in WEAP || k.endsWith('_evo')).length); console.log('weapon icons', n); check(n === 20, 'weapon icons not 20');   // WICON에는 능력·아이템 그림도 있음 (Build 54)
   await page.click('#bStart'); await page.waitForTimeout(300);
   // 무기 칸: 6종(검·권총 진화)
   await page.evaluate(() => { const G = SH.G; G.nextBoss = 999; G.nextWave = 999; G.spawnAcc = -1e9;

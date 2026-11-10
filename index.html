@@ -287,7 +287,7 @@ h2 .hb{-webkit-text-stroke:0;text-shadow:none;letter-spacing:0;font-family:"Jua"
 
 <script>
 'use strict';
-const BUILD = 95;
+const BUILD = 96;
 const BOSS_INTERVAL = 180;      // 보스 등장 간격(초)
 const WAVE_INTERVAL = 60;       // 대규모 몰이 이벤트 간격(초)
 const MAX_ENEMIES = 220;
@@ -489,7 +489,7 @@ const metaOf = k => (readJSON(META_KEY) || {})[k] || 0;
 const ACH = [
   { id: 'tower1',  icon: '🏹', name: '첫 망루',       desc: '망루를 처음 지었다',       title: '새내기 영웅', bank: 50,  p: () => [ST.towers, 1] },
   { id: 'evo1',    icon: '✨', name: '첫 진화',       desc: '무기 하나 진화시키기',     title: '진화 마법사', bank: 150, p: () => [ST.evoT.length, 1] },
-  { id: 'evo6',    icon: '🌟', name: '진화 도감',     desc: '무기 8종 모두 진화시키기', title: '무기 박사',  bank: 500, p: () => [ST.evoT.length, 8] },
+  { id: 'evo6',    icon: '🌟', name: '진화 도감',     desc: '무기 10종 모두 진화시키기', title: '무기 박사',  bank: 500, p: () => [ST.evoT.length, Object.keys(EVO).length] },
   { id: 'boss1',   icon: '👑', name: '첫 보스',       desc: '보스 1마리 잡기',          title: '보스 사냥꾼', bank: 100, p: () => [ST.bosses, 1] },
   { id: 'camp1',   icon: '🏴', name: '진지 파괴자',   desc: '적 진지 1개 부수기',       title: '돌격대장',   bank: 100, p: () => [ST.camps, 1] },
   { id: 'kill1k',  icon: '💀', name: '천 마리 사냥',  desc: '적 1,000마리 잡기',        title: '사냥꾼',     bank: 150, p: () => [ST.kills, 1000] },
@@ -802,6 +802,9 @@ const WEAP = {
   hammer:    { name: '불꽃 망치',   icon: '🔨', desc: l => l === 0 ? '쾅! 땅을 내려쳐 주변을 불태워요' : '더 넓고 더 뜨겁게!' },
   ice:       { name: '얼음 지팡이', icon: '❄️', desc: l => l === 0 ? '얼음 조각이 적을 꽁꽁 — 맞으면 느려져요' : l === 2 ? '얼음 조각 +1개!' : '더 세고 더 오래 느려짐' },
   xbow:      { name: '석궁',       icon: '🏹', desc: l => l === 0 ? '강한 화살이 적 여러 마리를 꿰뚫어요' : l === 3 ? '화살 2발!' : '공격력·관통 증가' },
+  // Build 96: 새 무기 2종
+  poison:    { name: '독 물약',     icon: '🧪', desc: l => l === 0 ? '던지면 깨져서 독 웅덩이가 남아요' : l === 3 ? '물약 2병!' : '웅덩이가 더 크고 더 아파요' },
+  star:      { name: '별 지팡이',   icon: '⭐', desc: l => l === 0 ? '하늘에서 별똥별이 떨어져 쾅!' : l === 2 || l === 4 ? '별똥별 +1개!' : '더 세고 넓게' },
 };
 // 스테이지를 깨면 열리는 것들 (깬 칸 수 기준, 게임오버 뒤에도 유지)
 const UNLOCKS = [
@@ -811,6 +814,8 @@ const UNLOCKS = [
   { at: 6, kind: 'w', id: 'xbow',   name: '🏹 석궁',       desc: '레벨업 카드에 새 무기가 나와요' },
   { at: 7, kind: 'w', id: 'hammer', name: '🔨 불꽃 망치',   desc: '레벨업 카드에 새 무기가 나와요' },
   { at: 8, kind: 'a', id: 'golem',  name: '🗿 꼬마 골렘',   desc: '영웅 숙소에서 고용할 수 있어요' },
+  { at: 9, kind: 'w', id: 'poison', name: '🧪 독 물약',     desc: '레벨업 카드에 새 무기가 나와요' },
+  { at: 11, kind: 'w', id: 'star',  name: '⭐ 별 지팡이',   desc: '레벨업 카드에 새 무기가 나와요' },
 ];
 const bestStage = () => Math.max(G ? G.stageN : 0, (readJSON(META_KEY) || {}).maxStage || 0);
 const isUnlocked = (kind, id) => { const u = UNLOCKS.find(u => u.kind === kind && u.id === id); return !u || bestStage() >= u.at; };
@@ -833,6 +838,8 @@ const EVO = {
   hammer:    { need: 'bag',    name: '화산 망치',    icon: '🌋', desc: '더 크게 쾅! 주변에 불길이 솟아요' },
   ice:       { need: 'magnet', name: '눈보라 왕관',  icon: '❄️', desc: '영웅 주변 눈보라 — 가까운 적 모두 느려지고 아파요' },
   xbow:      { need: 'speed',  name: '폭풍 석궁',    icon: '🏹', desc: '화살 5발 부채꼴 · 끝까지 꿰뚫어요' },
+  poison:    { need: 'bag',    name: '독 늪 가마솥',  icon: '🧪', desc: '독 물약 3병 · 커다란 독 늪이 오래 남아요' },
+  star:      { need: 'hp',     name: '유성우 지팡이', icon: '🌠', desc: '별똥별이 비처럼 쏟아져요' },
 };
 // 땅 장식 그림 (Build 74, img/d_*.webp): 이름 → 세상 속 높이 / 테마(땅 무늬)별로 쓰는 장식
 const PROJ_IMG = ['pj_slime', 'pj_ice', 'pj_skull', 'pj_cannon', 'pj_rock', 'pj_orb', 'pj_fist', 'pj_bolt'];   // 공격 그림 (Build 87, 모두 오른쪽을 향함)
@@ -888,7 +895,7 @@ function drawDecal(n, x, y, s) { // 땅에 놓인 작은 장식 (바닥 가운�
 }
 const wIco = (id, ev) => { const n = id + (ev ? '_evo' : ''); return WICON[n] ? `<img src="img/w_${n}.webp?b=${BUILD}" alt="">` : ev ? EVO[id].icon : WEAP[id].icon; };
 // 무기 그림을 세상 속에 그리기: 그림마다 날 끝 방향(도, 그림 기준)을 맞춰 aim 쪽으로 돌림, 왼쪽을 볼 땐 뒤집어 거꾸로 안 보이게
-const WTIP = { sword: -56, sword_evo: -58, pistol: -35, pistol_evo: -30, shotgun: -38, shotgun_evo: -25, boomerang: -65, boomerang_evo: -59, bolt: -60, bolt_evo: -66, hammer: -60, hammer_evo: -62, ice: -57, ice_evo: -55, xbow: -45, xbow_evo: -40 };
+const WTIP = { sword: -56, sword_evo: -58, pistol: -35, pistol_evo: -30, shotgun: -38, shotgun_evo: -25, boomerang: -65, boomerang_evo: -59, bolt: -60, bolt_evo: -66, hammer: -60, hammer_evo: -62, ice: -57, ice_evo: -55, xbow: -45, xbow_evo: -40, poison: -45, poison_evo: -90, star: -50, star_evo: -50 };
 const wName = id => id + (G.weapons[id] > MAX_WLV ? '_evo' : '');
 function drawWImg(n, x, y, aim, size, o) {
   const im = WICON[n]; if (!im) return false;
@@ -913,9 +920,9 @@ function drawWPoses() {
       drawWImg(n, hx + Math.cos(f.aim) * d, hy + Math.sin(f.aim) * d, f.aim, ev ? big + 10 : big, { flip: true, alpha: fade });
       if (k < 0.35 && id !== 'xbow') { const md = d + (ev ? big + 10 : big) * 0.5; ctx.fillStyle = id === 'shotgun' && ev ? 'rgba(255,120,0,.9)' : 'rgba(255,230,120,.95)';
         ctx.beginPath(); ctx.arc(hx + Math.cos(f.aim) * md, hy + Math.sin(f.aim) * md, (ev ? 9 : 6) * (1 - k * 2), 0, 7); ctx.fill(); }
-    } else if (id === 'bolt' || id === 'ice') { // 지팡이를 머리 위로 치켜듦
+    } else if (id === 'bolt' || id === 'ice' || id === 'star') { // 지팡이를 머리 위로 치켜듦
       const up = -Math.PI / 2 + p.face * 0.35, lift = Math.min(1, k * 4) * 10;
-      drawWImg(n, hx + p.face * 14, hy - 14 - lift, up, ev ? 46 : 38, { alpha: fade, glow: id === 'ice' ? '#bde8ff' : ev ? '#ffe066' : '#9fd8ff' });
+      drawWImg(n, hx + p.face * 14, hy - 14 - lift, up, ev ? 46 : 38, { alpha: fade, glow: id === 'star' ? '#fff3a0' : id === 'ice' ? '#bde8ff' : ev ? '#ffe066' : '#9fd8ff' });
     } else if (id === 'hammer') { // 머리 위에서 앞쪽 땅으로 쾅
       const sw = Math.min(1, k / 0.35), a0 = p.face > 0 ? -Math.PI * 0.85 : -Math.PI * 0.15, a1 = p.face > 0 ? Math.PI * 0.2 : Math.PI * 0.8;
       const a = a0 + (a1 - a0) * sw * sw, L = ev ? 30 : 24;
@@ -1005,6 +1012,8 @@ function wStat(id) {
     case 'hammer': return { cd: 1.6, dmg: 95, rad: 175, fire: true };
     case 'ice': return { cd: 0.5, dmg: 34, count: 1, slow: 2, aura: 140 };   // Build 75: 진화 중 가장 약하던 것 올림
     case 'xbow': return { cd: 0.8, dmg: 60, shots: 5, pierce: 99, spread: 0.55 };
+    case 'poison': return { cd: 1.3, dmg: 20, tick: 22, rad: 80, life: 5, n: 3 };
+    case 'star': return { cd: 0.9, dmg: 80, n: 6, rad: 60 };
   }
   switch (id) {
     case 'sword': return { n: 1 + l, dmg: 8 + 4 * l, rad: 50 + 6 * l, spd: 3.2 + 0.3 * l };
@@ -1015,6 +1024,8 @@ function wStat(id) {
     case 'hammer': return { cd: 2.8 - 0.2 * l, dmg: 26 + 10 * l, rad: 70 + 12 * l };
     case 'ice': return { cd: 1.0 - 0.06 * l, dmg: 12 + 5 * l, count: l >= 3 ? 2 : 1, slow: 1.2 + 0.15 * l };
     case 'xbow': return { cd: 1.1 - 0.07 * l, dmg: 22 + 8 * l, shots: l >= 4 ? 2 : 1, pierce: 2 + Math.floor(l / 2), spread: 0.14 };
+    case 'poison': return { cd: 2.2 - 0.15 * l, dmg: 10 + 4 * l, tick: 6 + 3 * l, rad: 40 + 5 * l, life: 3, n: l >= 3 ? 2 : 1 };
+    case 'star': return { cd: 1.6 - 0.1 * l, dmg: 30 + 12 * l, n: l >= 4 ? 3 : l >= 2 ? 2 : 1, rad: 45 };
   }
 }
 function recalcStats() {
@@ -1185,7 +1196,7 @@ function newGame() {
     t: 0, kills: 0, lvl: 1, xp: 0, need: xpNeed(1), pending: 0,
     p: { x: 0, y: 0, r: 11, logs: 0, cap: 12, chopT: 0, chop: 0, fullMsg: 0, hp: 100, maxHp: 100, speed: 150, face: 1, ax: 1, ay: 0, inv: 0, walk: 0, moving: false, magnet: 70, dmgMul: 1, cdMul: 1 },
     weapons: { pistol: 1 }, passives: {}, timers: {},
-    enemies: [], bullets: [], ebullets: [], booms: [], bombs: [], zaps: [], rings: [], fists: [], hazards: [], gems: [], hearts: [], chests: [], parts: [], texts: [], coins: [], corpses: [],
+    enemies: [], bullets: [], ebullets: [], booms: [], bombs: [], meteors: [], zaps: [], rings: [], fists: [], hazards: [], gems: [], hearts: [], chests: [], parts: [], texts: [], coins: [], corpses: [],
     trees: [], flyers: [], pflames: [], hint: null, mode: 'base', bt: 0, diff: diffSel, stageN: 0, stars: [], st: null, stash: null, gateT: 0,
     smith: false, forge: 0, tavern: false, allies: [], raid: null, raidIn: 0, raidCount: 0, drumT: 0,
     gold: 0, base: { hp: 1500, maxHp: 1500, hitT: 0 }, respawnT: 0, squadAng: Math.random() * 7, squadT: 6,
@@ -2231,11 +2242,26 @@ function updAllies(dt) {
   }
 }
 
+function updMeteors(dt) { // 별똥별: 0.5초 동안 하늘에서 떨어져 쾅 (원 안 적 모두)
+  for (const m of G.meteors) { m.t += dt; if (m.t >= m.dur && !m.done) { m.done = true;
+    for (const e of G.enemies) { const dx = e.x - m.x, dy = e.y - m.y, d = Math.hypot(dx, dy); if (d < m.rad + e.r) hurtEnemy(e, m.dmg, dx / (d || 1), dy / (d || 1), 160); }
+    G.rings.push({ x: m.x, y: m.y, r: m.rad, life: 0.35, max: 0.35, color: '#ffe066' }); burst(m.x, m.y - 6, '#ffe066', 18, 220, 5, 0.45); burst(m.x, m.y - 6, '#fff', 8, 160, 4, 0.35); G.shake = Math.max(G.shake, 3); sfx('bombBoom'); } }
+  G.meteors = G.meteors.filter(m => !m.done);
+}
+function drawMeteors() {
+  for (const m of G.meteors) { if (m.t < 0) continue; const k = m.t / m.dur, x = m.x + (1 - k) * 160, y = m.y - (1 - k) * 320 * K;
+    ctx.strokeStyle = 'rgba(255,240,150,.55)'; ctx.lineWidth = m.big ? 8 : 6; ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(x + 40, y - 80 * K); ctx.lineTo(x, y); ctx.stroke();
+    if (!drawProj(m.big ? 'star_evo' : 'star', x, y, G.t * 8, m.big ? 34 : 28)) { ctx.fillStyle = '#ffe066'; ctx.beginPath(); ctx.arc(x, y, 8, 0, 7); ctx.fill(); }
+    ctx.strokeStyle = `rgba(255,220,80,${0.3 + 0.5 * k})`; ctx.lineWidth = 2; ctx.setLineDash([5, 5]); ctx.beginPath(); ctx.arc(m.x, m.y, m.rad, 0, 7); ctx.stroke(); ctx.setLineDash([]); }   // 떨어질 자리 표시
+}
 function updBombs(dt) {
   for (const b of G.bombs) {
     b.t += dt;
     if (b.t >= b.dur && !b.done) {
       b.done = true;
+      if (b.poison) { const P = b.poison; // 독 물약: 깨지면서 작은 피해 + 독 웅덩이
+        for (const e of G.enemies) { const dx = e.x - b.x1, dy = e.y - b.y1, d = Math.hypot(dx, dy); if (d < P.rad * 0.6 + e.r) hurtEnemy(e, b.dmg, dx / (d || 1), dy / (d || 1), 60); }
+        addFlame(b.x1, b.y1, P.rad, P.life, { poison: true, dmg: P.tick }); burst(b.x1, b.y1 - 4, '#7bed9f', 16, 160, 4, 0.4); burst(b.x1, b.y1 - 4, '#b5179e', 6, 120, 3, 0.4); sfx('pop'); continue; }
       const R = 62;
       for (const e of G.enemies) {
         const dx = e.x - b.x1, dy = e.y - b.y1, d = Math.hypot(dx, dy);
@@ -2489,7 +2515,7 @@ function enterStage(idx, tower, practice, hard) {   // practice: 보스 연습 (
   // 무한 탑: 층마다 버티기, 5층마다 보스. 난이도 n = 2 + 층
   const def = practice !== undefined ? { name: '⚔ 보스 연습', th: practice === 'final' ? 4 : PRACTICE_TH[practice], goal: 'tboss', time: 30 } : tower ? { name: `무한 탑 ${tower}층`, th: Math.floor((tower - 1) / 5) % THEMES.length, goal: tower % 5 === 0 ? 'tboss' : 'survive', time: Math.min(40, 22 + Math.floor(tower / 3)) } : STAGES[idx];
   const p = G.p, n = practice !== undefined ? 5 : tower ? 1 + tower : idx, th = THEMES[def.th];
-  G.enemies = []; G.coins = []; G.gems = []; G.hearts = []; G.bullets = []; G.ebullets = []; G.booms = []; G.bombs = []; G.corpses = []; G.flyers = []; G.plane = null; G.fists = []; G.hazards = []; G.boss = null; G.intro = null;
+  G.enemies = []; G.coins = []; G.gems = []; G.hearts = []; G.bullets = []; G.ebullets = []; G.booms = []; G.bombs = []; G.meteors = []; G.corpses = []; G.flyers = []; G.plane = null; G.fists = []; G.hazards = []; G.boss = null; G.intro = null;
   const surv = def.goal === 'survive' || def.goal === 'tboss', L = surv ? 600 : def.goal === 'final' ? 2600 : 1700 + 120 * n;
   const st = { tower: tower || 0, practice, hard: !!hard, n, def, th, L, groups: [], deco: [], rocks: [], cages: [], bossOn: false, portal: null, clear: false, t: 0, hits: 0, acc: 0, timer: def.time || 0 };
   if (!surv) for (let y = -380; y > -L + 520; y -= rand(240, 320)) st.groups.push({ y, done: false });
@@ -2541,7 +2567,7 @@ function returnBase(win) {
   flushChests();
   const p = G.p, s = G.stash, st = G.st;
   G.enemies = s.enemies; G.coins = s.coins; G.gems = s.gems; G.hearts = s.hearts;
-  G.bullets = []; G.ebullets = []; G.booms = []; G.bombs = []; G.corpses = []; G.flyers = []; G.boss = null; G.plane = null; G.fists = []; G.hazards = [];
+  G.bullets = []; G.ebullets = []; G.booms = []; G.bombs = []; G.meteors = []; G.corpses = []; G.flyers = []; G.boss = null; G.plane = null; G.fists = []; G.hazards = [];
   G.mode = 'base'; G.st = null; G.stash = null; G.gateT = 0;
   p.x = GATE.x; p.y = GATE.y - 40; G.cam.x = p.x; G.cam.y = p.y - 12;
   placeAllies();
@@ -2943,17 +2969,27 @@ function fireWeapons(dt) {
         G.bullets.push({ x: ox, y: oy, vx: Math.cos(a) * 640, vy: Math.sin(a) * 640, r: 5, dmg: s.dmg, life: 0.8, pierce: s.pierce, hits: [], kind: 'xbow', big: s.shots >= 5 });
       }
       wPose('xbow', ang, 0.3); sfx('xbowShot');
+    } else if (id === 'poison') { // 독 물약: 적에게 휙 던지면 깨져서 독 웅덩이
+      const near = G.enemies.filter(e => !e.dead && (e.x - p.x) ** 2 + (e.y - p.y) ** 2 < 420 * 420);
+      for (let k = 0; k < s.n; k++) { const e = k === 0 ? tgt : near[Math.floor(Math.random() * near.length)] || tgt;
+        G.bombs.push({ x0: ox, y0: oy - 10, x1: e.x + rand(-10, 10), y1: e.y + rand(-10, 10), t: -k * 0.12, dur: 0.55, dmg: s.dmg, poison: s, big: !!G.weapons.poison && G.weapons.poison > MAX_WLV }); }
+      sfx('toss');
+    } else if (id === 'star') { // 별 지팡이: 하늘에서 별똥별 (화면 안 아무 적에게)
+      const near = G.enemies.filter(e => !e.dead && (e.x - p.x) ** 2 + (e.y - p.y) ** 2 < 380 * 380);
+      for (let k = 0; k < s.n && near.length; k++) { const e = near.splice(Math.floor(Math.random() * near.length), 1)[0];
+        G.meteors.push({ x: e.x, y: e.y, t: -k * 0.12, dur: 0.5, dmg: s.dmg, rad: s.rad, big: s.n >= 6 }); }
+      wPose('star', ang, 0.4); sfx('woosh');
     }
     G.timers[id] = s.cd * p.cdMul;
   }
 }
 
-function addFlame(x, y, r, life) { if (G.pflames.length < 40) G.pflames.push({ x, y, r, life, max: life, tick: 0 }); }
+function addFlame(x, y, r, life, o) { if (G.pflames.length < 60) G.pflames.push({ x, y, r, life, max: life, tick: 0, ...(o || {}) }); }   // o.poison: 초록 독 웅덩이 (o.dmg)
 function updFlames(dt) { // 영웅 쪽 불길: 0.4초마다 위에 있는 적에게 피해
   for (const f of G.pflames) {
     f.life -= dt; f.tick -= dt;
-    if (f.tick <= 0) { f.tick = 0.4; for (const e of G.enemies) if (!e.dead && (e.x - f.x) ** 2 + ((e.y - f.y) / 0.8) ** 2 < (f.r + e.r) ** 2) hurtEnemy(e, 10 + 2 * G.lvl, 0, 0, 0); }
-    if (Math.random() < 0.25) G.parts.push({ x: f.x + rand(-f.r, f.r) * 0.7, y: f.y + rand(-f.r, f.r) * 0.4, vx: 0, vy: -rand(30, 70), life: 0.45, max: 0.45, color: Math.random() < 0.5 ? '#ff7b00' : '#ffd23f', size: 4 });
+    if (f.tick <= 0) { f.tick = 0.4; for (const e of G.enemies) if (!e.dead && (e.x - f.x) ** 2 + ((e.y - f.y) / 0.8) ** 2 < (f.r + e.r) ** 2) hurtEnemy(e, f.dmg !== undefined ? f.dmg : 10 + 2 * G.lvl, 0, 0, 0); }
+    if (Math.random() < 0.25) G.parts.push({ x: f.x + rand(-f.r, f.r) * 0.7, y: f.y + rand(-f.r, f.r) * 0.4, vx: 0, vy: -rand(30, 70), life: 0.45, max: 0.45, color: f.poison ? (Math.random() < 0.5 ? '#7bed9f' : '#b388ff') : Math.random() < 0.5 ? '#ff7b00' : '#ffd23f', size: 4 });
   }
   G.pflames = G.pflames.filter(f => f.life > 0);
 }
@@ -2962,7 +2998,8 @@ function drawFlames() {
   for (const f of G.pflames) {
     const a = Math.min(1, f.life / 0.5, (f.max - f.life) / 0.15 + 0.3);
     const g = ctx.createRadialGradient(f.x, f.y, 2, f.x, f.y, f.r);
-    g.addColorStop(0, `rgba(255,240,120,${0.8 * a})`); g.addColorStop(0.55, `rgba(255,140,0,${0.6 * a})`); g.addColorStop(1, 'rgba(255,60,0,0)');
+    if (f.poison) { g.addColorStop(0, `rgba(170,255,120,${0.75 * a})`); g.addColorStop(0.6, `rgba(60,200,80,${0.55 * a})`); g.addColorStop(1, 'rgba(120,40,160,0)'); }   // 독 웅덩이
+    else { g.addColorStop(0, `rgba(255,240,120,${0.8 * a})`); g.addColorStop(0.55, `rgba(255,140,0,${0.6 * a})`); g.addColorStop(1, 'rgba(255,60,0,0)'); }
     ctx.fillStyle = g; ctx.beginPath(); ctx.ellipse(f.x, f.y, f.r, f.r * 0.8, 0, 0, 7); ctx.fill();
     if (hot) { ctx.strokeStyle = `rgba(255,250,190,${0.75 * a})`; ctx.lineWidth = 2.5; ctx.stroke(); }   // 화산 바닥에서도 보이게 밝은 테두리
   }
@@ -3044,7 +3081,7 @@ function update(dt) {
     sfx('swing');
     for (const e of G.enemies) { const dx = e.x - p.x, dy = e.y - p.y, d = Math.hypot(dx, dy) || 1; if (d < 66 + e.r && dx * p.face > -12) hurtEnemy(e, 12, dx / d, dy / d, 240); }
   } }
-  updAllies(dt); updBombs(dt); updPlane(dt);
+  updAllies(dt); updBombs(dt); updMeteors(dt); updPlane(dt);
   if (G.sosCd > 0) { G.sosCd -= dt; if (G.sosCd <= 0) { G.sosCd = 0; sfx('pick'); } }
   if (G.radio) { G.radio.t += dt; if (G.radio.t >= G.radio.dur) G.radio = null; else if (Math.floor(G.radio.t * 26) !== Math.floor((G.radio.t - dt) * 26) && G.radio.t * 26 < SKY_SQUAD[G.radio.k].line.length && Math.floor(G.radio.t * 26) % 3 === 0) tone(1300 + Math.random() * 300, 0.025, 'square', 0.015, 0); }
   for (const z of G.zaps) z.life -= dt; G.zaps = G.zaps.filter(z => z.life > 0);
@@ -4418,7 +4455,7 @@ function drawWorld() {
     ctx.fillStyle = 'rgba(255,255,255,.9)';
     for (let k = 0; k < 14; k++) { const a = G.t * (k % 2 ? 1.6 : -1.1) + k * 0.45, rr = R * (0.45 + 0.5 * ((k * 37) % 10) / 10); ctx.beginPath(); ctx.arc(p.x + Math.cos(a) * rr, p.y + Math.sin(a) * rr, 2.5, 0, 7); ctx.fill(); }
   }
-  drawWPoses(); drawFists(); drawFlames();
+  drawWPoses(); drawFists(); drawFlames(); drawMeteors();
   for (const b of G.ebullets) {
     { const pn = b.arrow ? 'pj_bolt' : b.slime ? 'pj_slime' : b.ice ? 'pj_ice' : b.skull ? 'pj_skull' : b.rock ? 'pj_rock' : b.cannon ? 'pj_cannon' : 'pj_orb';
       if (drawProj(pn, b.x, b.y, Math.atan2(b.vy, b.vx), b.arrow ? 7 : b.r * (b.cannon && !b.rock ? 2.3 : 2.8))) continue; }   // 그림이 없을 때만 아래 코드 그림
@@ -4433,6 +4470,7 @@ function drawWorld() {
   for (const b of G.bombs) {
     const k = Math.min(1, b.t / b.dur), x = b.x0 + (b.x1 - b.x0) * k, y = b.y0 + (b.y1 - b.y0) * k, z = b.drop ? (1 - k) * 140 : Math.sin(k * Math.PI) * 70;
     ctx.fillStyle = 'rgba(0,0,0,.2)'; ctx.beginPath(); ctx.ellipse(x, y + 4, 6, 3, 0, 0, 7); ctx.fill();
+    if (b.poison && drawProj(b.big ? 'poison_evo' : 'poison', x, y - z, b.t * 12, b.big ? 22 : 16)) continue;   // 빙글 도는 독 물약
     ctx.save(); ctx.translate(x, y - z); ctx.scale(1, IK);
     ctx.fillStyle = '#222'; ctx.beginPath(); ctx.arc(0, 0, 6, 0, 7); ctx.fill();
     ctx.fillStyle = 'rgba(255,255,255,.4)'; ctx.beginPath(); ctx.arc(-2, -2, 2, 0, 7); ctx.fill();
