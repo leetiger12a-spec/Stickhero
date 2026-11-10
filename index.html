@@ -321,7 +321,7 @@ h2 .hb{-webkit-text-stroke:0;text-shadow:none;letter-spacing:0;font-family:"Jua"
 
 <script>
 'use strict';
-const BUILD = 118;
+const BUILD = 119;
 const BOSS_INTERVAL = 180;      // 보스 등장 간격(초)
 const WAVE_INTERVAL = 60;       // 대규모 몰이 이벤트 간격(초)
 const MAX_ENEMIES = 220;
@@ -3309,7 +3309,7 @@ function update(dt) {
     sfx('swing');
     for (const e of G.enemies) { const dx = e.x - p.x, dy = e.y - p.y, d = Math.hypot(dx, dy) || 1; if (d < 66 + e.r && dx * p.face > -12) hurtEnemy(e, 12, dx / d, dy / d, 240); }
   } }
-  updAllies(dt); updBombs(dt); updMeteors(dt); updPlane(dt); updSay(dt); updCombo(dt); updItems(dt);
+  updAllies(dt); updBombs(dt); updMeteors(dt); updPlane(dt); updSay(dt); updCombo(dt); updItems(dt); updDanger(dt);
   if (G.sosCd > 0) { G.sosCd -= dt; if (G.sosCd <= 0) { G.sosCd = 0; sfx('pick'); } }
   if (G.radio) { G.radio.t += dt; if (G.radio.t >= G.radio.dur) G.radio = null; else if (Math.floor(G.radio.t * 26) !== Math.floor((G.radio.t - dt) * 26) && G.radio.t * 26 < SKY_SQUAD[G.radio.k].line.length && Math.floor(G.radio.t * 26) % 3 === 0) tone(1300 + Math.random() * 300, 0.025, 'square', 0.015, 0); }
   for (const z of G.zaps) z.life -= dt; G.zaps = G.zaps.filter(z => z.life > 0);
@@ -4763,7 +4763,7 @@ function hudText(t, x, y, size, color, align, big) {   // big: 제목 글꼴(검
 }
 // 💬 영웅 말풍선 (Build 104): 보스·진화·밤·유령 상자·체력 낮음 때 짧은 말
 const SAY = { boss: ['덤벼라!', '보스다! 간다!', '이번엔 안 진다!'], evo: ['진화다! 엄청 세졌어!', '우와, 반짝반짝!'], low: ['아야… 조심해야지', '하트가 필요해!'],
-  night: ['밤이다… 반딧불이 예쁘다', '어두워도 안 무서워!'], morning: ['아침이다! 해냈다!', '휴, 버텼다!'], ghost: ['앗! 유령 상자다!', '거기 서!'], combo: ['멈출 수 없어!', '콤보 최고!'], bats: ['박쥐다! 조심!'], catch: ['잡았다!', '내 보물이야!'] };
+  night: ['밤이다… 반딧불이 예쁘다', '어두워도 안 무서워!'], morning: ['아침이다! 해냈다!', '휴, 버텼다!'], ghost: ['앗! 유령 상자다!', '거기 서!'], combo: ['멈출 수 없어!', '콤보 최고!'], danger: ['마을이 위험해!', '지금 간다!'], bats: ['박쥐다! 조심!'], catch: ['잡았다!', '내 보물이야!'] };
 function heroSay(kind, force) { if (!G) return; const L = SAY[kind]; if (!L) return; if (!force && G.say && G.t - G.say.at < 3) return;
   G.say = { txt: L[Math.floor(Math.random() * L.length)], at: G.t, t: 0, dur: 2.2, kind }; }
 function updSay(dt) { const p = G.p;
@@ -4798,6 +4798,11 @@ function drawMinimap(x, y, size) { // 작은 지도: 마을·적 진지·바위�
   ctx.strokeStyle = 'rgba(255,255,255,.7)'; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(cx, cy, R, 0, 7); ctx.stroke();
   ctx.restore();
 }
+// 🚨 마을 위험 경고 (Build 119): 마을 체력 30% 아래면 막대 깜빡 + 화면 가장자리 빨간 빛 + 알림 (30초에 1번)
+const baseDanger = () => G && G.mode === 'base' && G.base && !G.baseDead && G.base.hp > 0 && G.base.hp < G.base.maxHp * 0.3;
+function updDanger(dt) { if (!baseDanger()) return; if (G.t - (G.dangerAt ?? -99) > 30) { G.dangerAt = G.t; banner('🚨 마을이 위험해요!', '마을로 돌아가 적을 막아요!', '#ff6b6b', 2.2); sfx('warn'); heroSay('danger', true); } }
+function drawDanger() { if (!baseDanger()) return; const a = 0.42 + 0.18 * Math.sin(G.t * 6), g = ctx.createRadialGradient(W / 2, H / 2, Math.min(W, H) * 0.3, W / 2, H / 2, Math.hypot(W, H) * 0.5);
+  g.addColorStop(0, 'rgba(255,0,0,0)'); g.addColorStop(1, `rgba(255,30,30,${a})`); ctx.fillStyle = g; ctx.fillRect(0, 0, W, H); }
 function drawPointers() { // Build 106: 화면 밖 보물 상자·유령 상자 쪽 가장자리 화살표 (보스는 원래 있는 화살표)
   const list = [];
   if (G.ghost) list.push([G.ghost, '👻', '#b8f2ff']);
@@ -4815,7 +4820,7 @@ function drawPointers() { // Build 106: 화면 밖 보물 상자·유령 상자 
 }
 function drawHUD() {
   const p = G.p, top = 8;
-  drawPointers();
+  drawDanger(); drawPointers();
   // 경험치바
   roundRect(8, top, W - 16, 16, 8); ctx.fillStyle = '#222'; ctx.fill();
   roundRect(10, top + 2, (W - 20) * Math.min(1, G.xp / G.need), 12, 6); ctx.fillStyle = '#3fa9f5'; ctx.fill();
@@ -4835,7 +4840,8 @@ function drawHUD() {
   // 마을 체력 / 금화
   const bb = G.base;
   roundRect(8, top + 48, hw, 18, 9); ctx.fillStyle = '#222'; ctx.fill();
-  roundRect(10, top + 50, (hw - 4) * clamp(bb.hp / bb.maxHp, 0, 1), 14, 7); ctx.fillStyle = bb.hitT > 0 ? '#fff' : '#2ecc71'; ctx.fill();
+  const danger = baseDanger(), blink = danger && Math.floor(G.t * 4) % 2;   // 🚨 Build 119
+  roundRect(10, top + 50, (hw - 4) * clamp(bb.hp / bb.maxHp, 0, 1), 14, 7); ctx.fillStyle = bb.hitT > 0 ? '#fff' : danger ? (blink ? '#ff3b3b' : '#ff9f1c') : '#2ecc71'; ctx.fill();
   hudText(`🏠 ${Math.ceil(bb.hp)}`, 14, top + 57, 12, '#fff');
   hudText('🪙 ' + G.gold, W - 12, top + 60, 18, '#ffd23f', 'right');
   if (G.mode === 'base') hudText(`🪵 ${p.logs}/${p.cap}`, W - 12, top + 86, 16, p.logs >= p.cap ? '#ff6b6b' : '#ffe0b3', 'right');
