@@ -293,7 +293,7 @@ h2 .hb{-webkit-text-stroke:0;text-shadow:none;letter-spacing:0;font-family:"Jua"
 
 <script>
 'use strict';
-const BUILD = 97;
+const BUILD = 98;
 const BOSS_INTERVAL = 180;      // 보스 등장 간격(초)
 const WAVE_INTERVAL = 60;       // 대규모 몰이 이벤트 간격(초)
 const MAX_ENEMIES = 220;
@@ -2009,9 +2009,40 @@ function updNight(dt) {
     G.nightOn = false; G.nights = (G.nights || 0) + 1; const bonus = 40 + 20 * G.nights; G.gold += bonus;
     banner('☀️ 아침이다!', `밤을 버텼다! 🪙${bonus}`, '#ffd23f', 2.6); sfx('cheer'); cheerAll(); floatText(p.x, p.y - 60, `+🪙${bonus}`, '#ffd23f', 20, 1.4);
   }
+  updGhostChest(dt, on, ph);
   const k = nightK(); G.flies = (G.flies || []).filter(f => (f.life -= dt) > 0);
   if (k > 0.3 && G.flies.length < 26 && Math.random() < dt * 8) G.flies.push({ x: p.x + rand(-260, 260), y: p.y + rand(-220, 220), vx: rand(-14, 14), vy: rand(-14, 6), life: rand(2, 4), max: 4, ph: Math.random() * 7 });   // 반딧불이
   for (const f of G.flies) { f.x += f.vx * dt; f.y += f.vy * dt; f.vx += rand(-20, 20) * dt; }
+}
+// 👻 유령 보물 상자 (Build 98): 밤이 되고 8초 뒤 나타나 영웅을 피해 도망다님 — 잡으면 큰 보물 상자 + 금화, 아침이 되면 사라짐
+function updGhostChest(dt, on, ph) {
+  const p = G.p;
+  if (on && ph > 8 && !G.ghostDone) { G.ghostDone = true; const a = Math.random() * 7, r = rand(260, 380);
+    G.ghost = { x: clamp(p.x + Math.cos(a) * r, -WORLD_R + 120, WORLD_R - 120), y: clamp(p.y + Math.sin(a) * r, -WORLD_R + 120, WORLD_R - 120), t: 0, run: 0, rest: 0 };
+    banner('👻 유령 보물 상자!', '도망가는 상자를 잡아라!', '#b8f2ff', 2.4); sfx('woosh'); }
+  if (!on) { G.ghostDone = false; if (G.ghost) { burst(G.ghost.x, G.ghost.y - 20, '#b8f2ff', 14, 120, 4, 0.6); floatText(G.ghost.x, G.ghost.y - 40, '스르르… 사라졌다', '#b8f2ff', 14, 1.4); G.ghost = null; } return; }
+  const g = G.ghost; if (!g) return; g.t += dt;
+  const dx = g.x - p.x, dy = g.y - p.y, d = Math.hypot(dx, dy) || 1;
+  if (!p.dead && d < 34) { // 잡았다!
+    G.ghost = null; G.ghostCaught = (G.ghostCaught || 0) + 1; ST.ghosts = (ST.ghosts || 0) + 1; questEvent('ghost');
+    const gold = 80 + 20 * G.ghostCaught; G.gold += gold; dropChest(g.x, g.y);
+    burst(g.x, g.y - 20, '#b8f2ff', 24, 200, 5, 0.7); burst(g.x, g.y - 20, '#ffd23f', 12, 160, 4, 0.6); floatText(g.x, g.y - 50, `👻 잡았다! +🪙${gold}`, '#ffd23f', 20, 1.6); sfx('cheer'); return; }
+  if (g.rest > 0) g.rest -= dt;   // 헥헥 쉬는 중 (이때 잡기 쉬움)
+  else if (d < 200) { g.run += dt; const sp = 112; g.x += dx / d * sp * dt; g.y += dy / d * sp * dt;
+    if (g.run > 2.6) { g.run = 0; g.rest = 1.1; floatText(g.x, g.y - 46, '헥헥', '#b8f2ff', 13, 0.9); } }
+  else { g.x += Math.cos(g.t * 0.9) * 20 * dt; g.y += Math.sin(g.t * 1.3) * 14 * dt; }
+  const r = Math.hypot(g.x, g.y), lim = WORLD_R - 90; if (r > lim) { g.x *= lim / r; g.y *= lim / r; g.x -= dy / d * 60 * dt; g.y += dx / d * 60 * dt; }   // 벽에 몰리면 옆으로 미끄러짐
+  if (Math.random() < dt * 10) G.parts.push({ x: g.x + rand(-10, 10), y: g.y - rand(8, 30), vx: rand(-10, 10), vy: -rand(10, 30), life: 0.6, max: 0.6, color: '#b8f2ff', size: 3 });
+}
+function drawGhostChest() { // 어둠 위에 그림 (스스로 빛남)
+  const g = G.ghost; if (!g) return; const x = (g.x - G.cam.x) * SCALE + W / 2, y = (g.y - G.cam.y) * SCALE * K + H / 2, fy = Math.sin(g.t * 3) * 6 * SCALE, s = SCALE;
+  ctx.save(); ctx.globalCompositeOperation = 'lighter'; const gr = ctx.createRadialGradient(x, y - 22 * s + fy, 4, x, y - 22 * s + fy, 46 * s);
+  gr.addColorStop(0, 'rgba(184,242,255,.55)'); gr.addColorStop(1, 'rgba(184,242,255,0)'); ctx.fillStyle = gr; ctx.beginPath(); ctx.arc(x, y - 22 * s + fy, 46 * s, 0, 7); ctx.fill(); ctx.restore();
+  ctx.fillStyle = 'rgba(0,0,0,.18)'; ctx.beginPath(); ctx.ellipse(x, y, 16 * s, 6 * s * K, 0, 0, 7); ctx.fill();
+  const ci = bakedIco('chest_big', 34); ctx.save(); ctx.globalAlpha = 0.55 + 0.25 * Math.sin(g.t * 5); ctx.translate(x, y - 10 * s + fy); ctx.rotate(Math.sin(g.t * 2.2) * 0.12);
+  if (ci) { const h = 34 * s, w = h * ci.width / ci.height; ctx.drawImage(ci, -w / 2, -h, w, h); } else { ctx.fillStyle = '#b8f2ff'; ctx.fillRect(-16 * s, -26 * s, 32 * s, 22 * s); }
+  ctx.globalAlpha = 1; ctx.font = `${16 * s}px sans-serif`; ctx.textAlign = 'center'; ctx.fillText('👻', 14 * s, -30 * s); ctx.restore();
+  if (g.rest > 0) { ctx.fillStyle = '#ffd23f'; ctx.font = `bold ${12 * s}px sans-serif`; ctx.textAlign = 'center'; ctx.fillText('💦', x - 18 * s, y - 40 * s + fy); }
 }
 let nightCv = null;
 function drawNight() { // 화면 위에 어둠을 덮고, 빛나는 곳(영웅·마을 회관·망루)만 구멍을 냄 (1/4 크기로 그려 늘림)
@@ -4819,7 +4850,7 @@ function render() {
   if (G.mode === 'stage') drawStageGround(); else drawGround();
   drawWorld();
   ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
-  if (G.mode === 'base') drawNight(); else drawBlizzard();
+  if (G.mode === 'base') { drawNight(); drawGhostChest(); } else drawBlizzard();
   drawHUD();
 }
 
