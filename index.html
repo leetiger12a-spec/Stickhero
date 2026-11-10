@@ -321,7 +321,7 @@ h2 .hb{-webkit-text-stroke:0;text-shadow:none;letter-spacing:0;font-family:"Jua"
 
 <script>
 'use strict';
-const BUILD = 122;
+const BUILD = 123;
 const BOSS_INTERVAL = 180;      // 보스 등장 간격(초)
 const WAVE_INTERVAL = 60;       // 대규모 몰이 이벤트 간격(초)
 const MAX_ENEMIES = 220;
@@ -2128,7 +2128,7 @@ function updNight(dt) {
     G.nightOn = false; G.nights = (G.nights || 0) + 1; questEvent('night'); stAdd('nightsAll'); const bonus = 40 + 20 * G.nights; G.gold += bonus;
     heroSay('morning', true); banner('☀️ 아침이다!', `밤을 버텼다! 🪙${bonus}`, '#ffd23f', 2.6); sfx('cheer'); cheerAll(); floatText(p.x, p.y - 60, `+🪙${bonus}`, '#ffd23f', 20, 1.4);
   }
-  updGhostChest(dt, on, ph);
+  updGhostChest(dt, on, ph); updRain(dt, on);
   // 🦇 밤 박쥐 떼 (Build 99): 밤 동안 14초마다 한 방향에서 박쥐 떼가 날아옴 (울타리를 넘어옴, 빠르지만 약함)
   if (on && ph > 3) { G.batT = (G.batT || 0) - dt; if (G.batT <= 0) { G.batT = 14; batSwarm(6 + Math.min(6, G.nights || 0)); } } else G.batT = 0;
   const k = nightK(); G.flies = (G.flies || []).filter(f => (f.life -= dt) > 0);
@@ -2170,6 +2170,19 @@ function batSwarm(n) {
   for (let i = 0; i < n && G.enemies.length < MAX_ENEMIES + 12; i++) { const a = a0 + (i - n / 2) * 0.05, e = makeEnemy('e_bat', Math.cos(a) * (R - (i % 3) * 18), Math.sin(a) * (R - (i % 3) * 18)); e.spd *= 1.3; e.nightBat = true; G.enemies.push(e); }
   banner('🦇 박쥐 떼다!', '하늘에서 몰려와요', '#c9b6ff', 1.6); heroSay('bats'); sfx('woosh');
 }
+// 🌧 비 오는 날 (Build 123): 마을에서 낮에 가끔(90~150초마다) 30초 동안 비 — 적이 10% 느려지고 나무 베기가 빨라짐
+function updRain(dt, night) {
+  if (G.rainNext === undefined) G.rainNext = rand(90, 150);
+  if (G.rainOn) { G.rainOn -= dt; if (G.rainOn <= 0 || night) { G.rainOn = 0; G.rainNext = rand(90, 150); rainEnd(); } }
+  else if (!night && G.bt > 60) { G.rainNext -= dt; if (G.rainNext <= 0) { G.rainOn = 30; G.rains = (G.rains || 0) + 1; banner('🌧 비가 와요!', '적이 미끄러워 느려지고 · 나무가 잘 베어져요', '#9fd8ff', 2.4); sfx('woosh'); } }
+  G.drops = (G.drops || []).filter(d => (d.life -= dt) > 0);
+  if (G.rainOn) for (let i = 0; i < 6 && G.drops.length < 140; i++) G.drops.push({ x: rand(0, W), y: rand(-40, H), life: rand(0.25, 0.5), max: 0.5 });
+  for (const d of G.drops) { d.y += 900 * dt; d.x -= 160 * dt; }
+}
+function rainEnd() { banner('☀️ 비가 그쳤어요', '', '#ffd23f', 1.6); }
+function drawRain() { if (!G.rainOn && !(G.drops || []).length) return; const k = G.rainOn ? Math.min(1, (30 - G.rainOn) / 2, G.rainOn / 2) : 0;
+  if (k > 0) { ctx.fillStyle = `rgba(40,60,90,${0.16 * k})`; ctx.fillRect(0, 0, W, H); }
+  ctx.strokeStyle = 'rgba(200,225,255,.55)'; ctx.lineWidth = 1.4; ctx.beginPath(); for (const d of G.drops) { ctx.moveTo(d.x, d.y); ctx.lineTo(d.x + 5, d.y - 18); } ctx.stroke(); }
 let nightCv = null;
 function drawNight() { // 화면 위에 어둠을 덮고, 빛나는 곳(영웅·마을 회관·망루)만 구멍을 냄 (1/4 크기로 그려 늘림)
   const k = nightK(); if (k <= 0) return;
@@ -2215,7 +2228,7 @@ function updBase(dt) {
     else {
       p.chopT -= dt;
       if (p.chopT <= 0) {
-        p.chopT = 0.32; p.chop = 0.2; p.face = tree.x > p.x ? 1 : -1;
+        p.chopT = G.rainOn ? 0.22 : 0.32;   /* 비 오면 빨리 벰 (Build 123) */ p.chop = 0.2; p.face = tree.x > p.x ? 1 : -1;
         tree.logs--; tree.shake = 0.25; p.logs++; sfx('stack'); questEvent('wood');
         burst(tree.x - p.face * 4, tree.y - 10, '#c68642', 5, 120, 3, 0.35);
         G.flyers.push({ x0: tree.x, y0: tree.y - 20, x1: p.x, y1: p.y - 30, t: 0, dur: 0.3, kind: 'log' });
@@ -3468,7 +3481,7 @@ function update(dt) {
       if (T === 'e_demon') e.z = 16 + Math.sin(e.wob * 0.7) * 5;
       if (T === 'e_ghost') e.z = 8 + Math.sin(e.wob * 0.5) * 6;
       if (T === 'e_bomber' && chase && pd < e.r + p.r + 12) { bomberBoom(e); continue; }
-      const sp = (e.hitT > 0 ? 0.35 : 1) * (idle ? 0.15 : 1) * (e.slowT > 0 ? 0.5 : 1) * (G.mode === 'stage' && G.st.blizOn > 0 ? 0.8 : 1) * e.spd * far * spm;   // 얼음 맞으면 절반 속도
+      const sp = (e.hitT > 0 ? 0.35 : 1) * (idle ? 0.15 : 1) * (e.slowT > 0 ? 0.5 : 1) * (G.mode === 'stage' && G.st.blizOn > 0 ? 0.8 : 1) * (G.rainOn && G.mode === 'base' ? 0.9 : 1) * e.spd * far * spm;   // 얼음 맞으면 절반 속도, 비 오면 -10%
       e.x += mx * sp * dt; e.y += my * sp * dt;
     }
     e.x += e.kx * dt; e.y += e.ky * dt;
@@ -5066,7 +5079,7 @@ function render() {
   if (G.mode === 'stage') drawStageGround(); else drawGround();
   drawWorld();
   ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
-  if (G.mode === 'base') { drawNight(); drawGhostChest(); } else drawBlizzard();
+  if (G.mode === 'base') { drawRain(); drawNight(); drawGhostChest(); } else drawBlizzard();
   drawHUD();
 }
 
