@@ -321,7 +321,7 @@ h2 .hb{-webkit-text-stroke:0;text-shadow:none;letter-spacing:0;font-family:"Jua"
 
 <script>
 'use strict';
-const BUILD = 119;
+const BUILD = 120;
 const BOSS_INTERVAL = 180;      // 보스 등장 간격(초)
 const WAVE_INTERVAL = 60;       // 대규모 몰이 이벤트 간격(초)
 const MAX_ENEMIES = 220;
@@ -3072,7 +3072,7 @@ function bossDie(e) {
     banner(rec ? `⏱ 신기록! ${sec}초` : `⚔ 연습 승리! ${sec}초`, rec ? (old ? `${key} · 전 기록 ${old}초` : `${key} 첫 기록`) : `${key} · 최고 ${old}초`, '#ffd23f', 3);
     sfx(rec ? 'rewardEvo' : 'bigBoom'); stageClear(e.x, e.y + 60); return;
   }
-  G.boss = null; G.bossKills = (G.bossKills || 0) + 1; questEvent('boss'); weeklyBoss(); stAdd('bosses'); stSet('bossT', e.name); ST.bk[e.name] = (ST.bk[e.name] || 0) + 1;
+  G.boss = null; G.bossKills = (G.bossKills || 0) + 1; allyCheer(); questEvent('boss'); weeklyBoss(); stAdd('bosses'); stSet('bossT', e.name); ST.bk[e.name] = (ST.bk[e.name] || 0) + 1;
   for (let i = 0; i < 5; i++) burst(e.x + rand(-40, 40), e.y + rand(-40, 40), [e.color, '#ffd23f', '#fff', '#ff9f1c', '#222'][i], 40, 380, 8, 1.2);
   for (let i = 0; i < 15; i++) { const a = Math.random() * Math.PI * 2, d = rand(10, 90); dropGem(e.x + Math.cos(a) * d, e.y + Math.sin(a) * d, 5); }   // 상자가 생겨서 구슬은 30 → 15
   dropChest(G.mode === 'stage' ? clamp(e.x, -STAGE_HW + 30, STAGE_HW - 30) : e.x, G.mode === 'stage' ? clamp(e.y + 20, -G.st.L - 350, 80) : e.y + 20, false, e.golden || e.goldG);
@@ -3309,7 +3309,7 @@ function update(dt) {
     sfx('swing');
     for (const e of G.enemies) { const dx = e.x - p.x, dy = e.y - p.y, d = Math.hypot(dx, dy) || 1; if (d < 66 + e.r && dx * p.face > -12) hurtEnemy(e, 12, dx / d, dy / d, 240); }
   } }
-  updAllies(dt); updBombs(dt); updMeteors(dt); updPlane(dt); updSay(dt); updCombo(dt); updItems(dt); updDanger(dt);
+  updAllies(dt); updBombs(dt); updMeteors(dt); updPlane(dt); updSay(dt); updCombo(dt); updItems(dt); updDanger(dt); updAllySay(dt);
   if (G.sosCd > 0) { G.sosCd -= dt; if (G.sosCd <= 0) { G.sosCd = 0; sfx('pick'); } }
   if (G.radio) { G.radio.t += dt; if (G.radio.t >= G.radio.dur) G.radio = null; else if (Math.floor(G.radio.t * 26) !== Math.floor((G.radio.t - dt) * 26) && G.radio.t * 26 < SKY_SQUAD[G.radio.k].line.length && Math.floor(G.radio.t * 26) % 3 === 0) tone(1300 + Math.random() * 300, 0.025, 'square', 0.015, 0); }
   for (const z of G.zaps) z.life -= dt; G.zaps = G.zaps.filter(z => z.life > 0);
@@ -4596,7 +4596,7 @@ function drawWorld() {
     for (const c of G.st.cages) if (vis(c)) list.push({ y: c.y, draw: () => drawCage(c) });
   }
   if (!p.dead && G.deadT <= 0) list.push({ y: p.y, draw: () => { if (p.slowT > 0) { ctx.save(); ctx.translate(p.x, p.y); ctx.scale(1, IK); ctx.strokeStyle = 'rgba(160,210,255,.9)'; ctx.lineWidth = 3; ctx.beginPath(); ctx.ellipse(0, 2, 16, 6, 0, 0, 7); ctx.stroke(); ctx.restore(); } drawStick(p); drawHeroTitle(p); drawSay(p); } });
-  for (const a of G.allies) if (!a.dead) list.push({ y: a.y, draw: () => drawAlly(a) });
+  for (const a of G.allies) if (!a.dead) list.push({ y: a.y, draw: () => { drawAlly(a); if (a.say) drawBubble(a.say, a.x, a.y - 80 * IK); } });
   list.sort((a, b) => a.y - b.y);
   for (const e of list) { if (e.draw) e.draw(); else if (e.boss) drawBoss(e); else drawEnemy(e); }
   for (const f of G.flyers) { // 날아가는 통나무·금화
@@ -4770,8 +4770,15 @@ function updSay(dt) { const p = G.p;
   if (G.say && (G.say.t += dt) > G.say.dur) G.say = null;
   if (G.boss && G.boss !== G.saidBoss && !G.boss.dead) { G.saidBoss = G.boss; heroSay('boss', true); }
   if (!p.dead && p.hp < p.maxHp * 0.3 && G.t - (G.lowSaid || -99) > 25) { G.lowSaid = G.t; heroSay('low'); } }
-function drawSay(p) { const S = G.say; if (!S || p.dead) return; const a = Math.min(1, 0.4 + S.t * 6, (S.dur - S.t) * 3), pop = 1 + 0.15 * Math.max(0, 1 - S.t * 6);
-  ctx.save(); ctx.globalAlpha = a; ctx.translate(p.x, p.y - 104 * IK); ctx.scale(pop, pop * IK); ctx.font = 'bold 13px Jua,system-ui,sans-serif'; ctx.textAlign = 'center';
+function drawSay(p) { const S = G.say; if (!S || p.dead) return; drawBubble(S, p.x, p.y - 104 * IK); }
+// 🐱 동료 말풍선 (Build 120): 싸울 때 가끔 한 명씩, 보스를 잡으면 다 같이 응원
+const ALLY_SAY = { fight: ['대장, 같이 가요!', '제가 막을게요!', '받아랏!', '조심하세요!'], cheer: ['대장 최고!', '우와, 이겼다!', '역시 대장!'] };
+function allySay(a, kind) { const L = ALLY_SAY[kind]; a.say = { txt: L[Math.floor(Math.random() * L.length)], t: -Math.random() * 0.4, dur: 2, kind }; }
+function updAllySay(dt) { if (!G.allies.length) return; for (const a of G.allies) if (a.say && (a.say.t += dt) > a.say.dur) a.say = null;
+  G.allySayT = (G.allySayT ?? 8) - dt; if (G.allySayT <= 0) { G.allySayT = rand(14, 20); const live = G.allies.filter(a => !a.dead && !a.say); if (live.length && G.enemies.length > 3) allySay(live[Math.floor(Math.random() * live.length)], 'fight'); } }
+function allyCheer() { G.allies.filter(a => !a.dead).forEach((a, i) => { allySay(a, 'cheer'); a.say.t = -0.3 - i * 0.7; }); }   // 차례로 (겹치지 않게)
+function drawBubble(S, x, y) { if (S.t < 0) return; const a = Math.min(1, 0.4 + S.t * 6, (S.dur - S.t) * 3), pop = 1 + 0.15 * Math.max(0, 1 - S.t * 6);
+  ctx.save(); ctx.globalAlpha = a; ctx.translate(x, y); ctx.scale(pop, pop * IK); ctx.font = 'bold 13px Jua,system-ui,sans-serif'; ctx.textAlign = 'center';
   const w = ctx.measureText(S.txt).width + 18; roundRect(-w / 2, -14, w, 24, 12); ctx.fillStyle = '#fff'; ctx.fill(); ctx.lineWidth = 2.5; ctx.strokeStyle = '#222'; ctx.stroke();
   ctx.beginPath(); ctx.moveTo(-6, 9); ctx.lineTo(0, 17); ctx.lineTo(6, 9); ctx.closePath(); ctx.fillStyle = '#fff'; ctx.fill(); ctx.beginPath(); ctx.moveTo(-6, 10); ctx.lineTo(0, 17); ctx.lineTo(6, 10); ctx.stroke();
   ctx.fillStyle = '#222'; ctx.fillText(S.txt, 0, 3); ctx.restore(); }
