@@ -36,11 +36,17 @@ const { chromium } = require('/opt/node22/lib/node_modules/playwright');
   const gc = await page.evaluate(async () => { const G = SH.G, e = G.boss, c0 = G.coins.length; for (let i = 0; i < 6; i++) { G.t += 0.3; hurtEnemy(e, 10, 0, 1, 0); } return G.coins.length - c0; });
   console.log('gold coins on hit', gc); check(gc >= 5, 'gold golem drops no coins');
   await page.screenshot({ path: `${OUT}/b84_gold.png` });
+  // Build 85: 황금 골렘 남은 시간 표시
+  const tx = await page.evaluate(async () => { const H = window.hudText, seen = []; window.hudText = function (t) { seen.push(String(t)); return H.apply(this, arguments); }; await new Promise(r => setTimeout(r, 120)); window.hudText = H; return seen.filter(t => t.includes('도망까지')); });
+  console.log('flee text', tx[0]); check(tx.length > 0 && /도망까지 \d+초/.test(tx[0]), 'gold golem countdown not shown');
   const fl = await page.evaluate(async () => { const G = SH.G, e = G.boss; e.fleeT = 0.3; await new Promise(r => setTimeout(r, 600)); return { boss: !!G.boss, dead: e.dead, chests: (G.chests || []).length, banner: G.banner && G.banner.t }; });
   console.log('gold flee', JSON.stringify(fl)); check(!fl.boss && fl.dead && fl.chests === 0, 'gold golem did not flee cleanly');
   // 황금 골렘을 잡으면 금빛 상자
   await spawn(10); await page.evaluate(() => { const e = SH.G.boss; hurtEnemy(e, 1e9, 0, 1, 0); }); await page.waitForTimeout(300);
   check(await page.evaluate(() => (SH.G.chests || []).some(c => c.gold)), 'gold golem no golden chest');
+  // Build 85: 골렘 업적 (황금 골렘을 잡았으니 첫 골렘·황금을 잡아라)
+  const ach = await page.evaluate(() => { checkAch(); const m = JSON.parse(localStorage.getItem('stickhero_meta')); return { g1: !!m.ach.golem1, gG: !!m.ach.golemG, g5: !!m.ach.golem5, n: ACH.length }; });
+  console.log('golem ach', JSON.stringify(ach)); check(ach.g1 && ach.gG && !ach.g5 && ach.n === 30, 'golem achievements wrong');
   // 도감: 보스 12종
   const dx = await page.evaluate(() => DEX.filter(d => d.boss).length); console.log('dex bosses', dx); check(dx === 12, 'dex bosses not 12');
   // 무한 탑 30~45층 = 골렘 4종

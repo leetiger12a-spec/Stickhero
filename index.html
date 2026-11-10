@@ -285,7 +285,7 @@ h2 .hb{-webkit-text-stroke:0;text-shadow:none;letter-spacing:0;font-family:"Jua"
 
 <script>
 'use strict';
-const BUILD = 84;
+const BUILD = 85;
 const BOSS_INTERVAL = 180;      // 보스 등장 간격(초)
 const WAVE_INTERVAL = 60;       // 대규모 몰이 이벤트 간격(초)
 const MAX_ENEMIES = 220;
@@ -502,6 +502,10 @@ const ACH = [
   { id: 'chest10',  icon: '🎁', name: '보물 사냥꾼',   desc: '보물 상자 10개 열기',       title: '보물 사냥꾼', bank: 200, p: () => [ST.chests || 0, 10] },
   { id: 'goldB1',   icon: '🌟', name: '황금 보스',     desc: '황금 보스 쓰러뜨리기',       title: '황금 기사',  bank: 400, p: () => [ST.goldB.length, 1] },
   { id: 'stars27',  icon: '💫', name: '별 반짝',       desc: '몬스터 도감 별 27개 모으기', title: '도감 수집가', bank: 400, p: () => [DEX.reduce((a, d) => a + dexStars(d), 0), 27] },
+  // Build 85: 골렘 보스 업적
+  { id: 'golem1',  icon: '🗿', name: '첫 골렘',       desc: '골렘 보스 처음 잡기',       title: '골렘 사냥꾼', bank: 150, p: () => [GOLEMS.filter(n => ST.bossT.includes(n)).length, 1] },
+  { id: 'golemG',  icon: '💰', name: '황금을 잡아라',  desc: '도망가기 전에 황금 골렘 잡기', title: '황금 손',   bank: 300, p: () => [ST.bossT.includes('황금 골렘') ? 1 : 0, 1] },
+  { id: 'golem5',  icon: '⛰', name: '골렘 왕국',     desc: '골렘 보스 5종 모두 잡기',   title: '골렘 대왕',  bank: 600, p: () => [GOLEMS.filter(n => ST.bossT.includes(n)).length, 5] },
   { id: 'floor25', icon: '🌤', name: '하늘 끝까지',   desc: '무한 탑 25층 돌파',        title: '하늘 정복자', bank: 600, p: () => [metaOf('bestFloor'), 25] },
 ];
 function checkAch() { // 1초마다: 기록 저장 + 새 업적
@@ -1102,6 +1106,7 @@ const BOSSES = [
   { name: '숲 골렘',     color: '#70a33a' },
   { name: '황금 골렘',   color: '#ffd23f' },
 ];
+const GOLEMS = ['바위 골렘 왕', '용암 골렘', '얼음 골렘', '숲 골렘', '황금 골렘'];
 const GOLD_GOLEM = 10, GOLD_GOLEM_P = 0.1, GOLD_GOLEM_FLEE = 40;   // 황금 골렘: 센 보스 차례에 10%, 40초 뒤 도망
 // 몬스터 도감 목록 (SPECIALS·BOSSES 다음에 있어야 함)
 const SP_NAME = { e_slime: '분열 슬라임', e_archer: '궁수', e_bomber: '자폭병', e_bat: '박쥐병', e_charger: '돌격병', e_shaman: '주술사' };
@@ -4435,6 +4440,7 @@ function drawHUD() {
     roundRect(bx, by, bw, 18, 9); ctx.fillStyle = '#222'; ctx.fill();
     roundRect(bx + 2, by + 2, (bw - 4) * Math.max(0, b.hp / b.maxHp), 14, 7); ctx.fillStyle = b.color; ctx.fill();
     hudText('👑 ' + b.name, W / 2, by + 9, 12, '#fff', 'center');
+    if (b.goldG && b.fleeT > 0) { const s = Math.ceil(b.fleeT), hurry = s <= 10; hudText(`💰 도망까지 ${s}초`, W / 2, by + 30, hurry ? 15 : 13, hurry && Math.floor(G.t * 4) % 2 ? '#ff6b6b' : '#ffd23f', 'center'); }   // 황금 골렘 남은 시간 (Build 85)
     // 화면 밖 보스 화살표
     const sx = (b.x - G.cam.x) * SCALE + W / 2, sy = (b.y - G.cam.y) * SCALE * K + H / 2;
     if (sx < 0 || sx > W || sy < 0 || sy > H) {
