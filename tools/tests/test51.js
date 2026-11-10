@@ -37,6 +37,16 @@ const { chromium } = require('/opt/node22/lib/node_modules/playwright');
   // 도감 카드에 기록 표시
   await page.evaluate(() => { togglePause(); $('bDexP').click(); }); await page.waitForTimeout(200);
   check(await page.evaluate(() => [...document.querySelectorAll('#dexList .dex.boss')].some(el => el.textContent.includes('바위 골렘 왕') && /연습 최고 \d+초/.test(el.textContent))), 'best time not shown in dex');
+  // Build 91: 일반 연습을 이기면 🔥 도전 버튼 → 체력 2배·공격 1.5배, 기록 따로
+  const hb = await page.evaluate(() => [...document.querySelectorAll('.dexFight.hard')].map(b => b.dataset.k)); console.log('hard buttons', hb.join()); check(hb.join() === 'boss6', 'hard button only after normal win');
+  await page.evaluate(() => document.querySelector('.dexFight.hard[data-k="boss6"]').click()); await page.waitForTimeout(2300);
+  const hd = await page.evaluate(() => { const e = SH.G.boss; return { hard: !!(e && e.hard), hp: e && Math.round(e.maxHp), dmg: e && Math.round(e.dmg) }; });
+  console.log('hard', JSON.stringify(hd)); check(hd.hard && hd.hp === 100000 && hd.dmg >= 82, 'hard practice stats wrong');
+  await page.evaluate(async () => { SH.skipIntro(); hurtEnemy(SH.G.boss, 1e9, 0, 1, 0); await new Promise(r => setTimeout(r, 300)); returnBase(true); }); await page.waitForTimeout(200);
+  const pb2 = await page.evaluate(() => JSON.parse(localStorage.getItem('stickhero_meta')).pbest); console.log('pbest', JSON.stringify(pb2));
+  check(pb2['바위 골렘 왕'] >= 1 && pb2['바위 골렘 왕 🔥'] >= 1, 'hard record not separate');
+  await page.evaluate(() => { togglePause(); $('bDexP').click(); }); await page.waitForTimeout(200);
+  await page.locator('.dexFight.hard[data-k="boss6"]').scrollIntoViewIfNeeded(); await page.screenshot({ path: `${OUT}/b91_dex.png` });
   await page.evaluate(() => { $('bDexOk').click(); togglePause(); }); await page.waitForTimeout(150);
   // 마지막 보스 연습: 변신까지, 지면 마을로
   await page.evaluate(() => { togglePause(); $('bDexP').click(); }); await page.waitForTimeout(200);

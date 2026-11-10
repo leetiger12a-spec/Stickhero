@@ -3,7 +3,7 @@ const { chromium } = require('/opt/node22/lib/node_modules/playwright');
 (async () => {
   const b = await chromium.launch(); const errors = []; const check = (c, m) => { if (!c) errors.push(m); };
   const ctx = await b.newContext({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 2 });
-  await ctx.addInitScript(() => localStorage.setItem('stickhero_story', '1'));
+  await ctx.addInitScript(() => { localStorage.setItem('stickhero_story', '1'); window.__noGold = true; });   // Build 84: 센 보스 차례에 황금 골렘(10%)이 끼어들지 않게
   const page = await ctx.newPage(); const OUT = process.env.OUT || 'shots';
   page.on('pageerror', e => errors.push(e.message)); page.on('console', m => { if (m.type() === 'error') errors.push(m.text()); });
   await page.goto('http://localhost:8765/index.html'); await page.click('#bStart'); await page.waitForTimeout(300);

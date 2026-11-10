@@ -1,7 +1,7 @@
 const { chromium } = require('/opt/node22/lib/node_modules/playwright');
 (async () => {
   const browser = await chromium.launch();
-  { const _nc = browser.newContext.bind(browser); browser.newContext = async o => { const c = await _nc(o); await c.addInitScript(() => { try { localStorage.setItem('stickhero_story', '1'); } catch (e) {} }); return c; }; } const errors = []; const check = (c, m) => { if (!c) errors.push(m); };
+  { const _nc = browser.newContext.bind(browser); browser.newContext = async o => { const c = await _nc(o); await c.addInitScript(() => { try { localStorage.setItem('stickhero_story', '1'); } catch (e) {} window.__noGold = true;   /* Build 84: 황금 골렘·황금 보스가 끼어들지 않게 */ }); return c; }; } const errors = []; const check = (c, m) => { if (!c) errors.push(m); };
   const page = await (await browser.newContext({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 2, hasTouch: true, isMobile: true })).newPage();
   page.on('pageerror', e => errors.push('pageerror: ' + e.message)); page.on('console', m => { if (m.type() === 'error') errors.push('console: ' + m.text()); });
   await page.goto('file:///home/user/Stickhero/index.html'); await page.tap('#bStart'); await page.waitForTimeout(300);
