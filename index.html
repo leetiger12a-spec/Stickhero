@@ -315,7 +315,7 @@ h2 .hb{-webkit-text-stroke:0;text-shadow:none;letter-spacing:0;font-family:"Jua"
 
 <script>
 'use strict';
-const BUILD = 111;
+const BUILD = 112;
 const BOSS_INTERVAL = 180;      // 보스 등장 간격(초)
 const WAVE_INTERVAL = 60;       // 대규모 몰이 이벤트 간격(초)
 const MAX_ENEMIES = 220;
@@ -2961,7 +2961,9 @@ function dropGem(x, y, v) {
     const old = G.gems[0]; old.v += v; return;
   }
   G.gems.push({ x, y, v, vx: 0, vy: 0, pull: false, bob: Math.random() * 6 });
+  if (Math.random() < RAINBOW_P && !G.gems.some(g => g.rainbow)) G.gems.push({ x: x + 8, y, v: Math.max(30, Math.round(G.need * 0.6)), rainbow: true, vx: 0, vy: 0, pull: false, bob: 0 });   // 🌈 Build 112
 }
+const RAINBOW_P = 0.003;   // 무지개 구슬: 다음 레벨까지 필요한 경험치의 60%
 function dropCoin(x, y) {
   if (G.coins.length > 250) { G.gold++; return; }
   const a = Math.random() * 7;
@@ -3523,7 +3525,7 @@ function update(dt) {
       const sp = 260 + (p.magnet - Math.min(d, p.magnet)) * 4;
       g.x += dx / d * sp * dt; g.y += dy / d * sp * dt;
     }
-    if (d < 16) { g.dead = true; G.xp += g.v; sfx('gem'); }
+    if (d < 16) { g.dead = true; G.xp += g.v; sfx('gem'); if (g.rainbow) { G.rainbows = (G.rainbows || 0) + 1; floatText(p.x, p.y - 64, `🌈 무지개 구슬! +${g.v}`, '#ff6bd6', 20, 1.4); burst(p.x, p.y - 12, '#ff6bd6', 12, 160, 4, 0.5); burst(p.x, p.y - 12, '#6bd6ff', 12, 160, 4, 0.5); sfx('unlock'); } }
   }
   G.gems = G.gems.filter(g => !g.dead);
   if (G.chests) for (const c of G.chests) {
@@ -4519,6 +4521,10 @@ function drawWorld() {
   }
   // 구슬
   for (const g of G.gems) {
+    if (g.rainbow) { const y = g.y + Math.sin(g.bob) * 3, s = 9, gr = ctx.createLinearGradient(g.x - s, y - s, g.x + s, y + s), h = (G.t * 120) % 360;   // 무지개 구슬: 색이 돌아가는 큰 보석 + 빛
+      for (let k = 0; k < 5; k++) gr.addColorStop(k / 4, `hsl(${(h + k * 72) % 360},90%,62%)`);
+      ctx.fillStyle = `hsla(${h},90%,70%,.35)`; ctx.beginPath(); ctx.arc(g.x, y, 16 + Math.sin(G.t * 6) * 3, 0, 7); ctx.fill();
+      ctx.fillStyle = gr; ctx.strokeStyle = '#fff'; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(g.x, y - s * 1.4); ctx.lineTo(g.x + s, y); ctx.lineTo(g.x, y + s * 1.4); ctx.lineTo(g.x - s, y); ctx.closePath(); ctx.fill(); ctx.stroke(); continue; }
     const c = g.v >= 20 ? '#ff4d6d' : g.v >= 5 ? '#2ecc71' : '#3fa9f5', s = g.v >= 5 ? 6.5 : 5, y = g.y + Math.sin(g.bob) * 2;
     const gi = bakedIco(g.v >= 20 ? 'gem_r' : g.v >= 5 ? 'gem_g' : 'gem_b', s * 2.8);
     if (gi) { const h = s * 2.8, w = h * gi.width / gi.height; ctx.drawImage(gi, g.x - w / 2, y - h * IK / 2, w, h * IK); continue; }   // save/restore 없이 (구슬은 수백 개)
