@@ -287,7 +287,7 @@ h2 .hb{-webkit-text-stroke:0;text-shadow:none;letter-spacing:0;font-family:"Jua"
 
 <script>
 'use strict';
-const BUILD = 94;
+const BUILD = 95;
 const BOSS_INTERVAL = 180;      // 보스 등장 간격(초)
 const WAVE_INTERVAL = 60;       // 대규모 몰이 이벤트 간격(초)
 const MAX_ENEMIES = 220;
@@ -866,6 +866,20 @@ function drawProj(n, x, y, ang, h) { // 날아가는 공격 그림: 진행 방�
   const c = bakedIco(n, h); if (!c) return false;
   const w = h * c.width / c.height;
   ctx.save(); ctx.translate(x, y); ctx.rotate(ang); ctx.drawImage(c, -w / 2, -h / 2, w, h); ctx.restore(); return true;
+}
+function onIce(x, y) { const st = G.mode === 'stage' && G.st; if (!st || !st.ice) return false; for (const c of st.ice) if ((x - c.x) ** 2 + ((y - c.y) / 0.7) ** 2 < c.r * c.r) return true; return false; }
+function drawIcePatches() { // 얼음판 = 얼음 웅덩이 그림을 크게 (그림은 늘리기만)
+  const st = G.st; if (!st || !st.ice) return; const c = bakedIco('d_icepud', 60);
+  for (const p of st.ice) { if (p.y < G.cam.y - VH * IK || p.y > G.cam.y + VH * IK) continue;
+    if (c) { const w = p.r * 2.1, h = w * c.height / c.width; ctx.drawImage(c, p.x - w / 2, p.y - h / 2, w, h); }
+    else { ctx.fillStyle = 'rgba(190,230,255,.75)'; ctx.beginPath(); ctx.ellipse(p.x, p.y, p.r, p.r * 0.7, 0, 0, 7); ctx.fill(); } }
+}
+function drawBlizzard() { // 화면 위 눈발 (상태 없이 시간으로 계산)
+  const st = G.mode === 'stage' && G.st; if (!st || !(st.blizOn > 0)) return;
+  const a = Math.min(1, st.blizOn / 1, (6 - st.blizOn) / 0.8); ctx.save(); ctx.fillStyle = `rgba(230,244,255,${0.18 * a})`; ctx.fillRect(0, 0, W, H);
+  ctx.strokeStyle = `rgba(255,255,255,${0.85 * a})`; ctx.lineWidth = 2; ctx.lineCap = 'round'; ctx.beginPath();
+  for (let i = 0; i < 90; i++) { const sx = (i * 97.3 % 1) , sy = (i * 61.7 % 1), x = ((sx * W + G.t * (260 + (i % 5) * 40)) % (W + 40)) - 20, y = ((sy * H + G.t * (140 + (i % 7) * 25)) % (H + 40)) - 20; ctx.moveTo(x, y); ctx.lineTo(x - 9, y - 5); }
+  ctx.stroke(); ctx.restore();
 }
 function drawDecal(n, x, y, s) { // 땅에 놓인 작은 장식 (바닥 가운데가 x,y)
   const h = DECAL_H[n], c = bakedIco(n, h); if (!c) return false;
@@ -2487,6 +2501,10 @@ function enterStage(idx, tower, practice, hard) {   // practice: 보스 연습 (
   if (!surv) for (let i = 0; i < L / 260; i++) st.deco.push({ x: rand(-STAGE_HW + 50, STAGE_HW - 50), y: rand(-L + 200, -150), kind: th.deco, logs: 1, max: 1, shake: 0, sz: rand(0.8, 1.05), ph: Math.random() * 7 });
   for (let i = 0; i < L / 120; i++) st.rocks.push({ x: rand(-STAGE_HW + 20, STAGE_HW - 20), y: rand(-L, -60), s: rand(0.6, 1.3) });
   st.par = surv ? 0 : L / 55 + 35;
+  if (th.tex === 'ice') { // 얼음 나라: 미끄러운 얼음판 + 눈보라
+    st.ice = []; for (let i = 0; i < L / 170; i++) { const y = rand(-L - 300, -120); st.ice.push({ x: rand(-STAGE_HW + 50, STAGE_HW - 50), y, r: rand(55, 85) }); }
+    st.blizT = rand(10, 16); st.blizOn = 0;
+  }
   G.st = st; G.mode = 'stage';
   p.x = 0; p.y = surv ? -L / 2 : -40; G.cam.x = 0; G.cam.y = p.y - 12; joy = null;
   placeAllies();
@@ -2580,6 +2598,10 @@ $('bClrOk').onclick = () => {
 function updStage(dt) {
   const p = G.p, st = G.st, def = st.def;
   if (!st.clear) st.t += dt;
+  if (st.blizT !== undefined && !st.clear) { // 눈보라: 20~28초마다 6초 동안 (영웅 0.75배·적 0.8배)
+    if (st.blizOn > 0) { st.blizOn -= dt; if (st.blizOn <= 0) floatText(p.x, p.y - 50, '눈보라가 그쳤다', '#dff6ff', 14, 1); }
+    else if ((st.blizT -= dt) <= 0) { st.blizOn = 6; st.blizT = rand(20, 28); banner('🌨 눈보라다!', '잠깐 느려져요 · 적도 느려져요', '#dff6ff', 1.8); sfx('woosh'); }
+  }
   // 앞쪽 무리가 가까워지면 등장
   for (const g of st.groups) {
     if (g.done || p.y - g.y > 430) continue;
@@ -2669,6 +2691,7 @@ function drawStageGround() {
   // 보스 결투장
   ctx.strokeStyle = 'rgba(255,60,60,.35)'; ctx.lineWidth = 6; ctx.setLineDash([14, 10]);
   ctx.beginPath(); ctx.arc(0, -st.L - 120, 170, 0, 7); ctx.stroke(); ctx.setLineDash([]);
+  drawIcePatches();
   const dl = DECAL_TH[th.tex];
   for (let i = 0; i < st.rocks.length; i++) { const r = st.rocks[i];
     if (r.y < G.cam.y - VH * IK || r.y > G.cam.y + VH * IK) continue;
@@ -2973,9 +2996,15 @@ function update(dt) {
   if (G.deadT <= 0 && !p.dead) {
     const d = inputDir();
     p.moving = Math.abs(d.x) + Math.abs(d.y) > 0.05;
+    const ice = onIce(p.x, p.y);   // Build 95: 얼음판 위에선 미끄러짐 (천천히 빨라지고, 손을 떼도 주르륵)
+    if (ice) {
+      const sm = (p.slowT > 0 ? 0.6 : 1) * (G.st && G.st.blizOn > 0 ? 0.75 : 1), tx = p.moving ? d.x * p.speed * sm : 0, ty = p.moving ? d.y * p.speed * sm : 0, k = Math.min(1, dt * 2.2);
+      p.ivx = (p.ivx || 0) + (tx - (p.ivx || 0)) * k; p.ivy = (p.ivy || 0) + (ty - (p.ivy || 0)) * k;
+      if (!p.moving) { p.x += p.ivx * dt; p.y += p.ivy * dt; p.x = clamp(p.x, -STAGE_HW + 12, STAGE_HW - 12); p.y = clamp(p.y, -G.st.L - 380, 100); }
+    } else { p.ivx = p.ivy = 0; }
     if (p.moving) {
-      const sm = p.slowT > 0 ? 0.6 : 1;
-      p.x += d.x * p.speed * sm * dt; p.y += d.y * p.speed * sm * dt;
+      const sm = (p.slowT > 0 ? 0.6 : 1) * (G.mode === 'stage' && G.st && G.st.blizOn > 0 ? 0.75 : 1);   // 눈보라: 0.75배
+      if (ice) { p.x += p.ivx * dt; p.y += p.ivy * dt; } else { p.x += d.x * p.speed * sm * dt; p.y += d.y * p.speed * sm * dt; }
       const l = Math.hypot(d.x, d.y); p.ax = d.x / l; p.ay = d.y / l;
       if (Math.abs(d.x) > 0.1) p.face = d.x > 0 ? 1 : -1;
       p.walk += dt * 12 * Math.min(1, l + 0.3);
@@ -3170,7 +3199,7 @@ function update(dt) {
       if (T === 'e_demon') e.z = 16 + Math.sin(e.wob * 0.7) * 5;
       if (T === 'e_ghost') e.z = 8 + Math.sin(e.wob * 0.5) * 6;
       if (T === 'e_bomber' && chase && pd < e.r + p.r + 12) { bomberBoom(e); continue; }
-      const sp = (e.hitT > 0 ? 0.35 : 1) * (idle ? 0.15 : 1) * (e.slowT > 0 ? 0.5 : 1) * e.spd * far * spm;   // 얼음 맞으면 절반 속도
+      const sp = (e.hitT > 0 ? 0.35 : 1) * (idle ? 0.15 : 1) * (e.slowT > 0 ? 0.5 : 1) * (G.mode === 'stage' && G.st.blizOn > 0 ? 0.8 : 1) * e.spd * far * spm;   // 얼음 맞으면 절반 속도
       e.x += mx * sp * dt; e.y += my * sp * dt;
     }
     e.x += e.kx * dt; e.y += e.ky * dt;
@@ -4713,7 +4742,7 @@ function render() {
   if (G.mode === 'stage') drawStageGround(); else drawGround();
   drawWorld();
   ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
-  if (G.mode === 'base') drawNight();
+  if (G.mode === 'base') drawNight(); else drawBlizzard();
   drawHUD();
 }
 
