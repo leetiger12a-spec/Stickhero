@@ -315,7 +315,7 @@ h2 .hb{-webkit-text-stroke:0;text-shadow:none;letter-spacing:0;font-family:"Jua"
 
 <script>
 'use strict';
-const BUILD = 108;
+const BUILD = 109;
 const BOSS_INTERVAL = 180;      // 보스 등장 간격(초)
 const WAVE_INTERVAL = 60;       // 대규모 몰이 이벤트 간격(초)
 const MAX_ENEMIES = 220;
@@ -1784,7 +1784,7 @@ function burst(x, y, color, n, spd, size, life) {
 }
 function floatText(x, y, text, color, size, life) {
   if (G.texts.length > 90) G.texts.shift();
-  G.texts.push({ x, y, text, color, size, life: life || 0.7, max: life || 0.7 });
+  G.texts.push({ x, y, text, color, size, life: life || 0.7, max: life || 0.7 }); return G.texts[G.texts.length - 1];
 }
 
 // ---------- 생성 ----------
@@ -2940,7 +2940,11 @@ function hurtEnemy(e, dmg, fx, fy, kb) {
   if (e.goldG && G.t - (e.coinAt || 0) > 0.25) { e.coinAt = G.t; dropCoin(e.x + rand(-40, 40), e.y + rand(-30, 30)); }   // 황금 골렘: 맞을 때 금화 (1초에 최대 4개)
   const k = e.boss ? kb * 0.05 : kb;
   e.kx += fx * k; e.ky += fy * k;
-  floatText(e.x + rand(-6, 6), e.y - e.r - 4, crit ? dmg + '!' : '' + dmg, crit ? '#ffd23f' : '#fff', crit ? 20 : 14, 0.6);
+  if (crit) { // 💥 치명타 (Build 109): 크고 통통 튀는 노란 숫자 + "치명타!" + 반짝
+    const t = floatText(e.x + rand(-6, 6), e.y - e.r - 6, dmg + '!', '#ffd23f', 24, 0.75); t.pop = 0.18; t.crit = true; G.crits = (G.crits || 0) + 1;
+    if (Math.random() < 0.35) floatText(e.x, e.y - e.r - 30, '치명타!', '#ff9f1c', 13, 0.6);
+    burst(e.x, e.y - e.r, '#ffe066', 6, 140, 3, 0.3);
+  } else floatText(e.x + rand(-6, 6), e.y - e.r - 4, '' + dmg, '#fff', 14, 0.6);
   sfx('hit');
   if (e.hp <= 0 && e.final && !e.phase2) { finalTransform(e); return; }   // Build 88: 마지막 보스 2단계
   if (e.hp <= 0) killEnemy(e);
@@ -3523,7 +3527,7 @@ function update(dt) {
   // 이펙트
   for (const q of G.parts) { q.x += q.vx * dt; q.y += q.vy * dt; q.vx *= 0.92; q.vy *= 0.92; q.life -= dt; }
   G.parts = G.parts.filter(q => q.life > 0);
-  for (const t of G.texts) { t.y -= 40 * dt; t.life -= dt; }
+  for (const t of G.texts) { t.y -= 40 * dt; t.life -= dt; if (t.pop > 0) t.pop -= dt; }
   G.texts = G.texts.filter(t => t.life > 0);
   if (G.banner) { G.banner.t += dt; if (G.banner.t > G.banner.dur) G.banner = null; }
   G.shake = Math.max(0, G.shake - dt * 30);
@@ -4672,9 +4676,9 @@ function drawWorld() {
   ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
   for (const t of G.texts) {
     ctx.globalAlpha = Math.min(1, t.life / t.max * 2);
-    ctx.save(); ctx.translate(t.x, t.y); ctx.scale(1, IK);
+    ctx.save(); ctx.translate(t.x, t.y); ctx.scale(1, IK); if (t.pop > 0) { const k = 1 + t.pop * 3; ctx.scale(k, k); }   // 치명타: 처음에 크게 튀어나옴
     ctx.font = `${t.size}px Jua,system-ui,sans-serif`;
-    ctx.lineWidth = 3.5; ctx.strokeStyle = '#222'; ctx.strokeText(t.text, 0, 0);
+    ctx.lineWidth = t.crit ? 5 : 3.5; ctx.strokeStyle = t.crit ? '#7a2e00' : '#222'; ctx.strokeText(t.text, 0, 0);
     ctx.fillStyle = t.color; ctx.fillText(t.text, 0, 0);
     ctx.restore();
   }
