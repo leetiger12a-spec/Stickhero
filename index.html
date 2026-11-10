@@ -28,6 +28,10 @@ canvas{display:block;position:fixed;inset:0;width:100%;height:100%}
 .btn.big::after{content:'';position:absolute;top:0;left:-60%;width:40%;height:100%;background:linear-gradient(100deg,transparent,rgba(255,255,255,.7),transparent);transform:skewX(-20deg);animation:shine 2.6s infinite}
 @keyframes shine{0%,55%{left:-60%}100%{left:130%}}
 .mrow{display:flex;gap:8px;margin-top:6px}
+#bDaily{position:relative}#bDaily.new::after{content:'';position:absolute;top:-4px;right:-4px;width:12px;height:12px;border-radius:50%;background:#ff3b3b;border:2px solid #fff}
+#dailyGrid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;width:min(92vw,360px);margin:10px 0}
+#dailyGrid .dd{border:3px solid #222;border-radius:12px;background:#fffaf0;color:#222;padding:6px 2px;font-weight:800;font-size:12px;display:flex;flex-direction:column;align-items:center;gap:2px}
+#dailyGrid .dd b{font-size:20px}#dailyGrid .dd.got{opacity:.45}#dailyGrid .dd.now{outline:4px solid #ffd23f;transform:scale(1.06)}#dailyGrid .dd.big{grid-column:span 2;background:#fff3c4}
 .mrow .hb{width:auto;padding:0 10px;font-size:14px;white-space:nowrap}
 .mrow{flex-wrap:wrap;justify-content:center}
 #logoImg{width:min(88vw,460px);filter:drop-shadow(0 6px 10px rgba(0,0,0,.55));animation:titleBob 2.4s ease-in-out infinite}
@@ -177,7 +181,7 @@ h2 .hb{-webkit-text-stroke:0;text-shadow:none;letter-spacing:0;font-family:"Jua"
    <button class="btn big" id="bStart">⚔ 출전!</button>
   </div>
   <div class="best" id="bestTitle"></div>
-  <div class="mrow"><button class="hb" id="bHelp">❓ 조작법</button><button class="hb" id="bStory" style="display:none">📖 이야기</button><button class="hb" id="bMusicT">🎵 음악</button><button class="hb" id="bVolT">🔈 소리 크기</button><button class="hb" id="bWard">🎨 꾸미기</button><button class="hb" id="bShopT">💪 강화</button><button class="hb" id="bAchT">🏅 업적</button></div>
+  <div class="mrow"><button class="hb" id="bHelp">❓ 조작법</button><button class="hb" id="bStory" style="display:none">📖 이야기</button><button class="hb" id="bMusicT">🎵 음악</button><button class="hb" id="bVolT">🔈 소리 크기</button><button class="hb" id="bWard">🎨 꾸미기</button><button class="hb" id="bShopT">💪 강화</button><button class="hb" id="bAchT">🏅 업적</button><button class="hb" id="bDaily">📅 출석</button></div>
   <div class="hint" id="helpBox" style="display:none">📱 화면을 끌어서 이동 · 공격은 자동<br>🌳 나무 옆에 서면 통나무를 모아요 → 🪵 동그라미 위에 서면 건설!<br>⚔ 출격 문으로 모험 → 보스를 잡고 금화를 가져와요<br>📻 위험할 땐 지원 버튼! SKYFANG 비행기가 폭격 (60초마다)<br>💻 WASD / 방향키 이동 · E 지원 요청 · P 일시정지</div>
  </div>
 </div>
@@ -218,6 +222,14 @@ h2 .hb{-webkit-text-stroke:0;text-shadow:none;letter-spacing:0;font-family:"Jua"
   <div id="chestItems"></div>
   <div class="sub" id="chestHint" style="margin:6px 0 0;font-size:14px">화면을 누르면 바로 열려요</div>
   <button class="btn" id="bChestOk" style="display:none">좋아!</button>
+</div>
+
+<div class="ov" id="ovDaily">
+  <h2 style="margin-bottom:4px">📅 매일 출석 보상</h2>
+  <div class="sub" id="dailySub"></div>
+  <div id="dailyGrid"></div>
+  <button class="btn" id="bDailyGet">받기!</button>
+  <button class="btn" id="bDailyOk" style="background:#ddd">닫기</button>
 </div>
 
 <div class="ov" id="ovVol">
@@ -293,7 +305,7 @@ h2 .hb{-webkit-text-stroke:0;text-shadow:none;letter-spacing:0;font-family:"Jua"
 
 <script>
 'use strict';
-const BUILD = 101;
+const BUILD = 102;
 const BOSS_INTERVAL = 180;      // 보스 등장 간격(초)
 const WAVE_INTERVAL = 60;       // 대규모 몰이 이벤트 간격(초)
 const MAX_ENEMIES = 220;
@@ -509,6 +521,24 @@ function renderWard() {
     const H = HATS[hatSel], hi = H && H.id && WICON['hat_' + H.id]; if (hi) { const hw = HEAD_W * h / 64, ww = hw * H.w, hh = ww * hi.height / hi.width, hx = 120 - w * 0.42 + HEAD_AT.hero[0][0] * w, hy = bot - h + HEAD_AT.hero[0][1] * h; x.drawImage(hi, hx - ww / 2, hy + hw * H.by - hh, ww, hh); } }
 }
 $('bShopT').onclick = () => { audioInit(); sfx('pick'); openShop(); };
+// ---------- 📅 매일 출석 보상 (Build 102): 하루 1번, 이어서 오면 다음 칸 (7일째 큰 보상, 끝나면 다시 1일째) — 🏦 금고(강화 상점 돈)에 들어감 ----------
+const DAILY = [30, 40, 50, 60, 80, 100, 250];
+const todayKey = (d = new Date()) => `${d.getFullYear()}-${d.getMonth() + 1}-${d.getDate()}`;
+function dailyState() { const m = readJSON(META_KEY) || {}, dl = m.daily || {}, y = new Date(); y.setDate(y.getDate() - 1);
+  const can = dl.last !== todayKey(), next = !can ? dl.step : dl.last === todayKey(y) ? (dl.step % 7) + 1 : 1; return { can, next, step: dl.step || 0 }; }
+function refreshDaily() { $('bDaily').classList.toggle('new', dailyState().can); }
+function openDaily() {
+  state = 'daily'; showOv('ovDaily'); const D = dailyState();
+  $('dailySub').textContent = D.can ? `오늘은 ${D.next}일째 보상! (이어서 오면 다음 칸)` : `오늘 보상은 받았어요 · 내일 또 와요 (${D.next}일째 받음)`;
+  const g = $('dailyGrid'); g.innerHTML = '';
+  DAILY.forEach((v, i) => { const n = i + 1, c = document.createElement('div'); c.className = 'dd' + (n === 7 ? ' big' : '') + (D.can ? (n < D.next ? ' got' : n === D.next ? ' now' : '') : (n <= D.next ? ' got' : '')) + (!D.can && n === D.next ? ' now' : '');
+    c.innerHTML = `${n}일째<b>${n === 7 ? '🎁' : '🪙'}</b>${v}`; g.appendChild(c); });
+  $('bDailyGet').style.display = D.can ? '' : 'none';
+  $('bDailyGet').onclick = () => { const S = dailyState(); if (!S.can) return; const m = readJSON(META_KEY) || {}, v = DAILY[S.next - 1];
+    m.daily = { last: todayKey(), step: S.next }; m.bank = (m.bank || 0) + v; writeJSON(META_KEY, m); sfx('cheer'); refreshDaily(); openDaily(); $('dailySub').textContent = `🏦 금고에 금화 ${v} 넣었다! '💪 강화'에서 써요`; };
+  $('bDailyOk').onclick = () => { sfx('pick'); state = 'title'; refreshTitle(); showOv('ovTitle'); };
+}
+$('bDaily').onclick = () => { audioInit(); sfx('pick'); openDaily(); };
 $('bShopP').onclick = () => { sfx('pick'); openShop(); };
 $('bShopOk').onclick = () => { sfx('pick'); if (shopBack === 'title' || !G) { state = 'title'; refreshTitle(); showOv('ovTitle'); } else { state = 'paused'; showOv('ovPause'); } };
 $('bWard').onclick = () => { audioInit(); sfx('pick'); openWard(); };
@@ -1447,7 +1477,7 @@ function saveSummary(d) {
   return `[${DIFFS[d.diff !== undefined ? d.diff : 2].name}] 스테이지 ${d.stageN} 클리어 · 영웅 Lv ${d.lvl} · 동료 ${d.allies.length}명 · 🪙${d.gold}<br><span style="opacity:.7">${ago < 1 ? '방금' : ago < 60 ? ago + '분 전' : Math.round(ago / 60) + '시간 전'} 저장</span>`;
 }
 function refreshTitle() {
-  renderDiff();
+  renderDiff(); refreshDaily();
   if (HAS_LOGO) { $('logoImg').src = `img/logo.webp?b=${BUILD}`; $('logoImg').style.display = ''; $('logoText').style.display = 'none'; $('logoKr').style.display = 'none'; }
   $('bStory').style.display = STORY.some(s => STORY_FILES.includes(s.img)) ? '' : 'none';
   $('bestTitle').innerHTML = bestText(loadBest());
@@ -1462,7 +1492,7 @@ function refreshTitle() {
 }
 
 // ---------- 화면 전환 ----------
-function showOv(id) { ['ovTitle', 'ovLevel', 'ovPause', 'ovOver', 'ovStory', 'ovMap', 'ovClear', 'ovWard', 'ovShop', 'ovAch', 'ovEvo', 'ovChest', 'ovDex', 'ovVol'].forEach(o => $(o).classList.toggle('show', o === id)); }
+function showOv(id) { ['ovTitle', 'ovLevel', 'ovPause', 'ovOver', 'ovStory', 'ovMap', 'ovClear', 'ovWard', 'ovShop', 'ovAch', 'ovEvo', 'ovChest', 'ovDex', 'ovVol', 'ovDaily'].forEach(o => $(o).classList.toggle('show', o === id)); }
 function startGame() {
   audioInit(); clearSave(); newGame(); state = 'play'; joy = null; showOv(null);
   $('hudBtns').classList.add('show');
