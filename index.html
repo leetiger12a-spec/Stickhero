@@ -315,7 +315,7 @@ h2 .hb{-webkit-text-stroke:0;text-shadow:none;letter-spacing:0;font-family:"Jua"
 
 <script>
 'use strict';
-const BUILD = 105;
+const BUILD = 106;
 const BOSS_INTERVAL = 180;      // 보스 등장 간격(초)
 const WAVE_INTERVAL = 60;       // 대규모 몰이 이벤트 간격(초)
 const MAX_ENEMIES = 220;
@@ -4718,12 +4718,30 @@ function drawMinimap(x, y, size) { // 작은 지도: 마을·적 진지·바위�
   ctx.fillStyle = '#adb5bd'; for (const o of G.rocks) if (o.s > 0) ctx.fillRect(cx + o.x * k - 1.5, cy + o.y * k - 1.5, 3, 3);
   for (const c of G.camps) { const up = c.e && !c.e.dead; ctx.fillStyle = up ? '#e63946' : '#777'; ctx.beginPath(); ctx.arc(cx + c.x * k, cy + c.y * k, up ? 3.5 : 2.5, 0, 7); ctx.fill(); }
   if (G.boss && G.mode === 'base') { ctx.fillStyle = Math.floor(G.t * 4) % 2 ? '#ff3b3b' : '#ffd23f'; ctx.beginPath(); ctx.arc(cx + G.boss.x * k, cy + G.boss.y * k, 4, 0, 7); ctx.fill(); }
+  ctx.fillStyle = '#ffb703'; ctx.strokeStyle = '#222'; ctx.lineWidth = 1; for (const c of G.chests || []) { ctx.fillRect(cx + c.x * k - 3, cy + c.y * k - 2.5, 6, 5); ctx.strokeRect(cx + c.x * k - 3, cy + c.y * k - 2.5, 6, 5); }   // Build 106: 보물 상자
+  if (G.ghost) { ctx.fillStyle = Math.floor(G.t * 3) % 2 ? '#b8f2ff' : '#ffffff'; ctx.beginPath(); ctx.arc(cx + G.ghost.x * k, cy + G.ghost.y * k, 4.5, 0, 7); ctx.fill(); }   // 유령 상자
   ctx.fillStyle = '#ffd23f'; ctx.strokeStyle = '#222'; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.arc(cx + G.p.x * k, cy + G.p.y * k, 3, 0, 7); ctx.fill(); ctx.stroke();
   ctx.strokeStyle = 'rgba(255,255,255,.7)'; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(cx, cy, R, 0, 7); ctx.stroke();
   ctx.restore();
 }
+function drawPointers() { // Build 106: 화면 밖 보물 상자·유령 상자 쪽 가장자리 화살표 (보스는 원래 있는 화살표)
+  const list = [];
+  if (G.ghost) list.push([G.ghost, '👻', '#b8f2ff']);
+  for (const c of G.chests || []) list.push([c, '🎁', '#ffd23f']);
+  for (const [o, ic, col] of list.slice(0, 4)) {
+    const sx = (o.x - G.cam.x) * SCALE + W / 2, sy = (o.y - G.cam.y) * SCALE * K + H / 2, m = 34;
+    if (sx > 0 && sx < W && sy > 60 && sy < H - 60) continue;   // 화면 안이면 안 그림
+    const dx = sx - W / 2, dy = sy - H / 2, t = Math.min((W / 2 - m) / Math.abs(dx || 1e-6), (H / 2 - m - 50) / Math.abs(dy || 1e-6)), ex = W / 2 + dx * t, ey = H / 2 + dy * t, a = Math.atan2(dy, dx);
+    ctx.save(); ctx.translate(ex, ey); const pul = 1 + 0.12 * Math.sin(G.t * 6); ctx.scale(pul, pul);
+    ctx.fillStyle = 'rgba(0,0,0,.55)'; ctx.beginPath(); ctx.arc(0, 0, 17, 0, 7); ctx.fill(); ctx.strokeStyle = col; ctx.lineWidth = 2.5; ctx.stroke();
+    ctx.save(); ctx.rotate(a); ctx.fillStyle = col; ctx.beginPath(); ctx.moveTo(25, 0); ctx.lineTo(16, -7); ctx.lineTo(16, 7); ctx.closePath(); ctx.fill(); ctx.restore();
+    ctx.font = '16px sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(ic, 0, 1); ctx.restore();
+  }
+  G.ptrN = list.length;
+}
 function drawHUD() {
   const p = G.p, top = 8;
+  drawPointers();
   // 경험치바
   roundRect(8, top, W - 16, 16, 8); ctx.fillStyle = '#222'; ctx.fill();
   roundRect(10, top + 2, (W - 20) * Math.min(1, G.xp / G.need), 12, 6); ctx.fillStyle = '#3fa9f5'; ctx.fill();
