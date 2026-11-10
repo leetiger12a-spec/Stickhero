@@ -307,7 +307,7 @@ h2 .hb{-webkit-text-stroke:0;text-shadow:none;letter-spacing:0;font-family:"Jua"
   <button class="btn" id="bResume">계속하기</button>
   <button class="btn blue" id="bShopP">💪 영웅 강화</button>
   <button class="btn" id="bAchP">🏅 업적</button>
-  <div class="mrow" style="margin:6px 0 10px"><button class="hb" id="bMusicP" style="width:auto;padding:0 14px;font-weight:800">🎵 음악</button><button class="hb" id="bVolP" style="width:auto;padding:0 14px;font-weight:800">🔈 소리 크기</button><button class="hb" id="bVibP" style="width:auto;padding:0 14px;font-weight:800">📳 진동</button><button class="hb" id="bNumP" style="width:auto;padding:0 14px;font-weight:800">🔢 숫자</button><button class="hb" id="bEvoP" style="width:auto;padding:0 14px;font-weight:800">✨ 진화 도감</button><button class="hb" id="bDexP" style="width:auto;padding:0 14px;font-weight:800">📖 몬스터 도감</button></div>
+  <div class="mrow" style="margin:6px 0 10px"><button class="hb" id="bMusicP" style="width:auto;padding:0 14px;font-weight:800">🎵 음악</button><button class="hb" id="bVolP" style="width:auto;padding:0 14px;font-weight:800">🔈 소리 크기</button><button class="hb" id="bVibP" style="width:auto;padding:0 14px;font-weight:800">📳 진동</button><button class="hb" id="bNumP" style="width:auto;padding:0 14px;font-weight:800">🔢 숫자</button><button class="hb" id="bShakeP" style="width:auto;padding:0 14px;font-weight:800">🎚 흔들림</button><button class="hb" id="bEvoP" style="width:auto;padding:0 14px;font-weight:800">✨ 진화 도감</button><button class="hb" id="bDexP" style="width:auto;padding:0 14px;font-weight:800">📖 몬스터 도감</button></div>
   <button class="btn gray" id="bQuit">처음으로</button>
 </div>
 
@@ -321,7 +321,7 @@ h2 .hb{-webkit-text-stroke:0;text-shadow:none;letter-spacing:0;font-family:"Jua"
 
 <script>
 'use strict';
-const BUILD = 121;
+const BUILD = 122;
 const BOSS_INTERVAL = 180;      // 보스 등장 간격(초)
 const WAVE_INTERVAL = 60;       // 대규모 몰이 이벤트 간격(초)
 const MAX_ENEMIES = 220;
@@ -689,8 +689,8 @@ const fmtTime = s => { s = Math.floor(s); return String(Math.floor(s / 60)).padS
 // ---------- 소리 (WebAudio 합성) ----------
 let AC = null, master = null, muted = false;
 // 설정: 소리·음악·진동 (기억됨)
-let musicOn = true, vibOn = true, numOn = true;   // numOn: 피해 숫자 보이기 (Build 121)
-try { musicOn = localStorage.getItem('stickhero_music') !== '0'; vibOn = localStorage.getItem('stickhero_vib') !== '0'; numOn = localStorage.getItem('stickhero_num') !== '0'; muted = localStorage.getItem('stickhero_mute') === '1'; } catch (e) {}
+let musicOn = true, vibOn = true, numOn = true, shakeOn = true;   // shakeOn: 화면 흔들림 (Build 122)   // numOn: 피해 숫자 보이기 (Build 121)
+try { musicOn = localStorage.getItem('stickhero_music') !== '0'; vibOn = localStorage.getItem('stickhero_vib') !== '0'; numOn = localStorage.getItem('stickhero_num') !== '0'; shakeOn = localStorage.getItem('stickhero_shake') !== '0'; muted = localStorage.getItem('stickhero_mute') === '1'; } catch (e) {}
 let musicBus = null;
 // 소리 크기 (Build 70): 효과음·음악 따로 0~100% (기본 80% · 70%)
 let vol = { s: 0.8, m: 0.7 };
@@ -1602,9 +1602,11 @@ function refreshSettings() {
   for (const id of ['bMusicT', 'bMusicP']) { $(id).textContent = musicOn ? '🎵 음악 켬' : '🎵 음악 끔'; $(id).style.opacity = musicOn ? 1 : 0.55; }
   $('bVibP').textContent = vibOn ? '📳 진동 켬' : '📳 진동 끔'; $('bVibP').style.opacity = vibOn ? 1 : 0.55;
   $('bNumP').textContent = numOn ? '🔢 피해 숫자 켬' : '🔢 피해 숫자 끔'; $('bNumP').style.opacity = numOn ? 1 : 0.55;
+  $('bShakeP').textContent = shakeOn ? '🎚 화면 흔들림 켬' : '🎚 화면 흔들림 끔'; $('bShakeP').style.opacity = shakeOn ? 1 : 0.55;
 }
 const toggleMusic = () => { audioInit(); musicOn = !musicOn; try { localStorage.setItem('stickhero_music', musicOn ? '1' : '0'); } catch (e) {} if (!musicOn && bgmCur) { const k = bgmCur.key; playBgm('__none'); bgmWant = k; } refreshSettings(); };
 $('bMusicT').onclick = toggleMusic; $('bMusicP').onclick = toggleMusic;
+$('bShakeP').onclick = () => { shakeOn = !shakeOn; try { localStorage.setItem('stickhero_shake', shakeOn ? '1' : '0'); } catch (e) {} sfx('pick'); refreshSettings(); };
 $('bNumP').onclick = () => { numOn = !numOn; try { localStorage.setItem('stickhero_num', numOn ? '1' : '0'); } catch (e) {} sfx('pick'); refreshSettings(); };
 $('bVibP').onclick = () => { vibOn = !vibOn; try { localStorage.setItem('stickhero_vib', vibOn ? '1' : '0'); } catch (e) {} if (vibOn) vib(40, true); refreshSettings(); };
 let volBack = null, volPingT = 0;
@@ -2077,7 +2079,7 @@ function endIntro() {
 function drawIntro() {
   const I = G.intro, t = I.t;
   const fade = Math.min(1, t / 0.25) * Math.min(1, (I.dur - t) / 0.3);
-  const sx = G.shake ? rand(-G.shake, G.shake) : 0, sy = G.shake ? rand(-G.shake, G.shake) : 0;
+  const sk = shakeOn ? G.shake : 0, sx = sk ? rand(-sk, sk) : 0, sy = sk ? rand(-sk, sk) : 0;   // 흔들림 끄기 (Build 122)
   ctx.save(); ctx.globalAlpha = Math.max(0, fade);
   ctx.fillStyle = 'rgba(10,0,0,.72)'; ctx.fillRect(0, 0, W, H);
   // 붉은 집중선
@@ -5057,7 +5059,7 @@ function drawTitleScene() {
 function render() {
   ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
   if (!G || state === 'title') { drawTitleScene(); return; }
-  const sx = G.shake ? rand(-G.shake, G.shake) : 0, sy = G.shake ? rand(-G.shake, G.shake) : 0;
+  const sk = shakeOn ? G.shake : 0, sx = sk ? rand(-sk, sk) : 0, sy = sk ? rand(-sk, sk) : 0;   // 흔들림 끄기 (Build 122)
   ctx.setTransform(DPR * SCALE, 0, 0, DPR * SCALE, DPR * (W / 2 + sx), DPR * (H / 2 + sy));
   ctx.scale(1, K);
   ctx.translate(-G.cam.x, -G.cam.y);
