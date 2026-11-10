@@ -315,7 +315,7 @@ h2 .hb{-webkit-text-stroke:0;text-shadow:none;letter-spacing:0;font-family:"Jua"
 
 <script>
 'use strict';
-const BUILD = 110;
+const BUILD = 111;
 const BOSS_INTERVAL = 180;      // 보스 등장 간격(초)
 const WAVE_INTERVAL = 60;       // 대규모 몰이 이벤트 간격(초)
 const MAX_ENEMIES = 220;
@@ -3003,11 +3003,16 @@ function killEnemy(e) {
   rollItem(e.x, e.y);
 }
 // 🧲 떨어지는 아이템 (Build 110~): 적을 잡으면 아주 가끔, 25초 뒤 사라짐 (마지막 5초 깜빡)
-const ITEMS = { magnet: { ic: '🧲', p: 0.004, col: '#ff6b6b' } };
+const ITEMS = { magnet: { ic: '🧲', p: 0.004, col: '#ff6b6b' }, bomb: { ic: '💣', p: 0.0035, col: '#ff9f1c' } };
 function rollItem(x, y) { for (const k in ITEMS) { if (G.items.some(i => i.kind === k)) continue; if (Math.random() < ITEMS[k].p) { dropItem(k, x, y); return; } } }
 function dropItem(kind, x, y) { G.items.push({ kind, x, y, bob: Math.random() * 6, t: 0 }); }
 function useItem(it) { const p = G.p;
   if (it.kind === 'magnet') { for (const g of G.gems) g.pull = true; for (const c of G.coins) c.pull = true; floatText(p.x, p.y - 60, '🧲 모두 끌어와!', '#ff6b6b', 18, 1.2); sfx('unlock'); burst(p.x, p.y - 12, '#ff6b6b', 20, 220, 4, 0.5); G.rings.push({ x: p.x, y: p.y, r: 140, life: 0.4, max: 0.4, color: '#ff6b6b' }); }
+  if (it.kind === 'bomb') { // 💣 폭탄 (Build 111): 영웅 둘레 260 안의 적 모두 큰 피해 (보스는 10%만)
+    const R = 260; for (const e of G.enemies) { if (e.dead) continue; const dx = e.x - p.x, dy = e.y - p.y, d = Math.hypot(dx, dy); if (d > R + e.r) continue;
+      hurtEnemy(e, e.boss ? e.maxHp * 0.1 / G.p.dmgMul : 400 + 40 * G.lvl, dx / (d || 1), dy / (d || 1), 260); }
+    G.rings.push({ x: p.x, y: p.y, r: R, life: 0.5, max: 0.5, color: '#ff9f1c' }); burst(p.x, p.y - 10, '#ff9f1c', 40, 380, 6, 0.6); burst(p.x, p.y - 10, '#ffe066', 24, 300, 5, 0.5);
+    G.shake = Math.max(G.shake, 14); G.lvlFlash = 0.35; sfx('bombBoom'); floatText(p.x, p.y - 70, '💣 쾅!', '#ff9f1c', 24, 1.1); }
   G.itemsUsed = (G.itemsUsed || 0) + 1; }
 function updItems(dt) { const p = G.p;
   for (const it of G.items) { it.t += dt; it.bob += dt * 4; if (it.t > 25) it.dead = true;
