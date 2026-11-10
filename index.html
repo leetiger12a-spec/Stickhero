@@ -127,6 +127,7 @@ h2{margin:0 0 14px;font:400 clamp(30px,9vw,46px) "BHS","Jua",system-ui,-apple-sy
 .best{margin-top:14px;font-size:15px;opacity:.85;line-height:1.6}
 .hint{margin-top:14px;font-size:13px;opacity:.65;line-height:1.5}
 #cards{display:flex;flex-direction:column;gap:12px;width:min(92vw,420px)}
+#cardTools{display:flex;gap:10px;margin-top:12px}#cardTools button{font:inherit;font-size:14px;font-weight:800;border:3px solid #222;border-radius:14px;background:#fffaf0;color:#222;padding:8px 14px;min-height:44px;cursor:pointer}#cardTools button:disabled{opacity:.4}#cardTools button.on{background:#ffd6d6;outline:3px solid #ff4d6d}
 .card{display:flex;align-items:center;gap:14px;text-align:left;font:inherit;color:#2b2d42;background:linear-gradient(#fffdf7,#fff1d6);border:3px solid #2b2d42;border-radius:18px;padding:12px 14px;cursor:pointer;box-shadow:inset 0 2px 0 #fff,0 5px 0 #2b2d42,0 10px 18px rgba(0,0,0,.3);animation:pop .25s ease-out backwards}
 .card:nth-child(2){animation-delay:.07s}.card:nth-child(3){animation-delay:.14s}
 .card:active{transform:translateY(3px);box-shadow:0 2px 0 #2b2d42}
@@ -294,6 +295,7 @@ h2 .hb{-webkit-text-stroke:0;text-shadow:none;letter-spacing:0;font-family:"Jua"
   <h2 id="lvlTitle">레벨 업!</h2>
   <div class="sub" id="lvlSub">하나를 골라 강해지자</div>
   <div id="cards"></div>
+  <div id="cardTools"><button id="bReroll"></button></div>
 </div>
 
 <div class="ov" id="ovPause">
@@ -315,7 +317,7 @@ h2 .hb{-webkit-text-stroke:0;text-shadow:none;letter-spacing:0;font-family:"Jua"
 
 <script>
 'use strict';
-const BUILD = 112;
+const BUILD = 113;
 const BOSS_INTERVAL = 180;      // 보스 등장 간격(초)
 const WAVE_INTERVAL = 60;       // 대규모 몰이 이벤트 간격(초)
 const MAX_ENEMIES = 220;
@@ -1461,7 +1463,7 @@ function buildSave() {
     rocks: G.rocks.map(o => [Math.round(o.x), Math.round(o.y), o.s, Math.round(o.regrow)]),
     camps: G.camps.map(c => [Math.round(c.x), Math.round(c.y), c.lvl, Math.round(c.rebuild), c.e && !c.e.dead ? Math.round(c.e.hp / c.e.maxHp * 100) / 100 : 0]),
     nextBoss: G.boss ? 15 : G.nextBoss, nextWave: G.nextWave, raidCount: G.raidCount - (G.raid ? 1 : 0), raidPending: !!(G.raid || G.raidIn > 0),
-    day: G.day, broken: Object.keys(G.broken).filter(k => G.broken[k]), quests: G.quests, questBonus: G.questBonus, questSwap: !!G.questSwap, nights: G.nights || 0, weekly: G.weekly || null, weeklyB: G.weeklyB || 0,
+    day: G.day, broken: Object.keys(G.broken).filter(k => G.broken[k]), quests: G.quests, questBonus: G.questBonus, questSwap: !!G.questSwap, nights: G.nights || 0, rerolls: G.rerolls, weekly: G.weekly || null, weeklyB: G.weeklyB || 0,
   };
 }
 function loadGame(d) {
@@ -1485,7 +1487,7 @@ function loadGame(d) {
   G.day = d.day || 1; G.broken = {}; for (const k of d.broken || []) G.broken[k] = true;
   G.chests = (d.chests || []).map(([x, y, sm, gd]) => ({ x, y, bob: 0, t: 1, small: !!sm, gold: !!gd }));   // 줍기 전에 끈 마을 보물 상자
   if (d.quests && d.quests.length) { G.quests = d.quests; G.questBonus = !!d.questBonus; G.questSwap = !!d.questSwap; } else newQuests();
-  G.nights = d.nights || 0; G.weekly = d.weekly || null; G.weeklyB = d.weeklyB || 0;   // 새 날(또는 예전 저장)은 새 퀘스트
+  G.nights = d.nights || 0; G.rerolls = d.rerolls; G.weekly = d.weekly || null; G.weeklyB = d.weeklyB || 0;   // 새 날(또는 예전 저장)은 새 퀘스트
   if (d.rocks) G.rocks = d.rocks.map(([x, y, s, rg]) => ({ x, y, s, max: 6, regrow: rg, shake: 0 }));
   if (d.camps) { G.enemies = G.enemies.filter(e => !e.camp); G.camps = d.camps.map(([x, y, lvl, rebuild, hp]) => ({ x, y, lvl, rebuild, spawnT: rand(8, 16), e: null })); G.camps.forEach((c, i) => { if (d.camps[i][4] > 0) makeCamp(c, d.camps[i][4]); }); }
   G.allies = [];
@@ -1621,6 +1623,10 @@ function openLevelUp() {
     b.onclick = () => chooseCard(i);
     box.appendChild(b);
   });
+  // 🔁 다시 뽑기 (Build 113): 한 판에 2번
+  if (G.rerolls === undefined) G.rerolls = 2;
+  $('cardTools').style.display = ''; $('bReroll').textContent = `🔁 다시 뽑기 (${G.rerolls})`; $('bReroll').disabled = G.rerolls <= 0;
+  $('bReroll').onclick = () => { if (G.rerolls <= 0 || state !== 'levelup') return; G.rerolls--; sfx('pick'); openLevelUp(); };
   $('lvlTitle').textContent = '레벨 업!';
   $('lvlSub').textContent = `레벨 ${G.lvl - G.pending + 1} 달성! 하나를 골라 강해지자`;
   showOv('ovLevel');
@@ -1725,7 +1731,7 @@ function openAllyPick() {
     b.onclick = () => chooseAlly(i);
     box.appendChild(b);
   });
-  $('lvlTitle').textContent = '동료 고용!';
+  $('lvlTitle').textContent = '동료 고용!'; $('cardTools').style.display = 'none';
   $('lvlSub').textContent = `함께 싸울 동료를 골라요 (${G.allies.length + 1}/${allyMax()})`;
   showOv('ovLevel');
 }
