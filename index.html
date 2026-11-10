@@ -285,7 +285,7 @@ h2 .hb{-webkit-text-stroke:0;text-shadow:none;letter-spacing:0;font-family:"Jua"
 
 <script>
 'use strict';
-const BUILD = 87;
+const BUILD = 88;
 const BOSS_INTERVAL = 180;      // 보스 등장 간격(초)
 const WAVE_INTERVAL = 60;       // 대규모 몰이 이벤트 간격(초)
 const MAX_ENEMIES = 220;
@@ -1133,7 +1133,7 @@ const DEX = [
   { k: 'e_ghost', name: '유령 기사', desc: '울타리 통과 · 쇠사슬은 느리게', where: '4단계 (마을 8분 · 모험 8칸)' },
   { k: 'e_golem', name: '바위 골렘', desc: '쓰러지면 작은 바위 3개로', where: '4단계 (마을 8분 · 모험 8칸)' },
   ...BOSSES.map((B, i) => ({ k: 'boss' + i, boss: B.name, name: B.name, desc: ['높이 뛰어올라 쿵!', '로켓 주먹을 날려요', '바닥에 불길을 깔아요', '얼음 숨결로 느리게 해요', '거미줄을 쏘고 새끼 거미를 불러요', '순간이동하고 해골 병사를 불러요', '땅을 쾅! 충격파 · 반쯤 다치면 작은 골렘을 불러요', '걸으며 불길을 남기고 불바다를 깔아요', '얼음 숨결로 느리게 해요', '뿌리로 발을 묶고 조금씩 회복해요', '때리면 금화가 튀어요 · 40초 뒤 도망!'][i], where: i < 6 ? '마을·모험·탑 보스' : i === 10 ? '마을 (아주 드물게) · 무한 탑 50층' : `마을·무한 탑 ${(i) * 5}층` })),
-  { k: 'boss_final', boss: '왕관 괴물 대왕', name: '왕관 괴물 대왕', desc: '모든 보스의 기술을 다 써요', where: '모험 10칸 · 왕관 괴물의 성' },
+  { k: 'boss_final', boss: '왕관 괴물 대왕', name: '왕관 괴물 대왕', desc: '모든 보스의 기술을 다 써요 · 쓰러지면 진짜 모습으로 다시 일어나요', where: '모험 10칸 · 왕관 괴물의 성' },
 ];
 const DEX_STARS = { mob: [10, 100, 1000], boss: [1, 5, 20] };
 function pickSpecial(stageN) { // 열린 특수 적 중 하나 (없으면 null)
@@ -2648,7 +2648,7 @@ function nearest(x, y, maxD) {
   return best;
 }
 function hurtEnemy(e, dmg, fx, fy, kb) {
-  if (e.dead) return;
+  if (e.dead || e.transT > 0) return;   // 변신 중인 마지막 보스는 안 맞음
   const crit = Math.random() < 0.1;
   dmg = Math.round(dmg * G.p.dmgMul * (crit ? 2 : 1));
   if (e.type === 'e_agrunt' && fx * e.face < 0) { dmg = Math.round(dmg * 0.7); if (Math.random() < 0.15) floatText(e.x, e.y - 50, '막음!', '#dee2e6', 12, 0.5); }   // 갑옷 졸개: 앞(보는 쪽)에서 맞으면 방패로 −30%
@@ -2658,7 +2658,15 @@ function hurtEnemy(e, dmg, fx, fy, kb) {
   e.kx += fx * k; e.ky += fy * k;
   floatText(e.x + rand(-6, 6), e.y - e.r - 4, crit ? dmg + '!' : '' + dmg, crit ? '#ffd23f' : '#fff', crit ? 20 : 14, 0.6);
   sfx('hit');
+  if (e.hp <= 0 && e.final && !e.phase2) { finalTransform(e); return; }   // Build 88: 마지막 보스 2단계
   if (e.hp <= 0) killEnemy(e);
+}
+function finalTransform(e) { // 왕관 괴물 대왕: 한 번 쓰러지면 진짜 모습으로 일어남 (체력 50%, 빨라짐)
+  e.phase2 = true; e.hp = e.maxHp * 0.5; e.transT = 1.8; e.mode = 'walk'; e.st = 2.2; e.z = 0;
+  e.spd *= 1.25; e.dmg *= 1.15; G.ebullets.length = 0; G.fists = []; G.hazards = [];
+  G.shake = 26; G.slow = 1.2; vib([80, 40, 80, 40, 200], true); sfx('bigBoom'); sfx('bossIn');
+  for (let i = 0; i < 4; i++) burst(e.x + rand(-50, 50), e.y + rand(-50, 50), ['#b5179e', '#ff3b3b', '#ffd23f', '#fff'][i], 40, 360, 8, 1.2);
+  banner('👑 진짜 모습이다!', '왕관 괴물 대왕이 다시 일어났다!', '#ff3b3b', 2.6);
 }
 function dropGem(x, y, v) {
   if (G.gems.length > 350) { // 너무 많으면 가장 오래된 구슬에 합치기
@@ -3215,7 +3223,8 @@ function update(dt) {
 }
 
 function updBoss(e, dt, dx, dy, d) {
-  e.st -= dt;
+  if (e.transT > 0) { e.transT -= dt; return; }   // 변신하는 동안 멈춤
+  e.st -= dt * (e.phase2 ? 1.4 : 1);   // 2단계: 기술을 더 자주
   if (e.mode === 'walk') {
     const sl = e.slowT > 0 ? 0.75 : 1;   // 보스는 얼음에 덜 느려짐
     e.x += dx / d * e.spd * sl * dt; e.y += dy / d * e.spd * sl * dt;
@@ -4107,12 +4116,13 @@ function drawBossInner(e) {
   const z = e.z || 0;
   ctx.fillStyle = 'rgba(0,0,0,.2)'; ctx.beginPath(); ctx.ellipse(0, e.r * 0.9, e.r * (1 - z / 400), e.r * 0.3 * (1 - z / 400), 0, 0, 7); ctx.fill();
   ctx.translate(0, -z);
+  if (e.phase2) { const a = 0.25 + 0.15 * Math.sin(G.t * 8); ctx.fillStyle = `rgba(255,40,80,${a})`; ctx.beginPath(); ctx.ellipse(0, -e.r * 0.4, e.r * 1.5, e.r * 1.2, 0, 0, 7); ctx.fill(); ctx.scale(1.15, 1.15); }   // 진짜 모습: 붉은 기운 + 더 큼
   const pulse = e.mode === 'jumpWind' ? 1 + (0.55 - Math.max(0, e.st)) * 0.35 : e.mode === 'aim' || e.mode === 'punchAim' || e.mode === 'fireCast' ? 1 + Math.sin(G.t * 40) * 0.05 : 1 + Math.sin(G.t * 5) * 0.04;
   ctx.scale(pulse, 2 - pulse);
   if (SPR[e.spr]) { // 그림 보스: 바닥(발)이 e.y + r 근처, 돌진 준비 땐 하얗게 깜빡이며 부풀어 오름
     const img = SPR[e.spr], h = SPR_INFO[e.spr].h, w = h * img.width / img.height, top = e.r * 0.95 - h;
     ctx.drawImage(e.golden && SPR_GOLD[e.spr] ? SPR_GOLD[e.spr] : img, -w / 2, top, w, h);
-    const glow = e.mode === 'aim' || e.mode === 'punchAim' || e.mode === 'fireCast' ? 0.25 + 0.25 * Math.sin(G.t * 30) : e.flash > 0 ? 0.45 : 0; // 보스는 반투명하게만 번쩍
+    const glow = e.transT > 0 ? 0.35 + 0.35 * Math.sin(G.t * 40) : e.mode === 'aim' || e.mode === 'punchAim' || e.mode === 'fireCast' ? 0.25 + 0.25 * Math.sin(G.t * 30) : e.flash > 0 ? 0.45 : 0; // 보스는 반투명하게만 번쩍
     if (glow > 0 && SPR_WHITE[e.spr]) { ctx.globalAlpha = glow; ctx.drawImage(SPR_WHITE[e.spr], -w / 2, top, w, h); }
     ctx.restore();
     return;
@@ -4451,7 +4461,7 @@ function drawHUD() {
     const bw = Math.min(W - 130, 360), bx = (W - bw) / 2, by = top + 78;
     roundRect(bx, by, bw, 18, 9); ctx.fillStyle = '#222'; ctx.fill();
     roundRect(bx + 2, by + 2, (bw - 4) * Math.max(0, b.hp / b.maxHp), 14, 7); ctx.fillStyle = b.color; ctx.fill();
-    hudText('👑 ' + b.name, W / 2, by + 9, 12, '#fff', 'center');
+    hudText('👑 ' + b.name + (b.phase2 ? ' · 진짜 모습' : ''), W / 2, by + 9, 12, '#fff', 'center');
     if (b.goldG && b.fleeT > 0) { const s = Math.ceil(b.fleeT), hurry = s <= 10; hudText(`💰 도망까지 ${s}초`, W / 2, by + 30, hurry ? 15 : 13, hurry && Math.floor(G.t * 4) % 2 ? '#ff6b6b' : '#ffd23f', 'center'); }   // 황금 골렘 남은 시간 (Build 85)
     // 화면 밖 보스 화살표
     const sx = (b.x - G.cam.x) * SCALE + W / 2, sy = (b.y - G.cam.y) * SCALE * K + H / 2;
