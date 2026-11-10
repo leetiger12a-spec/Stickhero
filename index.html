@@ -315,7 +315,7 @@ h2 .hb{-webkit-text-stroke:0;text-shadow:none;letter-spacing:0;font-family:"Jua"
 
 <script>
 'use strict';
-const BUILD = 109;
+const BUILD = 110;
 const BOSS_INTERVAL = 180;      // 보스 등장 간격(초)
 const WAVE_INTERVAL = 60;       // 대규모 몰이 이벤트 간격(초)
 const MAX_ENEMIES = 220;
@@ -1290,7 +1290,7 @@ function newGame() {
     t: 0, kills: 0, lvl: 1, xp: 0, need: xpNeed(1), pending: 0,
     p: { x: 0, y: 0, r: 11, logs: 0, cap: 12, chopT: 0, chop: 0, fullMsg: 0, hp: 100, maxHp: 100, speed: 150, face: 1, ax: 1, ay: 0, inv: 0, walk: 0, moving: false, magnet: 70, dmgMul: 1, cdMul: 1 },
     weapons: { pistol: 1 }, passives: {}, timers: {},
-    enemies: [], bullets: [], ebullets: [], booms: [], bombs: [], meteors: [], zaps: [], rings: [], fists: [], hazards: [], gems: [], hearts: [], chests: [], parts: [], texts: [], coins: [], corpses: [],
+    enemies: [], bullets: [], ebullets: [], booms: [], bombs: [], meteors: [], items: [], zaps: [], rings: [], fists: [], hazards: [], gems: [], hearts: [], chests: [], parts: [], texts: [], coins: [], corpses: [],
     trees: [], flyers: [], pflames: [], hint: null, mode: 'base', bt: 0, diff: diffSel, stageN: 0, stars: [], st: null, stash: null, gateT: 0,
     smith: false, forge: 0, tavern: false, allies: [], raid: null, raidIn: 0, raidCount: 0, drumT: 0,
     gold: 0, base: { hp: 1500, maxHp: 1500, hitT: 0 }, respawnT: 0, squadAng: Math.random() * 7, squadT: 6,
@@ -2672,7 +2672,7 @@ function enterStage(idx, tower, practice, hard) {   // practice: 보스 연습 (
   // 무한 탑: 층마다 버티기, 5층마다 보스. 난이도 n = 2 + 층
   const def = practice !== undefined ? { name: '⚔ 보스 연습', th: practice === 'final' ? 4 : PRACTICE_TH[practice], goal: 'tboss', time: 30 } : tower ? { name: `무한 탑 ${tower}층`, th: Math.floor((tower - 1) / 5) % THEMES.length, goal: tower % 5 === 0 ? 'tboss' : 'survive', time: Math.min(40, 22 + Math.floor(tower / 3)) } : STAGES[idx];
   const p = G.p, n = practice !== undefined ? 5 : tower ? 1 + tower : idx, th = THEMES[def.th];
-  G.enemies = []; G.coins = []; G.gems = []; G.hearts = []; G.bullets = []; G.ebullets = []; G.booms = []; G.bombs = []; G.meteors = []; G.corpses = []; G.flyers = []; G.plane = null; G.fists = []; G.hazards = []; G.boss = null; G.intro = null;
+  G.enemies = []; G.coins = []; G.gems = []; G.hearts = []; G.bullets = []; G.ebullets = []; G.booms = []; G.bombs = []; G.meteors = []; G.items = []; G.corpses = []; G.flyers = []; G.plane = null; G.fists = []; G.hazards = []; G.boss = null; G.intro = null;
   const surv = def.goal === 'survive' || def.goal === 'tboss', L = surv ? 600 : def.goal === 'final' ? 2600 : 1700 + 120 * n;
   const st = { tower: tower || 0, practice, hard: !!hard, n, def, th, L, groups: [], deco: [], rocks: [], cages: [], bossOn: false, portal: null, clear: false, t: 0, hits: 0, acc: 0, timer: def.time || 0 };
   if (!surv) for (let y = -380; y > -L + 520; y -= rand(240, 320)) st.groups.push({ y, done: false });
@@ -2724,7 +2724,7 @@ function returnBase(win) {
   flushChests();
   const p = G.p, s = G.stash, st = G.st;
   G.enemies = s.enemies; G.coins = s.coins; G.gems = s.gems; G.hearts = s.hearts;
-  G.bullets = []; G.ebullets = []; G.booms = []; G.bombs = []; G.meteors = []; G.corpses = []; G.flyers = []; G.boss = null; G.plane = null; G.fists = []; G.hazards = [];
+  G.bullets = []; G.ebullets = []; G.booms = []; G.bombs = []; G.meteors = []; G.items = []; G.corpses = []; G.flyers = []; G.boss = null; G.plane = null; G.fists = []; G.hazards = [];
   G.mode = 'base'; G.st = null; G.stash = null; G.gateT = 0;
   p.x = GATE.x; p.y = GATE.y - 40; G.cam.x = p.x; G.cam.y = p.y - 12;
   placeAllies();
@@ -3000,7 +3000,23 @@ function killEnemy(e) {
   if (Math.random() < 0.08 * upLv('luck')) dropCoin(e.x, e.y);   // 행운 강화: 금화 하나 더
   for (let i = 0; i < e.gold; i++) if (i > 0 || Math.random() < 0.7) dropCoin(e.x + rand(-8, 8), e.y + rand(-8, 8));
   if (Math.random() < 0.012) G.hearts.push({ x: e.x, y: e.y, bob: 0 });
+  rollItem(e.x, e.y);
 }
+// 🧲 떨어지는 아이템 (Build 110~): 적을 잡으면 아주 가끔, 25초 뒤 사라짐 (마지막 5초 깜빡)
+const ITEMS = { magnet: { ic: '🧲', p: 0.004, col: '#ff6b6b' } };
+function rollItem(x, y) { for (const k in ITEMS) { if (G.items.some(i => i.kind === k)) continue; if (Math.random() < ITEMS[k].p) { dropItem(k, x, y); return; } } }
+function dropItem(kind, x, y) { G.items.push({ kind, x, y, bob: Math.random() * 6, t: 0 }); }
+function useItem(it) { const p = G.p;
+  if (it.kind === 'magnet') { for (const g of G.gems) g.pull = true; for (const c of G.coins) c.pull = true; floatText(p.x, p.y - 60, '🧲 모두 끌어와!', '#ff6b6b', 18, 1.2); sfx('unlock'); burst(p.x, p.y - 12, '#ff6b6b', 20, 220, 4, 0.5); G.rings.push({ x: p.x, y: p.y, r: 140, life: 0.4, max: 0.4, color: '#ff6b6b' }); }
+  G.itemsUsed = (G.itemsUsed || 0) + 1; }
+function updItems(dt) { const p = G.p;
+  for (const it of G.items) { it.t += dt; it.bob += dt * 4; if (it.t > 25) it.dead = true;
+    if (!p.dead && (p.x - it.x) ** 2 + (p.y - 10 - it.y) ** 2 < 28 * 28) { it.dead = true; useItem(it); } }
+  G.items = G.items.filter(i => !i.dead); }
+function drawItems() { for (const it of G.items) { if (it.t > 20 && Math.floor(it.t * 6) % 2) continue; const I = ITEMS[it.kind], y = it.y - 10 + Math.sin(it.bob) * 3, pul = 0.5 + 0.5 * Math.sin(it.t * 5);
+  ctx.fillStyle = 'rgba(0,0,0,.2)'; ctx.beginPath(); ctx.ellipse(it.x, it.y + 2, 11, 4, 0, 0, 7); ctx.fill();
+  ctx.save(); ctx.translate(it.x, y); ctx.scale(1, IK); ctx.fillStyle = `rgba(255,255,255,${0.55 + pul * 0.3})`; ctx.strokeStyle = I.col; ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(0, -4, 14 + pul * 2, 0, 7); ctx.fill(); ctx.stroke();
+  ctx.font = '17px sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(I.ic, 0, -3); ctx.restore(); } }
 function bossDie(e) {
   if (G.mode === 'stage' && G.st && G.st.practice !== undefined) { // 보스 연습: 기록·상자 없이 금화 조금
     G.boss = null; G.shake = 25; G.slow = 1.3; cheerAll(); G.ebullets.length = 0; G.fists = []; G.hazards = [];
@@ -3248,7 +3264,7 @@ function update(dt) {
     sfx('swing');
     for (const e of G.enemies) { const dx = e.x - p.x, dy = e.y - p.y, d = Math.hypot(dx, dy) || 1; if (d < 66 + e.r && dx * p.face > -12) hurtEnemy(e, 12, dx / d, dy / d, 240); }
   } }
-  updAllies(dt); updBombs(dt); updMeteors(dt); updPlane(dt); updSay(dt); updCombo(dt);
+  updAllies(dt); updBombs(dt); updMeteors(dt); updPlane(dt); updSay(dt); updCombo(dt); updItems(dt);
   if (G.sosCd > 0) { G.sosCd -= dt; if (G.sosCd <= 0) { G.sosCd = 0; sfx('pick'); } }
   if (G.radio) { G.radio.t += dt; if (G.radio.t >= G.radio.dur) G.radio = null; else if (Math.floor(G.radio.t * 26) !== Math.floor((G.radio.t - dt) * 26) && G.radio.t * 26 < SKY_SQUAD[G.radio.k].line.length && Math.floor(G.radio.t * 26) % 3 === 0) tone(1300 + Math.random() * 300, 0.025, 'square', 0.015, 0); }
   for (const z of G.zaps) z.life -= dt; G.zaps = G.zaps.filter(z => z.life > 0);
@@ -4624,7 +4640,7 @@ function drawWorld() {
     ctx.fillStyle = 'rgba(255,255,255,.9)';
     for (let k = 0; k < 14; k++) { const a = G.t * (k % 2 ? 1.6 : -1.1) + k * 0.45, rr = R * (0.45 + 0.5 * ((k * 37) % 10) / 10); ctx.beginPath(); ctx.arc(p.x + Math.cos(a) * rr, p.y + Math.sin(a) * rr, 2.5, 0, 7); ctx.fill(); }
   }
-  drawWPoses(); drawFists(); drawFlames(); drawMeteors();
+  drawWPoses(); drawFists(); drawFlames(); drawMeteors(); drawItems();   /* 아이템은 나무 위에 (안 가려지게) */
   for (const b of G.ebullets) {
     { const pn = b.arrow ? 'pj_bolt' : b.slime ? 'pj_slime' : b.ice ? 'pj_ice' : b.skull ? 'pj_skull' : b.rock ? 'pj_rock' : b.cannon ? 'pj_cannon' : 'pj_orb';
       if (drawProj(pn, b.x, b.y, Math.atan2(b.vy, b.vx), b.arrow ? 7 : b.r * (b.cannon && !b.rock ? 2.3 : 2.8))) continue; }   // 그림이 없을 때만 아래 코드 그림
