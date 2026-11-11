@@ -89,6 +89,7 @@ canvas{display:block;position:fixed;inset:0;width:100%;height:100%}
 .sw i{width:34px;height:14px;border-radius:7px;border:2px solid #222;display:block}
 .sw.on{outline:4px solid #ffd23f;transform:scale(1.06)}
 .sw.lock{opacity:.5}
+#petGrid{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;width:min(92vw,360px);margin:2px 0 10px}#petGrid .sw{padding:5px 2px 4px;font-size:11px;min-height:58px}#petGrid .sw img{height:30px;max-width:44px;object-fit:contain}#petGrid .sw b{font-size:22px;line-height:30px}
 #hatGrid{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;width:min(92vw,360px);margin:2px 0 10px}
 #hatGrid .sw{padding:5px 2px 4px;font-size:11px;min-height:58px}#hatGrid .sw img{height:30px;max-width:44px;object-fit:contain}#hatGrid .sw b{font-size:22px;line-height:30px}
 .wardH{font-weight:800;font-size:13px;color:#ffd23f;margin-top:4px}
@@ -281,6 +282,8 @@ h2 .hb{-webkit-text-stroke:0;text-shadow:none;letter-spacing:0;font-family:"Jua"
   <div id="wardGrid"></div>
   <div class="wardH">🎩 모자</div>
   <div id="hatGrid"></div>
+  <div class="wardH">🐾 펫 친구</div>
+  <div id="petGrid"></div>
   <button class="btn" id="bWardOk">완료</button>
 </div>
 
@@ -325,7 +328,7 @@ h2 .hb{-webkit-text-stroke:0;text-shadow:none;letter-spacing:0;font-family:"Jua"
 
 <script>
 'use strict';
-const BUILD = 134;
+const BUILD = 135;
 const BOSS_INTERVAL = 180;      // 보스 등장 간격(초)
 const WAVE_INTERVAL = 60;       // 대규모 몰이 이벤트 간격(초)
 const MAX_ENEMIES = 220;
@@ -484,6 +487,28 @@ const HATS = [
 // 그림마다 머리 꼭대기 위치 (칸 폭·높이 대비, tools로 잰 값): [가운데 x, 꼭대기 y]
 const HEAD_AT = { hero: [[0.4506, 0.0406]], hero_walk: [[0.512, 0.035], [0.5072, 0.035], [0.512, 0.04], [0.5144, 0.04]], hero_slash: [[0.4727, 0.16], [0.4754, 0.165], [0.4891, 0.16], [0.4536, 0.18]] };
 const HEAD_W = 23;   // 게임 속 머리 폭(px)
+// 🐾 펫 친구 (Build 135): 별로 열림, 영웅을 따라다니며 도와줌
+const PETS = [
+  { id: null, name: '없음', need: 0 },
+  { id: 'puppy',  name: '강아지', need: 6,  desc: '금화를 물어 와요' },
+  { id: 'kitten', name: '고양이', need: 14, desc: '구슬을 물어 와요' },
+  { id: 'chick',  name: '병아리', need: 22, desc: '3초마다 체력 +2' },
+  { id: 'dragon', name: '아기 용', need: 30, desc: '불꽃을 퐁퐁 쏴요' },
+];
+let petSel = 0;
+try { petSel = +(localStorage.getItem('stickhero_pet') || 0) || 0; } catch (e) {}
+function updPet(dt) { const P = PETS[petSel], p = G.p; if (!P || !P.id) { G.pet = null; return; }
+  const pt = G.pet || (G.pet = { x: p.x - 30, y: p.y + 10, t: 0, face: 1, cd: 1, hop: 0 }); pt.t += dt;
+  const tx = p.x - 34 * (p.face || 1), ty = p.y + 14, dx = tx - pt.x, dy = ty - pt.y, d = Math.hypot(dx, dy);
+  if (d > 600) { pt.x = tx; pt.y = ty; } else if (d > 6) { const sp = Math.min(d * 4, p.speed * 1.4); pt.x += dx / d * sp * dt; pt.y += dy / d * sp * dt; pt.hop += dt * 12; if (Math.abs(dx) > 2) pt.face = dx > 0 ? 1 : -1; }
+  pt.cd -= dt; if (pt.cd > 0 || p.dead) return;
+  if (P.id === 'puppy') { pt.cd = 1.2; const c = G.coins.filter(c => !c.pull && (c.x - p.x) ** 2 + (c.y - p.y) ** 2 < 320 * 320).slice(0, 4); for (const k of c) k.pull = true; if (c.length) floatText(pt.x, pt.y - 34, '멍!', '#ffb703', 12, 0.6); }
+  else if (P.id === 'kitten') { pt.cd = 1.2; const g = G.gems.filter(g => !g.pull && (g.x - p.x) ** 2 + (g.y - p.y) ** 2 < 320 * 320).slice(0, 6); for (const k of g) k.pull = true; if (g.length) floatText(pt.x, pt.y - 34, '냥!', '#bde0fe', 12, 0.6); }
+  else if (P.id === 'chick') { pt.cd = 3; if (p.hp < p.maxHp) { p.hp = Math.min(p.maxHp, p.hp + 2); floatText(pt.x, pt.y - 34, '삐약 +2', '#7bed9f', 12, 0.7); } }
+  else if (P.id === 'dragon') { pt.cd = 2; const e = nearest(pt.x, pt.y, 300); if (e) { const a = Math.atan2(e.y - pt.y, e.x - pt.x); G.bullets.push({ x: pt.x, y: pt.y - 14, vx: Math.cos(a) * 420, vy: Math.sin(a) * 420, r: 5, dmg: 8 + 2 * G.lvl, life: 0.8, pierce: 0, hits: [], kind: 'pistol', pet: true }); pt.face = Math.cos(a) > 0 ? 1 : -1; sfx('toss'); } } }
+function drawPet() { const pt = G.pet, P = PETS[petSel]; if (!pt || !P || !P.id) return; const im = bakedIco('pet_' + P.id, 30); if (!im) return; const h = 30, w = h * im.width / im.height, hop = Math.abs(Math.sin(pt.hop)) * 4;
+  ctx.fillStyle = 'rgba(0,0,0,.18)'; ctx.beginPath(); ctx.ellipse(pt.x, pt.y + 2, 11, 4, 0, 0, 7); ctx.fill();
+  ctx.save(); ctx.translate(pt.x, pt.y - hop); ctx.scale(pt.face, IK); ctx.drawImage(im, -w / 2, -h + 2, w, h); ctx.restore(); }
 let hatSel = 0;
 try { hatSel = +(localStorage.getItem('stickhero_hat') || 0) || 0; } catch (e) {}
 function drawHat(hx, hy, hw) { // 머리 꼭대기 (hx, hy)에 모자, hw = 머리 폭
@@ -533,6 +558,14 @@ function renderWard() {
     b.innerHTML = (h.id ? `<img src="img/hat_${h.id}.webp?b=${BUILD}" alt="">` : '<b>🚫</b>') + (lock ? '🔒⭐' + h.need : h.name);
     b.onclick = () => { if (lock) { sfx('hurt'); return; } hatSel = i; try { localStorage.setItem('stickhero_hat', i); } catch (e) {} sfx('pick'); renderWard(); };
     hg.appendChild(b);
+  });
+  const pg = $('petGrid'); pg.innerHTML = '';
+  PETS.forEach((h, i) => {
+    const lock = have < h.need, b = document.createElement('button');
+    b.className = 'sw' + (i === petSel ? ' on' : '') + (lock ? ' lock' : ''); b.dataset.i = i; b.title = h.desc || '';
+    b.innerHTML = (h.id ? `<img src="img/pet_${h.id}.webp?b=${BUILD}" alt="">` : '<b>🚫</b>') + (lock ? '🔒⭐' + h.need : h.name);
+    b.onclick = () => { if (lock) { sfx('hurt'); return; } petSel = i; try { localStorage.setItem('stickhero_pet', i); } catch (e) {} sfx('pick'); if (G) G.pet = null; renderWard(); if (h.desc) $('wardSub').textContent = `🐾 ${h.name}: ${h.desc}`; };
+    pg.appendChild(b);
   });
   // 미리보기
   const c = $('wardPrev'), x = c.getContext('2d'), im = SPR_SRC.hero;
@@ -961,7 +994,7 @@ const DECAL_TH = { grass: ['d_daisy', 'd_butter', 'd_mush', 'd_pebble'], ruins: 
 const WICON = {};
 for (const id in WEAP) for (const ev of [0, 1]) { const n = id + (ev ? '_evo' : ''), im = new Image(); im.onload = () => { WICON[n] = im; }; im.src = `img/w_${n}.webp?b=${BUILD}`; }
 // 능력·회복·경험치 구슬 그림 (img/p_능력.webp, i_chicken, i_heart, gem_b/g/r)
-for (const n of [...Object.keys(PASS).map(id => 'p_' + id), 'i_chicken', 'i_heart', 'gem_b', 'gem_g', 'gem_r', 'chest_big', 'chest_big_open', 'chest_small', 'chest_small_open', ...Object.keys(DECAL_H), ...PROJ_IMG, ...HATS.filter(h => h.id).map(h => 'hat_' + h.id)]) { const im = new Image(); im.onload = () => { WICON[n] = im; }; im.src = `img/${n}.webp?b=${BUILD}`; }
+for (const n of [...Object.keys(PASS).map(id => 'p_' + id), 'i_chicken', 'i_heart', 'gem_b', 'gem_g', 'gem_r', 'chest_big', 'chest_big_open', 'chest_small', 'chest_small_open', ...Object.keys(DECAL_H), ...PROJ_IMG, ...HATS.filter(h => h.id).map(h => 'hat_' + h.id), ...PETS.filter(h => h.id).map(h => 'pet_' + h.id)]) { const im = new Image(); im.onload = () => { WICON[n] = im; }; im.src = `img/${n}.webp?b=${BUILD}`; }
 const icoHtml = (n, alt) => WICON[n] ? `<img src="img/${n}.webp?b=${BUILD}" alt="">` : alt;
 const mIco = (n, alt) => WICON[n] ? `<img class="mi" src="img/${n}.webp?b=${BUILD}" alt="">` : alt;   // 글자 줄 안의 작은 그림
 const pMini = id => mIco('p_' + id, PASS[id].icon), wMini = (id, ev) => { const n = id + (ev ? '_evo' : ''); return WICON[n] ? `<img class="mi" src="img/w_${n}.webp?b=${BUILD}" alt="">` : ev ? EVO[id].icon : WEAP[id].icon; };   // 무기 그림 키는 w_ 없이
@@ -3381,7 +3414,7 @@ function update(dt) {
     sfx('swing');
     for (const e of G.enemies) { const dx = e.x - p.x, dy = e.y - p.y, d = Math.hypot(dx, dy) || 1; if (d < 66 + e.r && dx * p.face > -12) hurtEnemy(e, 12, dx / d, dy / d, 240); }
   } }
-  updAllies(dt); updBombs(dt); updMeteors(dt); updPlane(dt); updSay(dt); updCombo(dt); updItems(dt); updDanger(dt); updAllySay(dt);
+  updAllies(dt); updBombs(dt); updMeteors(dt); updPlane(dt); updSay(dt); updCombo(dt); updItems(dt); updDanger(dt); updAllySay(dt); updPet(dt);
   if (G.sosCd > 0) { G.sosCd -= dt; if (G.sosCd <= 0) { G.sosCd = 0; sfx('pick'); } }
   if (G.radio) { G.radio.t += dt; if (G.radio.t >= G.radio.dur) G.radio = null; else if (Math.floor(G.radio.t * 26) !== Math.floor((G.radio.t - dt) * 26) && G.radio.t * 26 < SKY_SQUAD[G.radio.k].line.length && Math.floor(G.radio.t * 26) % 3 === 0) tone(1300 + Math.random() * 300, 0.025, 'square', 0.015, 0); }
   for (const z of G.zaps) z.life -= dt; G.zaps = G.zaps.filter(z => z.life > 0);
@@ -4678,6 +4711,7 @@ function drawWorld() {
     for (const c of G.st.cages) if (vis(c)) list.push({ y: c.y, draw: () => drawCage(c) });
   }
   if (!p.dead && G.deadT <= 0) list.push({ y: p.y, draw: () => { if (p.slowT > 0) { ctx.save(); ctx.translate(p.x, p.y); ctx.scale(1, IK); ctx.strokeStyle = 'rgba(160,210,255,.9)'; ctx.lineWidth = 3; ctx.beginPath(); ctx.ellipse(0, 2, 16, 6, 0, 0, 7); ctx.stroke(); ctx.restore(); } drawStick(p); drawHeroTitle(p); drawSay(p); } });
+  if (G.pet && !p.dead) list.push({ y: G.pet.y, draw: drawPet });
   for (const a of G.allies) if (!a.dead) list.push({ y: a.y, draw: () => { drawAlly(a); if (a.say) drawBubble(a.say, a.x, a.y - 80 * IK); } });
   list.sort((a, b) => a.y - b.y);
   for (const e of list) { if (e.draw) e.draw(); else if (e.boss) drawBoss(e); else drawEnemy(e); }
