@@ -1,7 +1,7 @@
 // 치트 없는 자동 플레이 봇: 키보드 입력(keys)만 조작, 레벨업 카드는 무작위 선택
 // 사용: node tools/bot.js [판 수] [분] [normal|fighter|days(무너져도 다음 날 계속)] — 결과·사건 기록 출력 (음악까지 쓰려면 http로 열 것)
 const { chromium } = require('/opt/node22/lib/node_modules/playwright');
-const RUNS = +process.argv[2] || 4, MINUTES = +process.argv[3] || 15, STYLE = process.argv[4] || 'normal';
+const PICK = process.env.BOT_PICK || 'random', RUNS = +process.argv[2] || 4, MINUTES = +process.argv[3] || 15, STYLE = process.argv[4] || 'normal';
 (async () => {
   const browser = await chromium.launch();
   { const _nc = browser.newContext.bind(browser); browser.newContext = async o => { const c = await _nc(o); await c.addInitScript(st => { try { localStorage.setItem('stickhero_story', '1'); if (st) localStorage.setItem('stickhero_meta', JSON.stringify({ maxStage: st })); } catch (e) {} }, +process.env.BOT_STAGE || 0); /* BOT_STAGE: 모험 칸을 이만큼 깬 것으로 시작 (열린 무기·동료 시험용) */ return c; }; } const results = []; const errors = [];
@@ -12,15 +12,24 @@ const RUNS = +process.argv[2] || 4, MINUTES = +process.argv[3] || 15, STYLE = pr
     await page.goto(process.env.BOT_URL || 'file:///home/user/Stickhero/index.html');   // BOT_URL: 고정 사본으로 돌릴 때
     await page.click('#bStart');
     if (process.env.BOT_ALLIES) await page.evaluate(list => { const G = SH.G; G.tavern = true; const pd = G.pads.find(q => q.kind === 'tavern'); if (pd) pd.built = true; for (const t of list.split(',')) hireAlly(t); }, process.env.BOT_ALLIES);   // BOT_ALLIES=golem,golem: 숙소를 지은 채 이 동료들로 시작 (동료 비교용)
-    const r = await page.evaluate(([MINUTES, STYLE]) => {
+    const r = await page.evaluate(([MINUTES, STYLE, PICK]) => {
       const log = [], ev = (t) => log.push(`${Math.floor(SH.G.t / 60)}:${String(Math.floor(SH.G.t % 60)).padStart(2, '0')} ${t}`);
-      const G = () => SH.G; const st = { firstTower: null, stages: 0, retreats: 0, deaths: 0, raidsWon: 0, minBase: 1e9, bossKills: 0, lastStage: 0, lastRaidCount: 0 };
+      const G = () => SH.G; const st = { rerolls: 0, bans: 0, firstTower: null, stages: 0, retreats: 0, deaths: 0, raidsWon: 0, minBase: 1e9, bossKills: 0, lastStage: 0, lastRaidCount: 0 };
       const setDir = (dx, dy) => { for (const k of ['w', 'a', 's', 'd']) keys[k] = false; const l = Math.hypot(dx, dy); if (l < 6) return; const a = Math.atan2(dy, dx);
         if (Math.cos(a) > 0.38) keys.d = true; if (Math.cos(a) < -0.38) keys.a = true; if (Math.sin(a) > 0.38) keys.s = true; if (Math.sin(a) < -0.38) keys.w = true; };
       const near = (arr, x, y) => { let b = null, bd = 1e12; for (const o of arr) { const d = (o.x - x) ** 2 + (o.y - y) ** 2; if (d < bd) { bd = d; b = o; } } return b; };
+      // BOT_PICK=smart (Build 133): 사람처럼 고르기 — 진화 먼저, 가진 무기 올리기, 무기가 5개면 새 무기는 빼기(🚫)·다시 뽑기(🔁)
+      const smartPick = () => { const G = SH.G, nW = Object.keys(G.weapons).length, score = c => c.kind === 'evo' ? 100 : c.kind === 'w' ? (c.l > 0 ? 50 + c.l : nW < 5 ? 30 : -10) : c.kind === 'p' ? (Object.keys(EVO).some(id => EVO[id].need === c.id && (G.weapons[id] || 0) >= 3) ? 60 : 20 + (c.l > 0 ? 5 : 0)) : 0;
+        for (let guard = 0; guard < 6 && SH.state === 'levelup'; guard++) {
+          const best = Math.max(...choices.map(score));
+          if (best < 0 && G.rerolls > 0) { G.rerolls--; openLevelUp(); st.rerolls++; continue; }
+          const bad = choices.findIndex(c => c.kind === 'w' && c.l === 0 && nW >= 5);
+          if (bad >= 0 && G.bans > 0) { banCard(bad); st.bans++; continue; }
+          let bi = 0; choices.forEach((c, i) => { if (score(c) > score(choices[bi])) bi = i; }); SH.choose(bi); return; }
+        if (SH.state === 'levelup') SH.choose(0); };
       let prevDead = false, prevMode = 'base', prevBossK = 0, prevRaid = false, steps = MINUTES * 60 * 30;
       for (let i = 0; i < steps; i++) {
-        if (SH.state === 'levelup') SH.choose(Math.floor(Math.random() * 3));
+        if (SH.state === 'levelup') { if (PICK === 'smart') smartPick(); else SH.choose(Math.floor(Math.random() * 3)); }
         if (SH.state === 'chest') { document.getElementById('ovChest').onclick({ target: {} }); SH.closeChest(); }   // 보물 상자 (Build 61)
         if (SH.state === 'result') SH.ok(); if (SH.state === 'map') document.getElementById('bGo').click();
         if (SH.state === 'allypick') SH.chooseAlly(Math.floor(Math.random() * Math.max(1, document.querySelectorAll('#cards .card').length))); /* 열린 동료 중 무작위 (Build 92: 예전엔 앞 2종만) */
@@ -69,8 +78,8 @@ const RUNS = +process.argv[2] || 4, MINUTES = +process.argv[3] || 15, STYLE = pr
       }
       const g = G();
       const sizes = ['enemies', 'bullets', 'ebullets', 'parts', 'texts', 'corpses', 'coins', 'gems', 'hearts', 'hazards', 'fists', 'bombs', 'flyers', 'rings'].map(k => k + ':' + (g[k] ? g[k].length : '-')).join(' ');
-      return { sizes, evo: Object.keys(g.weapons).filter(id => g.weapons[id] > 5).join('+'), heapMB: performance.memory ? Math.round(performance.memory.usedJSHeapSize / 1048576) : -1, log, t: Math.round(g.t), state: SH.state, lvl: g.lvl, kills: g.kills, gold: g.gold, base: Math.round(g.base.hp), minBase: Math.round(st.minBase), firstTower: st.firstTower, stages: st.stages, deaths: st.deaths, raidsWon: st.raidsWon, bosses: g.bossKills || 0, day: g.day, broken: Object.keys(g.broken).filter(k => g.broken[k]).length, towers: g.towers.map(t => t.lvl).join(''), wall: g.wallLvl, allies: g.allies.map(a => a.type[0] + a.lvl).join(''), vLvl: g.vLvl, bld: JSON.stringify(g.bld), stone: g.stone, campsDown: campsDown(), campLv: g.camps.map(c => c.lvl).join(''), forge: g.forge, smith: g.smith, weapons: JSON.stringify(g.weapons) };
-    }, [MINUTES, STYLE]);
+      return { sizes, evo: Object.keys(g.weapons).filter(id => g.weapons[id] > 5).join('+'), heapMB: performance.memory ? Math.round(performance.memory.usedJSHeapSize / 1048576) : -1, log, t: Math.round(g.t), state: SH.state, lvl: g.lvl, kills: g.kills, gold: g.gold, base: Math.round(g.base.hp), minBase: Math.round(st.minBase), firstTower: st.firstTower, stages: st.stages, deaths: st.deaths, rerolls: st.rerolls, bans: st.bans, nW: Object.keys(g.weapons).length, raidsWon: st.raidsWon, bosses: g.bossKills || 0, day: g.day, broken: Object.keys(g.broken).filter(k => g.broken[k]).length, towers: g.towers.map(t => t.lvl).join(''), wall: g.wallLvl, allies: g.allies.map(a => a.type[0] + a.lvl).join(''), vLvl: g.vLvl, bld: JSON.stringify(g.bld), stone: g.stone, campsDown: campsDown(), campLv: g.camps.map(c => c.lvl).join(''), forge: g.forge, smith: g.smith, weapons: JSON.stringify(g.weapons) };
+    }, [MINUTES, STYLE, PICK]);
     results.push(r);
     await page.close();
   }
