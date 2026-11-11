@@ -285,7 +285,7 @@ h2 .hb{-webkit-text-stroke:0;text-shadow:none;letter-spacing:0;font-family:"Jua"
 </div>
 
 <div class="ov" id="ovMap">
-  <div id="mapHead"><h2 style="margin:0">🗺 모험 지도</h2><button class="hb" id="bTower" style="width:auto;padding:0 10px;font-weight:800;background:#b5179e;color:#fff">🗼 무한 탑</button><button class="hb" id="bMapClose" style="width:auto;padding:0 12px;font-weight:800">✖ 닫기</button></div>
+  <div id="mapHead"><h2 style="margin:0">🗺 모험 지도</h2><button class="hb" id="bTower" style="width:auto;padding:0 10px;font-weight:800;background:#b5179e;color:#fff">🗼 무한 탑</button><button class="hb" id="bCave" style="width:auto;padding:0 10px;font-weight:800;background:#ffd23f;color:#222">🌟 동굴</button><button class="hb" id="bMapClose" style="width:auto;padding:0 12px;font-weight:800">✖ 닫기</button></div>
   <div id="mapScroll"><div id="mapInner"></div></div>
   <div id="mapCard"></div>
 </div>
@@ -325,7 +325,7 @@ h2 .hb{-webkit-text-stroke:0;text-shadow:none;letter-spacing:0;font-family:"Jua"
 
 <script>
 'use strict';
-const BUILD = 130;
+const BUILD = 131;
 const BOSS_INTERVAL = 180;      // 보스 등장 간격(초)
 const WAVE_INTERVAL = 60;       // 대규모 몰이 이벤트 간격(초)
 const MAX_ENEMIES = 220;
@@ -1479,7 +1479,7 @@ function buildSave() {
     rocks: G.rocks.map(o => [Math.round(o.x), Math.round(o.y), o.s, Math.round(o.regrow)]),
     camps: G.camps.map(c => [Math.round(c.x), Math.round(c.y), c.lvl, Math.round(c.rebuild), c.e && !c.e.dead ? Math.round(c.e.hp / c.e.maxHp * 100) / 100 : 0]),
     nextBoss: G.boss ? 15 : G.nextBoss, nextWave: G.nextWave, raidCount: G.raidCount - (G.raid ? 1 : 0), raidPending: !!(G.raid || G.raidIn > 0),
-    day: G.day, broken: Object.keys(G.broken).filter(k => G.broken[k]), quests: G.quests, questBonus: G.questBonus, questSwap: !!G.questSwap, nights: G.nights || 0, rerolls: G.rerolls, bans: G.bans, banned: G.banned || [], weekly: G.weekly || null, weeklyB: G.weeklyB || 0,
+    day: G.day, broken: Object.keys(G.broken).filter(k => G.broken[k]), quests: G.quests, questBonus: G.questBonus, questSwap: !!G.questSwap, nights: G.nights || 0, caveDay: G.caveDay || 0, rerolls: G.rerolls, bans: G.bans, banned: G.banned || [], weekly: G.weekly || null, weeklyB: G.weeklyB || 0,
   };
 }
 function loadGame(d) {
@@ -1503,7 +1503,7 @@ function loadGame(d) {
   G.day = d.day || 1; G.broken = {}; for (const k of d.broken || []) G.broken[k] = true;
   G.chests = (d.chests || []).map(([x, y, sm, gd]) => ({ x, y, bob: 0, t: 1, small: !!sm, gold: !!gd }));   // 줍기 전에 끈 마을 보물 상자
   if (d.quests && d.quests.length) { G.quests = d.quests; G.questBonus = !!d.questBonus; G.questSwap = !!d.questSwap; } else newQuests();
-  G.nights = d.nights || 0; G.rerolls = d.rerolls; G.bans = d.bans; G.banned = d.banned || []; G.weekly = d.weekly || null; G.weeklyB = d.weeklyB || 0;   // 새 날(또는 예전 저장)은 새 퀘스트
+  G.nights = d.nights || 0; G.caveDay = d.caveDay || 0; G.rerolls = d.rerolls; G.bans = d.bans; G.banned = d.banned || []; G.weekly = d.weekly || null; G.weeklyB = d.weeklyB || 0;   // 새 날(또는 예전 저장)은 새 퀘스트
   if (d.rocks) G.rocks = d.rocks.map(([x, y, s, rg]) => ({ x, y, s, max: 6, regrow: rg, shake: 0 }));
   if (d.camps) { G.enemies = G.enemies.filter(e => !e.camp); G.camps = d.camps.map(([x, y, lvl, rebuild, hp]) => ({ x, y, lvl, rebuild, spawnT: rand(8, 16), e: null })); G.camps.forEach((c, i) => { if (d.camps[i][4] > 0) makeCamp(c, d.camps[i][4]); }); }
   G.allies = [];
@@ -1967,7 +1967,8 @@ function makeEnemy(type, x, y) {
   const T = ETYPES[type], hm = DF().ehp;   // Build 67: 같은 적은 세기 고정 (시간이 지나면 센 종류가 나옴 — tierType)
   const e = { id: ++eid, type, x, y, r: T.r, hp: T.hp * hm, maxHp: T.hp * hm, spd: T.spd * rand(0.9, 1.1), dmg: T.dmg * DF().edmg, color: T.color, xp: T.xp, gold: T.gold, flash: 0, hitT: 0, kx: 0, ky: 0, swordCd: 0, wob: Math.random() * 6, inside: Math.hypot(x, y) < WALL_R, atk: 0.5, lunge: 0, face: 1 };
   if (G && G.weekly) { if (WK('giant')) { e.hp *= 1.6; e.maxHp *= 1.6; e.gold *= 2; } else if (WK('swift')) e.spd *= 1.25; else if (WK('swarm')) { e.hp *= 0.6; e.maxHp *= 0.6; } }   // 이번 주 도전
-  if (!window.__noGold && Math.random() < GOLD_P) makeGolden(e);   // __noGold: 정확한 기록을 보는 시험용
+  if (G && G.mode === 'stage' && G.st && G.st.cave) { makeGolden(e); e.hp /= 3; e.maxHp /= 3; }   // 동굴: 모두 황금 (체력은 보통)
+  else if (!window.__noGold && Math.random() < GOLD_P) makeGolden(e);   // __noGold: 정확한 기록을 보는 시험용
   return e;
 }
 // ---------- 야생 지대: 적 진지 ----------
@@ -2708,7 +2709,7 @@ let mapSel = 0;
 function openMap() {
   state = 'map'; joy = null;
   mapSel = Math.min(G.stageN, STAGES.length - 1);
-  renderMap(); showOv('ovMap');
+  renderMap(); showOv('ovMap'); $('bCave').style.display = caveOpen() ? '' : 'none';   // 비밀: 조건이 되면 나타남
   setTimeout(() => { const n = document.querySelector('.mnode.cur') || document.querySelector('.mnode.sel'); if (n) n.scrollIntoView({ block: 'center' }); }, 30);
   sfx('pick');
 }
@@ -2753,18 +2754,28 @@ $('bTower').onclick = () => {
   $('bGoTower').onclick = () => { showOv(null); state = 'play'; G.towerGold = 0; enterStage(0, 1); };
   sfx('pick');
 };
+// 🌟 비밀 보물 동굴 (Build 131): ⭐3으로 깬 칸이 5개 넘으면 열림, 하루(날짜) 1번 — 40초 동안 모두 황금 몬스터
+const star3 = () => (G.stars || []).filter(v => v >= 3).length;
+const caveOpen = () => star3() >= 5;
+$('bCave').onclick = () => {
+  if (!caveOpen()) { sfx('hurt'); $('mapCard').innerHTML = `<div class="t">🌟 비밀 보물 동굴</div><div class="g">🔒 ⭐⭐⭐로 깬 칸 5개 (지금 ${star3()}개)</div>`; return; }
+  const used = G.caveDay === G.day;
+  $('mapCard').innerHTML = `<div class="t">🌟 비밀 보물 동굴</div><div class="g">40초 동안 황금 몬스터만 나와요 · 잡으면 금화 와르르</div><div class="r">하루(날짜) 1번 · ${used ? '오늘은 이미 다녀왔어요 · 내일 또!' : '오늘 갈 수 있어요!'}</div>` + (used ? '' : '<button class="btn big" id="bGoCave" style="margin-top:6px">🌟 동굴로!</button>');
+  if (!used) $('bGoCave').onclick = () => { showOv(null); state = 'play'; G.caveDay = G.day; G.caveGold0 = G.gold; G.caves = (G.caves || 0) + 1; enterStage(0, 0, undefined, false, true); };
+  sfx('pick');
+};
 $('bMapClose').onclick = () => { sfx('pick'); closeMap(); };
 
-function enterStage(idx, tower, practice, hard) {   // practice: 보스 연습 (보스 번호 또는 'final')
+function enterStage(idx, tower, practice, hard, cave) {   // cave: 🌟 비밀 보물 동굴 (Build 131)   // practice: 보스 연습 (보스 번호 또는 'final')
   if (idx === undefined) idx = Math.min(G.stageN, STAGES.length - 1);
   flushChests();
   if (G.mode === 'base') { saveGame(); G.stash = { enemies: G.enemies, coins: G.coins, gems: G.gems, hearts: G.hearts }; }   // 탑 다음 층은 마을을 다시 넣지 않음
   // 무한 탑: 층마다 버티기, 5층마다 보스. 난이도 n = 2 + 층
-  const def = practice !== undefined ? { name: '⚔ 보스 연습', th: practice === 'final' ? 4 : PRACTICE_TH[practice], goal: 'tboss', time: 30 } : tower ? { name: `무한 탑 ${tower}층`, th: Math.floor((tower - 1) / 5) % THEMES.length, goal: tower % 5 === 0 ? 'tboss' : 'survive', time: Math.min(40, 22 + Math.floor(tower / 3)) } : STAGES[idx];
-  const p = G.p, n = practice !== undefined ? 5 : tower ? 1 + tower : idx, th = THEMES[def.th];
+  const def = cave ? { name: '🌟 비밀 보물 동굴', th: 2, goal: 'survive', time: 40 } : practice !== undefined ? { name: '⚔ 보스 연습', th: practice === 'final' ? 4 : PRACTICE_TH[practice], goal: 'tboss', time: 30 } : tower ? { name: `무한 탑 ${tower}층`, th: Math.floor((tower - 1) / 5) % THEMES.length, goal: tower % 5 === 0 ? 'tboss' : 'survive', time: Math.min(40, 22 + Math.floor(tower / 3)) } : STAGES[idx];
+  const p = G.p, n = cave ? 4 : practice !== undefined ? 5 : tower ? 1 + tower : idx, th = THEMES[def.th];
   G.enemies = []; G.coins = []; G.gems = []; G.hearts = []; G.bullets = []; G.ebullets = []; G.booms = []; G.bombs = []; G.meteors = []; G.items = []; G.corpses = []; G.flyers = []; G.plane = null; G.fists = []; G.hazards = []; G.boss = null; G.intro = null;
   const surv = def.goal === 'survive' || def.goal === 'tboss', L = surv ? 600 : def.goal === 'final' ? 2600 : 1700 + 120 * n;
-  const st = { tower: tower || 0, practice, hard: !!hard, n, def, th, L, groups: [], deco: [], rocks: [], cages: [], bossOn: false, portal: null, clear: false, t: 0, hits: 0, acc: 0, timer: def.time || 0 };
+  const st = { tower: tower || 0, practice, hard: !!hard, cave: !!cave, n, def, th, L, groups: [], deco: [], rocks: [], cages: [], bossOn: false, portal: null, clear: false, t: 0, hits: 0, acc: 0, timer: def.time || 0 };
   if (!surv) for (let y = -380; y > -L + 520; y -= rand(240, 320)) st.groups.push({ y, done: false });
   if (def.goal === 'rescue') for (let k = 0; k < 3; k++) st.cages.push({ x: rand(-STAGE_HW + 60, STAGE_HW - 60), y: -L * (0.22 + k * 0.25), hold: 0, freed: false, cat: ['ally_sword', 'ally_archer', 'ally_bomber'][k], shake: 0 });
   // 길 가장자리(폰 화면 안쪽에 보이게)와 길 안쪽 군데군데에 테마 장식
@@ -2781,7 +2792,8 @@ function enterStage(idx, tower, practice, hard) {   // practice: 보스 연습 (
   G.st = st; G.mode = 'stage';
   p.x = 0; p.y = surv ? -L / 2 : -40; G.cam.x = 0; G.cam.y = p.y - 12; joy = null;
   placeAllies();
-  if (practice !== undefined) banner(hard ? '🔥 보스 도전' : '⚔ 보스 연습', hard ? '체력 2배 · 공격 1.5배! 기록·업적엔 안 남아요' : '기록·업적엔 안 남아요 · 져도 괜찮아!', hard ? '#ff9f1c' : '#9fd8ff', 2.2);
+  if (cave) banner('🌟 비밀 보물 동굴!', '⏱ 40초 동안 황금 몬스터를 잡아 금화를 모아요!', '#ffd23f', 2.6);
+  else if (practice !== undefined) banner(hard ? '🔥 보스 도전' : '⚔ 보스 연습', hard ? '체력 2배 · 공격 1.5배! 기록·업적엔 안 남아요' : '기록·업적엔 안 남아요 · 져도 괜찮아!', hard ? '#ff9f1c' : '#9fd8ff', 2.2);
   else if (tower) banner(`🗼 ${tower}층`, def.goal === 'tboss' ? '👑 보스 층! 보스를 물리쳐라' : `⏱ ${def.time}초 버텨라!`, tower % 5 === 0 ? '#ff6b6b' : '#9fd8ff', 2.2);
   else banner(`${n + 1}. ${def.name}`, def.goal === 'survive' ? `⏱ ${def.time}초 버텨라!` : GOAL_TXT[def.goal], '#ffd23f', 2.6);
   sfx('wave');
@@ -2791,7 +2803,7 @@ function stageClear(x, y) {
   const st = G.st, p = G.p; if (st.clear) return;
   x = clamp(x, -STAGE_HW + 40, STAGE_HW - 40); y = clamp(y, -st.L - 340, 60);   // 영웅이 갈 수 있는 곳에만 포털 (보스가 밖에서 쓰러져도)
   st.clear = true;
-  if (st.practice !== undefined) { st.portal = { x, y, t: 0, hold: 0, on: false }; return; }   // 연습: 마을로 가는 포털만
+  if (st.practice !== undefined || st.cave) { st.portal = { x, y, t: 0, hold: 0, on: false }; return; }   // 연습·동굴: 마을로 가는 포털만
   if (st.tower) {
     questEvent('tower');
     const f = st.tower, prize = 15 + f * 6 + (f % 5 === 0 ? 60 + f * 4 : 0);
@@ -2818,6 +2830,7 @@ function returnBase(win) {
   G.mode = 'base'; G.st = null; G.stash = null; G.gateT = 0;
   p.x = GATE.x; p.y = GATE.y - 40; G.cam.x = p.x; G.cam.y = p.y - 12;
   placeAllies();
+  if (st && st.cave) { banner(win ? '🌟 동굴에서 귀환!' : '동굴에서 쓰러졌다', `얻은 금화 🪙${G.gold - (G.caveGold0 || 0)} (쓰러져도 금화는 그대로)`, '#ffd23f', 2.8); saveGame(); return; }
   if (st && st.practice !== undefined) { banner(win ? '🏠 연습 끝!' : '연습에서 쓰러졌다', win ? '또 도전해 봐요' : '괜찮아, 다시 해 보자!', win ? '#7bed9f' : '#9fd8ff', 2.4); saveGame(); return; }
   if (st && st.tower) {
     const reached = st.clear ? st.tower : st.tower - 1;
