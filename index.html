@@ -324,7 +324,7 @@ h2 .hb{-webkit-text-stroke:0;text-shadow:none;letter-spacing:0;font-family:"Jua"
 
 <script>
 'use strict';
-const BUILD = 128;
+const BUILD = 129;
 const BOSS_INTERVAL = 180;      // 보스 등장 간격(초)
 const WAVE_INTERVAL = 60;       // 대규모 몰이 이벤트 간격(초)
 const MAX_ENEMIES = 220;
@@ -1774,7 +1774,7 @@ function openAllyPick() {
     const T = ALLY_TYPES[type], have = G.allies.filter(a => a.type === type).length;
     const icon = SPR_SRC['ally_' + type] ? `<img src="img/ally_${type}.webp?b=${BUILD}" alt="">` : T.icon;
     const b = document.createElement('button'); b.className = 'card';
-    b.innerHTML = `<div class="ic">${icon}</div><div><div class="nm">${T.name}<span class="lv new">${T.icon}</span></div><div class="ds">${T.desc}${have ? ` · 지금 ${have}마리` : ''}</div></div><div class="key">${i + 1}</div>`;
+    b.innerHTML = `<div class="ic">${icon}</div><div><div class="nm">${T.name}<span class="lv new">${T.icon}</span></div><div class="ds">${T.desc}${have ? ` · 지금 ${have}마리` : ''}<br><b class="hint">⚡ Lv5 필살기: ${ULT[type] || ''}</b></div></div><div class="key">${i + 1}</div>`;
     b.onclick = () => chooseAlly(i);
     box.appendChild(b);
   });
@@ -2397,11 +2397,25 @@ function placeAllies() { // 장소가 바뀔 때 영웅 곁으로
   const p = G.p;
   for (const a of G.allies) { const an = a.slot * Math.PI * 2 / Math.max(4, G.allies.length) + Math.PI / 4; a.x = p.x + Math.cos(an) * 34; a.y = p.y + Math.sin(an) * 34; }
 }
+// ⚡ 동료 Lv5 필살기 (Build 129): 근처(260)에 적이 있으면 12초마다
+const ULT = { sword: '🌪 회오리 베기', archer: '🏹 화살비', bomber: '💥 왕폭탄', shield: '🛡 수호 방패', golem: '⛰ 대지진' };
+function allyUlt(a, fm) {
+  const near = G.enemies.filter(e => !e.dead && (e.x - a.x) ** 2 + (e.y - a.y) ** 2 < 260 * 260); if (!near.length) return false;
+  const p = G.p, hitR = (x, y, R, dmg, kb) => { for (const e of G.enemies) { if (e.dead) continue; const dx = e.x - x, dy = e.y - y, d = Math.hypot(dx, dy); if (d < R + e.r) hurtEnemy(e, dmg, dx / (d || 1), dy / (d || 1), kb); } };
+  if (a.type === 'sword') { hitR(a.x, a.y, 120, 90 * fm, 320); G.rings.push({ x: a.x, y: a.y, r: 120, life: 0.35, max: 0.35, color: '#3fa9f5' }); burst(a.x, a.y - 10, '#bde0fe', 26, 280, 5, 0.5); sfx('slash'); }
+  else if (a.type === 'archer') { for (let k = 0; k < 8; k++) { const e = near[k % near.length]; (a.queue = a.queue || []).push({ t: k * 0.07, fn: () => { if (!e.dead) { hurtEnemy(e, 45 * fm, 0, 1, 80); burst(e.x, e.y - 10, '#2ecc71', 6, 120, 3, 0.3); } } }); } sfx('xbowShot'); }
+  else if (a.type === 'bomber') { const e = near[0]; G.bombs.push({ x0: a.x, y0: a.y - 10, x1: e.x, y1: e.y, t: 0, dur: 0.6, dmg: 160 * fm, big: true }); sfx('toss'); }
+  else if (a.type === 'shield') { p.inv = Math.max(p.inv, 2); p.hp = Math.min(p.maxHp, p.hp + 20); G.rings.push({ x: p.x, y: p.y, r: 60, life: 0.6, max: 0.6, color: '#ffd23f' }); hitR(a.x, a.y, 90, 40 * fm, 520); floatText(p.x, p.y - 60, '🛡 2초 무적!', '#ffd23f', 16, 1); sfx('thud'); }
+  else if (a.type === 'golem') { hitR(a.x, a.y, 180, 80 * fm, 260); for (const e of near) e.slowT = Math.max(e.slowT || 0, 2); G.rings.push({ x: a.x, y: a.y, r: 180, life: 0.45, max: 0.45, color: '#a3b18a' }); G.shake = Math.max(G.shake, 9); sfx('bombBoom'); }
+  else return false;
+  floatText(a.x, a.y - 70, ULT[a.type] + '!', '#ffd23f', 17, 1.1); a.ults = (a.ults || 0) + 1; G.ults = (G.ults || 0) + 1; return true;
+}
 function updAllies(dt) {
   const p = G.p, fm0 = 1 + 0.1 * G.forge;
   for (const a of G.allies) {
     const fm = fm0 * allyMul(a), sk = (a.lvl || 1) >= 3;
     a.cd -= dt; a.inv -= dt; a.swing -= dt;
+    if ((a.lvl || 1) >= 5 && !a.dead) { a.ultT = (a.ultT ?? 6) - dt; if (a.ultT <= 0) { if (allyUlt(a, fm)) a.ultT = 12; else a.ultT = 1; } }   // ⚡ Build 129: Lv5 필살기 (12초마다)
     if (a.act) { a.actT += dt; if (a.actT >= ACTS[a.act]) a.act = null; }
     if (a.queue) { for (const q of a.queue) { q.t -= dt; if (q.t <= 0 && !q.done) { q.done = true; if (!a.dead) q.fn(); } } a.queue = a.queue.filter(q => !q.done); }
     if (a.dead) {
