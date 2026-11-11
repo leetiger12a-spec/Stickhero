@@ -6,12 +6,12 @@ const { chromium } = require('/opt/node22/lib/node_modules/playwright');
   page.on('pageerror', e => errors.push('pageerror: ' + e.message)); page.on('console', m => { if (m.type() === 'error') errors.push('console: ' + m.text()); });
   await page.goto('file:///home/user/Stickhero/index.html'); await page.tap('#bStart'); await page.waitForTimeout(300);
   for (let n = 0; n < 3; n++) {
-    await page.evaluate(n => { const G = SH.G; G.enemies = []; G.boss = null; G.bossCount = n; G.p.hp = G.p.maxHp = 1e6; SH.spawnBoss(); }, n);
+    await page.evaluate(n => { const G = SH.G; G.enemies = []; G.boss = null; G.bossCount = n; G.p.hp = G.p.maxHp = 1e6; SH.spawnBoss(); if (n === 0 && SH.G.intro) SH.G.intro.dur = 8; }, n);   /* Build 134: 사진 3장 찍는 판은 바쁠 때 2.6초를 넘겨서 연출을 늘려 둠 (끝나는 건 n=2에서 봄) */
     const t0 = await page.evaluate(() => SH.G.t);
     for (const [ms, tag] of [[350, 'fall'], [1000, 'stomp'], [1450, 'name']]) { await page.waitForTimeout(ms === 350 ? 350 : ms - (tag === 'stomp' ? 350 : 1000)); if (n === 0) await page.screenshot({ path: `${process.env.OUT||'.'}/b16_intro_${tag}.png` }); }
     check(await page.evaluate(t0 => SH.G.t === t0 && !!SH.G.intro, t0), 'game time moved during intro');
     if (n === 1) { await page.tap('body', { position: { x: 200, y: 400 } }); await page.waitForTimeout(100); check(await page.evaluate(() => !SH.G.intro), 'tap did not skip'); }
-    else { await page.waitForTimeout(1500); check(await page.evaluate(() => !SH.G.intro), 'intro did not end'); }
+    else { if (n === 0) await page.evaluate(() => { if (SH.G.intro) SH.G.intro.dur = SH.G.intro.t + 0.5; }); await page.waitForTimeout(1500); check(await page.evaluate(() => !SH.G.intro), 'intro did not end'); }
     if (n === 2) await page.screenshot({ path: (process.env.OUT||'.')+'/b16_after.png' });
     await page.waitForTimeout(300);
     check(await page.evaluate(() => SH.G.t > 0), 'time not resumed');
