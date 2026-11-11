@@ -324,7 +324,7 @@ h2 .hb{-webkit-text-stroke:0;text-shadow:none;letter-spacing:0;font-family:"Jua"
 
 <script>
 'use strict';
-const BUILD = 127;
+const BUILD = 128;
 const BOSS_INTERVAL = 180;      // 보스 등장 간격(초)
 const WAVE_INTERVAL = 60;       // 대규모 몰이 이벤트 간격(초)
 const MAX_ENEMIES = 220;
@@ -3092,6 +3092,9 @@ function updItems(dt) { const p = G.p;
   for (const it of G.items) { it.t += dt; it.bob += dt * 4; if (it.t > 25) it.dead = true;
     if (!p.dead && (p.x - it.x) ** 2 + (p.y - 10 - it.y) ** 2 < 28 * 28) { it.dead = true; useItem(it); } }
   G.items = G.items.filter(i => !i.dead); }
+function drawRage() { const b = G.boss; if (!b || b.dead || !b.rage) return; const k = 0.5 + 0.5 * Math.sin(G.t * 8), R = (b.r || 40) + 14 + k * 6;   // 화난 보스: 발밑 빨간 불꽃 고리
+  ctx.save(); ctx.translate(b.x, b.y); ctx.scale(1, IK); ctx.strokeStyle = `rgba(255,59,59,${0.45 + 0.35 * k})`; ctx.lineWidth = 5; ctx.beginPath(); ctx.ellipse(0, 4, R, R * 0.45, 0, 0, 7); ctx.stroke(); ctx.restore();
+  if (Math.random() < 0.5) G.parts.push({ x: b.x + rand(-b.r, b.r), y: b.y - rand(0, 60), vx: 0, vy: -rand(40, 90), life: 0.5, max: 0.5, color: Math.random() < 0.5 ? '#ff3b3b' : '#ff9f1c', size: 5 }); }
 function drawItems() { for (const it of G.items) { if (it.t > 20 && Math.floor(it.t * 6) % 2) continue; const I = ITEMS[it.kind], y = it.y - 10 + Math.sin(it.bob) * 3, pul = 0.5 + 0.5 * Math.sin(it.t * 5);
   ctx.fillStyle = 'rgba(0,0,0,.2)'; ctx.beginPath(); ctx.ellipse(it.x, it.y + 2, 11, 4, 0, 0, 7); ctx.fill();
   ctx.save(); ctx.translate(it.x, y); ctx.scale(1, IK); ctx.fillStyle = `rgba(255,255,255,${0.55 + pul * 0.3})`; ctx.strokeStyle = I.col; ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(0, -4, 14 + pul * 2, 0, 7); ctx.fill(); ctx.stroke();
@@ -3641,13 +3644,21 @@ function update(dt) {
 
 function updBoss(e, dt, dx, dy, d) {
   if (e.transT > 0) { e.transT -= dt; return; }   // 변신하는 동안 멈춤
-  e.st -= dt * (e.phase2 ? 1.4 : 1);   // 2단계: 기술을 더 자주
+  if (!e.rage && !e.final && !e.goldG && e.hp < e.maxHp * 0.5) { // 😡 Build 128: 체력 절반 아래면 화남 — 1.25배 빠름, 기술 1.3배 자주, 회오리 탄 추가
+    e.rage = true; e.spd *= 1.25; G.rages = (G.rages || 0) + 1; banner('😡 보스가 화났다!', '더 빨라지고 회오리 공격을 써요!', '#ff6b6b', 2); sfx('warn'); G.shake = Math.max(G.shake, 8);
+    burst(e.x, e.y - 40, '#ff3b3b', 30, 260, 6, 0.6); floatText(e.x, e.y - 110, '으아아아!', '#ff6b6b', 22, 1.2); }
+  e.st -= dt * (e.phase2 ? 1.4 : 1) * (e.rage ? 1.3 : 1);   // 2단계·화남: 기술을 더 자주
+  if (e.mode === 'spiral') { // 🌀 회오리 탄: 1.4초 동안 돌아가며 쏨
+    e.spT = (e.spT || 0) - dt; e.spA = (e.spA || 0) + dt * 5;
+    if (e.spT <= 0) { e.spT = 0.09; G.spShots = (G.spShots || 0) + 2; for (let k = 0; k < 2; k++) { const a = e.spA + k * Math.PI; G.ebullets.push({ x: e.x, y: e.y - 20, vx: Math.cos(a) * 190, vy: Math.sin(a) * 190, r: 7, dmg: (10 + e.lvl * 3) * DF().edmg, life: 4 }); } sfx('arrow'); }
+    if (e.st <= 0) { e.mode = 'walk'; e.st = rand(1.5, 2.4); } return; }
   if (e.mode === 'walk') {
     const sl = e.slowT > 0 ? 0.75 : 1;   // 보스는 얼음에 덜 느려짐
     e.x += dx / d * e.spd * sl * dt; e.y += dy / d * e.spd * sl * dt;
     if (e.st <= 0) {
       const r = Math.random();
-      if (r < 0.38) { startSpecial(e, dx, dy, d); }
+      if (e.rage && Math.random() < 0.3) { e.mode = 'spiral'; e.st = 1.4; e.spA = Math.random() * 7; floatText(e.x, e.y - 100, '🌀 회오리!', '#ff9f1c', 16, 0.9); }
+      else if (r < 0.38) { startSpecial(e, dx, dy, d); }
       else if (r < 0.6) { e.mode = 'aim'; e.st = 0.9; sfx('warn'); }
       else if (r < 0.75) { e.mode = 'ring'; e.st = 0.3; e.rings = 2 + Math.min(3, e.lvl); }
       else {
@@ -4723,7 +4734,7 @@ function drawWorld() {
     ctx.fillStyle = 'rgba(255,255,255,.9)';
     for (let k = 0; k < 14; k++) { const a = G.t * (k % 2 ? 1.6 : -1.1) + k * 0.45, rr = R * (0.45 + 0.5 * ((k * 37) % 10) / 10); ctx.beginPath(); ctx.arc(p.x + Math.cos(a) * rr, p.y + Math.sin(a) * rr, 2.5, 0, 7); ctx.fill(); }
   }
-  drawWPoses(); drawFists(); drawFlames(); drawMeteors(); drawItems();   /* 아이템은 나무 위에 (안 가려지게) */
+  drawWPoses(); drawFists(); drawFlames(); drawMeteors(); drawItems(); drawRage();   /* 아이템은 나무 위에 (안 가려지게) */
   for (const b of G.ebullets) {
     { const pn = b.arrow ? 'pj_bolt' : b.slime ? 'pj_slime' : b.ice ? 'pj_ice' : b.skull ? 'pj_skull' : b.rock ? 'pj_rock' : b.cannon ? 'pj_cannon' : 'pj_orb';
       if (drawProj(pn, b.x, b.y, Math.atan2(b.vy, b.vx), b.arrow ? 7 : b.r * (b.cannon && !b.rock ? 2.3 : 2.8))) continue; }   // 그림이 없을 때만 아래 코드 그림
