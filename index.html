@@ -328,7 +328,7 @@ h2 .hb{-webkit-text-stroke:0;text-shadow:none;letter-spacing:0;font-family:"Jua"
 
 <script>
 'use strict';
-const BUILD = 135;
+const BUILD = 136;
 const BOSS_INTERVAL = 180;      // 보스 등장 간격(초)
 const WAVE_INTERVAL = 60;       // 대규모 몰이 이벤트 간격(초)
 const MAX_ENEMIES = 220;
@@ -403,7 +403,7 @@ const THEMES = [
   { name: '던전', tex: 'dungeon', edgeTex: 'dungeon_dark', ground: '#5d4d70', check: 'rgba(0,0,0,.12)',       edge: '#231a2e', deco: 'torch',  bgm: 'd', map: '#5d4d70' },
   { name: '화산', tex: 'volcano', edgeTex: 'volcano_dark', ground: '#7a4a3a', check: 'rgba(255,90,0,.08)',    edge: '#2a1410', deco: 'torch',  bgm: 'c', map: '#b5482e' },
   { name: '성',   tex: 'castle', edgeTex: 'castle_dark', ground: '#8d8fa3', check: 'rgba(0,0,0,.08)',       edge: '#2b2d42', deco: 'pillar', bgm: 'boss', map: '#4a4e69' },
-  { name: '얼음', tex: 'ice', ground: '#dfeefa', check: 'rgba(110,150,200,.08)', edge: '#5f7fa8', deco: 'ice', bgm: 'b', map: '#7fb8e8' },   // Build 94: 얼음 나라 (바닥 그림은 받으면 TEX_IMG에 추가)
+  { name: '얼음', tex: 'ice', ground: '#dfeefa', check: 'rgba(110,150,200,.08)', edge: '#5f7fa8', deco: 'ice', bgm: 'b', map: '#7fb8e8' },   // Build 94: 얼음 나라 (바닥 그림 Build 136)
 ];
 // 모험 지도 10칸. goal: boss(보스 잡기) / rescue(갇힌 고양이 구출 후 보스) / survive(정해진 시간 버티기) / final(마지막 성)
 const STAGES = [
@@ -3934,7 +3934,7 @@ const TEX = {}, TEX_PAT = {}, TEX_WORLD = 300;
 const TEX_TONE = { grass: 'rgba(110,170,80,.3)', dirt: 'rgba(227,197,143,.35)', forest: 'rgba(25,60,25,.3)',
   ruins_dark: 'rgba(45,48,58,.62)', dungeon_dark: 'rgba(14,9,24,.72)', volcano_dark: 'rgba(28,10,6,.7)', castle_dark: 'rgba(20,20,40,.68)' };   // 숲은 경기장보다 어둡게   // 너무 밝은 색을 예전 색 쪽으로 살짝 (적·구슬·건설 표시가 잘 보이게)   // 그림 한 장이 덮는 월드 크기
 // 패턴 이름 → 그림 파일 (_dark: 같은 그림을 어둡게 덧칠해 스테이지 길 바깥에 씀)
-const TEX_IMG = { grass: 'grass', dirt: 'dirt', forest: 'forest', ruins: 'ruins', dungeon: 'dungeon', volcano: 'volcano', castle: 'castle', ruins_dark: 'ruins', dungeon_dark: 'dungeon', volcano_dark: 'volcano', castle_dark: 'castle' };
+const TEX_IMG = { grass: 'grass', dirt: 'dirt', forest: 'forest', ruins: 'ruins', dungeon: 'dungeon', volcano: 'volcano', castle: 'castle', ruins_dark: 'ruins', dungeon_dark: 'dungeon', volcano_dark: 'volcano', castle_dark: 'castle', ice: 'ice' };   // Build 136: 얼음 바닥
 for (const n of new Set(Object.values(TEX_IMG))) { const im = new Image(); im.onload = () => { TEX[n] = im; }; im.src = `img/tex_${n}.webp?b=${BUILD}`; }
 function texPat(n) {
   const im = TEX[TEX_IMG[n]]; if (!im || dprCap <= 1.25) return null;   // 아주 느린 기기(화질 자동 조절 마지막 단계)는 단색 땅
