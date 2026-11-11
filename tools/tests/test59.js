@@ -11,8 +11,8 @@ const { chromium } = require('/opt/node22/lib/node_modules/playwright');
   await calm(); await page.waitForTimeout(500);
   check(await page.evaluate(() => SH.G.enemies.filter(e => e.nightBat).length === 0), 'bats in day');
   await page.evaluate(() => { SH.G.bt = NIGHT_START + 3.2; SH.G.nights = 2; }); await page.waitForTimeout(250); await calm();
-  const bats = await page.evaluate(() => { const B = SH.G.enemies.filter(e => e.nightBat), a = B.map(e => Math.atan2(e.y, e.x)); return { n: B.length, spread: Math.max(...a) - Math.min(...a), spd: B[0] && B[0].spd, base: makeEnemy('e_bat', 0, 0).spd }; });
-  console.log('bats', JSON.stringify(bats)); check(bats.n === 8, 'swarm size not 8'); check(bats.spread < 0.8, 'not from one direction'); check(bats.spd > bats.base * 1.2, 'bats not faster');
+  const bats = await page.evaluate(() => { const B = SH.G.enemies.filter(e => e.nightBat), a = B.map(e => Math.atan2(e.y, e.x)); return { n: B.length, spread: Math.max(...a) - Math.min(...a), spd: B[0] && B[0].spd, base: makeEnemy('e_bat', 0, 0).spd, min: ETYPES.e_bat.spd * 0.9 * 1.3 }; });
+  console.log('bats', JSON.stringify(bats)); check(bats.n === 8, 'swarm size not 8'); check(bats.spread < 0.8, 'not from one direction'); check(bats.spd >= bats.min * 0.999, 'bats not faster');   /* Build 138: 박쥐마다 ±10% 무작위라 다른 박쥐와 비교하면 흔들림 → 기본 속도×1.3×0.9 이상인지 */
   // 14초 뒤 다음 떼
   await page.evaluate(() => { SH.G.batT = 0.05; }); await page.waitForTimeout(250);
   const n2 = await page.evaluate(() => SH.G.enemies.filter(e => e.nightBat).length); console.log('after 2nd', n2); check(n2 >= 15, 'second swarm missing');
