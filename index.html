@@ -325,7 +325,7 @@ h2 .hb{-webkit-text-stroke:0;text-shadow:none;letter-spacing:0;font-family:"Jua"
 
 <script>
 'use strict';
-const BUILD = 131;
+const BUILD = 132;
 const BOSS_INTERVAL = 180;      // 보스 등장 간격(초)
 const WAVE_INTERVAL = 60;       // 대규모 몰이 이벤트 간격(초)
 const MAX_ENEMIES = 220;
@@ -1090,6 +1090,7 @@ function renderDex() {
       `<span class="stars">${'★'.repeat(st)}<i>${'★'.repeat(3 - st)}</i></span>` +
       `<small>${ok ? d.desc : d.where}</small><small class="cnt">${ok ? `${n.toLocaleString()}${d.boss ? '번' : '마리'}${next ? ` · 다음 별 ${next.toLocaleString()}` : ' · 완성!'}` : '아직 못 만났어요'}</small>` +
       `<span class="gold${g ? ' on' : ''}" title="황금">${g ? '✨황금' : '황금 ?'}</span>` +
+      (d.boss && (ST.bfast || {})[d.boss] ? `<small class="cnt fast">🏆 가장 빨리 ${(ST.bfast || {})[d.boss]}초</small>` : '') +
       (d.boss && pbest(d.boss) ? `<small class="cnt">⏱ 연습 최고 ${pbest(d.boss)}초</small>` + (pbest(d.boss + ' 🔥') ? `<small class="cnt">🔥 도전 최고 ${pbest(d.boss + ' 🔥')}초</small>` : '') : '') +
       (d.boss && ok && canPractice() ? `<button class="dexFight" data-k="${d.k}">⚔ 다시 싸우기</button>` + (pbest(d.boss) ? `<button class="dexFight hard" data-k="${d.k}" data-h="1">🔥 도전</button>` : '') : '');
     box.appendChild(el);
@@ -3130,6 +3131,9 @@ function drawItems() { for (const it of G.items) { if (it.t > 20 && Math.floor(i
   ctx.fillStyle = 'rgba(0,0,0,.2)'; ctx.beginPath(); ctx.ellipse(it.x, it.y + 2, 11, 4, 0, 0, 7); ctx.fill();
   ctx.save(); ctx.translate(it.x, y); ctx.scale(1, IK); ctx.fillStyle = `rgba(255,255,255,${0.55 + pul * 0.3})`; ctx.strokeStyle = I.col; ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(0, -4, 14 + pul * 2, 0, 7); ctx.fill(); ctx.stroke();
   ctx.font = '17px sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(I.ic, 0, -3); ctx.restore(); } }
+// 🏆 보스 빨리 잡기 기록 (Build 132): 진짜 싸움(연습 아님)에서 보스마다 가장 빨리 잡은 초 — 몬스터 도감에 표시
+function bossFast(e) { const sec = Math.max(1, Math.round(G.t - (e.bornT ?? G.t))); ST.bfast = ST.bfast || {}; const old = ST.bfast[e.name];
+  if (!old || sec < old) { ST.bfast[e.name] = sec; stDirty = true; if (old) floatText(G.p.x, G.p.y - 90, `🏆 ${e.name} 최고 기록 ${sec}초! (전 ${old}초)`, '#ffd23f', 17, 2); } return sec; }
 function bossDie(e) {
   if (G.mode === 'stage' && G.st && G.st.practice !== undefined) { // 보스 연습: 기록·상자 없이 금화 조금
     G.boss = null; G.shake = 25; G.slow = 1.3; cheerAll(); G.ebullets.length = 0; G.fists = []; G.hazards = [];
@@ -3140,7 +3144,7 @@ function bossDie(e) {
     banner(rec ? `⏱ 신기록! ${sec}초` : `⚔ 연습 승리! ${sec}초`, rec ? (old ? `${key} · 전 기록 ${old}초` : `${key} 첫 기록`) : `${key} · 최고 ${old}초`, '#ffd23f', 3);
     sfx(rec ? 'rewardEvo' : 'bigBoom'); stageClear(e.x, e.y + 60); return;
   }
-  G.boss = null; G.bossKills = (G.bossKills || 0) + 1; allyCheer(); questEvent('boss'); weeklyBoss(); stAdd('bosses'); stSet('bossT', e.name); ST.bk[e.name] = (ST.bk[e.name] || 0) + 1;
+  G.boss = null; G.bossKills = (G.bossKills || 0) + 1; allyCheer(); questEvent('boss'); weeklyBoss(); stAdd('bosses'); stSet('bossT', e.name); ST.bk[e.name] = (ST.bk[e.name] || 0) + 1; bossFast(e);
   for (let i = 0; i < 5; i++) burst(e.x + rand(-40, 40), e.y + rand(-40, 40), [e.color, '#ffd23f', '#fff', '#ff9f1c', '#222'][i], 40, 380, 8, 1.2);
   for (let i = 0; i < 15; i++) { const a = Math.random() * Math.PI * 2, d = rand(10, 90); dropGem(e.x + Math.cos(a) * d, e.y + Math.sin(a) * d, 5); }   // 상자가 생겨서 구슬은 30 → 15
   dropChest(G.mode === 'stage' ? clamp(e.x, -STAGE_HW + 30, STAGE_HW - 30) : e.x, G.mode === 'stage' ? clamp(e.y + 20, -G.st.L - 350, 80) : e.y + 20, false, e.golden || e.goldG);
