@@ -49,6 +49,7 @@ canvas{display:block;position:fixed;inset:0;width:100%;height:100%}
 .arow.off{opacity:.62;background:#e9e4da}.arow .ic{font-size:24px;width:30px;text-align:center}img.mi{height:1.35em;width:auto;vertical-align:-.3em}.arow .ic img{width:40px;height:40px;object-fit:contain;display:block;margin-left:-5px}.arow .tx{flex:1;font-size:14px;line-height:1.3}.arow .tx b{font-weight:400;font-size:16px}
 .arow .pb{height:5px;background:#ddd;border-radius:3px;margin-top:3px}.arow .pb i{display:block;height:100%;background:#3fa9f5;border-radius:3px}
 .arow button{font:inherit;font-size:13px;color:#2b2d42;border:2px solid #2b2d42;border-radius:9px;padding:4px 7px;background:#ffd23f;cursor:pointer;white-space:nowrap}.arow button.on{background:#7bed9f}
+#ovChest.jack{background:radial-gradient(circle at 50% 35%,rgba(255,210,63,.55),rgba(20,10,40,.9) 70%) !important}#ovChest.jack #chestTitle{color:#ffd23f;text-shadow:0 0 12px #ff6bd6,0 0 22px #ffd23f}
 #chestBox{position:relative;margin:4px 0 10px;animation:chestShake .45s ease-in-out infinite}
 #chestBox::before{content:'';position:absolute;inset:-30px;background:radial-gradient(circle,rgba(255,226,120,.75),rgba(255,226,120,0) 62%);opacity:0;transition:opacity .3s}
 #chestBox.open{animation:none}#chestBox.open::before{opacity:1;animation:chestGlow 1.2s ease-in-out infinite}
@@ -324,7 +325,7 @@ h2 .hb{-webkit-text-stroke:0;text-shadow:none;letter-spacing:0;font-family:"Jua"
 
 <script>
 'use strict';
-const BUILD = 129;
+const BUILD = 130;
 const BOSS_INTERVAL = 180;      // 보스 등장 간격(초)
 const WAVE_INTERVAL = 60;       // 대규모 몰이 이벤트 간격(초)
 const MAX_ENEMIES = 220;
@@ -1700,7 +1701,8 @@ function applyChoice(c, quiet) { // 레벨업 카드·보물 상자 공통: 무�
 
 // ---------- 보물 상자: 보스를 쓰러뜨리면 떨어짐, 닿으면 열기 → 무기·능력 1~3개 (진화 먼저) ----------
 const CHEST_ROLL = [[1, 0.6], [2, 0.3], [3, 0.1]];   // [개수, 확률]
-function dropChest(x, y, small, gold) { G.chests = G.chests || []; G.chests.push({ x, y, bob: 0, t: 0, small: !!small, gold: !!gold }); }   // small: 진지 작은 상자(1개·진화 없음), gold: 황금 보스(최소 2개)
+function dropChest(x, y, small, gold) { G.chests = G.chests || []; G.chests.push({ x, y, bob: 0, t: 0, small: !!small, gold: !!gold, jack: !small && Math.random() < JACK_P }); }   // jack: 🌟 대박 상자 (Build 130)
+const JACK_P = 0.08;   // 큰 상자 중 대박 상자 확률   // small: 진지 작은 상자(1개·진화 없음), gold: 황금 보스(최소 2개)
 function chestPick(noEvo) { // 지금 상태에서 상자가 줄 것 하나 (진화 → 가진 무기·능력 → 새 무기·능력 → 금화)
   const evo = noEvo ? [] : Object.keys(EVO).filter(id => canEvolve(id));
   if (evo.length) return { kind: 'evo', id: evo[Math.floor(Math.random() * evo.length)], l: MAX_WLV };
@@ -1713,8 +1715,9 @@ function chestPick(noEvo) { // 지금 상태에서 상자가 줄 것 하나 (진
 }
 function chestRewards(ch) {
   let r = Math.random(), n = 1; for (const [k, pr] of CHEST_ROLL) { if ((r -= pr) <= 0) { n = k; break; } }
-  if (ch && ch.small) n = 1; if (ch && ch.gold) n = Math.max(2, n);
+  if (ch && ch.small) n = 1; if (ch && ch.gold) n = Math.max(2, n); if (ch && ch.jack) n = 3;
   const out = []; for (let i = 0; i < n; i++) { const c = chestPick(ch && ch.small); applyChoice(c, true); out.push(c); }   // 하나씩 적용해야 다음 것이 진화 조건을 봄
+  if (ch && ch.jack) { const g = 150 + 10 * G.lvl; G.gold += g; out.push({ kind: 'gold', n: g }); G.jacks = (G.jacks || 0) + 1; }   // 대박: 3개 + 금화
   return out;
 }
 function chestCardHtml(c) {
@@ -1737,7 +1740,8 @@ function openChest(auto, ch) {
   const kind = ch && ch.small ? 'chest_small' : 'chest_big', cb = $('chestBox'), hasImg = !!WICON[kind]; cb.classList.toggle('img', hasImg);   // 그림이 있으면 그림 상자 (없으면 SVG)
   if (hasImg) $('chestImg').src = `img/${kind}.webp?b=${BUILD}`; cb.dataset.kind = kind;
   cb.classList.remove('open'); $('bChestOk').style.display = 'none'; $('chestHint').style.display = '';
-  $('chestTitle').textContent = (ch && ch.gold ? '✨ 황금 ' : '') + (ch && ch.small ? '작은 상자!' : items.length > 1 ? `보물 상자! ×${items.length}` : '보물 상자!');
+  $('chestTitle').textContent = ch && ch.jack ? `🌟 대박 상자! ×${items.length}` : (ch && ch.gold ? '✨ 황금 ' : '') + (ch && ch.small ? '작은 상자!' : items.length > 1 ? `보물 상자! ×${items.length}` : '보물 상자!');
+  $('ovChest').classList.toggle('jack', !!(ch && ch.jack)); if (ch && ch.jack) { sfx('unlock'); heroSay('jack', true); }
   showOv('ovChest'); sfx('chestShake'); vib([30, 30, 30]);
   let t = 0, k = 0; const stopAt = items.map((_, i) => 0.9 + i * 0.45);
   const done = i => { if (els[i].classList.contains('done')) return; els[i].className = 'ci done' + (items[i].kind === 'evo' ? ' evo' : ''); els[i].innerHTML = chestCardHtml(items[i]); sfx(items[i].kind === 'evo' ? 'rewardEvo' : 'reward'); };
@@ -3893,6 +3897,8 @@ function texPat(n) {
 }
 function drawChest(c) { // 땅의 보물 상자: 통통 튀며 빛나는 원
   const pulse = 0.5 + 0.5 * Math.sin(c.t * 5), y = c.y - 6 - Math.abs(Math.sin(c.bob)) * 6;
+  if (c.jack) { const h = (c.t * 160) % 360; ctx.fillStyle = `hsla(${h},95%,65%,${0.3 + pulse * 0.25})`; ctx.beginPath(); ctx.ellipse(c.x, c.y, 46 + pulse * 8, 30 + pulse * 5, 0, 0, 7); ctx.fill();   // 🌟 대박 상자: 무지개 빛 + 반짝이
+    if (Math.random() < 0.4) G.parts.push({ x: c.x + rand(-26, 26), y: c.y - rand(10, 50), vx: 0, vy: -rand(20, 50), life: 0.6, max: 0.6, color: `hsl(${(h + rand(0, 120)) % 360},95%,70%)`, size: 4 }); }
   ctx.fillStyle = `rgba(255,214,90,${0.18 + pulse * 0.2})`; ctx.beginPath(); ctx.ellipse(c.x, c.y, 30 + pulse * 6, 20 + pulse * 4, 0, 0, 7); ctx.fill();
   ctx.fillStyle = 'rgba(0,0,0,.22)'; ctx.beginPath(); ctx.ellipse(c.x, c.y + 2, 17, 7, 0, 0, 7); ctx.fill();
   const ch = c.small ? 26 : 34, ci = bakedIco(c.small ? 'chest_small' : 'chest_big', ch);
@@ -4822,7 +4828,7 @@ function hudText(t, x, y, size, color, align, big) {   // big: 제목 글꼴(검
 }
 // 💬 영웅 말풍선 (Build 104): 보스·진화·밤·유령 상자·체력 낮음 때 짧은 말
 const SAY = { boss: ['덤벼라!', '보스다! 간다!', '이번엔 안 진다!'], evo: ['진화다! 엄청 세졌어!', '우와, 반짝반짝!'], low: ['아야… 조심해야지', '하트가 필요해!'],
-  night: ['밤이다… 반딧불이 예쁘다', '어두워도 안 무서워!'], morning: ['아침이다! 해냈다!', '휴, 버텼다!'], ghost: ['앗! 유령 상자다!', '거기 서!'], combo: ['멈출 수 없어!', '콤보 최고!'], danger: ['마을이 위험해!', '지금 간다!'], rainbow: ['우와, 무지개다!', '금화 비다!'], bats: ['박쥐다! 조심!'], catch: ['잡았다!', '내 보물이야!'] };
+  night: ['밤이다… 반딧불이 예쁘다', '어두워도 안 무서워!'], morning: ['아침이다! 해냈다!', '휴, 버텼다!'], ghost: ['앗! 유령 상자다!', '거기 서!'], combo: ['멈출 수 없어!', '콤보 최고!'], danger: ['마을이 위험해!', '지금 간다!'], jack: ['대박이다!!', '우와, 다 좋은 거야!'], rainbow: ['우와, 무지개다!', '금화 비다!'], bats: ['박쥐다! 조심!'], catch: ['잡았다!', '내 보물이야!'] };
 function heroSay(kind, force) { if (!G) return; const L = SAY[kind]; if (!L) return; if (!force && G.say && G.t - G.say.at < 3) return;
   G.say = { txt: L[Math.floor(Math.random() * L.length)], at: G.t, t: 0, dur: 2.2, kind }; }
 function updSay(dt) { const p = G.p;
