@@ -328,7 +328,7 @@ h2 .hb{-webkit-text-stroke:0;text-shadow:none;letter-spacing:0;font-family:"Jua"
 
 <script>
 'use strict';
-const BUILD = 136;
+const BUILD = 137;
 const BOSS_INTERVAL = 180;      // 보스 등장 간격(초)
 const WAVE_INTERVAL = 60;       // 대규모 몰이 이벤트 간격(초)
 const MAX_ENEMIES = 220;
@@ -456,7 +456,7 @@ const SPR_INFO = {    // ax: 발 위치(그림 폭 대비), h: 화면 키(월드
   tree: { h: 78 }, stump: { h: 20 }, log: { h: 8 }, stake: { h: 26 }, tower: { h: 76 }, hall: { h: 92 },
   smith: { h: 72 }, pillar: { h: 70 }, icepillar: { ax: 0.5, h: 70 }, snowman: { ax: 0.5, h: 46 }, snowtree: { ax: 0.5, h: 72 }, torch: { h: 58 }, coin: { h: 12 },
   ally_sword: { ax: 0.5, h: 52 }, ally_archer: { ax: 0.5, h: 52 }, ally_bomber: { ax: 0.45, h: 52 }, ally_shield: { ax: 0.5, h: 54 }, ally_golem: { ax: 0.5, h: 58 }, ally_golem_walk: { h: 60 }, ally_golem_slam: { h: 60 }, hero_slash: { h: 72 }, hero_walk: { h: 72 }, ally_archer_shoot: { h: 60 }, ally_bomber_toss: { h: 60 }, ally_shield_bash: { h: 60 }, ally_sword_slash: { h: 60 }, ally_sword_walk: { h: 60 }, ally_archer_walk: { h: 60 }, ally_bomber_walk: { h: 60 }, ally_shield_walk: { h: 60 }, sf_plane0: { h: 80 }, sf_plane1: { h: 80 }, sf_plane2: { h: 80 }, sf_plane3: { h: 80 }, sf_plane4: { h: 80 }, sf_pilot0: { h: 70 }, sf_pilot1: { h: 70 }, sf_pilot2: { h: 70 }, sf_pilot3: { h: 70 }, sf_pilot4: { h: 70 }, tavern: { h: 72 }, skyfang_plane: { h: 80 },
-  e_archer: { ax: 0.45, h: 50 }, e_bomber: { ax: 0.42, h: 50 }, e_bat: { ax: 0.5, h: 48 }, e_slime: { ax: 0.5, h: 42 }, e_shaman: { ax: 0.42, h: 56 }, e_charger: { ax: 0.5, h: 52 },
+  e_archer: { ax: 0.45, h: 50 }, e_bomber: { ax: 0.42, h: 50 }, e_bat: { ax: 0.5, h: 48 }, e_slime: { ax: 0.5, h: 42 }, e_shaman: { ax: 0.42, h: 56 }, e_charger: { ax: 0.5, h: 52 }, e_snowman: { ax: 0.5, h: 56 }, e_ginger: { ax: 0.5, h: 46 },
   farm: { h: 72 }, mine: { h: 74 }, market: { h: 76 }, stone: { h: 14 }, rock: { h: 64 }, camp: { h: 100 }, hall2: { h: 100 }, hall3: { h: 108 }, hall_broken: { h: 96 }, tower_broken: { h: 70 }, stonewall: { h: 34 }, repair: { h: 40 },
 };
 const SPR_SRC = {}, SPR_ORIG = {};
@@ -719,7 +719,7 @@ function bakeSprite(n) {
   }
 }
 // img/ 폴더에 실제로 있는 그림만 불러옴 (없는 파일을 부르면 오류가 남)
-const SPR_FILES = ['e_agrunt', 'e_srunner', 'e_stank', 'e_knight', 'e_assassin', 'e_ogre', 'e_demon', 'e_ghost', 'e_golem', 'boss3', 'boss4', 'boss5', 'boss6', 'boss7', 'boss8', 'boss9', 'boss10', 'boss_final', 'e_spider', 'e_skel', 'e_archer', 'e_bomber', 'e_bat', 'e_slime', 'e_shaman', 'e_charger', 'hall2', 'hall3', 'hall_broken', 'tower_broken', 'stonewall', 'repair', 'farm', 'mine', 'market', 'stone', 'rock', 'camp', 'hero', 'grunt', 'runner', 'tank', 'boss0', 'boss1', 'boss2', 'tree', 'stump', 'log', 'stake', 'tower', 'hall',
+const SPR_FILES = ['e_snowman', 'e_ginger', 'e_agrunt', 'e_srunner', 'e_stank', 'e_knight', 'e_assassin', 'e_ogre', 'e_demon', 'e_ghost', 'e_golem', 'boss3', 'boss4', 'boss5', 'boss6', 'boss7', 'boss8', 'boss9', 'boss10', 'boss_final', 'e_spider', 'e_skel', 'e_archer', 'e_bomber', 'e_bat', 'e_slime', 'e_shaman', 'e_charger', 'hall2', 'hall3', 'hall_broken', 'tower_broken', 'stonewall', 'repair', 'farm', 'mine', 'market', 'stone', 'rock', 'camp', 'hero', 'grunt', 'runner', 'tank', 'boss0', 'boss1', 'boss2', 'tree', 'stump', 'log', 'stake', 'tower', 'hall',
   'smith', 'pillar', 'icepillar', 'snowman', 'snowtree', 'torch', 'coin', 'ally_sword', 'ally_archer', 'tavern', 'ally_bomber', 'skyfang_plane', 'ally_shield', 'hero_slash', 'hero_walk', 'ally_archer_shoot', 'ally_bomber_toss', 'ally_shield_bash', 'ally_sword_slash', 'ally_sword_walk', 'ally_archer_walk', 'ally_bomber_walk', 'ally_shield_walk', 'ally_golem', 'ally_golem_walk', 'ally_golem_slam', 'sf_plane0', 'sf_plane1', 'sf_plane2', 'sf_plane3', 'sf_plane4', 'sf_pilot0', 'sf_pilot1', 'sf_pilot2', 'sf_pilot3', 'sf_pilot4'];
 SPR_FILES.forEach(n => {
   const im = new Image();
@@ -994,7 +994,7 @@ const DECAL_TH = { grass: ['d_daisy', 'd_butter', 'd_mush', 'd_pebble'], ruins: 
 const WICON = {};
 for (const id in WEAP) for (const ev of [0, 1]) { const n = id + (ev ? '_evo' : ''), im = new Image(); im.onload = () => { WICON[n] = im; }; im.src = `img/w_${n}.webp?b=${BUILD}`; }
 // 능력·회복·경험치 구슬 그림 (img/p_능력.webp, i_chicken, i_heart, gem_b/g/r)
-for (const n of [...Object.keys(PASS).map(id => 'p_' + id), 'i_chicken', 'i_heart', 'gem_b', 'gem_g', 'gem_r', 'chest_big', 'chest_big_open', 'chest_small', 'chest_small_open', ...Object.keys(DECAL_H), ...PROJ_IMG, ...HATS.filter(h => h.id).map(h => 'hat_' + h.id), ...PETS.filter(h => h.id).map(h => 'pet_' + h.id)]) { const im = new Image(); im.onload = () => { WICON[n] = im; }; im.src = `img/${n}.webp?b=${BUILD}`; }
+for (const n of [...Object.keys(PASS).map(id => 'p_' + id), 'i_chicken', 'i_heart', 'gem_b', 'gem_g', 'gem_r', 'chest_big', 'chest_big_open', 'chest_small', 'chest_small_open', ...Object.keys(DECAL_H), ...PROJ_IMG, ...HATS.filter(h => h.id).map(h => 'hat_' + h.id), 'i_gift', 'i_candy', ...PETS.filter(h => h.id).map(h => 'pet_' + h.id)]) { const im = new Image(); im.onload = () => { WICON[n] = im; }; im.src = `img/${n}.webp?b=${BUILD}`; }
 const icoHtml = (n, alt) => WICON[n] ? `<img src="img/${n}.webp?b=${BUILD}" alt="">` : alt;
 const mIco = (n, alt) => WICON[n] ? `<img class="mi" src="img/${n}.webp?b=${BUILD}" alt="">` : alt;   // 글자 줄 안의 작은 그림
 const pMini = id => mIco('p_' + id, PASS[id].icon), wMini = (id, ev) => { const n = id + (ev ? '_evo' : ''); return WICON[n] ? `<img class="mi" src="img/w_${n}.webp?b=${BUILD}" alt="">` : ev ? EVO[id].icon : WEAP[id].icon; };   // 무기 그림 키는 w_ 없이
@@ -1181,7 +1181,7 @@ function recalcStats() {
   p.maxHp = Math.round((100 + 25 * (ps.hp || 0)) * (1 + 0.1 * U('hp')));
   if (p.maxHp > oldMax) p.hp += p.maxHp - oldMax;
   p.hp = Math.min(p.hp, p.maxHp);
-  p.speed = 150 * (1 + 0.1 * (ps.speed || 0)) * (1 + 0.04 * U('spd')) * (WK('swift') ? 1.15 : 1);
+  p.speed = 150 * (1 + 0.1 * (ps.speed || 0)) * (1 + 0.04 * U('spd')) * (WK('swift') ? 1.15 : 1);   // 🍬 사탕 빠르기는 이동 때 곱함
   p.magnet = 70 * (1 + 0.4 * (ps.magnet || 0)) * (1 + 0.12 * U('mag'));
   p.dmgMul = (1 + 0.15 * (ps.power || 0)) * (1 + 0.1 * (G.forge || 0)) * (1 + 0.06 * U('atk'));
   p.cdMul = Math.max(0.5, 1 - 0.1 * (ps.haste || 0));
@@ -1230,6 +1230,8 @@ const ETYPES = {
   tank:   { r: 17, hp: 75, spd: 40,  dmg: 18, color: '#2f6fd6', xp: 5, gold: 4 },
   // 특수 적 (Build 42)
   e_archer:  { r: 10, hp: 12, spd: 52, dmg: 6,  color: '#2ecc71', xp: 2, gold: 1 },
+  e_snowman: { r: 14, hp: 40, spd: 46, dmg: 12, color: '#e9f1ff', xp: 3, gold: 2 },   // Build 137 겨울 이벤트: 튼튼·느림
+  e_ginger:  { r: 10, hp: 14, spd: 112, dmg: 7, color: '#c8743a', xp: 2, gold: 2 },   // 쿠키맨: 빠름
   e_bomber:  { r: 11, hp: 16, spd: 74, dmg: 6,  color: '#ff9f1c', xp: 2, gold: 2 },
   e_bat:     { r: 9,  hp: 10, spd: 88, dmg: 4,  color: '#9b5de5', xp: 2, gold: 1 },
   e_slime:   { r: 13, hp: 20, spd: 44, dmg: 8,  color: '#7bed9f', xp: 2, gold: 1 },
@@ -2060,7 +2062,7 @@ function spawnEnemy(type) {
   if (G.enemies.length >= MAX_ENEMIES) return;
   // 한 방향에서 부대처럼 몰려오고, 몇 초마다 방향이 바뀜
   const a = G.squadAng + rand(-0.35, 0.35), R = WORLD_R - rand(10, 40);
-  G.enemies.push(makeEnemy(type, Math.cos(a) * R, Math.sin(a) * R));
+  G.enemies.push(winterFix(makeEnemy(type, Math.cos(a) * R, Math.sin(a) * R)));
 }
 function pickType() {
   const r = Math.random(), t = G.bt;
@@ -2416,7 +2418,7 @@ function updBase(dt) {
   rate *= 1 + 0.5 * nightK();   // 밤에는 적 +50%
   if (WK('swarm')) rate *= 1.6;
   G.spawnAcc += rate * dt;
-  while (G.spawnAcc >= 1) { G.spawnAcc--; spawnEnemy(pickType()); }
+  while (G.spawnAcc >= 1) { G.spawnAcc--; spawnEnemy(winterSwap(pickType())); }
 
 }
 
@@ -2930,7 +2932,7 @@ function updStage(dt) {
     const n = 4 + Math.min(10, Math.round(st.n * 1.3)) + Math.floor(rand(0, 3));
     for (let i = 0; i < n; i++) {
       const type = (Math.random() < 0.22 && pickSpecial(st.n)) || tierType(tierNow(), st.n >= 2 ? [0.55, 0.3, 0.15] : st.n >= 1 ? [0.55, 0.45, 0] : [1, 0, 0]);
-      const e = makeEnemy(type, rand(-STAGE_HW + 25, STAGE_HW - 25), g.y + rand(-70, 70));
+      const e = winterFix(makeEnemy(winterSwap(type), rand(-STAGE_HW + 25, STAGE_HW - 25), g.y + rand(-70, 70)));
       G.enemies.push(e);
     }
   }
@@ -3140,9 +3142,10 @@ function killEnemy(e) {
   for (let i = 0; i < e.gold; i++) if (i > 0 || Math.random() < 0.7) dropCoin(e.x + rand(-8, 8), e.y + rand(-8, 8));
   if (Math.random() < 0.012) G.hearts.push({ x: e.x, y: e.y, bob: 0 });
   rollItem(e.x, e.y);
+  if ((e.type === 'e_snowman' || e.type === 'e_ginger') && !e.small) { const r = Math.random(); if (r < 0.15) dropItem('gift', e.x, e.y); else if (r < 0.3) dropItem('candy', e.x, e.y); }   // 🎄
 }
 // 🧲 떨어지는 아이템 (Build 110~): 적을 잡으면 아주 가끔, 25초 뒤 사라짐 (마지막 5초 깜빡)
-const ITEMS = { magnet: { ic: '🧲', p: 0.004, col: '#ff6b6b' }, bomb: { ic: '💣', p: 0.0035, col: '#ff9f1c' } };
+const ITEMS = { magnet: { ic: '🧲', p: 0.004, col: '#ff6b6b' }, bomb: { ic: '💣', p: 0.0035, col: '#ff9f1c' }, gift: { ic: '🎁', img: 'i_gift', p: 0, col: '#2ecc71' }, candy: { ic: '🍬', img: 'i_candy', p: 0, col: '#ff4d6d' } };
 function rollItem(x, y) { for (const k in ITEMS) { if (G.items.some(i => i.kind === k)) continue; if (Math.random() < ITEMS[k].p) { dropItem(k, x, y); return; } } }
 function dropItem(kind, x, y) { G.items.push({ kind, x, y, bob: Math.random() * 6, t: 0 }); }
 function useItem(it) { const p = G.p;
@@ -3152,7 +3155,18 @@ function useItem(it) { const p = G.p;
       hurtEnemy(e, e.boss ? e.maxHp * 0.1 / G.p.dmgMul : 400 + 40 * G.lvl, dx / (d || 1), dy / (d || 1), 260); }
     G.rings.push({ x: p.x, y: p.y, r: R, life: 0.5, max: 0.5, color: '#ff9f1c' }); burst(p.x, p.y - 10, '#ff9f1c', 40, 380, 6, 0.6); burst(p.x, p.y - 10, '#ffe066', 24, 300, 5, 0.5);
     G.shake = Math.max(G.shake, 14); G.lvlFlash = 0.35; sfx('bombBoom'); floatText(p.x, p.y - 70, '💣 쾅!', '#ff9f1c', 24, 1.1); }
+  if (it.kind === 'gift') { const r = Math.random(); G.gifts = (G.gifts || 0) + 1; burst(p.x, p.y - 12, '#2ecc71', 16, 200, 4, 0.5); burst(p.x, p.y - 12, '#ff4d6d', 12, 200, 4, 0.5); sfx('unlock');   // 🎁 선물: 금화·구슬·작은 상자 중 하나
+    if (r < 0.45) { const g = 40 + 5 * G.lvl; G.gold += g; floatText(p.x, p.y - 60, `🎁 금화 +${g}!`, '#ffd23f', 18, 1.2); }
+    else if (r < 0.8) { const v = Math.round(G.need * 0.35); G.xp += v; floatText(p.x, p.y - 60, `🎁 경험치 +${v}!`, '#6bd6ff', 18, 1.2); }
+    else { dropChest(p.x + 30, p.y, true); floatText(p.x, p.y - 60, '🎁 작은 보물 상자!', '#ffd23f', 18, 1.2); } }
+  if (it.kind === 'candy') { p.hp = Math.min(p.maxHp, p.hp + 20); G.candyT = 6; floatText(p.x, p.y - 60, '🍬 체력 +20 · 6초 빨라져요!', '#ff4d6d', 16, 1.2); sfx('heal'); }
   G.itemsUsed = (G.itemsUsed || 0) + 1; }
+// 🎄 겨울 이벤트 (Build 137): 12월~1월엔 마을에, 얼음 나라엔 언제나 — 눈사람·쿠키맨이 섞여 나오고, 잡으면 선물·사탕을 떨어뜨림
+const winterSeason = (d = new Date()) => window.__winter !== undefined ? !!window.__winter : d.getMonth() === 11 || d.getMonth() === 0;
+const winterHere = () => G && (G.mode === 'stage' ? !!(G.st && G.st.th && G.st.th.tex === 'ice') : G.mode === 'base' && winterSeason());
+function winterSwap(type) { if (!winterHere() || Math.random() > 0.12) return type; return Math.random() < 0.5 ? 'e_snowman' : 'e_ginger'; }
+function winterFix(e) { if (e.type !== 'e_snowman' && e.type !== 'e_ginger') return e; const base = ETYPES[TIERS[Math.min(TIERS.length - 1, Math.floor(tierNow() || 0))][0]].hp * DF().ehp, k = e.type === 'e_snowman' ? 3 : 1;
+  e.hp = e.maxHp = Math.max(e.maxHp, base * k); if (!G.winterAnn) { G.winterAnn = true; banner('🎄 겨울 친구들이 왔다!', '눈사람·쿠키맨을 잡으면 🎁 선물·🍬 사탕!', '#bde0fe', 2.6); sfx('reward'); } return e; }
 function updItems(dt) { const p = G.p;
   for (const it of G.items) { it.t += dt; it.bob += dt * 4; if (it.t > 25) it.dead = true;
     if (!p.dead && (p.x - it.x) ** 2 + (p.y - 10 - it.y) ** 2 < 28 * 28) { it.dead = true; useItem(it); } }
@@ -3163,7 +3177,7 @@ function drawRage() { const b = G.boss; if (!b || b.dead || !b.rage) return; con
 function drawItems() { for (const it of G.items) { if (it.t > 20 && Math.floor(it.t * 6) % 2) continue; const I = ITEMS[it.kind], y = it.y - 10 + Math.sin(it.bob) * 3, pul = 0.5 + 0.5 * Math.sin(it.t * 5);
   ctx.fillStyle = 'rgba(0,0,0,.2)'; ctx.beginPath(); ctx.ellipse(it.x, it.y + 2, 11, 4, 0, 0, 7); ctx.fill();
   ctx.save(); ctx.translate(it.x, y); ctx.scale(1, IK); ctx.fillStyle = `rgba(255,255,255,${0.55 + pul * 0.3})`; ctx.strokeStyle = I.col; ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(0, -4, 14 + pul * 2, 0, 7); ctx.fill(); ctx.stroke();
-  ctx.font = '17px sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(I.ic, 0, -3); ctx.restore(); } }
+  const im = I.img && bakedIco(I.img, 24); if (im) { const w = 24 * im.width / im.height; ctx.drawImage(im, -w / 2, -16, w, 24); } else { ctx.font = '17px sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(I.ic, 0, -3); } ctx.restore(); } }
 // 🏆 보스 빨리 잡기 기록 (Build 132): 진짜 싸움(연습 아님)에서 보스마다 가장 빨리 잡은 초 — 몬스터 도감에 표시
 function bossFast(e) { const sec = Math.max(1, Math.round(G.t - (e.bornT ?? G.t))); ST.bfast = ST.bfast || {}; const old = ST.bfast[e.name];
   if (!old || sec < old) { ST.bfast[e.name] = sec; stDirty = true; if (old) floatText(G.p.x, G.p.y - 90, `🏆 ${e.name} 최고 기록 ${sec}초! (전 ${old}초)`, '#ffd23f', 17, 2); } return sec; }
@@ -3368,7 +3382,7 @@ function update(dt) {
     p.moving = Math.abs(d.x) + Math.abs(d.y) > 0.05;
     const ice = onIce(p.x, p.y);   // Build 95: 얼음판 위에선 미끄러짐 (천천히 빨라지고, 손을 떼도 주르륵)
     if (ice) {
-      const sm = (p.slowT > 0 ? 0.6 : 1) * (G.st && G.st.blizOn > 0 ? 0.75 : 1), tx = p.moving ? d.x * p.speed * sm : 0, ty = p.moving ? d.y * p.speed * sm : 0, k = Math.min(1, dt * 2.2);
+      const sm = (p.slowT > 0 ? 0.6 : 1) * (G.st && G.st.blizOn > 0 ? 0.75 : 1) * (G.candyT > 0 ? 1.25 : 1), tx = p.moving ? d.x * p.speed * sm : 0, ty = p.moving ? d.y * p.speed * sm : 0, k = Math.min(1, dt * 2.2);
       p.ivx = (p.ivx || 0) + (tx - (p.ivx || 0)) * k; p.ivy = (p.ivy || 0) + (ty - (p.ivy || 0)) * k;
       if (!p.moving) { p.x += p.ivx * dt; p.y += p.ivy * dt; p.x = clamp(p.x, -STAGE_HW + 12, STAGE_HW - 12); p.y = clamp(p.y, -G.st.L - 380, 100); }
     } else { p.ivx = p.ivy = 0; }
@@ -3414,7 +3428,7 @@ function update(dt) {
     sfx('swing');
     for (const e of G.enemies) { const dx = e.x - p.x, dy = e.y - p.y, d = Math.hypot(dx, dy) || 1; if (d < 66 + e.r && dx * p.face > -12) hurtEnemy(e, 12, dx / d, dy / d, 240); }
   } }
-  updAllies(dt); updBombs(dt); updMeteors(dt); updPlane(dt); updSay(dt); updCombo(dt); updItems(dt); updDanger(dt); updAllySay(dt); updPet(dt);
+  updAllies(dt); updBombs(dt); updMeteors(dt); updPlane(dt); if (G.candyT > 0) G.candyT -= dt; updSay(dt); updCombo(dt); updItems(dt); updDanger(dt); updAllySay(dt); updPet(dt);
   if (G.sosCd > 0) { G.sosCd -= dt; if (G.sosCd <= 0) { G.sosCd = 0; sfx('pick'); } }
   if (G.radio) { G.radio.t += dt; if (G.radio.t >= G.radio.dur) G.radio = null; else if (Math.floor(G.radio.t * 26) !== Math.floor((G.radio.t - dt) * 26) && G.radio.t * 26 < SKY_SQUAD[G.radio.k].line.length && Math.floor(G.radio.t * 26) % 3 === 0) tone(1300 + Math.random() * 300, 0.025, 'square', 0.015, 0); }
   for (const z of G.zaps) z.life -= dt; G.zaps = G.zaps.filter(z => z.life > 0);
