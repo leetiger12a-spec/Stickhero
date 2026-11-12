@@ -328,7 +328,7 @@ h2 .hb{-webkit-text-stroke:0;text-shadow:none;letter-spacing:0;font-family:"Jua"
 
 <script>
 'use strict';
-const BUILD = 139;
+const BUILD = 140;
 const BOSS_INTERVAL = 180;      // 보스 등장 간격(초)
 const WAVE_INTERVAL = 60;       // 대규모 몰이 이벤트 간격(초)
 const MAX_ENEMIES = 220;
@@ -660,6 +660,13 @@ const ACH = [
   { id: 'night10', icon: '🌙', name: '밤의 수호자',   desc: '밤 10번 버티기',             title: '달빛 영웅',  bank: 250, p: () => [ST.nightsAll || 0, 10] },
   { id: 'hat1',    icon: '🎩', name: '첫 모자',       desc: '모자 하나 열기 (별 4개)',     title: '멋쟁이',     bank: 80,  p: () => [HATS.filter(h => h.id && totalStars() >= h.need).length, 1] },
   { id: 'hat8',    icon: '🐉', name: '모자 부자',     desc: '모자 8개 모두 열기',          title: '패션 왕',    bank: 500, p: () => [HATS.filter(h => h.id && totalStars() >= h.need).length, 8] },
+  // Build 140: 새 업적 6개
+  { id: 'pet5',    icon: '🐾', name: '펫 대장',       desc: '펫 하나를 Lv5로 키우기',      title: '펫 조련사',  bank: 300, p: () => [Math.max(...PETS.filter(q => q.id).map(q => petLv(q.id))), 5] },
+  { id: 'cave1',   icon: '🌟', name: '비밀 탐험가',   desc: '비밀 보물 동굴 다녀오기',      title: '동굴 탐험가', bank: 150, p: () => [ST.caves || 0, 1] },
+  { id: 'jack3',   icon: '🎁', name: '대박 행운',     desc: '대박 상자 3개 열기',           title: '행운아',     bank: 250, p: () => [ST.jacks || 0, 3] },
+  { id: 'ult50',   icon: '⚡', name: '필살기 팀',     desc: '동료 필살기 50번',             title: '팀 대장',    bank: 200, p: () => [ST.ults || 0, 50] },
+  { id: 'winter50', icon: '⛄', name: '눈싸움 왕',    desc: '눈사람·쿠키맨 50마리 잡기',    title: '겨울 용사',  bank: 150, p: () => [(ST.kc.e_snowman || 0) + (ST.kc.e_ginger || 0), 50] },
+  { id: 'rage10',  icon: '😡', name: '화 다스리기',   desc: '화난 보스 10마리 물리치기',    title: '진정한 영웅', bank: 300, p: () => [ST.rageKills || 0, 10] },
   { id: 'newevo',  icon: '🌠', name: '독과 별',       desc: '독 늪 가마솥·유성우 지팡이 진화', title: '별빛 연금술사', bank: 300, p: () => [['poison', 'star'].filter(x => ST.evoT.includes(x)).length, 2] },
 ];
 function checkAch() { // 1초마다: 기록 저장 + 새 업적
@@ -1759,7 +1766,7 @@ function chestRewards(ch) {
   let r = Math.random(), n = 1; for (const [k, pr] of CHEST_ROLL) { if ((r -= pr) <= 0) { n = k; break; } }
   if (ch && ch.small) n = 1; if (ch && ch.gold) n = Math.max(2, n); if (ch && ch.jack) n = 3;
   const out = []; for (let i = 0; i < n; i++) { const c = chestPick(ch && ch.small); applyChoice(c, true); out.push(c); }   // 하나씩 적용해야 다음 것이 진화 조건을 봄
-  if (ch && ch.jack) { const g = 150 + 10 * G.lvl; G.gold += g; out.push({ kind: 'gold', n: g }); G.jacks = (G.jacks || 0) + 1; }   // 대박: 3개 + 금화
+  if (ch && ch.jack) { const g = 150 + 10 * G.lvl; G.gold += g; out.push({ kind: 'gold', n: g }); G.jacks = (G.jacks || 0) + 1; stAdd('jacks'); }   // 대박: 3개 + 금화
   return out;
 }
 function chestCardHtml(c) {
@@ -2455,7 +2462,7 @@ function allyUlt(a, fm) {
   else if (a.type === 'shield') { p.inv = Math.max(p.inv, 2); p.hp = Math.min(p.maxHp, p.hp + 20); G.rings.push({ x: p.x, y: p.y, r: 60, life: 0.6, max: 0.6, color: '#ffd23f' }); hitR(a.x, a.y, 90, 40 * fm, 520); floatText(p.x, p.y - 60, '🛡 2초 무적!', '#ffd23f', 16, 1); sfx('thud'); }
   else if (a.type === 'golem') { hitR(a.x, a.y, 180, 80 * fm, 260); for (const e of near) e.slowT = Math.max(e.slowT || 0, 2); G.rings.push({ x: a.x, y: a.y, r: 180, life: 0.45, max: 0.45, color: '#a3b18a' }); G.shake = Math.max(G.shake, 9); sfx('bombBoom'); }
   else return false;
-  floatText(a.x, a.y - 70, ULT[a.type] + '!', '#ffd23f', 17, 1.1); a.ults = (a.ults || 0) + 1; G.ults = (G.ults || 0) + 1; return true;
+  floatText(a.x, a.y - 70, ULT[a.type] + '!', '#ffd23f', 17, 1.1); a.ults = (a.ults || 0) + 1; G.ults = (G.ults || 0) + 1; stAdd('ults'); return true;
 }
 function updAllies(dt) {
   const p = G.p, fm0 = 1 + 0.1 * G.forge;
@@ -2804,7 +2811,7 @@ $('bCave').onclick = () => {
   if (!caveOpen()) { sfx('hurt'); $('mapCard').innerHTML = `<div class="t">🌟 비밀 보물 동굴</div><div class="g">🔒 ⭐⭐⭐로 깬 칸 5개 (지금 ${star3()}개)</div>`; return; }
   const used = G.caveDay === G.day;
   $('mapCard').innerHTML = `<div class="t">🌟 비밀 보물 동굴</div><div class="g">40초 동안 황금 몬스터만 나와요 · 잡으면 금화 와르르</div><div class="r">하루(날짜) 1번 · ${used ? '오늘은 이미 다녀왔어요 · 내일 또!' : '오늘 갈 수 있어요!'}</div>` + (used ? '' : '<button class="btn big" id="bGoCave" style="margin-top:6px">🌟 동굴로!</button>');
-  if (!used) $('bGoCave').onclick = () => { showOv(null); state = 'play'; G.caveDay = G.day; G.caveGold0 = G.gold; G.caves = (G.caves || 0) + 1; enterStage(0, 0, undefined, false, true); };
+  if (!used) $('bGoCave').onclick = () => { showOv(null); state = 'play'; G.caveDay = G.day; G.caveGold0 = G.gold; G.caves = (G.caves || 0) + 1; stAdd('caves'); enterStage(0, 0, undefined, false, true); };
   sfx('pick');
 };
 const rushOpen = () => G.stageN >= 5;
@@ -3208,7 +3215,7 @@ function bossDie(e) {
       const v = 300, m2 = readJSON(META_KEY) || {}; m2.bank = (m2.bank || 0) + v; writeJSON(META_KEY, m2); stAdd('rushes'); banner('👑 보스 러시 완주!', `보스 ${R.list.length}마리 연속 · 금고에 🪙${v}`, '#ffd23f', 3.2); sfx('unlock'); }
     stageClear(e.x, e.y + 60); return;
   }
-  G.boss = null; G.bossKills = (G.bossKills || 0) + 1; allyCheer(); questEvent('boss'); weeklyBoss(); stAdd('bosses'); stSet('bossT', e.name); ST.bk[e.name] = (ST.bk[e.name] || 0) + 1; bossFast(e);
+  G.boss = null; G.bossKills = (G.bossKills || 0) + 1; allyCheer(); if (e.rage) stAdd('rageKills'); questEvent('boss'); weeklyBoss(); stAdd('bosses'); stSet('bossT', e.name); ST.bk[e.name] = (ST.bk[e.name] || 0) + 1; bossFast(e);
   for (let i = 0; i < 5; i++) burst(e.x + rand(-40, 40), e.y + rand(-40, 40), [e.color, '#ffd23f', '#fff', '#ff9f1c', '#222'][i], 40, 380, 8, 1.2);
   for (let i = 0; i < 15; i++) { const a = Math.random() * Math.PI * 2, d = rand(10, 90); dropGem(e.x + Math.cos(a) * d, e.y + Math.sin(a) * d, 5); }   // 상자가 생겨서 구슬은 30 → 15
   dropChest(G.mode === 'stage' ? clamp(e.x, -STAGE_HW + 30, STAGE_HW - 30) : e.x, G.mode === 'stage' ? clamp(e.y + 20, -G.st.L - 350, 80) : e.y + 20, false, e.golden || e.goldG);
