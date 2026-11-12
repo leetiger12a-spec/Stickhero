@@ -49,7 +49,8 @@ const PICK = process.env.BOT_PICK || 'random', RUNS = +process.argv[2] || 4, MIN
           } else {
             const threat = g.enemies.filter(e => Math.hypot(e.x, e.y) < 330);
             const pads = g.pads.map(q => ({ q, c: padCost(q) })).filter(o => o.c && p.logs >= Math.min(o.c.w - o.q.pw, p.logs) && (o.c.w - o.q.pw <= p.logs || p.logs >= p.cap) && (o.c.g - o.q.pg <= g.gold || o.c.g === 0) && ((o.c.s || 0) - (o.q.ps || 0) <= g.stone) && (o.c.w > 0 || o.c.g > 0) && !(o.c.w - o.q.pw > 0 && p.logs === 0));
-            if (threat.length && !lowHp) { const t = near(threat, p.x, p.y); tx = t.x; ty = t.y; if (Math.hypot(t.x - p.x, t.y - p.y) < 60) { tx = p.x - (t.x - p.x); ty = p.y - (t.y - p.y); } }
+            const danger = PICK !== 'smart' || g.raid || g.boss || threat.filter(e => Math.hypot(e.x, e.y) < 200).length >= 3 || (p.logs >= p.cap && !pads.length);   // Build 156 smart: 위험할 때만 싸우고 아니면 나무·짓기 (예전엔 적이 1마리만 있어도 계속 쫓아서 나무를 못 벰)
+            if (threat.length && !lowHp && danger) { const t = near(threat, p.x, p.y); tx = t.x; ty = t.y; if (Math.hypot(t.x - p.x, t.y - p.y) < 60) { tx = p.x - (t.x - p.x); ty = p.y - (t.y - p.y); } }
             else if (lowHp) { tx = 0; ty = 60; }
             else if (pads.length) { const o = pads[0]; tx = o.q.x; ty = o.q.y + padOY(o.q); }
             else if (p.logs < p.cap && STYLE !== 'fighter') { const t = near(g.trees.filter(t => t.logs > 0), p.x, p.y); if (t) { tx = t.x - 20; ty = t.y; } }
