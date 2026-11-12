@@ -328,7 +328,7 @@ h2 .hb{-webkit-text-stroke:0;text-shadow:none;letter-spacing:0;font-family:"Jua"
 
 <script>
 'use strict';
-const BUILD = 137;
+const BUILD = 138;
 const BOSS_INTERVAL = 180;      // 보스 등장 간격(초)
 const WAVE_INTERVAL = 60;       // 대규모 몰이 이벤트 간격(초)
 const MAX_ENEMIES = 220;
@@ -502,13 +502,19 @@ function updPet(dt) { const P = PETS[petSel], p = G.p; if (!P || !P.id) { G.pet 
   const tx = p.x - 34 * (p.face || 1), ty = p.y + 14, dx = tx - pt.x, dy = ty - pt.y, d = Math.hypot(dx, dy);
   if (d > 600) { pt.x = tx; pt.y = ty; } else if (d > 6) { const sp = Math.min(d * 4, p.speed * 1.4); pt.x += dx / d * sp * dt; pt.y += dy / d * sp * dt; pt.hop += dt * 12; if (Math.abs(dx) > 2) pt.face = dx > 0 ? 1 : -1; }
   pt.cd -= dt; if (pt.cd > 0 || p.dead) return;
-  if (P.id === 'puppy') { pt.cd = 1.2; const c = G.coins.filter(c => !c.pull && (c.x - p.x) ** 2 + (c.y - p.y) ** 2 < 320 * 320).slice(0, 4); for (const k of c) k.pull = true; if (c.length) floatText(pt.x, pt.y - 34, '멍!', '#ffb703', 12, 0.6); }
-  else if (P.id === 'kitten') { pt.cd = 1.2; const g = G.gems.filter(g => !g.pull && (g.x - p.x) ** 2 + (g.y - p.y) ** 2 < 320 * 320).slice(0, 6); for (const k of g) k.pull = true; if (g.length) floatText(pt.x, pt.y - 34, '냥!', '#bde0fe', 12, 0.6); }
-  else if (P.id === 'chick') { pt.cd = 3; if (p.hp < p.maxHp) { p.hp = Math.min(p.maxHp, p.hp + 2); floatText(pt.x, pt.y - 34, '삐약 +2', '#7bed9f', 12, 0.7); } }
-  else if (P.id === 'dragon') { pt.cd = 2; const e = nearest(pt.x, pt.y, 300); if (e) { const a = Math.atan2(e.y - pt.y, e.x - pt.x); G.bullets.push({ x: pt.x, y: pt.y - 14, vx: Math.cos(a) * 420, vy: Math.sin(a) * 420, r: 5, dmg: 8 + 2 * G.lvl, life: 0.8, pierce: 0, hits: [], kind: 'pistol', pet: true }); pt.face = Math.cos(a) > 0 ? 1 : -1; sfx('toss'); } } }
+  const L = petLv(P.id);   // 🐾 Build 138: 펫 레벨 1~5
+  if (P.id === 'puppy') { pt.cd = 1.3 - 0.1 * L; const c = G.coins.filter(c => !c.pull && (c.x - p.x) ** 2 + (c.y - p.y) ** 2 < 320 * 320).slice(0, 3 + L); for (const k of c) k.pull = true; if (c.length) floatText(pt.x, pt.y - 34, '멍!', '#ffb703', 12, 0.6); }
+  else if (P.id === 'kitten') { pt.cd = 1.3 - 0.1 * L; const g = G.gems.filter(g => !g.pull && (g.x - p.x) ** 2 + (g.y - p.y) ** 2 < 320 * 320).slice(0, 4 + 2 * L); for (const k of g) k.pull = true; if (g.length) floatText(pt.x, pt.y - 34, '냥!', '#bde0fe', 12, 0.6); }
+  else if (P.id === 'chick') { pt.cd = 3; if (p.hp < p.maxHp) { p.hp = Math.min(p.maxHp, p.hp + 2 * L); floatText(pt.x, pt.y - 34, `삐약 +${2 * L}`, '#7bed9f', 12, 0.7); } }
+  else if (P.id === 'dragon') { pt.cd = 2.2 - 0.2 * L; const e = nearest(pt.x, pt.y, 300); if (e) { const a = Math.atan2(e.y - pt.y, e.x - pt.x); G.bullets.push({ x: pt.x, y: pt.y - 14, vx: Math.cos(a) * 420, vy: Math.sin(a) * 420, r: 5, dmg: (8 + 2 * G.lvl) * (1 + 0.25 * (L - 1)), life: 0.8, pierce: L >= 5 ? 2 : 0, hits: [], kind: 'pistol', pet: true }); pt.face = Math.cos(a) > 0 ? 1 : -1; sfx('toss'); } } }
+const PET_XP = [0, 100, 300, 700, 1500];   // 펫이 함께 잡은 적 수로 레벨 (영원히)
+const petLv = id => { const x = ((ST.petXp || {})[id]) || 0; let l = 1; for (let i = 1; i < PET_XP.length; i++) if (x >= PET_XP[i]) l = i + 1; return l; };
+function petGain() { const P = PETS[petSel]; if (!P || !P.id || !G.pet) return; ST.petXp = ST.petXp || {}; const before = petLv(P.id); ST.petXp[P.id] = (ST.petXp[P.id] || 0) + 1; stDirty = true;
+  const now = petLv(P.id); if (now > before) { floatText(G.pet.x, G.pet.y - 50, `🐾 ${P.name} Lv ${now}!`, '#ffd23f', 18, 1.6); burst(G.pet.x, G.pet.y - 16, '#ffd23f', 20, 200, 4, 0.6); sfx('unlock'); } }
 function drawPet() { const pt = G.pet, P = PETS[petSel]; if (!pt || !P || !P.id) return; const im = bakedIco('pet_' + P.id, 30); if (!im) return; const h = 30, w = h * im.width / im.height, hop = Math.abs(Math.sin(pt.hop)) * 4;
   ctx.fillStyle = 'rgba(0,0,0,.18)'; ctx.beginPath(); ctx.ellipse(pt.x, pt.y + 2, 11, 4, 0, 0, 7); ctx.fill();
-  ctx.save(); ctx.translate(pt.x, pt.y - hop); ctx.scale(pt.face, IK); ctx.drawImage(im, -w / 2, -h + 2, w, h); ctx.restore(); }
+  ctx.save(); ctx.translate(pt.x, pt.y - hop); ctx.scale(pt.face, IK); ctx.drawImage(im, -w / 2, -h + 2, w, h); ctx.restore();
+  const L = petLv(P.id); if (L > 1) { ctx.save(); ctx.translate(pt.x, pt.y - h - 6 - hop); ctx.scale(1, IK); ctx.font = 'bold 9px Jua,system-ui,sans-serif'; ctx.textAlign = 'center'; ctx.lineWidth = 3; ctx.strokeStyle = '#222'; ctx.strokeText('Lv' + L, 0, 0); ctx.fillStyle = L >= 5 ? '#ffd23f' : '#fff'; ctx.fillText('Lv' + L, 0, 0); ctx.restore(); } }
 let hatSel = 0;
 try { hatSel = +(localStorage.getItem('stickhero_hat') || 0) || 0; } catch (e) {}
 function drawHat(hx, hy, hw) { // 머리 꼭대기 (hx, hy)에 모자, hw = 머리 폭
@@ -563,8 +569,8 @@ function renderWard() {
   PETS.forEach((h, i) => {
     const lock = have < h.need, b = document.createElement('button');
     b.className = 'sw' + (i === petSel ? ' on' : '') + (lock ? ' lock' : ''); b.dataset.i = i; b.title = h.desc || '';
-    b.innerHTML = (h.id ? `<img src="img/pet_${h.id}.webp?b=${BUILD}" alt="">` : '<b>🚫</b>') + (lock ? '🔒⭐' + h.need : h.name);
-    b.onclick = () => { if (lock) { sfx('hurt'); return; } petSel = i; try { localStorage.setItem('stickhero_pet', i); } catch (e) {} sfx('pick'); if (G) G.pet = null; renderWard(); if (h.desc) $('wardSub').textContent = `🐾 ${h.name}: ${h.desc}`; };
+    b.innerHTML = (h.id ? `<img src="img/pet_${h.id}.webp?b=${BUILD}" alt="">` : '<b>🚫</b>') + (lock ? '🔒⭐' + h.need : h.name + (h.id ? ` <small>Lv${petLv(h.id)}</small>` : ''));
+    b.onclick = () => { if (lock) { sfx('hurt'); return; } petSel = i; try { localStorage.setItem('stickhero_pet', i); } catch (e) {} sfx('pick'); if (G) G.pet = null; renderWard(); if (h.desc) { const L = petLv(h.id), nx = PET_XP[L]; $('wardSub').textContent = `🐾 ${h.name} Lv${L}: ${h.desc}` + (nx ? ` · 다음 레벨까지 적 ${nx - ((ST.petXp || {})[h.id] || 0)}마리` : ' · 최고 레벨!'); } };
     pg.appendChild(b);
   });
   // 미리보기
@@ -3114,7 +3120,7 @@ function addCombo() { G.combo = (G.comboT > 0 ? G.combo || 0 : 0) + 1; G.comboT 
   const gift = COMBO_GIFT[G.combo]; if (gift) { G.gold += gift; floatText(G.p.x, G.p.y - 74, `🔥 ${G.combo} 콤보! +🪙${gift}`, '#ff9f1c', 20, 1.4); sfx('coin'); if (G.combo >= 100) heroSay('combo', true); } }
 function updCombo(dt) { if (G.comboT > 0) { G.comboT -= dt; if (G.comboT <= 0) G.combo = 0; } if (G.comboPop > 0) G.comboPop -= dt; }
 function killEnemy(e) {
-  e.dead = true; G.kills++; if (!e.boss && !e.camp) addCombo(); if (e.lastSrc === 'poison') questEvent('poison'); else if (e.lastSrc === 'star') questEvent('meteor');
+  e.dead = true; G.kills++; if (!e.boss && !e.camp) { addCombo(); petGain(); } if (e.lastSrc === 'poison') questEvent('poison'); else if (e.lastSrc === 'star') questEvent('meteor');
   if (G.allies.length) allyGainXp(e.x, e.y, e.boss ? 40 : e.camp ? 20 : e.xp);
   if (!e.boss && !e.camp) { questEvent('kill'); stAdd('kills'); ST.kc[e.type] = (ST.kc[e.type] || 0) + 1; if (e.golden) { stSet('goldT', e.type); goldDie(e); } if (e.type.startsWith('e_')) { questEvent('special'); if (SPECIALS.some(q => q[0] === e.type)) stSet('specT', e.type); } }
   if (e.boss) { bossDie(e); return; }
