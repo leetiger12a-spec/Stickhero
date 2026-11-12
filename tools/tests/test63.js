@@ -14,7 +14,7 @@ const { chromium } = require('/opt/node22/lib/node_modules/playwright');
   await page.evaluate(() => { ST.kills = 12345; ST.bosses = 7; ST.ghosts = 3; ST.playT = 3725; SH.killBase && 0; state = 'title'; showOv('ovTitle'); });
   await page.click('#bStats'); await page.waitForTimeout(300);
   const rows = await page.evaluate(() => [...document.querySelectorAll('#statList .st')].map(e => e.textContent)); console.log(rows.join(' / '));
-  check(rows.length === 14, 'rows not 14'); check(rows.some(r => r.includes('12,345')) && rows.some(r => r.includes('1시간 2분')) && rows.some(r => r.includes('유령') && r.endsWith('3')), 'values wrong');
+  check(rows.length === 22, 'rows not 22');   /* Build 146: 8칸 추가 */ check(rows.some(r => r.includes('12,345')) && rows.some(r => r.includes('1시간 2분')) && rows.some(r => r.includes('유령') && r.endsWith('3')), 'values wrong');
   await page.screenshot({ path: `${OUT}/b103_stats.png` });
   await page.click('#bStatsOk'); await page.waitForTimeout(200); check(await page.evaluate(() => SH.state === 'title' && $('ovTitle').classList.contains('show')), 'close failed');
   console.log(errors.length ? 'ERRORS:\n' + errors.join('\n') : 'OK');

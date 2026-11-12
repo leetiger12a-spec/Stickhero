@@ -29,7 +29,7 @@ canvas{display:block;position:fixed;inset:0;width:100%;height:100%}
 @keyframes shine{0%,55%{left:-60%}100%{left:130%}}
 .mrow{display:flex;gap:8px;margin-top:6px}
 #bDaily{position:relative}#bDaily.new::after{content:'';position:absolute;top:-4px;right:-4px;width:12px;height:12px;border-radius:50%;background:#ff3b3b;border:2px solid #fff}
-#statList{width:min(92vw,360px);margin:10px 0;display:grid;grid-template-columns:1fr 1fr;gap:8px}#statList .st{background:#fffaf0;color:#222;border:3px solid #222;border-radius:12px;padding:7px 8px;font-size:12px;font-weight:800}#statList .st b{display:block;font-size:19px;color:#d35400}
+#statList{width:min(92vw,360px);margin:10px 0;display:grid;grid-template-columns:1fr 1fr;gap:8px;max-height:62vh;overflow-y:auto;padding:2px}#statList .st{background:#fffaf0;color:#222;border:3px solid #222;border-radius:12px;padding:7px 8px;font-size:12px;font-weight:800}#statList .st b{display:block;font-size:19px;color:#d35400}
 #dailyGrid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;width:min(92vw,360px);margin:10px 0}
 #dailyGrid .dd{border:3px solid #222;border-radius:12px;background:#fffaf0;color:#222;padding:6px 2px;font-weight:800;font-size:12px;display:flex;flex-direction:column;align-items:center;gap:2px}
 #dailyGrid .dd b{font-size:20px}#dailyGrid .dd.got{opacity:.45}#dailyGrid .dd.now{outline:4px solid #ffd23f;transform:scale(1.06)}#dailyGrid .dd.big{grid-column:span 2;background:#fff3c4}
@@ -333,7 +333,7 @@ h2 .hb{-webkit-text-stroke:0;text-shadow:none;letter-spacing:0;font-family:"Jua"
 
 <script>
 'use strict';
-const BUILD = 145;
+const BUILD = 146;
 const BOSS_INTERVAL = 180;      // 보스 등장 간격(초)
 const WAVE_INTERVAL = 60;       // 대규모 몰이 이벤트 간격(초)
 const MAX_ENEMIES = 220;
@@ -610,7 +610,11 @@ function statRows() { const b = loadBest(), m = readJSON(META_KEY) || {};
   return [['⏱ 놀이 시간', fmtT(ST.playT || 0)], ['💀 잡은 적', (ST.kills || 0).toLocaleString()], ['👑 잡은 보스', ST.bosses || 0], ['🏴 부순 진지', ST.camps || 0],
     ['✨ 진화한 무기', `${ST.evoT.length}/${Object.keys(EVO).length}`], ['🗺 모험 지도', `${bestStage()}/${STAGES.length}칸`], ['🌤 무한 탑 최고', `${m.bestFloor || 0}층`], ['📅 버틴 날', `${ST.day || 1}일`],
     ['🌙 버틴 밤', ST.nightsAll || 0], ['👻 잡은 유령 상자', ST.ghosts || 0], ['⭐ 모은 별', totalStars()], ['🏅 업적', `${ACH.filter(A => (m.ach || {})[A.id]).length}/${ACH.length}`],
-    ['🎚 최고 레벨', `Lv ${b.lvl || 0}`], ['🏦 금고', `🪙${m.bank || 0}`]]; }
+    ['🎚 최고 레벨', `Lv ${b.lvl || 0}`], ['🏦 금고', `🪙${m.bank || 0}`],
+    // Build 146: 새 칸
+    ['🐾 펫 최고 레벨', (() => { const P = PETS.filter(q => q.id), best = P.reduce((a, q) => petLv(q.id) > petLv(a.id) ? q : a, P[0]); return ((ST.petXp || {})[best.id] ? `${best.name} Lv${petLv(best.id)}` : '-'); })()],
+    ['🔥 최고 콤보', ST.bestCombo || 0], ['🌟 동굴 탐험', `${ST.caves || 0}번`], ['🎁 대박 상자', `${ST.jacks || 0}개`],
+    ['⚡ 동료 필살기', `${ST.ults || 0}번`], ['👑 보스 러시 완주', `${ST.rushes || 0}번`], ['😡 화난 보스 처치', ST.rageKills || 0], ['🌕 보름달 밤', ST.moons || 0]]; }
 function openStats() { state = 'stats'; showOv('ovStats'); $('statList').innerHTML = statRows().map(([k, v]) => `<div class="st">${k}<b>${v}</b></div>`).join('');
   $('bStatsOk').onclick = () => { sfx('pick'); state = 'title'; refreshTitle(); showOv('ovTitle'); }; }
 $('bStats').onclick = () => { audioInit(); sfx('pick'); openStats(); };
