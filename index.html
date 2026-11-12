@@ -137,7 +137,7 @@ h2{margin:0 0 14px;font:400 clamp(30px,9vw,46px) "BHS","Jua",system-ui,-apple-sy
 .best{margin-top:14px;font-size:15px;opacity:.85;line-height:1.6}
 .hint{margin-top:14px;font-size:13px;opacity:.65;line-height:1.5}
 #cards{display:flex;flex-direction:column;gap:12px;width:min(92vw,420px)}
-#pauseStats{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;width:min(92vw,380px);margin:4px 0 10px}#pauseStats .ps{background:rgba(255,250,240,.95);color:#222;border:2px solid #222;border-radius:10px;padding:4px 2px;font-size:11px;font-weight:800;text-align:center}#pauseStats .ps b{display:block;font-size:15px;color:#d35400}#pauseStats .pw{grid-column:1/-1;font-size:12px;line-height:1.6}
+#pauseStats{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;width:min(92vw,380px);margin:4px 0 10px}#pauseStats .ps{background:rgba(255,250,240,.95);color:#222;border:2px solid #222;border-radius:10px;padding:4px 2px;font-size:11px;font-weight:800;text-align:center}#pauseStats .ps b{display:block;font-size:15px;color:#d35400}#pauseStats .anm{font:inherit;font-size:12px;font-weight:800;border:2px solid #222;border-radius:10px;background:#fff3c4;padding:4px 8px;margin:3px 2px;min-height:32px;cursor:pointer}#pauseStats .pw{grid-column:1/-1;font-size:12px;line-height:1.6}
 #overStats .runSum{display:grid;grid-template-columns:1fr 1fr;gap:2px 12px;margin-top:8px;padding-top:8px;border-top:2px dashed rgba(255,255,255,.35);font-size:13px;text-align:left}#overStats .runW{grid-column:1/-1;text-align:center;margin-top:4px}
 #cardTools{display:flex;gap:10px;margin-top:12px}#cardTools button{font:inherit;font-size:14px;font-weight:800;border:3px solid #222;border-radius:14px;background:#fffaf0;color:#222;padding:8px 14px;min-height:44px;cursor:pointer}#cardTools button:disabled{opacity:.4}#cardTools button.on{background:#ffd6d6;outline:3px solid #ff4d6d}#cards .card.banable{outline:4px dashed #ff4d6d}
 .card{display:flex;align-items:center;gap:14px;text-align:left;font:inherit;color:#2b2d42;background:linear-gradient(#fffdf7,#fff1d6);border:3px solid #2b2d42;border-radius:18px;padding:12px 14px;cursor:pointer;box-shadow:inset 0 2px 0 #fff,0 5px 0 #2b2d42,0 10px 18px rgba(0,0,0,.3);animation:pop .25s ease-out backwards}
@@ -341,7 +341,7 @@ h2 .hb{-webkit-text-stroke:0;text-shadow:none;letter-spacing:0;font-family:"Jua"
 
 <script>
 'use strict';
-const BUILD = 152;
+const BUILD = 153;
 const BOSS_INTERVAL = 180;      // 보스 등장 간격(초)
 const WAVE_INTERVAL = 60;       // 대규모 몰이 이벤트 간격(초)
 const MAX_ENEMIES = 220;
@@ -381,10 +381,14 @@ const allyMax = () => ALLY_MAX + (G && G.vLvl >= 3 ? 1 : 0);   // 마을 Lv3이�
 const ALLY_NEED = [0, 60, 180, 360, 600];  // 다음 레벨까지 경험치 (Lv1→2: 60 …)
 const ALLY_TRAIN = l => 50 + 60 * l;       // 숙소 훈련 비용 (금화)
 const ALLY_SKILL = { sword: '회전 베기', archer: '화살 3발', bomber: '두 번 펑', shield: '든든한 방패(주변 피해 −25%)', golem: '도발! 가까운 적이 골렘을 노려요' };
-function makeAlly(type, lvl, xp) {
+// 🐱 동료 이름표 (Build 153): 무작위 귀여운 이름, 일시정지 화면에서 🔄로 바꾸기, 저장
+const ALLY_NAMES = { cat: ['나비', '치즈', '콩이', '루비', '보리', '까망', '호떡', '망고', '구름', '모카'], dog: ['바둑', '초코', '두부', '몽이', '해피', '복실'], golem: ['돌돌', '바위', '쿵쿵', '단단', '몽돌'] };
+const allyNamePool = t => t === 'golem' ? ALLY_NAMES.golem : t === 'shield' ? ALLY_NAMES.dog : ALLY_NAMES.cat;
+function pickAllyName(t, not) { const L = allyNamePool(t).filter(n => n !== not && !G.allies.some(a => a.name === n)); return L.length ? L[Math.floor(Math.random() * L.length)] : allyNamePool(t)[0]; }
+function makeAlly(type, lvl, xp, name) {
   if ((ST.alv[type] || 0) < (lvl || 1)) { ST.alv[type] = lvl || 1; stDirty = true; }   // 동료 도감: 만난 동료·최고 레벨
   const T = ALLY_TYPES[type], l = lvl || 1, hp = Math.round(T.hp * (1 + 0.2 * (l - 1)));
-  return { type, lvl: l, xp: xp || 0, slot: G.allies.length, x: TAVERN.x, y: TAVERN.y + 34, hp, maxHp: hp, cd: 0, inv: 0, face: 1, wob: 0, swing: 0, dead: false, reviveT: 0, hits: 0 };
+  return { type, lvl: l, xp: xp || 0, name: name || pickAllyName(type), slot: G.allies.length, x: TAVERN.x, y: TAVERN.y + 34, hp, maxHp: hp, cd: 0, inv: 0, face: 1, wob: 0, swing: 0, dead: false, reviveT: 0, hits: 0 };
 }
 function allyLevelUp(a) {
   if (a.lvl >= 5) return;
@@ -1571,7 +1575,7 @@ function buildSave() {
     weapons: G.weapons, passives: G.passives, gold: G.gold, chests: G.mode === 'base' ? (G.chests || []).map(c => [Math.round(c.x), Math.round(c.y), c.small ? 1 : 0, c.gold ? 1 : 0]) : [], logs: p.logs, hp: p.dead ? -1 : p.hp,
     base: G.base.hp, wallLvl: G.wallLvl, walls: G.walls.map(w => w.hp), towers: G.towers.map(t => t.lvl),
     pads: G.pads.map(q => [q.built, q.pw, q.pg, q.ps || 0]), smith: G.smith, forge: G.forge, tavern: G.tavern,
-    allies: G.allies.map(a => [a.type, a.lvl || 1, Math.round(a.xp || 0)]), stageN: G.stageN, stars: G.stars, bossCount: G.bossCount - (G.boss ? 1 : 0), bossKills: G.bossKills || 0,
+    allies: G.allies.map(a => [a.type, a.lvl || 1, Math.round(a.xp || 0), a.name]), stageN: G.stageN, stars: G.stars, bossCount: G.bossCount - (G.boss ? 1 : 0), bossKills: G.bossKills || 0,
     vLvl: G.vLvl, stone: G.stone, bld: G.bld,
     rocks: G.rocks.map(o => [Math.round(o.x), Math.round(o.y), o.s, Math.round(o.regrow)]),
     camps: G.camps.map(c => [Math.round(c.x), Math.round(c.y), c.lvl, Math.round(c.rebuild), c.e && !c.e.dead ? Math.round(c.e.hp / c.e.maxHp * 100) / 100 : 0]),
@@ -1604,7 +1608,7 @@ function loadGame(d) {
   if (d.rocks) G.rocks = d.rocks.map(([x, y, s, rg]) => ({ x, y, s, max: 6, regrow: rg, shake: 0 }));
   if (d.camps) { G.enemies = G.enemies.filter(e => !e.camp); G.camps = d.camps.map(([x, y, lvl, rebuild, hp]) => ({ x, y, lvl, rebuild, spawnT: rand(8, 16), e: null })); G.camps.forEach((c, i) => { if (d.camps[i][4] > 0) makeCamp(c, d.camps[i][4]); }); }
   G.allies = [];
-  for (const it of d.allies) { const [type, lvl, xp] = Array.isArray(it) ? it : [it, 1, 0]; G.allies.push(makeAlly(type, lvl, xp)); }   // 예전 저장은 종류만
+  for (const it of d.allies) { const [type, lvl, xp, nm] = Array.isArray(it) ? it : [it, 1, 0]; G.allies.push(makeAlly(type, lvl, xp, nm)); }   // 예전 저장은 종류만
   if (d.raidPending) G.raidIn = 10;
   for (const t of G.weapons ? Object.keys(G.weapons) : []) G.timers[t] = 0.5;
 }
@@ -1674,7 +1678,8 @@ function dayMilestone(d) { const v = DAY_GIFT[d]; if (!v) return false; const m 
 function renderPauseStats() { const p = G.p, pct = v => `${v >= 1 ? '+' : ''}${Math.round((v - 1) * 100)}%`;
   const ws = Object.keys(G.weapons).map(id => `${wMini(id, G.weapons[id] > MAX_WLV)} ${G.weapons[id] > MAX_WLV ? '✨진화' : 'Lv' + G.weapons[id]}`).join(' · ');
   const cells = [['⚔ 공격력', pct(p.dmgMul)], ['⏱ 공격 빠르기', pct(1 / p.cdMul)], ['💨 이동 속도', Math.round(p.speed)], ['❤ 최대 체력', p.maxHp], ['🧲 자석 범위', Math.round(p.magnet)], ['🎒 통나무', `${p.cap}개`]];
-  $('pauseStats').innerHTML = cells.map(([k, v]) => `<div class="ps">${k}<b>${v}</b></div>`).join('') + `<div class="ps pw">${ws || '무기 없음'}${G.combo ? '' : ''}<br><small>🔥 최고 콤보 ${G.bestCombo || 0} · 🔁 ${G.rerolls ?? 2} · 🚫 ${G.bans ?? 2}</small></div>`; }
+  const al = G.allies.map((a, i) => `<button class="anm" data-i="${i}">${ALLY_TYPES[a.type].icon} ${a.name || '?'} 🔄</button>`).join('');
+  $('pauseStats').innerHTML = (al ? `<div class="ps pw">🐱 동료 이름 (눌러서 바꾸기)<br>${al}</div>` : '') + cells.map(([k, v]) => `<div class="ps">${k}<b>${v}</b></div>`).join('') + `<div class="ps pw">${ws || '무기 없음'}${G.combo ? '' : ''}<br><small>🔥 최고 콤보 ${G.bestCombo || 0} · 🔁 ${G.rerolls ?? 2} · 🚫 ${G.bans ?? 2}</small></div>`; }
 // 🧾 이번 판 요약 (Build 116): 게임오버 화면에 최고 콤보·치명타·유령 상자·아이템·무지개 구슬·버틴 밤·무기
 function runSummary() { const ws = Object.keys(G.weapons).map(id => `${wMini(id, G.weapons[id] > MAX_WLV)}${G.weapons[id] > MAX_WLV ? '✨' : G.weapons[id]}`).join(' ');
   const L = [['🔥 최고 콤보', G.bestCombo || 0], ['💥 치명타', G.crits || 0], ['👻 유령 상자', G.ghostCaught || 0], ['🧲💣 아이템', G.itemsUsed || 0], ['🌈 무지개 구슬', G.rainbows || 0], ['🌙 버틴 밤', G.nights || 0]];
@@ -1695,6 +1700,7 @@ const TIPS = {
 let tipT = 0;
 function showTip(id) { const m = readJSON(META_KEY) || {}; m.tips = m.tips || {}; if (m.tips[id] || !TIPS[id]) return false; m.tips[id] = 1; writeJSON(META_KEY, m);
   const el = $('tipCard'); el.innerHTML = TIPS[id]; el.classList.add('show'); el.dataset.id = id; clearTimeout(tipT); tipT = setTimeout(() => el.classList.remove('show'), 5000); return true; }
+document.addEventListener('click', ev => { const b = ev.target.closest && ev.target.closest('.anm'); if (!b || !G) return; const a = G.allies[+b.dataset.i]; if (!a) return; a.name = pickAllyName(a.type, a.name); sfx('pick'); renderPauseStats(); });
 function togglePause() {
   if (state === 'play') { state = 'paused'; joy = null; renderPauseStats(); showOv('ovPause'); }
   else if (state === 'paused') { state = 'play'; showOv(null); }
@@ -4361,6 +4367,9 @@ function drawAlly(a) {
   if (a.lvl > 1) { // 레벨 별
     ctx.save(); ctx.translate(a.x, hy - 13); ctx.scale(1, IK); ctx.font = '9px Jua,system-ui,sans-serif'; ctx.textAlign = 'center'; ctx.lineWidth = 2.5; ctx.strokeStyle = '#222';
     const st = '★'.repeat(a.lvl - 1); ctx.strokeText(st, 0, 0); ctx.fillStyle = a.lvl >= 5 ? '#ffd23f' : '#ffe58f'; ctx.fillText(st, 0, 0); ctx.restore();
+  }
+  if (a.name) { ctx.save(); ctx.translate(a.x, a.y + 18); ctx.scale(1, IK); ctx.font = 'bold 9px Jua,system-ui,sans-serif'; ctx.textAlign = 'center'; ctx.lineWidth = 2.5; ctx.strokeStyle = 'rgba(0,0,0,.7)'; ctx.strokeText(a.name, 0, 0); ctx.fillStyle = '#fff'; ctx.fillText(a.name, 0, 0); ctx.restore(); }   // 발밑 이름표
+  if (a.lvl > 1) {
     if (a.lvl < 5 && a.xp > 0) { ctx.fillStyle = '#222'; ctx.fillRect(a.x - 10, hy - 26, 20, 3); ctx.fillStyle = '#ffd23f'; ctx.fillRect(a.x - 10, hy - 26, 20 * Math.min(1, a.xp / ALLY_NEED[a.lvl]), 3); }
   }
   if (a.hp < a.maxHp) {
