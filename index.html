@@ -328,7 +328,7 @@ h2 .hb{-webkit-text-stroke:0;text-shadow:none;letter-spacing:0;font-family:"Jua"
 
 <script>
 'use strict';
-const BUILD = 141;
+const BUILD = 142;
 const BOSS_INTERVAL = 180;      // 보스 등장 간격(초)
 const WAVE_INTERVAL = 60;       // 대규모 몰이 이벤트 간격(초)
 const MAX_ENEMIES = 220;
@@ -339,7 +339,8 @@ let WALL_R = 165;               // 울타리 반지름 (마을 레벨에 따라 
 const BASE_R = 34;              // 마을 회관 크기
 const WALL_SEGS = 16;
 const K = 0.72, IK = 1 / K;      // 3/4 시점: 땅은 세로로 납작하게, 서 있는 물체는 그대로
-const TOWER_W = [6, 0, 0, 0, 0], TOWER_G = [0, 20, 40, 70, 110];    // 망루: 처음엔 통나무, 강화는 금화만
+const TOWER_W = [6, 0, 0, 0, 0, 0], TOWER_G = [0, 20, 40, 70, 110, 180];   // Build 142: Lv6 (불화살, 마을 Lv3 필요)
+const TOWER_MAX = () => G.vLvl >= 3 ? 6 : 5;    // 망루: 처음엔 통나무, 강화는 금화만
 const WALL_W = [0, 8, 12, 16, 20, 0, 0], WALL_G = [0, 10, 25, 40, 60, 80, 120], WALL_S = [0, 0, 0, 0, 0, 15, 30];   // 울타리: 현재 Lv 기준 (Lv6~7은 돌 성벽)
 // 마을 레벨: 마을회관을 키우면 울타리가 넓어지고 새 건물 자리가 생김
 const VILLAGE = [
@@ -1919,7 +1920,7 @@ function padCost(pd) {
   const bk = brokenKey(pd);
   if (bk && G.broken[bk]) return repairCost(bk);
   if (!padVisible(pd)) return null;
-  if (pd.kind === 'tower') { const l = G.towers[pd.idx].lvl; return l < 5 ? { w: TOWER_W[l], g: TOWER_G[l] } : null; }
+  if (pd.kind === 'tower') { const l = G.towers[pd.idx].lvl; return l < TOWER_MAX() ? { w: TOWER_W[l], g: TOWER_G[l] } : null; }
   if (pd.kind === 'tavern') { if (!G.tavern) return { w: 12, g: 40 }; if (G.allies.length < allyMax()) return { w: 0, g: ALLY_COST[G.allies.length] }; const a = trainee(); return a ? { w: 0, g: ALLY_TRAIN(a.lvl) } : null; }
   if (pd.kind === 'smith') return !G.smith ? { w: 10, g: 20 } : G.forge < FORGE_MAX ? { w: 0, g: 25 + 15 * G.forge } : null;
   if (pd.kind === 'hall') return G.vLvl < VILLAGE.length ? VILLAGE[G.vLvl].cost : null;
@@ -1931,7 +1932,7 @@ const padOY = pd => pd.kind === 'tower' && G.towers[pd.idx].lvl > 0 ? 40 : (pd.k
 function padLabel(pd) {
   const bk = brokenKey(pd);
   if (bk && G.broken[bk]) return bk === 'hall' ? '🔨 마을회관 수리' : bk[0] === 't' && bk !== 'tavern' ? '🔨 망루 수리' : `🔨 ${bk === 'smith' ? '대장간' : bk === 'tavern' ? '영웅 숙소' : BLD[bk].name.slice(3)} 수리`;
-  if (pd.kind === 'tower') { const l = G.towers[pd.idx].lvl; return l === 0 ? '망루 짓기' : l < 5 ? `망루 Lv${l + 1}` : '망루 MAX'; }
+  if (pd.kind === 'tower') { const l = G.towers[pd.idx].lvl; return l === 0 ? '망루 짓기' : l < TOWER_MAX() ? (l === 5 ? '🔥 망루 Lv6' : `망루 Lv${l + 1}`) : '망루 MAX'; }
   if (pd.kind === 'smith') return G.smith ? `⚒ 강화 Lv${G.forge + 1}` : '대장간 짓기';
   if (pd.kind === 'tavern') { if (!G.tavern) return '영웅 숙소 짓기'; if (G.allies.length < allyMax()) return `👥 동료 고용 ${G.allies.length + 1}/${allyMax()}`; const a = trainee(); return `🎓 ${ALLY_TYPES[a.type].name.split(' ').pop()} 훈련 Lv${a.lvl}→${a.lvl + 1}`; }
   if (pd.kind === 'hall') return `🏛 마을 Lv${G.vLvl + 1}`;
@@ -1968,7 +1969,7 @@ function padDone(pd) {
   }
   if (pd.kind === 'tower') {
     const t = G.towers[pd.idx]; t.lvl++; if (t.lvl === 1) stAdd('towers');
-    banner(t.lvl === 1 ? '망루 완성!' : `망루 Lv ${t.lvl}!`, t.lvl === 1 ? '자동으로 화살을 쏴요' : '더 빠르고 강하게!', '#7bed9f', 1.6);
+    banner(t.lvl === 1 ? '망루 완성!' : t.lvl === 6 ? '🔥 망루 Lv 6!' : `망루 Lv ${t.lvl}!`, t.lvl === 1 ? '자동으로 화살을 쏴요' : t.lvl === 6 ? '불화살! 맞은 곳에 불길이 남아요' : '더 빠르고 강하게!', t.lvl === 6 ? '#ff9f1c' : '#7bed9f', 1.8);
     burst(t.x, t.y - 20, '#ffd23f', 30, 220, 5, 0.6);
   } else if (pd.kind === 'tavern') {
     if (!G.tavern) { G.tavern = true; banner('영웅 숙소 완성!', '금화로 동료를 고용해요', '#7bed9f', 1.8); }
@@ -2398,7 +2399,7 @@ function updBase(dt) {
     const n = t.lvl >= 5 ? 3 : t.lvl >= 3 ? 2 : 1, a = Math.atan2(tgt.y - (t.y - 34), tgt.x - t.x);
     for (let k = 0; k < n; k++) {
       const aa = a + (k - (n - 1) / 2) * 0.1;
-      G.bullets.push({ x: t.x, y: t.y - 34, vx: Math.cos(aa) * 520, vy: Math.sin(aa) * 520, r: 4, dmg: 10 + 6 * t.lvl, life: 0.8, pierce: t.lvl >= 4 ? 1 : 0, hits: [], kind: 'arrow', tower: true });
+      G.bullets.push({ x: t.x, y: t.y - 34, vx: Math.cos(aa) * 520, vy: Math.sin(aa) * 520, r: 4, dmg: 10 + 6 * t.lvl, life: 0.8, pierce: t.lvl >= 4 ? 1 : 0, hits: [], kind: 'arrow', tower: true, fireA: t.lvl >= 6 });
     }
     t.cd = Math.max(0.3, 1.0 - 0.13 * t.lvl); t.shot = 0.15;
     sfx('arrow');
@@ -3496,6 +3497,7 @@ function update(dt) {
       const rr = e.r + b.r;
       if ((e.x - b.x) ** 2 + (e.y - b.y) ** 2 < rr * rr && !b.hits.includes(e.id)) {
         b.hits.push(e.id);
+        if (b.fireA && b.hits.length === 1) addFlame(e.x, e.y, 26, 1.6);   // 🔥 망루 Lv6 불화살
         const l = Math.hypot(b.vx, b.vy);
         if (b.slow) { e.slowT = Math.max(e.slowT || 0, b.slow); burst(b.x, b.y, '#dff6ff', 5, 100, 3, 0.25); }   // 얼음: 느려짐
         hurtEnemy(e, b.dmg, b.vx / l, b.vy / l, b.kind === 'shot' || b.kind === 'flame' ? 220 : b.kind === 'xbow' ? 90 : 140);
@@ -4807,7 +4809,8 @@ function drawWorld() {
     if (b.kind === 'arrow') {
       const ux = b.vx / l, uy = b.vy / l;
       ctx.strokeStyle = '#6b4226'; ctx.lineWidth = 2.5; ctx.beginPath(); ctx.moveTo(b.x - ux * 16, b.y - uy * 16); ctx.lineTo(b.x, b.y); ctx.stroke();
-      ctx.fillStyle = '#ddd'; ctx.beginPath(); ctx.moveTo(b.x + ux * 5, b.y + uy * 5); ctx.lineTo(b.x - uy * 3, b.y + ux * 3); ctx.lineTo(b.x + uy * 3, b.y - ux * 3); ctx.fill();
+      ctx.fillStyle = b.fireA ? '#ff9f1c' : '#ddd'; ctx.beginPath(); ctx.moveTo(b.x + ux * 5, b.y + uy * 5); ctx.lineTo(b.x - uy * 3, b.y + ux * 3); ctx.lineTo(b.x + uy * 3, b.y - ux * 3); ctx.fill();
+      if (b.fireA) { ctx.fillStyle = 'rgba(255,140,0,.55)'; ctx.beginPath(); ctx.arc(b.x, b.y, 5, 0, 7); ctx.fill(); }   // 불화살 끝 불꽃
       continue;
     }
     if (b.kind === 'ice' && drawProj('pj_ice', b.x, b.y, Math.atan2(b.vy, b.vx), 16)) continue;   // 영웅 얼음 조각 그림
