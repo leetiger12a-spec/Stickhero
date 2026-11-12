@@ -112,7 +112,9 @@ canvas{display:block;position:fixed;inset:0;width:100%;height:100%}
 .unlock{margin-top:10px;padding:10px 14px;border:3px solid #ffd23f;border-radius:14px;background:rgba(255,210,63,.15);animation:pop .5s ease-out .8s backwards}
 .unlock small{font-size:13px;opacity:.85}
 #clrStars{font-size:56px;letter-spacing:6px;margin:4px 0 8px}
-#clrStars span{display:inline-block;animation:pop .4s ease-out backwards}
+#clrStars span{display:inline-block;animation:pop .4s ease-out backwards}#clrStars span:not(.off){animation:stamp .5s cubic-bezier(.2,1.6,.4,1) backwards;text-shadow:0 0 14px #ffd23f}
+@keyframes stamp{0%{transform:scale(3) rotate(-25deg);opacity:0}60%{transform:scale(.85) rotate(6deg);opacity:1}100%{transform:scale(1) rotate(0)}}
+#clrWhy{font-size:13px;margin:-4px 0 6px;line-height:1.6}#clrWhy .no{opacity:.45}
 #clrStars .off{filter:grayscale(1) brightness(.5)}
 @keyframes storyIn{from{opacity:0;transform:scale(1.06)}to{opacity:1;transform:scale(1)}}
 #ovTitle .best{margin-top:8px;font-size:13px}
@@ -296,6 +298,7 @@ h2 .hb{-webkit-text-stroke:0;text-shadow:none;letter-spacing:0;font-family:"Jua"
 <div class="ov" id="ovClear">
   <h2 id="clrTitle">스테이지 클리어!</h2>
   <div id="clrStars"></div>
+  <div id="clrWhy"></div>
   <div class="stats" id="clrInfo"></div>
   <button class="btn big" id="bClrOk">마을로 ▶</button>
 </div>
@@ -328,7 +331,7 @@ h2 .hb{-webkit-text-stroke:0;text-shadow:none;letter-spacing:0;font-family:"Jua"
 
 <script>
 'use strict';
-const BUILD = 143;
+const BUILD = 144;
 const BOSS_INTERVAL = 180;      // 보스 등장 간격(초)
 const WAVE_INTERVAL = 60;       // 대규모 몰이 이벤트 간격(초)
 const MAX_ENEMIES = 220;
@@ -2908,7 +2911,7 @@ function returnBase(win) {
     { // 별을 모으면 머리띠 색이 열림 (게임오버 뒤에도 유지)
       const tot = G.stars.reduce((s, v) => s + (v || 0), 0), meta = readJSON(META_KEY) || {}, before = meta.bestStars || 0;
       if (tot > before) { meta.bestStars = tot; writeJSON(META_KEY, meta); }
-      st.newBand = HEADBANDS.find(h => h.need > before && h.need <= tot) || null; st.newHat = HATS.find(h => h.need > before && h.need <= tot) || null; }
+      st.newBand = HEADBANDS.find(h => h.need > before && h.need <= tot) || null; st.newHat = HATS.find(h => h.need > before && h.need <= tot) || null; st.newPet = PETS.find(h => h.need > before && h.need <= tot) || null; st.totStars = tot; st.gotStars = Math.max(0, tot - before); }
     G.gold += prize;
     if (first) {
       const before = bestStage();
@@ -2928,12 +2931,16 @@ function showClear(st, prize, first, old) {
   const all = first && st.def.goal === 'final', iceAll = first && G.stageN >= STAGES.length;   // 엔딩은 왕관 괴물의 성 · 얼음 나라 끝은 따로
   $('clrTitle').textContent = all ? '🏆 왕관 괴물 대왕 격파! 🏆' : iceAll ? '❄️ 얼음 나라 정복! ❄️' : `${st.n + 1}. ${st.def.name} 클리어!`;
   $('clrStars').innerHTML = [0, 1, 2].map(k => `<span class="${k < st.stars ? '' : 'off'}" style="animation-delay:${0.2 + k * 0.25}s">⭐</span>`).join('');
-  [0, 1, 2].forEach(k => { if (k < st.stars) setTimeout(() => tone(880 + k * 220, 0.15, 'square', 0.06, 200), 200 + k * 250); });
+  [0, 1, 2].forEach(k => { if (k < st.stars) setTimeout(() => { tone(880 + k * 220, 0.15, 'square', 0.06, 200); vib(25); }, 200 + k * 250); });
+  // ⭐ Build 144: 별마다 이유 (✔/✖) + 모은 별
+  const why = ['⭐1 클리어', '⭐2 체력 절반 이상', st.def.goal === 'survive' ? '⭐3 거의 안 맞기' : '⭐3 빨리 깨기'];
+  $('clrWhy').innerHTML = why.map((t, k) => `<span class="${k < st.stars ? '' : 'no'}">${k < st.stars ? '✔' : '✖'} ${t}</span>`).join(' · ') + (st.totStars !== undefined ? `<br>⭐ 모은 별 <b>${st.totStars}</b>개${st.gotStars ? ` (+${st.gotStars})` : ''}` : '');
   const tm = fmtTime(st.t);
   $('clrInfo').innerHTML = `⏱ 걸린 시간 <b>${tm}</b><br>🪙 보상 <b>+${prize}</b>${first ? ' (첫 클리어)' : ''}${st.stars > old && old > 0 ? '<br>✨ 별 기록 갱신!' : ''}` +
     (all ? '<br><br>왕관 괴물 대왕을 물리쳤다!<br>마을에 평화가 찾아왔어요 🎉<br><br>❄️ 북쪽에 새 땅 <b>얼음 나라</b>가 열렸어요!' : iceAll ? '<br><br>황금 골렘까지 물리쳤다!<br>진짜 레전드 히어로 🏆' : first && G.stageN < STAGES.length ? `<br>🔓 다음 스테이지 <b>${STAGES[G.stageN].name}</b> 열림!` : '') +
     (st.newUnlock ? `<div class="unlock">🎁 새로 열림! <b>${st.newUnlock.name}</b><br><small>${st.newUnlock.desc}</small></div>` : '') +
     (st.newBand ? `<div class="unlock">🎨 새 머리띠! <b>${st.newBand.name}</b><br><small>시작 화면 '꾸미기'에서 바꿀 수 있어요</small></div>` : '') +
+    (st.newPet ? `<div class="unlock">🐾 새 펫! <b>${mIco('pet_' + st.newPet.id, '')} ${st.newPet.name}</b><br><small>${st.newPet.desc} · 시작 화면 '꾸미기'에서 데려가요</small></div>` : '') +
     (st.newHat ? `<div class="unlock">🎩 새 모자! <b>${mIco('hat_' + st.newHat.id, '')} ${st.newHat.name}</b><br><small>시작 화면 '꾸미기'에서 쓸 수 있어요</small></div>` : '') +
     (G.raidIn > 0 ? '<br><span style="color:#ff9f1c">⚠ 적의 대군이 다가온다… 마을을 지켜라!</span>' : '');
   if (st.newUnlock) setTimeout(() => sfx('unlock'), 900);
