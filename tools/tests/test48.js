@@ -46,9 +46,9 @@ const { chromium } = require('/opt/node22/lib/node_modules/playwright');
   check(await page.evaluate(() => (SH.G.chests || []).some(c => c.gold)), 'gold golem no golden chest');
   // Build 85: 골렘 업적 (황금 골렘을 잡았으니 첫 골렘·황금을 잡아라)
   const ach = await page.evaluate(() => { checkAch(); const m = JSON.parse(localStorage.getItem('stickhero_meta')); return { g1: !!m.ach.golem1, gG: !!m.ach.golemG, g5: !!m.ach.golem5, n: ACH.length }; });
-  console.log('golem ach', JSON.stringify(ach)); check(ach.g1 && ach.gG && !ach.g5 && ach.n === 43, 'golem achievements wrong');   // Build 94: 업적 31개
+  console.log('golem ach', JSON.stringify(ach)); check(ach.g1 && ach.gG && !ach.g5 && ach.n === 44, 'golem achievements wrong');   // Build 94: 업적 31개
   // 도감: 보스 12종
-  const dx = await page.evaluate(() => DEX.filter(d => d.boss).length); console.log('dex bosses', dx); check(dx === 12, 'dex bosses not 12');
+  const dx = await page.evaluate(() => DEX.filter(d => d.boss).length); console.log('dex bosses', dx); check(dx === 17, 'dex bosses not 17');   /* Build 159: 해골 왕 5 */
   // 무한 탑 30~45층 = 골렘 4종
   const tw = await page.evaluate(() => { const G = SH.G, out = []; const m = G.mode; G.mode = 'stage'; for (const f of [30, 35, 40, 45]) { G.st = { n: 1 + f, tower: f, def: { goal: 'tboss' } }; SH.spawnBoss(0, 0); out.push(G.boss.name); G.enemies = G.enemies.filter(x => x !== G.boss); G.boss = null; G.intro = null; } G.mode = m; G.st = null; return out; });
   console.log('tower', tw.join()); check(tw.join() === '바위 골렘 왕,용암 골렘,얼음 골렘,숲 골렘', 'tower golem floors wrong');

@@ -8,10 +8,10 @@ const { chromium } = require('/opt/node22/lib/node_modules/playwright');
   page.on('pageerror', e => errors.push(e.message)); page.on('console', m => { if (m.type() === 'error') errors.push(m.text()); });
   await page.goto('http://localhost:8765/index.html'); await page.waitForTimeout(900); await page.click('#bStart'); await page.waitForTimeout(400);
   const info = await page.evaluate(() => ({ n: STAGES.length, fin: FINAL_IDX, ice: STAGES.slice(11).map(d => d.name + ':' + THEMES[d.th].name + ':' + d.goal), img: ['icepillar', 'snowman', 'snowtree'].filter(k => SPR[k]).length, dec: ['d_snowball', 'd_icecrys', 'd_icepud', 'd_snowrock'].filter(k => WICON[k]).length }));
-  console.log(JSON.stringify(info)); check(info.n === 15 && info.fin === 9 && info.ice.length === 4 && info.ice.every(t => t.includes(':얼음:')) && info.img === 3 && info.dec === 4, 'ice land setup wrong');
+  console.log(JSON.stringify(info)); check(info.n === 20 && info.fin === 9 && info.ice.length === 9 && info.ice.slice(0, 4).every(t => t.includes(':얼음:')) && info.img === 3 && info.dec === 4, 'ice land setup wrong');
   // 지도: 10칸까지 깨면 11칸 열림
   const mp = await page.evaluate(() => { SH.G.stageN = 10; openMap(); return { nodes: document.querySelectorAll('.mnode').length, open: [...document.querySelectorAll('.mnode')].filter(b => !b.classList.contains('lock')).length }; });
-  console.log('map', JSON.stringify(mp)); check(mp.nodes === 15 && mp.open === 11, 'map nodes wrong');
+  console.log('map', JSON.stringify(mp)); check(mp.nodes === 20 && mp.open === 11, 'map nodes wrong');
   await page.screenshot({ path: `${OUT}/b94_map.png` });
   await page.evaluate(() => closeMap());
   // 11칸: 얼음 장식 그려짐

@@ -9,7 +9,7 @@ const { chromium } = require('/opt/node22/lib/node_modules/playwright');
   await page.goto('http://localhost:8765/index.html'); await page.waitForTimeout(800); await page.click('#bStart'); await page.waitForTimeout(400);
   const ids = ['pet5', 'cave1', 'jack3', 'ult50', 'winter50', 'rage10'];
   const got = () => page.evaluate(ids => { checkAch(); const a = (JSON.parse(localStorage.getItem('stickhero_meta')) || {}).ach || {}; return ids.map(i => !!a[i]); }, ids);
-  check((await got()).every(x => !x), 'got too early'); check(await page.evaluate(() => ACH.length === 43), 'ACH not 43');
+  check((await got()).every(x => !x), 'got too early'); check(await page.evaluate(() => ACH.length === 44), 'ACH not 43');
   // 실제 행동 1번씩
   const r = await page.evaluate(() => { const G = SH.G; G.nextBoss = 999; G.nextWave = 999; G.spawnAcc = -1e9; G.need = 1e9; G.p.hp = G.p.maxHp = 1e9;
     G.tavern = true; const pd = G.pads.find(q => q.kind === 'tavern'); if (pd) pd.built = true; hireAlly('sword'); const a = G.allies[0]; const e = makeEnemy('tank', a.x + 40, a.y); e.hp = e.maxHp = 1e6; G.enemies = [e]; allyUlt(a, 1);

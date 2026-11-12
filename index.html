@@ -343,7 +343,7 @@ h2 .hb{-webkit-text-stroke:0;text-shadow:none;letter-spacing:0;font-family:"Jua"
 
 <script>
 'use strict';
-const BUILD = 158;
+const BUILD = 159;
 const BOSS_INTERVAL = 180;      // 보스 등장 간격(초)
 const WAVE_INTERVAL = 60;       // 대규모 몰이 이벤트 간격(초)
 const MAX_ENEMIES = 220;
@@ -443,6 +443,12 @@ const STAGES = [
   { name: '눈보라 언덕',     th: 5, goal: 'survive', time: 80 },
   { name: '얼어붙은 화산',   th: 5, goal: 'boss', boss: 7 },
   { name: '황금 얼음 궁전',  th: 5, goal: 'boss', boss: 10 },
+  // Build 159: 💀 해골 왕국 (아들 생각 — 골렘과 같은 5가지 컨셉: 번개 바위·용암·얼음·숲·황금)
+  { name: '번개 해골 성',    th: 2, goal: 'boss', boss: 11 },
+  { name: '불타는 해골 화산', th: 3, goal: 'boss', boss: 12 },
+  { name: '얼음 해골 무덤',  th: 5, goal: 'rescue', boss: 13 },
+  { name: '이끼 숲 해골 성', th: 0, goal: 'boss', boss: 14 },
+  { name: '황금 해골 보물창고', th: 4, goal: 'boss', boss: 15 },
 ];
 const FINAL_IDX = STAGES.findIndex(d => d.goal === 'final');
 const GOAL_TXT = { boss: '👑 끝까지 가서 보스를 물리쳐라', rescue: '🐱 갇힌 고양이 3마리를 구하고 보스를 물리쳐라', survive: '⏱ 몰려오는 적을 버텨라', final: '🏰 왕관 괴물 대왕을 쓰러뜨려라!' };
@@ -470,7 +476,7 @@ const SPR = {};
 const SPR_WHITE = {}, SPR_GOLD = {};  // 맞았을 때 번쩍이는 흰 실루엣
 const SPR_INFO = {    // ax: 발 위치(그림 폭 대비), h: 화면 키(월드 단위)
   hero: { ax: 0.42 }, grunt: { ax: 0.45, h: 50 }, runner: { ax: 0.5, h: 42 }, tank: { ax: 0.42, h: 62 },
-  boss0: { ax: 0.5, h: 140 }, boss1: { ax: 0.5, h: 140 }, boss2: { ax: 0.5, h: 150 }, boss3: { ax: 0.5, h: 140 }, boss4: { ax: 0.5, h: 120 }, boss5: { ax: 0.5, h: 150 }, boss6: { ax: 0.5, h: 160 }, boss7: { ax: 0.5, h: 160 }, boss8: { ax: 0.5, h: 160 }, boss9: { ax: 0.5, h: 160 }, boss10: { ax: 0.5, h: 160 }, boss_final: { ax: 0.5, h: 175 },
+  boss0: { ax: 0.5, h: 140 }, boss1: { ax: 0.5, h: 140 }, boss2: { ax: 0.5, h: 150 }, boss3: { ax: 0.5, h: 140 }, boss4: { ax: 0.5, h: 120 }, boss5: { ax: 0.5, h: 150 }, boss6: { ax: 0.5, h: 160 }, boss7: { ax: 0.5, h: 160 }, boss8: { ax: 0.5, h: 160 }, boss9: { ax: 0.5, h: 160 }, boss10: { ax: 0.5, h: 160 }, boss11: { ax: 0.5, h: 160 }, boss12: { ax: 0.5, h: 160 }, boss13: { ax: 0.5, h: 160 }, boss14: { ax: 0.5, h: 160 }, boss15: { ax: 0.5, h: 165 }, boss_final: { ax: 0.5, h: 175 },
   e_spider: { ax: 0.5, h: 30 }, e_skel: { ax: 0.5, h: 46 },
   e_agrunt: { ax: 0.45, h: 52 }, e_srunner: { ax: 0.5, h: 46 }, e_stank: { ax: 0.45, h: 70 }, e_knight: { ax: 0.5, h: 58 }, e_assassin: { ax: 0.5, h: 50 }, e_ogre: { ax: 0.5, h: 92 }, e_demon: { ax: 0.5, h: 60 }, e_ghost: { ax: 0.5, h: 56 }, e_golem: { ax: 0.5, h: 112 },
   tree: { h: 78 }, stump: { h: 20 }, log: { h: 8 }, stake: { h: 26 }, tower: { h: 76 }, hall: { h: 92 },
@@ -705,6 +711,7 @@ const ACH = [
   { id: 'golemG',  icon: '💰', name: '황금을 잡아라',  desc: '도망가기 전에 황금 골렘 잡기', title: '황금 손',   bank: 300, p: () => [ST.bossT.includes('황금 골렘') ? 1 : 0, 1] },
   { id: 'golem5',  icon: '⛰', name: '골렘 왕국',     desc: '골렘 보스 5종 모두 잡기',   title: '골렘 대왕',  bank: 600, p: () => [GOLEMS.filter(n => ST.bossT.includes(n)).length, 5] },
   { id: 'ice15',   icon: '❄️', name: '얼음 나라 정복', desc: '모험 지도 15칸 모두 깨기',   title: '얼음 영웅',  bank: 800, p: () => [bestStage(), 15] },   // Build 94
+  { id: 'skull20', icon: '💀', name: '해골 왕국 정복', desc: '모험 지도 20칸 모두 깨기', title: '다섯 왕국 영웅', bank: 1000, p: () => [bestStage(), 20] },   // Build 159
   { id: 'floor25', icon: '🌤', name: '하늘 끝까지',   desc: '무한 탑 25층 돌파',        title: '하늘 정복자', bank: 600, p: () => [metaOf('bestFloor'), 25] },
   // Build 101: 새 업적 6개
   { id: 'ghost1',  icon: '👻', name: '유령 잡기',     desc: '유령 보물 상자 잡기',        title: '유령 사냥꾼', bank: 100, p: () => [ST.ghosts || 0, 1] },
@@ -784,7 +791,7 @@ function bakeSprite(n) {
   }
 }
 // img/ 폴더에 실제로 있는 그림만 불러옴 (없는 파일을 부르면 오류가 남)
-const SPR_FILES = ['e_snowman', 'e_ginger', 'e_agrunt', 'e_srunner', 'e_stank', 'e_knight', 'e_assassin', 'e_ogre', 'e_demon', 'e_ghost', 'e_golem', 'boss3', 'boss4', 'boss5', 'boss6', 'boss7', 'boss8', 'boss9', 'boss10', 'boss_final', 'e_spider', 'e_skel', 'e_archer', 'e_bomber', 'e_bat', 'e_slime', 'e_shaman', 'e_charger', 'hall2', 'hall3', 'hall_broken', 'tower_broken', 'stonewall', 'repair', 'farm', 'mine', 'market', 'stone', 'rock', 'camp', 'hero', 'grunt', 'runner', 'tank', 'boss0', 'boss1', 'boss2', 'tree', 'stump', 'log', 'stake', 'tower', 'hall',
+const SPR_FILES = ['e_snowman', 'e_ginger', 'e_agrunt', 'e_srunner', 'e_stank', 'e_knight', 'e_assassin', 'e_ogre', 'e_demon', 'e_ghost', 'e_golem', 'boss3', 'boss4', 'boss5', 'boss6', 'boss7', 'boss8', 'boss9', 'boss10', 'boss11', 'boss12', 'boss13', 'boss14', 'boss15', 'boss_final', 'e_spider', 'e_skel', 'e_archer', 'e_bomber', 'e_bat', 'e_slime', 'e_shaman', 'e_charger', 'hall2', 'hall3', 'hall_broken', 'tower_broken', 'stonewall', 'repair', 'farm', 'mine', 'market', 'stone', 'rock', 'camp', 'hero', 'grunt', 'runner', 'tank', 'boss0', 'boss1', 'boss2', 'tree', 'stump', 'log', 'stake', 'tower', 'hall',
   'smith', 'pillar', 'icepillar', 'snowman', 'snowtree', 'torch', 'coin', 'ally_sword', 'ally_archer', 'tavern', 'ally_bomber', 'skyfang_plane', 'ally_shield', 'hero_slash', 'hero_walk', 'ally_archer_shoot', 'ally_bomber_toss', 'ally_shield_bash', 'ally_sword_slash', 'ally_sword_walk', 'ally_archer_walk', 'ally_bomber_walk', 'ally_shield_walk', 'ally_golem', 'ally_golem_walk', 'ally_golem_slam', 'sf_plane0', 'sf_plane1', 'sf_plane2', 'sf_plane3', 'sf_plane4', 'sf_pilot0', 'sf_pilot1', 'sf_pilot2', 'sf_pilot3', 'sf_pilot4'];
 SPR_FILES.forEach(n => {
   const im = new Image();
@@ -1373,7 +1380,14 @@ const BOSSES = [
   { name: '얼음 골렘',   color: '#9fd8ff' },
   { name: '숲 골렘',     color: '#70a33a' },
   { name: '황금 골렘',   color: '#ffd23f' },
+  // Build 159: 해골 왕 5종 (골렘과 같은 컨셉)
+  { name: '번개 해골 왕', color: '#4cc9f0' },
+  { name: '용암 해골 왕', color: '#ff6b00' },
+  { name: '얼음 해골 왕', color: '#9fd8ff' },
+  { name: '숲 해골 왕',   color: '#70a33a' },
+  { name: '황금 해골 왕', color: '#ffd23f' },
 ];
+const SKULLS = ['번개 해골 왕', '용암 해골 왕', '얼음 해골 왕', '숲 해골 왕', '황금 해골 왕'];
 const GOLEMS = ['바위 골렘 왕', '용암 골렘', '얼음 골렘', '숲 골렘', '황금 골렘'];
 const GOLD_GOLEM = 10, GOLD_GOLEM_P = 0.1, GOLD_GOLEM_FLEE = 40;   // 황금 골렘: 센 보스 차례에 10%, 40초 뒤 도망
 // 몬스터 도감 목록 (SPECIALS·BOSSES 다음에 있어야 함)
@@ -1394,7 +1408,7 @@ const DEX = [
   { k: 'e_demon', name: '악마 병사', desc: '날아서 울타리를 넘어요', where: '4단계 (마을 8분 · 모험 8칸)' },
   { k: 'e_ghost', name: '유령 기사', desc: '울타리 통과 · 쇠사슬은 느리게', where: '4단계 (마을 8분 · 모험 8칸)' },
   { k: 'e_golem', name: '바위 골렘', desc: '쓰러지면 작은 바위 3개로', where: '4단계 (마을 8분 · 모험 8칸)' },
-  ...BOSSES.map((B, i) => ({ k: 'boss' + i, boss: B.name, name: B.name, desc: ['높이 뛰어올라 쿵!', '로켓 주먹을 날려요', '바닥에 불길을 깔아요', '얼음 숨결로 느리게 해요', '거미줄을 쏘고 새끼 거미를 불러요', '순간이동하고 해골 병사를 불러요', '땅을 쾅! 충격파 · 반쯤 다치면 작은 골렘을 불러요', '걸으며 불길을 남기고 불바다를 깔아요', '얼음 숨결로 느리게 해요', '뿌리로 발을 묶고 조금씩 회복해요', '때리면 금화가 튀어요 · 40초 뒤 도망!'][i], where: i < 6 ? '마을·모험·탑 보스' : i === 10 ? '마을 (아주 드물게) · 무한 탑 50층' : `마을·무한 탑 ${(i) * 5}층` })),
+  ...BOSSES.map((B, i) => ({ k: 'boss' + i, boss: B.name, name: B.name, desc: ['높이 뛰어올라 쿵!', '로켓 주먹을 날려요', '바닥에 불길을 깔아요', '얼음 숨결로 느리게 해요', '거미줄을 쏘고 새끼 거미를 불러요', '순간이동하고 해골 병사를 불러요', '땅을 쾅! 충격파 · 반쯤 다치면 작은 골렘을 불러요', '걸으며 불길을 남기고 불바다를 깔아요', '얼음 숨결로 느리게 해요', '뿌리로 발을 묶고 조금씩 회복해요', '때리면 금화가 튀어요 · 40초 뒤 도망!', '순간이동 · 해골 병사를 불러요 (번개 바위)', '걸으며 불길을 남겨요 (용암)', '얼음 숨결로 느리게 해요 (얼음)', '뿌리로 발을 묶고 회복해요 (숲)', '때리면 금화가 튀어요 (황금)'][i], where: i < 6 ? '마을·모험·탑 보스' : i === 10 ? '마을 (아주 드물게) · 무한 탑 50층' : i > 10 ? `💀 해골 왕국 · 모험 ${i + 5}칸` : `마을·무한 탑 ${(i) * 5}층` })),
   { k: 'boss_final', boss: '왕관 괴물 대왕', name: '왕관 괴물 대왕', desc: '모든 보스의 기술을 다 써요 · 쓰러지면 진짜 모습으로 다시 일어나요', where: '모험 10칸 · 왕관 괴물의 성' },
 ];
 const DEX_STARS = { mob: [10, 100, 1000], boss: [1, 5, 20] };
@@ -2168,11 +2182,11 @@ function spawnWave() {
   sfx('wave');
 }
 // 보스 세기 (보통 난이도): 대왕 슬라임 → 강철 거인 → 불꽃 대마왕 → 얼음 용 → 거미 여왕 → 해골 왕 → 왕관 괴물 대왕
-const BOSS_HP = [800, 2400, 12000, 24000, 32000, 40000, 50000, 50000, 50000, 50000, 40000], BOSS_FINAL = { hp: 70000, dmg: 65, spd: 80 };   // Build 80~82: 후반 보스가 6~7초 만에 쓰러져서 올림 (목표 약 15초, 봇 측정) · 불꽃 대마왕은 15000에서 모험 4칸 벽이 되어 12000
+const BOSS_HP = [800, 2400, 12000, 24000, 32000, 40000, 50000, 50000, 50000, 50000, 40000, 55000, 58000, 61000, 64000, 70000], BOSS_FINAL = { hp: 70000, dmg: 65, spd: 80 };   // Build 80~82: 후반 보스가 6~7초 만에 쓰러져서 올림 (목표 약 15초, 봇 측정) · 불꽃 대마왕은 15000에서 모험 4칸 벽이 되어 12000
 const STAGE_BOSS = [0, 1, 1, 2, 3, 3, 4, 5, 5];   // 모험 1~9칸 보스 (10칸은 왕관 괴물 대왕)
-const BOSS_DMG = [25, 33, 41, 40, 45, 50, 55, 55, 55, 55, 45];   // 보스 공격력 (Build 83: 얼음 용 49→40 · 거미 여왕 57→45 · 해골 왕 65→50 — 체력을 올려 싸움이 길어진 만큼 덜 아프게)
+const BOSS_DMG = [25, 33, 41, 40, 45, 50, 55, 55, 55, 55, 45, 56, 57, 58, 59, 60];   // Build 159: 해골 왕 5종   // 보스 공격력 (Build 83: 얼음 용 49→40 · 거미 여왕 57→45 · 해골 왕 65→50 — 체력을 올려 싸움이 길어진 만큼 덜 아프게)
 const BOSS_MIN_TIER = [0, 1, 3, 4];
-const PRACTICE_TH = [0, 0, 3, 2, 2, 1, 1, 3, 2, 0, 4];   // 보스 연습 땅 테마 (숲·폐허·던전·화산·성)   // 적 단계(1~4)별 마을 최소 보스: 슬라임 · 강철 거인 · 얼음 용 · 거미 여왕
+const PRACTICE_TH = [0, 0, 3, 2, 2, 1, 1, 3, 2, 0, 4, 2, 3, 5, 0, 4];   // 보스 연습 땅 테마 (숲·폐허·던전·화산·성)   // 적 단계(1~4)별 마을 최소 보스: 슬라임 · 강철 거인 · 얼음 용 · 거미 여왕
 function spawnBoss(bx, by) {
   // 마을 보스와 스테이지 보스는 따로 센다 (스테이지를 깬다고 마을 보스가 갑자기 세지지 않게)
   const pr = G.mode === 'stage' && G.st && G.st.practice !== undefined ? G.st.practice : undefined;   // 보스 연습
@@ -3020,8 +3034,8 @@ function returnBase(win) {
 }
 function showClear(st, prize, first, old) {
   state = 'result'; joy = null;
-  const all = first && st.def.goal === 'final', iceAll = first && G.stageN >= STAGES.length;   // 엔딩은 왕관 괴물의 성 · 얼음 나라 끝은 따로
-  $('clrTitle').textContent = all ? '🏆 왕관 괴물 대왕 격파! 🏆' : iceAll ? '❄️ 얼음 나라 정복! ❄️' : `${st.n + 1}. ${st.def.name} 클리어!`;
+  const all = first && st.def.goal === 'final', iceAll = first && G.stageN === 15, skullAll = first && G.stageN >= STAGES.length;   // 엔딩은 왕관 괴물의 성 · 얼음 나라 끝은 따로
+  $('clrTitle').textContent = all ? '🏆 왕관 괴물 대왕 격파! 🏆' : skullAll ? '💀 해골 왕국 정복! 💀' : iceAll ? '❄️ 얼음 나라 정복! ❄️' : `${st.n + 1}. ${st.def.name} 클리어!`;
   $('clrStars').innerHTML = [0, 1, 2].map(k => `<span class="${k < st.stars ? '' : 'off'}" style="animation-delay:${0.2 + k * 0.25}s">⭐</span>`).join('');
   [0, 1, 2].forEach(k => { if (k < st.stars) setTimeout(() => { tone(880 + k * 220, 0.15, 'square', 0.06, 200); vib(25); }, 200 + k * 250); });
   // ⭐ Build 144: 별마다 이유 (✔/✖) + 모은 별
@@ -3029,7 +3043,7 @@ function showClear(st, prize, first, old) {
   $('clrWhy').innerHTML = why.map((t, k) => `<span class="${k < st.stars ? '' : 'no'}">${k < st.stars ? '✔' : '✖'} ${t}</span>`).join(' · ') + (st.totStars !== undefined ? `<br>⭐ 모은 별 <b>${st.totStars}</b>개${st.gotStars ? ` (+${st.gotStars})` : ''}` : '');
   const tm = fmtTime(st.t);
   $('clrInfo').innerHTML = `⏱ 걸린 시간 <b>${tm}</b><br>🪙 보상 <b>+${prize}</b>${first ? ' (첫 클리어)' : ''}${st.stars > old && old > 0 ? '<br>✨ 별 기록 갱신!' : ''}` +
-    (all ? '<br><br>왕관 괴물 대왕을 물리쳤다!<br>마을에 평화가 찾아왔어요 🎉<br><br>❄️ 북쪽에 새 땅 <b>얼음 나라</b>가 열렸어요!' : iceAll ? '<br><br>황금 골렘까지 물리쳤다!<br>진짜 레전드 히어로 🏆' : first && G.stageN < STAGES.length ? `<br>🔓 다음 스테이지 <b>${STAGES[G.stageN].name}</b> 열림!` : '') +
+    (all ? '<br><br>왕관 괴물 대왕을 물리쳤다!<br>마을에 평화가 찾아왔어요 🎉<br><br>❄️ 북쪽에 새 땅 <b>얼음 나라</b>가 열렸어요!' : skullAll ? '<br><br>해골 왕 5마리를 모두 물리쳤다!<br>골렘과 해골 왕, 다섯 왕국의 진짜 영웅 👑' : iceAll ? '<br><br>황금 골렘까지 물리쳤다!<br><br>💀 더 먼 곳에 <b>해골 왕국</b>이 열렸어요!' : first && G.stageN < STAGES.length ? `<br>🔓 다음 스테이지 <b>${STAGES[G.stageN].name}</b> 열림!` : '') +
     (st.newUnlock ? `<div class="unlock">🎁 새로 열림! <b>${st.newUnlock.name}</b><br><small>${st.newUnlock.desc}</small></div>` : '') +
     (st.newBand ? `<div class="unlock">🎨 새 머리띠! <b>${st.newBand.name}</b><br><small>시작 화면 '꾸미기'에서 바꿀 수 있어요</small></div>` : '') +
     (st.newPet ? `<div class="unlock">🐾 새 펫! <b>${mIco('pet_' + st.newPet.id, '')} ${st.newPet.name}</b><br><small>${st.newPet.desc} · 시작 화면 '꾸미기'에서 데려가요</small></div>` : '') +
@@ -3932,7 +3946,7 @@ function updBoss(e, dt, dx, dy, d) {
 
 // ---------- 보스 특수 공격 ----------
 // 대왕 슬라임: 점프해서 쿵 내려찍기 / 강철 거인: 로켓 펀치 / 불꽃 대마왕: 불길 장판 / 왕관 괴물 대왕: 셋 다
-const BOSS_KIND = { boss0: 'jump', boss1: 'punch', boss2: 'fire', boss3: 'ice', boss4: 'web', boss5: 'skull', boss6: 'quake', boss7: 'fire', boss8: 'ice', boss9: 'root', boss10: 'punch' };
+const BOSS_KIND = { boss0: 'jump', boss1: 'punch', boss2: 'fire', boss3: 'ice', boss4: 'web', boss5: 'skull', boss6: 'quake', boss7: 'fire', boss8: 'ice', boss9: 'root', boss10: 'punch', boss11: 'skull', boss12: 'fire', boss13: 'ice', boss14: 'root', boss15: 'punch' };
 const bossKind = e => e.final ? e.fk || 'jump' : BOSS_KIND[e.spr] || 'jump';
 function startSpecial(e, dx, dy, d) {
   if (e.final) e.fk = ['jump', 'punch', 'fire', 'ice', 'web', 'skull'][Math.floor(Math.random() * 6)];
