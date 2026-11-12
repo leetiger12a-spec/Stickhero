@@ -15,7 +15,7 @@ const { chromium } = require('/opt/node22/lib/node_modules/playwright');
   await page.screenshot({ path: `${OUT}/b102_daily.png` });
   await page.click('#bDailyGet'); await page.waitForTimeout(200);
   let m = await meta(); console.log('after get', JSON.stringify({ bank: m.bank, daily: m.daily })); check(m.bank === 30 && m.daily.step === 1, 'day1 reward wrong');
-  check(await page.evaluate(() => $('bDailyGet').style.display === 'none' && !$('bDaily').classList.contains('new')), 'can claim twice');
+  check(await page.evaluate(() => $('bDailyGet').style.display === 'none' && !dailyState().can), 'can claim twice');   /* Build 148: 빨간 점은 룰렛이 남아도 켜짐 */
   await page.click('#bDailyOk'); await page.waitForTimeout(200); check(await page.evaluate(() => SH.state === 'title'), 'not back to title');
   // 어제 받은 것으로 → 오늘 2일째
   const setLast = (days, step) => page.evaluate(([days, step]) => { const d = new Date(); d.setDate(d.getDate() - days); const m = JSON.parse(localStorage.getItem('stickhero_meta')); m.daily = { last: todayKey(d), step }; localStorage.setItem('stickhero_meta', JSON.stringify(m)); }, [days, step]);
