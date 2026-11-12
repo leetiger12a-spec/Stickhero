@@ -343,7 +343,7 @@ h2 .hb{-webkit-text-stroke:0;text-shadow:none;letter-spacing:0;font-family:"Jua"
 
 <script>
 'use strict';
-const BUILD = 157;
+const BUILD = 158;
 const BOSS_INTERVAL = 180;      // 보스 등장 간격(초)
 const WAVE_INTERVAL = 60;       // 대규모 몰이 이벤트 간격(초)
 const MAX_ENEMIES = 220;
@@ -438,7 +438,7 @@ const STAGES = [
   { name: '화산 분화구',     th: 3, goal: 'survive', time: 70 },
   { name: '왕관 괴물의 성',  th: 4, goal: 'final' },
   // Build 94: ❄️ 얼음 나라 (마지막 성 다음) — 칸 보스는 골렘들
-  { name: '눈 덮인 숲',      th: 5, goal: 'boss', boss: 9 },
+  { name: '숲',              th: 0, goal: 'boss', boss: 9 },   // Build 158: 아들 의견 — 눈 덮인 숲(얼음 땅) 대신 그냥 숲 (숲 골렘이 나오니까)
   { name: '얼음 동굴',       th: 5, goal: 'rescue', boss: 8 },
   { name: '눈보라 언덕',     th: 5, goal: 'survive', time: 80 },
   { name: '얼어붙은 화산',   th: 5, goal: 'boss', boss: 7 },
@@ -2697,7 +2697,7 @@ const QUESTS = [ // id, 글, 목표(날짜 d), 나올 수 있는지
   { id: 'petfetch', txt: n => `🐾 펫이 금화·구슬 ${n}개 물어 오기`, goal: d => 30 + 10 * d, ok: () => petSel > 0 && (PETS[petSel].id === 'puppy' || PETS[petSel].id === 'kitten') },
   { id: 'ult',     txt: n => `⚡ 동료 필살기 ${n}번`,            goal: () => 3, ok: () => G.allies.some(a => (a.lvl || 1) >= 4) },
   { id: 'combo',   txt: n => `🔥 한 번에 ${n} 콤보`,             goal: d => 30 + 10 * Math.min(5, d) },
-  { id: 'winter',  txt: n => `⛄ 눈사람·쿠키맨 ${n}마리 잡기`,   goal: () => 10, ok: () => winterSeason() || bestStage() >= 11 },
+  { id: 'winter',  txt: n => `⛄ 눈사람·쿠키맨 ${n}마리 잡기`,   goal: () => 10, ok: () => winterSeason() || bestStage() >= 12 },
 ];
 function newQuests() {
   const d = G.day || 1, pool = QUESTS.filter(q => !q.ok || q.ok()), out = [];

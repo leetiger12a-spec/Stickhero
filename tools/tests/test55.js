@@ -7,7 +7,7 @@ const { chromium } = require('/opt/node22/lib/node_modules/playwright');
   const page = await ctx.newPage(); const OUT = process.env.OUT || 'shots';
   page.on('pageerror', e => errors.push(e.message)); page.on('console', m => { if (m.type() === 'error') errors.push(m.text()); });
   await page.goto('http://localhost:8765/index.html'); await page.waitForTimeout(900); await page.click('#bStart'); await page.waitForTimeout(400);
-  const setup = await page.evaluate(() => { const G = SH.G; G.stageN = 15; enterStage(10); G.intro = null; G.st.groups.forEach(g => g.done = true); G.enemies = []; G.p.hp = G.p.maxHp = 1e6; G.st.blizT = 999;
+  const setup = await page.evaluate(() => { const G = SH.G; G.stageN = 15; enterStage(11);   /* Build 158 */ G.intro = null; G.st.groups.forEach(g => g.done = true); G.enemies = []; G.p.hp = G.p.maxHp = 1e6; G.st.blizT = 999;
     const c = G.st.ice[0]; G.st.ice = [{ x: 0, y: -600, r: 400 }]; G.p.x = -100; G.p.y = -600; return { patches: c ? 1 : 0 }; });
   check(setup.patches === 1, 'no ice patches in ice stage');
   // 얼음판: 오른쪽으로 0.6초 → 손 떼고 0.5초 동안 더 미끄러짐

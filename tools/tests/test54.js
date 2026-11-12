@@ -7,15 +7,15 @@ const { chromium } = require('/opt/node22/lib/node_modules/playwright');
   const page = await ctx.newPage(); const OUT = process.env.OUT || 'shots';
   page.on('pageerror', e => errors.push(e.message)); page.on('console', m => { if (m.type() === 'error') errors.push(m.text()); });
   await page.goto('http://localhost:8765/index.html'); await page.waitForTimeout(900); await page.click('#bStart'); await page.waitForTimeout(400);
-  const info = await page.evaluate(() => ({ n: STAGES.length, fin: FINAL_IDX, ice: STAGES.slice(10).map(d => d.name + ':' + THEMES[d.th].name + ':' + d.goal), img: ['icepillar', 'snowman', 'snowtree'].filter(k => SPR[k]).length, dec: ['d_snowball', 'd_icecrys', 'd_icepud', 'd_snowrock'].filter(k => WICON[k]).length }));
-  console.log(JSON.stringify(info)); check(info.n === 15 && info.fin === 9 && info.ice.every(t => t.includes(':얼음:')) && info.img === 3 && info.dec === 4, 'ice land setup wrong');
+  const info = await page.evaluate(() => ({ n: STAGES.length, fin: FINAL_IDX, ice: STAGES.slice(11).map(d => d.name + ':' + THEMES[d.th].name + ':' + d.goal), img: ['icepillar', 'snowman', 'snowtree'].filter(k => SPR[k]).length, dec: ['d_snowball', 'd_icecrys', 'd_icepud', 'd_snowrock'].filter(k => WICON[k]).length }));
+  console.log(JSON.stringify(info)); check(info.n === 15 && info.fin === 9 && info.ice.length === 4 && info.ice.every(t => t.includes(':얼음:')) && info.img === 3 && info.dec === 4, 'ice land setup wrong');
   // 지도: 10칸까지 깨면 11칸 열림
   const mp = await page.evaluate(() => { SH.G.stageN = 10; openMap(); return { nodes: document.querySelectorAll('.mnode').length, open: [...document.querySelectorAll('.mnode')].filter(b => !b.classList.contains('lock')).length }; });
   console.log('map', JSON.stringify(mp)); check(mp.nodes === 15 && mp.open === 11, 'map nodes wrong');
   await page.screenshot({ path: `${OUT}/b94_map.png` });
   await page.evaluate(() => closeMap());
   // 11칸: 얼음 장식 그려짐
-  const dc = await page.evaluate(async () => { const G = SH.G; enterStage(10); G.intro = null; G.p.hp = G.p.maxHp = 1e6; G.p.y = -G.st.L * 0.4;
+  const dc = await page.evaluate(async () => { const G = SH.G; enterStage(11); G.intro = null; G.p.hp = G.p.maxHp = 1e6; G.p.y = -G.st.L * 0.4;   /* Build 158: 11칸은 그냥 숲, 얼음은 12칸부터 */
     const D = window.drawDecal, c = {}; window.drawDecal = function (n) { const ok = D.apply(this, arguments); if (ok) c[n] = (c[n] || 0) + 1; return ok; };
     await new Promise(r => setTimeout(r, 300)); window.drawDecal = D; return { decals: c, deco: [...new Set(G.st.deco.map(d => d.kind))], th: G.st.th.name }; });
   console.log('stage 11', JSON.stringify(dc)); check(dc.th === '얼음' && dc.deco.join() === 'ice' && Object.keys(dc.decals).length >= 2 && Object.keys(dc.decals).every(k => ['d_snowball', 'd_icecrys', 'd_icepud', 'd_snowrock'].includes(k)), 'ice decorations wrong');
