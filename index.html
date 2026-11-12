@@ -341,7 +341,7 @@ h2 .hb{-webkit-text-stroke:0;text-shadow:none;letter-spacing:0;font-family:"Jua"
 
 <script>
 'use strict';
-const BUILD = 151;
+const BUILD = 152;
 const BOSS_INTERVAL = 180;      // 보스 등장 간격(초)
 const WAVE_INTERVAL = 60;       // 대규모 몰이 이벤트 간격(초)
 const MAX_ENEMIES = 220;
@@ -2300,8 +2300,10 @@ function batSwarm(n) {
 // 🌧 비 오는 날 (Build 123): 마을에서 낮에 가끔(90~150초마다) 30초 동안 비 — 적이 10% 느려지고 나무 베기가 빨라짐
 function updRain(dt, night) {
   if (G.rainNext === undefined) G.rainNext = rand(90, 150);
-  if (G.rainOn) { G.rainOn -= dt; if (G.rainOn <= 0 || night) { G.rainOn = 0; G.rainNext = rand(90, 150); rainEnd(night); } }
-  else if (!night && G.bt > 60) { G.rainNext -= dt; if (G.rainNext <= 0) { G.rainOn = 30; G.rains = (G.rains || 0) + 1; banner('🌧 비가 와요!', '적이 미끄러워 느려지고 · 나무가 잘 베어져요', '#9fd8ff', 2.4); sfx('woosh'); } }
+  if (G.fogOn) { G.fogOn -= dt; if (G.fogOn <= 0 || night) { G.fogOn = 0; G.rainNext = rand(90, 150); banner('🌤 안개가 걷혔어요', '', '#dfe7ee', 1.6); } }   // 🌫 Build 152: 안개
+  else if (G.rainOn) { G.rainOn -= dt; if (G.rainOn <= 0 || night) { G.rainOn = 0; G.rainNext = rand(90, 150); rainEnd(night); } }
+  else if (!night && G.bt > 60 && (G.rainNext -= dt) <= 0 && (window.__weather ? window.__weather === 'fog' : Math.random() < 0.5)) { G.fogOn = 25; G.fogs = (G.fogs || 0) + 1; banner('🌫 안개가 꼈어요!', '멀리가 안 보여요 · 대신 적이 놀라서 15% 더 아파해요', '#dfe7ee', 2.6); sfx('woosh'); }
+  else if (!night && G.bt > 60) { if (G.rainNext <= 0) { G.rainOn = 30; G.rains = (G.rains || 0) + 1; banner('🌧 비가 와요!', '적이 미끄러워 느려지고 · 나무가 잘 베어져요', '#9fd8ff', 2.4); sfx('woosh'); } }
   G.drops = (G.drops || []).filter(d => (d.life -= dt) > 0);
   if (G.rainOn) for (let i = 0; i < 6 && G.drops.length < 140; i++) G.drops.push({ x: rand(0, W), y: rand(-40, H), life: rand(0.25, 0.5), max: 0.5 });
   for (const d of G.drops) { d.y += 900 * dt; d.x -= 160 * dt; }
@@ -2313,6 +2315,9 @@ function updRainbow(dt) { if (G.rainbowT > 0) G.rainbowT -= dt;
 function drawRainbowArc() { if (!(G.rainbowT > 0)) return; const a = Math.min(1, (8 - G.rainbowT) / 1.2, G.rainbowT / 1.5) * 0.45, cx = W / 2, cy = H * 0.62, R = Math.max(W, H) * 0.55;
   const cols = ['#ff4d4d', '#ff9f1c', '#ffd23f', '#5cdb5c', '#3fa9f5', '#5e60ce', '#b5179e']; ctx.save(); ctx.globalAlpha = a; ctx.lineWidth = 11;
   cols.forEach((c, i) => { ctx.strokeStyle = c; ctx.beginPath(); ctx.arc(cx, cy, R - i * 11, Math.PI * 1.08, Math.PI * 1.92); ctx.stroke(); }); ctx.restore(); }
+function drawFog() { if (!(G.fogOn > 0)) return; const k = Math.min(1, (25 - G.fogOn) / 2, G.fogOn / 2), p = G.p, sx = (p.x - G.cam.x) * SCALE + W / 2, sy = (p.y - 12 - G.cam.y) * SCALE * K + H / 2;   // 영웅 둘레만 보이는 안개
+  const g = ctx.createRadialGradient(sx, sy, 150 * SCALE, sx, sy, 320 * SCALE); g.addColorStop(0, 'rgba(225,232,240,0)'); g.addColorStop(1, `rgba(225,232,240,${0.82 * k})`); ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+  ctx.fillStyle = `rgba(225,232,240,${0.1 * k})`; ctx.fillRect(0, 0, W, H); }
 function drawRain() { if (!G.rainOn && !(G.drops || []).length) return; const k = G.rainOn ? Math.min(1, (30 - G.rainOn) / 2, G.rainOn / 2) : 0;
   if (k > 0) { ctx.fillStyle = `rgba(40,60,90,${0.16 * k})`; ctx.fillRect(0, 0, W, H); }
   ctx.strokeStyle = 'rgba(200,225,255,.55)'; ctx.lineWidth = 1.4; ctx.beginPath(); for (const d of G.drops) { ctx.moveTo(d.x, d.y); ctx.lineTo(d.x + 5, d.y - 18); } ctx.stroke(); }
@@ -3167,7 +3172,7 @@ function nearest(x, y, maxD) {
 function hurtEnemy(e, dmg, fx, fy, kb) {
   if (e.dead || e.transT > 0) return;   // 변신 중인 마지막 보스는 안 맞음
   const crit = Math.random() < 0.1;
-  dmg = Math.round(dmg * G.p.dmgMul * (crit ? 2 : 1) * (e.boss && e.weakT > 0 ? 1.5 : 1));   // 🎯 보스 약점 타임
+  dmg = Math.round(dmg * G.p.dmgMul * (crit ? 2 : 1) * (e.boss && e.weakT > 0 ? 1.5 : 1) * (G.fogOn > 0 && G.mode === 'base' ? 1.15 : 1));   // 안개: +15%   // 🎯 보스 약점 타임
   if (e.boss && e.weakT > 0) { G.weakHits = (G.weakHits || 0) + 1; if (G.t - (e.weakTxt || 0) > 0.6) { e.weakTxt = G.t; floatText(e.x + rand(-20, 20), e.y - (e.r || 40) - 40, '약점!', '#ff4d6d', 18, 0.6); } }
   if (e.type === 'e_agrunt' && fx * e.face < 0) { dmg = Math.round(dmg * 0.7); if (Math.random() < 0.15) floatText(e.x, e.y - 50, '막음!', '#dee2e6', 12, 0.5); }   // 갑옷 졸개: 앞(보는 쪽)에서 맞으면 방패로 −30%
   e.hp -= dmg; e.flash = 0.1; e.hitT = 0.25; e.hx = fx; e.hy = fy; e.lastSrc = G.hitSrc || null;   // 마지막으로 때린 것 (퀘스트용)
@@ -5305,7 +5310,7 @@ function render() {
   if (G.mode === 'stage') drawStageGround(); else drawGround();
   drawWorld();
   ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
-  if (G.mode === 'base') { drawRain(); drawRainbowArc(); drawNight(); drawGhostChest(); } else drawBlizzard();
+  if (G.mode === 'base') { drawRain(); drawFog(); drawRainbowArc(); drawNight(); drawGhostChest(); } else drawBlizzard();
   drawHUD();
 }
 
