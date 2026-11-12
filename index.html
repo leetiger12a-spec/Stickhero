@@ -91,6 +91,7 @@ canvas{display:block;position:fixed;inset:0;width:100%;height:100%}
 .sw i{width:34px;height:14px;border-radius:7px;border:2px solid #222;display:block}
 .sw.on{outline:4px solid #ffd23f;transform:scale(1.06)}
 .sw.lock{opacity:.5}
+#pet2Grid{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;width:min(92vw,360px);margin:2px 0 10px}#pet2Grid .sw{padding:5px 2px 4px;font-size:11px;min-height:58px}#pet2Grid .sw img{height:30px;max-width:44px;object-fit:contain}#pet2Grid .sw b{font-size:22px;line-height:30px}
 #petGrid{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;width:min(92vw,360px);margin:2px 0 10px}#petGrid .sw{padding:5px 2px 4px;font-size:11px;min-height:58px}#petGrid .sw img{height:30px;max-width:44px;object-fit:contain}#petGrid .sw b{font-size:22px;line-height:30px}
 #hatGrid{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;width:min(92vw,360px);margin:2px 0 10px}
 #hatGrid .sw{padding:5px 2px 4px;font-size:11px;min-height:58px}#hatGrid .sw img{height:30px;max-width:44px;object-fit:contain}#hatGrid .sw b{font-size:22px;line-height:30px}
@@ -292,6 +293,8 @@ h2 .hb{-webkit-text-stroke:0;text-shadow:none;letter-spacing:0;font-family:"Jua"
   <div id="hatGrid"></div>
   <div class="wardH">🐾 펫 친구</div>
   <div id="petGrid"></div>
+  <div class="wardH" id="pet2H">🐾 두 번째 펫</div>
+  <div id="pet2Grid"></div>
   <button class="btn" id="bWardOk">완료</button>
 </div>
 
@@ -338,7 +341,7 @@ h2 .hb{-webkit-text-stroke:0;text-shadow:none;letter-spacing:0;font-family:"Jua"
 
 <script>
 'use strict';
-const BUILD = 150;
+const BUILD = 151;
 const BOSS_INTERVAL = 180;      // 보스 등장 간격(초)
 const WAVE_INTERVAL = 60;       // 대규모 몰이 이벤트 간격(초)
 const MAX_ENEMIES = 220;
@@ -506,11 +509,14 @@ const PETS = [
   { id: 'chick',  name: '병아리', need: 22, desc: '3초마다 체력 +2' },
   { id: 'dragon', name: '아기 용', need: 30, desc: '불꽃을 퐁퐁 쏴요' },
 ];
-let petSel = 0;
-try { petSel = +(localStorage.getItem('stickhero_pet') || 0) || 0; } catch (e) {}
-function updPet(dt) { const P = PETS[petSel], p = G.p; if (!P || !P.id) { G.pet = null; return; }
-  const pt = G.pet || (G.pet = { x: p.x - 30, y: p.y + 10, t: 0, face: 1, cd: 1, hop: 0 }); pt.t += dt;
-  const tx = p.x - 34 * (p.face || 1), ty = p.y + 14, dx = tx - pt.x, dy = ty - pt.y, d = Math.hypot(dx, dy);
+let petSel = 0, pet2Sel = 0;
+const PET2_NEED = 40;
+try { petSel = +(localStorage.getItem('stickhero_pet') || 0) || 0; pet2Sel = +(localStorage.getItem('stickhero_pet2') || 0) || 0; } catch (e) {}
+function updPet(dt) { updPetOne(dt, petSel, 'pet', 1); if (pet2On()) updPetOne(dt, pet2Sel, 'pet2', -1); else G.pet2 = null; }   // 🐾 Build 151: 별 40개면 두 번째 펫
+const pet2On = () => totalStars() >= PET2_NEED && pet2Sel > 0 && pet2Sel !== petSel;
+function updPetOne(dt, sel, key, side) { const P = PETS[sel], p = G.p; if (!P || !P.id) { G[key] = null; return; }
+  const pt = G[key] || (G[key] = { x: p.x - 30, y: p.y + 10, t: 0, face: 1, cd: 1, hop: 0 }); pt.t += dt;
+  const tx = p.x - 34 * side * (p.face || 1), ty = p.y + 14, dx = tx - pt.x, dy = ty - pt.y, d = Math.hypot(dx, dy);
   if (d > 600) { pt.x = tx; pt.y = ty; } else if (d > 6) { const sp = Math.min(d * 4, p.speed * 1.4); pt.x += dx / d * sp * dt; pt.y += dy / d * sp * dt; pt.hop += dt * 12; if (Math.abs(dx) > 2) pt.face = dx > 0 ? 1 : -1; }
   pt.cd -= dt; if (pt.cd > 0 || p.dead) return;
   const L = petLv(P.id);   // 🐾 Build 138: 펫 레벨 1~5
@@ -520,9 +526,12 @@ function updPet(dt) { const P = PETS[petSel], p = G.p; if (!P || !P.id) { G.pet 
   else if (P.id === 'dragon') { pt.cd = 2.2 - 0.2 * L; const e = nearest(pt.x, pt.y, 300); if (e) { const a = Math.atan2(e.y - pt.y, e.x - pt.x); G.bullets.push({ x: pt.x, y: pt.y - 14, vx: Math.cos(a) * 420, vy: Math.sin(a) * 420, r: 5, dmg: (8 + 2 * G.lvl) * (1 + 0.25 * (L - 1)), life: 0.8, pierce: L >= 5 ? 2 : 0, hits: [], kind: 'pistol', pet: true }); pt.face = Math.cos(a) > 0 ? 1 : -1; sfx('toss'); } } }
 const PET_XP = [0, 100, 300, 700, 1500];   // 펫이 함께 잡은 적 수로 레벨 (영원히)
 const petLv = id => { const x = ((ST.petXp || {})[id]) || 0; let l = 1; for (let i = 1; i < PET_XP.length; i++) if (x >= PET_XP[i]) l = i + 1; return l; };
-function petGain() { const P = PETS[petSel]; if (!P || !P.id || !G.pet) return; ST.petXp = ST.petXp || {}; const before = petLv(P.id); ST.petXp[P.id] = (ST.petXp[P.id] || 0) + 1; stDirty = true;
-  const now = petLv(P.id); if (now > before) { floatText(G.pet.x, G.pet.y - 50, `🐾 ${P.name} Lv ${now}!`, '#ffd23f', 18, 1.6); burst(G.pet.x, G.pet.y - 16, '#ffd23f', 20, 200, 4, 0.6); sfx('unlock'); } }
-function drawPet() { const pt = G.pet, P = PETS[petSel]; if (!pt || !P || !P.id) return; const im = bakedIco('pet_' + P.id, 30); if (!im) return; const h = 30, w = h * im.width / im.height, hop = Math.abs(Math.sin(pt.hop)) * 4;
+function petGain() { petGainOne(petSel, G.pet); if (G.pet2) petGainOne(pet2Sel, G.pet2); }
+function petGainOne(sel, pt) { const P = PETS[sel]; if (!P || !P.id || !pt) return; ST.petXp = ST.petXp || {}; const before = petLv(P.id); ST.petXp[P.id] = (ST.petXp[P.id] || 0) + 1; stDirty = true;
+  const now = petLv(P.id); if (now > before) { floatText(pt.x, pt.y - 50, `🐾 ${P.name} Lv ${now}!`, '#ffd23f', 18, 1.6); burst(pt.x, pt.y - 16, '#ffd23f', 20, 200, 4, 0.6); sfx('unlock'); } }
+function drawPet() { drawPetOne(G.pet, petSel); }
+function drawPet2() { drawPetOne(G.pet2, pet2Sel); }
+function drawPetOne(pt, sel) { const P = PETS[sel]; if (!pt || !P || !P.id) return; const im = bakedIco('pet_' + P.id, 30); if (!im) return; const h = 30, w = h * im.width / im.height, hop = Math.abs(Math.sin(pt.hop)) * 4;
   ctx.fillStyle = 'rgba(0,0,0,.18)'; ctx.beginPath(); ctx.ellipse(pt.x, pt.y + 2, 11, 4, 0, 0, 7); ctx.fill();
   ctx.save(); ctx.translate(pt.x, pt.y - hop); ctx.scale(pt.face, IK); ctx.drawImage(im, -w / 2, -h + 2, w, h); ctx.restore();
   const L = petLv(P.id); if (L > 1) { ctx.save(); ctx.translate(pt.x, pt.y - h - 6 - hop); ctx.scale(1, IK); ctx.font = 'bold 9px Jua,system-ui,sans-serif'; ctx.textAlign = 'center'; ctx.lineWidth = 3; ctx.strokeStyle = '#222'; ctx.strokeText('Lv' + L, 0, 0); ctx.fillStyle = L >= 5 ? '#ffd23f' : '#fff'; ctx.fillText('Lv' + L, 0, 0); ctx.restore(); } }
@@ -583,6 +592,15 @@ function renderWard() {
     b.innerHTML = (h.id ? `<img src="img/pet_${h.id}.webp?b=${BUILD}" alt="">` : '<b>🚫</b>') + (lock ? '🔒⭐' + h.need : h.name + (h.id ? ` <small>Lv${petLv(h.id)}</small>` : ''));
     b.onclick = () => { if (lock) { sfx('hurt'); return; } petSel = i; try { localStorage.setItem('stickhero_pet', i); } catch (e) {} sfx('pick'); if (G) G.pet = null; renderWard(); if (h.desc) { const L = petLv(h.id), nx = PET_XP[L]; $('wardSub').textContent = `🐾 ${h.name} Lv${L}: ${h.desc}` + (nx ? ` · 다음 레벨까지 적 ${nx - ((ST.petXp || {})[h.id] || 0)}마리` : ' · 최고 레벨!'); } };
     pg.appendChild(b);
+  });
+  const p2 = $('pet2Grid'); p2.innerHTML = ''; const open2 = have >= PET2_NEED;
+  $('pet2H').textContent = open2 ? '🐾 두 번째 펫 (같이 따라다녀요)' : `🐾 두 번째 펫 🔒⭐${PET2_NEED}`;
+  PETS.forEach((h, i) => {
+    const lock = !open2 || have < h.need || (i && i === petSel), b = document.createElement('button');
+    b.className = 'sw' + (i === pet2Sel ? ' on' : '') + (lock ? ' lock' : ''); b.dataset.i = i;
+    b.innerHTML = (h.id ? `<img src="img/pet_${h.id}.webp?b=${BUILD}" alt="">` : '<b>🚫</b>') + (!open2 ? '🔒' : i && i === petSel ? '첫 펫' : have < h.need ? '🔒⭐' + h.need : h.name);
+    b.onclick = () => { if (lock) { sfx('hurt'); return; } pet2Sel = i; try { localStorage.setItem('stickhero_pet2', i); } catch (e) {} sfx('pick'); if (G) G.pet2 = null; renderWard(); };
+    p2.appendChild(b);
   });
   // 미리보기
   const c = $('wardPrev'), x = c.getContext('2d'), im = SPR_SRC.hero;
@@ -4818,6 +4836,7 @@ function drawWorld() {
   }
   if (!p.dead && G.deadT <= 0) list.push({ y: p.y, draw: () => { if (p.slowT > 0) { ctx.save(); ctx.translate(p.x, p.y); ctx.scale(1, IK); ctx.strokeStyle = 'rgba(160,210,255,.9)'; ctx.lineWidth = 3; ctx.beginPath(); ctx.ellipse(0, 2, 16, 6, 0, 0, 7); ctx.stroke(); ctx.restore(); } drawStick(p); drawHeroTitle(p); drawSay(p); } });
   if (G.pet && !p.dead) list.push({ y: G.pet.y, draw: drawPet });
+  if (G.pet2 && !p.dead) list.push({ y: G.pet2.y, draw: drawPet2 });
   for (const a of G.allies) if (!a.dead) list.push({ y: a.y, draw: () => { drawAlly(a); if (a.say) drawBubble(a.say, a.x, a.y - 80 * IK); } });
   list.sort((a, b) => a.y - b.y);
   for (const e of list) { if (e.draw) e.draw(); else if (e.boss) drawBoss(e); else drawEnemy(e); }
