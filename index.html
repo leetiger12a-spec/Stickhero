@@ -35,6 +35,7 @@ canvas{display:block;position:fixed;inset:0;width:100%;height:100%}
 #dailyGrid .dd{border:3px solid #222;border-radius:12px;background:#fffaf0;color:#222;padding:6px 2px;font-weight:800;font-size:12px;display:flex;flex-direction:column;align-items:center;gap:2px}
 #dailyGrid .dd b{font-size:20px}#dailyGrid .dd.got{opacity:.45}#dailyGrid .dd.now{outline:4px solid #ffd23f;transform:scale(1.06)}#dailyGrid .dd.big{grid-column:span 2;background:#fff3c4}
 .mrow .hb{width:auto;padding:0 10px;font-size:14px;white-space:nowrap}
+#bMail{display:block;width:100%;max-width:340px;margin:2px auto 6px;padding:8px 10px;border:3px solid #222;border-radius:14px;background:linear-gradient(#d6ffd9,#7bed9f);color:#222;font:inherit;font-size:14px;font-weight:800;cursor:pointer;animation:mailBob 1s ease-in-out infinite}@keyframes mailBob{50%{transform:translateY(-3px)}}
 #bWeekly{display:block;width:100%;max-width:340px;margin:2px auto 8px;padding:7px 10px;border:3px solid #222;border-radius:14px;background:#fff3c4;color:#222;font:inherit;font-size:13px;font-weight:800;line-height:1.35;white-space:normal;cursor:pointer}#bWeekly small{font-size:11px;font-weight:700;opacity:.8}
 .mrow{flex-wrap:wrap;justify-content:center}
 #logoImg{width:min(88vw,460px);filter:drop-shadow(0 6px 10px rgba(0,0,0,.55));animation:titleBob 2.4s ease-in-out infinite}
@@ -191,6 +192,7 @@ h2 .hb{-webkit-text-stroke:0;text-shadow:none;letter-spacing:0;font-family:"Jua"
    <div class="plabel">난이도</div>
    <div class="pills" id="diffPills"></div>
    <div id="diffDesc"></div>
+   <button id="bMail" style="display:none"></button>
    <button id="bWeekly"></button>
    <button class="btn big" id="bContinue" style="display:none">▶ 이어하기</button>
    <div class="best" id="saveInfo" style="margin-top:0"></div>
@@ -341,7 +343,7 @@ h2 .hb{-webkit-text-stroke:0;text-shadow:none;letter-spacing:0;font-family:"Jua"
 
 <script>
 'use strict';
-const BUILD = 153;
+const BUILD = 154;
 const BOSS_INTERVAL = 180;      // 보스 등장 간격(초)
 const WAVE_INTERVAL = 60;       // 대규모 몰이 이벤트 간격(초)
 const MAX_ENEMIES = 220;
@@ -1617,7 +1619,7 @@ function saveSummary(d) {
   return `[${DIFFS[d.diff !== undefined ? d.diff : 2].name}] 스테이지 ${d.stageN} 클리어 · 영웅 Lv ${d.lvl} · 동료 ${d.allies.length}명 · 🪙${d.gold}<br><span style="opacity:.7">${ago < 1 ? '방금' : ago < 60 ? ago + '분 전' : Math.round(ago / 60) + '시간 전'} 저장</span>`;
 }
 function refreshTitle() {
-  renderDiff(); refreshDaily(); refreshWeekly();
+  renderDiff(); refreshDaily(); refreshWeekly(); refreshMail();
   if (HAS_LOGO) { $('logoImg').src = `img/logo.webp?b=${BUILD}`; $('logoImg').style.display = ''; $('logoText').style.display = 'none'; $('logoKr').style.display = 'none'; }
   $('bStory').style.display = STORY.some(s => STORY_FILES.includes(s.img)) ? '' : 'none';
   $('bestTitle').innerHTML = bestText(loadBest());
@@ -1644,6 +1646,11 @@ const weekNo = (t = Date.now()) => Math.floor((t / 86400000 + 3) / 7);
 let WEEKLY_FORCE = null;   // 시험용: 규칙 고정
 const weekNow = () => WEEKLY_FORCE ? WEEKLY.find(w => w.id === WEEKLY_FORCE) : WEEKLY[weekNo() % WEEKLY.length];
 const WK = id => G && G.weekly === id;
+// 📬 새 버전 선물 (Build 154): 새 빌드가 들어오면 시작 화면에 선물 1번 (처음 하는 사람은 없음)
+const MAIL_GIFT = 100;
+function mailState() { const m = readJSON(META_KEY) || {}; if (m.lastBuild === undefined) { m.lastBuild = BUILD; writeJSON(META_KEY, m); return null; } return m.lastBuild < BUILD ? m.lastBuild : null; }
+function refreshMail() { const from = mailState(); $('bMail').style.display = from ? '' : 'none'; if (from) $('bMail').innerHTML = `📬 새 버전 선물 도착! (Build ${from} → ${BUILD})<br><small>눌러서 금고 🪙${MAIL_GIFT} 받기</small>`; }
+$('bMail').onclick = () => { audioInit(); const m = readJSON(META_KEY) || {}; if (!(m.lastBuild < BUILD)) return; m.lastBuild = BUILD; m.bank = (m.bank || 0) + MAIL_GIFT; writeJSON(META_KEY, m); sfx('unlock'); $('bMail').innerHTML = `🎉 금고에 🪙${MAIL_GIFT} 넣었어요! 새 기능을 즐겨요`; setTimeout(refreshMail, 1800); };
 function refreshWeekly() { const m = readJSON(META_KEY) || {}, w = weekNow(), done = m.weeklyDone === weekNo();
   $('bWeekly').innerHTML = `🎯 이번 주 도전: <b>${w.name}</b> ${m.weeklyOn ? '✅ 켜짐' : '⬜ 꺼짐'}${done ? ' · 🏆 보상 받음' : ''}<br><small>${w.desc} · 보스 3마리 = 금고 🪙300</small>`; }
 $('bWeekly').onclick = () => { audioInit(); sfx('pick'); const m = readJSON(META_KEY) || {}; m.weeklyOn = !m.weeklyOn; writeJSON(META_KEY, m); refreshWeekly(); };
