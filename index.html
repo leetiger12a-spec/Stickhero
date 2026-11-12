@@ -328,7 +328,7 @@ h2 .hb{-webkit-text-stroke:0;text-shadow:none;letter-spacing:0;font-family:"Jua"
 
 <script>
 'use strict';
-const BUILD = 142;
+const BUILD = 143;
 const BOSS_INTERVAL = 180;      // 보스 등장 간격(초)
 const WAVE_INTERVAL = 60;       // 대규모 몰이 이벤트 간격(초)
 const MAX_ENEMIES = 220;
@@ -2189,9 +2189,9 @@ function nightK() { // 0(낮) ~ 1(한밤), 4초 동안 서서히
 }
 function updNight(dt) {
   const ph = nightPh(), on = ph >= 0 && ph < NIGHT_LEN, p = G.p;
-  if (on && !G.nightOn) { G.nightOn = true; heroSay('night', true); banner('🌙 밤이 됐다!', '적이 더 많이 몰려와요 · 아침까지 버텨라!', '#9fb4ff', 2.6); sfx('wave'); }
+  if (on && !G.nightOn) { G.nightOn = true; G.moon = ((G.nights || 0) + 1) % 5 === 0; heroSay('night', true); if (G.moon) banner('🌕 보름달 밤!', '적이 2배! 대신 아침 보너스도 2배!', '#ffe9a8', 2.8); else banner('🌙 밤이 됐다!', '적이 더 많이 몰려와요 · 아침까지 버텨라!', '#9fb4ff', 2.6); sfx('wave'); }   // 🌕 Build 143: 5번째 밤마다 보름달
   if (!on && G.nightOn) {
-    G.nightOn = false; G.nights = (G.nights || 0) + 1; questEvent('night'); stAdd('nightsAll'); const bonus = 40 + 20 * G.nights; G.gold += bonus;
+    G.nightOn = false; G.nights = (G.nights || 0) + 1; questEvent('night'); stAdd('nightsAll'); const bonus = (40 + 20 * G.nights) * (G.moon ? 2 : 1); G.gold += bonus; if (G.moon) stAdd('moons'); G.moon = false;
     heroSay('morning', true); banner('☀️ 아침이다!', `밤을 버텼다! 🪙${bonus}`, '#ffd23f', 2.6); sfx('cheer'); cheerAll(); floatText(p.x, p.y - 60, `+🪙${bonus}`, '#ffd23f', 20, 1.4);
   }
   updGhostChest(dt, on, ph); updRain(dt, on); updRainbow(dt);
@@ -2269,6 +2269,8 @@ function drawNight() { // 화면 위에 어둠을 덮고, 빛나는 곳(영웅·
   hole(0, -10, 150);   // 마을 회관 등불
   for (const t of G.towers) if (t.lvl > 0) hole(t.x, t.y - 30, 70);
   ctx.drawImage(nightCv, 0, 0, W, H);
+  if (G.moon) { const mx = W * 0.64, my = 160, r = 24; ctx.save(); ctx.globalAlpha = k; const g = ctx.createRadialGradient(mx, my, r * 0.6, mx, my, r * 2.4); g.addColorStop(0, 'rgba(255,240,180,.5)'); g.addColorStop(1, 'rgba(255,240,180,0)'); ctx.fillStyle = g; ctx.beginPath(); ctx.arc(mx, my, r * 2.4, 0, 7); ctx.fill();   // 🌕 큰 보름달
+    ctx.fillStyle = '#fff4c2'; ctx.beginPath(); ctx.arc(mx, my, r, 0, 7); ctx.fill(); ctx.fillStyle = 'rgba(220,200,140,.6)'; for (const [dx, dy, rr] of [[-8, -6, 5], [7, 4, 4], [-3, 10, 3]]) { ctx.beginPath(); ctx.arc(mx + dx, my + dy, rr, 0, 7); ctx.fill(); } ctx.restore(); }
   ctx.save(); ctx.globalCompositeOperation = 'lighter';   // 반딧불이 (어둠 위에서 반짝)
   for (const f of G.flies) { const x = (f.x - G.cam.x) * SCALE + W / 2, y = (f.y - G.cam.y) * SCALE * K + H / 2, a = k * Math.min(1, f.life) * (0.5 + 0.5 * Math.sin(G.t * 6 + f.ph));
     ctx.fillStyle = `rgba(200,255,120,${0.35 * a})`; ctx.beginPath(); ctx.arc(x, y, 6, 0, 7); ctx.fill(); ctx.fillStyle = `rgba(240,255,190,${a})`; ctx.beginPath(); ctx.arc(x, y, 2, 0, 7); ctx.fill(); }
@@ -2429,7 +2431,7 @@ function updBase(dt) {
   let rate = ((G.bt < 10 ? 0.35 : 0.5) + G.bt * 0.016) * DF().rate;
   if (G.boss) rate *= 0.35;
   rate *= 1 - 0.15 * campsDown();   // 부순 진지 하나마다 -15%
-  rate *= 1 + 0.5 * nightK();   // 밤에는 적 +50%
+  rate *= 1 + (G.moon ? 1 : 0.5) * nightK();   // 밤에는 적 +50%, 보름달은 +100%
   if (WK('swarm')) rate *= 1.6;
   G.spawnAcc += rate * dt;
   while (G.spawnAcc >= 1) { G.spawnAcc--; spawnEnemy(winterSwap(pickType())); }
