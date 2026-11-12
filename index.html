@@ -343,7 +343,7 @@ h2 .hb{-webkit-text-stroke:0;text-shadow:none;letter-spacing:0;font-family:"Jua"
 
 <script>
 'use strict';
-const BUILD = 154;
+const BUILD = 155;
 const BOSS_INTERVAL = 180;      // 보스 등장 간격(초)
 const WAVE_INTERVAL = 60;       // 대규모 몰이 이벤트 간격(초)
 const MAX_ENEMIES = 220;
@@ -1485,6 +1485,7 @@ cv.addEventListener('pointerdown', e => {
   audioInit();
   if (state === 'play' && G && G.intro) { if (G.intro.t > 0.8) endIntro(); return; }
   if (state !== 'play' || joy) return;
+  if (G && tapWish(e.clientX, e.clientY)) return;   // 🌠 소원 별똥별을 누름
   joy = { id: e.pointerId, ox: e.clientX, oy: e.clientY, x: e.clientX, y: e.clientY };
   try { cv.setPointerCapture(e.pointerId); } catch (_) {}
 });
@@ -2268,7 +2269,7 @@ function updNight(dt) {
     G.nightOn = false; G.nights = (G.nights || 0) + 1; questEvent('night'); stAdd('nightsAll'); const bonus = (40 + 20 * G.nights) * (G.moon ? 2 : 1); G.gold += bonus; if (G.moon) stAdd('moons'); G.moon = false;
     heroSay('morning', true); banner('☀️ 아침이다!', `밤을 버텼다! 🪙${bonus}`, '#ffd23f', 2.6); sfx('cheer'); cheerAll(); floatText(p.x, p.y - 60, `+🪙${bonus}`, '#ffd23f', 20, 1.4);
   }
-  updGhostChest(dt, on, ph); updRain(dt, on); updRainbow(dt);
+  updGhostChest(dt, on, ph); updRain(dt, on); updRainbow(dt); updWish(dt, on && ph > 2);
   // 🦇 밤 박쥐 떼 (Build 99): 밤 동안 14초마다 한 방향에서 박쥐 떼가 날아옴 (울타리를 넘어옴, 빠르지만 약함)
   if (on && ph > 3) { G.batT = (G.batT || 0) - dt; if (G.batT <= 0) { G.batT = 14; batSwarm(6 + Math.min(6, G.nights || 0)); } } else G.batT = 0;
   const k = nightK(); G.flies = (G.flies || []).filter(f => (f.life -= dt) > 0);
@@ -2334,6 +2335,20 @@ function drawFog() { if (!(G.fogOn > 0)) return; const k = Math.min(1, (25 - G.f
 function drawRain() { if (!G.rainOn && !(G.drops || []).length) return; const k = G.rainOn ? Math.min(1, (30 - G.rainOn) / 2, G.rainOn / 2) : 0;
   if (k > 0) { ctx.fillStyle = `rgba(40,60,90,${0.16 * k})`; ctx.fillRect(0, 0, W, H); }
   ctx.strokeStyle = 'rgba(200,225,255,.55)'; ctx.lineWidth = 1.4; ctx.beginPath(); for (const d of G.drops) { ctx.moveTo(d.x, d.y); ctx.lineTo(d.x + 5, d.y - 18); } ctx.stroke(); }
+// 🌠 소원 별똥별 (Build 155): 마을의 밤에 9~14초마다 화면 위쪽을 가로지르는 별 — 누르면 소원 (금화·경험치·체력)
+function updWish(dt, on) { if (!on) { G.wish = null; G.wishT = 6; return; } if (G.wish) { G.wish.t += dt; if (G.wish.t > G.wish.dur) G.wish = null; return; }
+  G.wishT = (G.wishT ?? 6) - dt; if (G.wishT <= 0) { G.wishT = rand(9, 14); const l2r = Math.random() < 0.5; G.wish = { x0: l2r ? -20 : W + 20, x1: l2r ? W + 20 : -20, y0: rand(300, 360), y1: rand(380, 450), t: 0, dur: 2.4 }; } }
+function wishPos() { const w = G.wish, k = w.t / w.dur; return [w.x0 + (w.x1 - w.x0) * k, w.y0 + (w.y1 - w.y0) * k]; }
+function tapWish(cx, cy) { if (!G.wish || G.mode !== 'base') return false; const r = cv.getBoundingClientRect(), [x, y] = wishPos(); if ((cx - r.left - x) ** 2 + (cy - r.top - y) ** 2 > 48 * 48) return false;
+  G.wish = null; G.wishes = (G.wishes || 0) + 1; stAdd('wishes'); const p = G.p, k = Math.random();
+  if (k < 0.4) { const g = 30 + 3 * G.lvl; G.gold += g; floatText(p.x, p.y - 70, `🌠 소원: 금화 +${g}!`, '#ffd23f', 18, 1.4); }
+  else if (k < 0.75) { const v = Math.round(G.need * 0.25); G.xp += v; floatText(p.x, p.y - 70, `🌠 소원: 경험치 +${v}!`, '#6bd6ff', 18, 1.4); }
+  else { p.hp = Math.min(p.maxHp, p.hp + p.maxHp * 0.3); floatText(p.x, p.y - 70, '🌠 소원: 체력 회복!', '#7bed9f', 18, 1.4); }
+  sfx('unlock'); heroSay('wish', true); return true; }
+function drawWish() { if (!G.wish) return; const [x, y] = wishPos(), w = G.wish, dx = w.x1 - w.x0, dy = w.y1 - w.y0, L = Math.hypot(dx, dy), ux = dx / L, uy = dy / L, a = Math.min(1, w.t * 4, (w.dur - w.t) * 3);
+  ctx.save(); ctx.globalAlpha = a; const g = ctx.createLinearGradient(x - ux * 90, y - uy * 90, x, y); g.addColorStop(0, 'rgba(255,240,170,0)'); g.addColorStop(1, 'rgba(255,240,170,.9)');
+  ctx.strokeStyle = g; ctx.lineWidth = 5; ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(x - ux * 90, y - uy * 90); ctx.lineTo(x, y); ctx.stroke();
+  ctx.font = '26px sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText('⭐', x, y); ctx.strokeStyle = `rgba(255,255,255,${0.5 + 0.5 * Math.sin(G.t * 12)})`; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(x, y, 22, 0, 7); ctx.stroke(); ctx.restore(); }
 let nightCv = null;
 function drawNight() { // 화면 위에 어둠을 덮고, 빛나는 곳(영웅·마을 회관·망루)만 구멍을 냄 (1/4 크기로 그려 늘림)
   const k = nightK(); if (k <= 0) return;
@@ -5026,7 +5041,7 @@ function hudText(t, x, y, size, color, align, big) {   // big: 제목 글꼴(검
 }
 // 💬 영웅 말풍선 (Build 104): 보스·진화·밤·유령 상자·체력 낮음 때 짧은 말
 const SAY = { boss: ['덤벼라!', '보스다! 간다!', '이번엔 안 진다!'], evo: ['진화다! 엄청 세졌어!', '우와, 반짝반짝!'], low: ['아야… 조심해야지', '하트가 필요해!'],
-  night: ['밤이다… 반딧불이 예쁘다', '어두워도 안 무서워!'], morning: ['아침이다! 해냈다!', '휴, 버텼다!'], ghost: ['앗! 유령 상자다!', '거기 서!'], combo: ['멈출 수 없어!', '콤보 최고!'], danger: ['마을이 위험해!', '지금 간다!'], jack: ['대박이다!!', '우와, 다 좋은 거야!'], rainbow: ['우와, 무지개다!', '금화 비다!'], bats: ['박쥐다! 조심!'], catch: ['잡았다!', '내 보물이야!'] };
+  night: ['밤이다… 반딧불이 예쁘다', '어두워도 안 무서워!'], morning: ['아침이다! 해냈다!', '휴, 버텼다!'], ghost: ['앗! 유령 상자다!', '거기 서!'], combo: ['멈출 수 없어!', '콤보 최고!'], danger: ['마을이 위험해!', '지금 간다!'], jack: ['대박이다!!', '우와, 다 좋은 거야!'], rainbow: ['우와, 무지개다!', '금화 비다!'], wish: ['소원 빌었다!', '별님 고마워요!'], bats: ['박쥐다! 조심!'], catch: ['잡았다!', '내 보물이야!'] };
 function heroSay(kind, force) { if (!G) return; const L = SAY[kind]; if (!L) return; if (!force && G.say && G.t - G.say.at < 3) return;
   G.say = { txt: L[Math.floor(Math.random() * L.length)], at: G.t, t: 0, dur: 2.2, kind }; }
 function updSay(dt) { const p = G.p;
@@ -5326,7 +5341,7 @@ function render() {
   if (G.mode === 'stage') drawStageGround(); else drawGround();
   drawWorld();
   ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
-  if (G.mode === 'base') { drawRain(); drawFog(); drawRainbowArc(); drawNight(); drawGhostChest(); } else drawBlizzard();
+  if (G.mode === 'base') { drawRain(); drawFog(); drawRainbowArc(); drawNight(); drawGhostChest(); drawWish(); } else drawBlizzard();
   drawHUD();
 }
 
