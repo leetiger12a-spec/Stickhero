@@ -19,7 +19,7 @@ const { chromium } = require('/opt/node22/lib/node_modules/playwright');
   check(d.chests === 1, 'no chest dropped'); check(d.gems >= 10 && d.gems <= 20, 'boss gems not ~15');
   await page.waitForTimeout(1500); await page.screenshot({ path: `${OUT}/b61_chest_world.png` });
   // 상자 3개 나오게 하고 닿기 → 진화(성검 폭풍)가 먼저
-  await page.evaluate(() => { const G = SH.G, c = G.chests[0]; c.t = 1; window.__roll = CHEST_ROLL.map(r => r[1]); CHEST_ROLL.forEach((r, i) => r[1] = i === 2 ? 1 : 0); G.p.x = c.x; G.p.y = c.y + 10; });   // 3개 나오게 확률을 잠깐 바꿈
+  await page.evaluate(() => { const G = SH.G, c = G.chests[0]; c.t = 1; c.jack = false;   /* Build 147: 대박 상자(8%)면 보상이 4칸이라 끔 */ window.__roll = CHEST_ROLL.map(r => r[1]); CHEST_ROLL.forEach((r, i) => r[1] = i === 2 ? 1 : 0); G.p.x = c.x; G.p.y = c.y + 10; });   // 3개 나오게 확률을 잠깐 바꿈
   await page.waitForTimeout(250);
   check(await page.evaluate(() => SH.state === 'chest' && document.getElementById('ovChest').classList.contains('show')), 'chest screen not shown');
   await page.waitForTimeout(500); await page.screenshot({ path: `${OUT}/b61_chest_spin.png` });

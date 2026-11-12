@@ -24,7 +24,8 @@ const { chromium } = require('/opt/node22/lib/node_modules/playwright');
   for (const k of ['gatling', 'flame', 'thunder', 'volcano', 'whirl', 'shing']) check(w[k] > 0, 'weapon sound not played: ' + k);
   check(!w.shoot, 'gatling still plays pistol sound');
   // 보물 상자
-  await page.evaluate(() => { const G = SH.G; G.enemies = []; G.weapons = { sword: 5 }; G.passives = { power: 1 }; __sfx = {}; dropChest(G.p.x, G.p.y - 10); G.chests[0].t = 1; });
+  await page.evaluate(() => { const m = JSON.parse(localStorage.getItem('stickhero_meta') || '{}'); m.ach = Object.fromEntries(ACH.map(A => [A.id, true])); localStorage.setItem('stickhero_meta', JSON.stringify(m)); });   /* Build 147: 업적 달성 소리(unlock)가 섞이지 않게 */
+  await page.evaluate(() => { const G = SH.G; G.enemies = []; G.weapons = { sword: 5 }; G.passives = { power: 1 }; __sfx = {}; dropChest(G.p.x, G.p.y - 10); G.chests[0].t = 1; G.chests[0].jack = false; });
   await page.waitForTimeout(2600);
   const c = await page.evaluate(() => __sfx); console.log('chest sfx', JSON.stringify(c));
   for (const k of ['chestShake', 'chestOpen', 'tick']) check(c[k] > 0, 'chest sound not played: ' + k);

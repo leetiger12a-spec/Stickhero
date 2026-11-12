@@ -6,7 +6,7 @@ const { chromium } = require('/opt/node22/lib/node_modules/playwright');
   await ctx.addInitScript(() => { localStorage.setItem('stickhero_story', '1'); window.__noGold = true; });   // Build 84: 센 보스 차례에 황금 골렘(10%)이 끼어들지 않게
   const page = await ctx.newPage(); const OUT = process.env.OUT || 'shots';
   page.on('pageerror', e => errors.push(e.message)); page.on('console', m => { if (m.type() === 'error') errors.push(m.text()); });
-  await page.goto('http://localhost:8765/index.html'); await page.click('#bStart'); await page.waitForTimeout(300);
+  await page.goto('http://localhost:8765/index.html'); await page.waitForFunction(() => window.SH && typeof startGame === 'function', null, { timeout: 15000 }); await page.waitForTimeout(300); await page.click('#bStart'); await page.waitForFunction(() => SH.G, null, { timeout: 15000 }); await page.waitForTimeout(300);   /* Build 147: 바쁠 때 버튼이 준비되기 전에 눌러 게임이 안 시작되던 흔들림 */
   const pick = () => page.evaluate(() => { for (let i = 0; i < 10; i++) { if (SH.state === 'levelup') SH.choose(0); else if (SH.state === 'allypick') SH.chooseAlly(0); else if (SH.state === 'result' || SH.state === 'map') SH.ok(); else if (SH.state === 'chest') { document.getElementById('ovChest').onclick({ target: {} }); SH.closeChest(); } } if (SH.G && SH.G.intro) SH.skipIntro(); });
   // 키운 마을 + 혼돈
   await page.evaluate(() => { const G = SH.G;
