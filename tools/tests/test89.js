@@ -7,6 +7,7 @@ const { chromium } = require('/opt/node22/lib/node_modules/playwright');
   const page = await ctx.newPage(); const OUT = process.env.OUT || 'shots';
   page.on('pageerror', e => errors.push(e.message)); page.on('console', m => { if (m.type() === 'error') errors.push(m.text()); });
   await page.goto('http://localhost:8765/index.html'); await page.waitForTimeout(800); await page.click('#bStart'); await page.waitForTimeout(400);
+  await page.evaluate(() => { const m = JSON.parse(localStorage.getItem('stickhero_meta') || '{}'); m.ach = Object.fromEntries(ACH.map(A => [A.id, true])); localStorage.setItem('stickhero_meta', JSON.stringify(m)); });   /* 업적 알림이 귀환 알림을 덮지 않게 */
   await page.evaluate(() => { const G = SH.G; G.nextBoss = 999; G.nextWave = 999; G.spawnAcc = -1e9; G.p.inv = 0; G.p.hp = G.p.maxHp = 1e9; G.need = 1e9; G.pads.find(q => q.order === 0).built = true; G.stageN = 6; G.stars = [3, 3, 3, 3, 2, 1]; openMap(); });
   check(await page.evaluate(() => $('bCave').style.display === 'none'), 'cave shown with 4 stars3');
   await page.evaluate(() => { SH.G.stars[4] = 3; $('bMapClose').click(); openMap(); }); await page.waitForTimeout(150);
