@@ -9,7 +9,7 @@ const { chromium } = require('/opt/node22/lib/node_modules/playwright');
   await page.goto('http://localhost:8765/index.html'); await page.waitForTimeout(800); await page.click('#bStart'); await page.waitForTimeout(400);
   await page.evaluate(() => { const G = SH.G; G.nextBoss = 999; G.nextWave = 999; G.spawnAcc = -1e9; G.p.inv = 0; G.p.hp = G.p.maxHp = 1e9; G.need = 1e9; G.pads.find(q => q.order === 0).built = true; G.stageN = 4; openMap(); });
   await page.click('#bTower'); await page.waitForTimeout(100); check(await page.evaluate(() => !$('bGoRush') && $('mapCard').textContent.includes('5칸')), 'rush open too early');
-  await page.evaluate(() => { SH.G.stageN = 6; }); await page.click('#bTower'); await page.waitForTimeout(100);
+  await page.evaluate(() => { SH.G.stageN = 6; openMap(); }); await page.click('#bTower'); await page.waitForTimeout(100);
   await page.screenshot({ path: `${OUT}/b139_card.png` });
   const bank0 = await page.evaluate(() => (JSON.parse(localStorage.getItem('stickhero_meta')) || {}).bank || 0);
   await page.click('#bGoRush'); await page.waitForTimeout(300);

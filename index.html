@@ -109,6 +109,18 @@ canvas{display:block;position:fixed;inset:0;width:100%;height:100%}
 .mnode.sel{outline:4px solid #fff}
 .mstars{position:absolute;transform:translate(-50%,0);font-size:14px;letter-spacing:-1px;text-shadow:0 1px 2px #000;white-space:nowrap}
 .mname{position:absolute;transform:translate(-50%,0);font-size:12px;font-weight:800;white-space:nowrap;text-shadow:0 1px 3px #000}
+#ovMap.towerV{background:linear-gradient(#05021a,#24106b 40%,#3a5bd9)}
+.tfl{position:absolute;width:42px;height:42px;margin:-21px 0 0 -21px;border-radius:12px;border:3px solid #222;font:inherit;font-size:15px;font-weight:900;color:#fff;background:#4a4e69;cursor:pointer;box-shadow:0 4px 0 rgba(0,0,0,.45);padding:0;line-height:1}
+.tfl.done{background:linear-gradient(#ffe066,#f4a300);color:#222}.tfl.boss{border-color:#ff4d6d;width:48px;height:48px;margin:-24px 0 0 -24px;font-size:13px}.tfl.boss.done{background:linear-gradient(#ff8fa3,#e63946);color:#fff}
+.tfl.lock{opacity:.55}.tfl.next{border-color:#fff;animation:pop .7s ease-in-out infinite alternate;background:#3a86ff}.tfl.sel{outline:4px solid #fff}
+.tbimg{position:absolute;transform:translate(-50%,-62%);height:66px;max-width:84px;object-fit:contain;filter:drop-shadow(0 4px 3px rgba(0,0,0,.6));pointer-events:none}.tbimg.lock{filter:brightness(0) drop-shadow(0 0 6px #b5179e);opacity:.75}
+.tbname{position:absolute;transform:translate(-50%,0);font-size:11px;font-weight:800;white-space:nowrap;text-shadow:0 1px 3px #000;pointer-events:none}
+.tsec{position:absolute;right:4px;font-size:11px;font-weight:900;color:#fff;background:rgba(0,0,0,.45);border-radius:8px;padding:2px 6px;white-space:nowrap;pointer-events:none}
+.thero{position:absolute;height:54px;transform:translate(-50%,-80%);animation:titleBob 1.2s ease-in-out infinite;filter:drop-shadow(0 0 8px #fff);pointer-events:none}
+.ttro{position:absolute;transform:translate(-50%,-50%);font-size:22px;pointer-events:none;filter:drop-shadow(0 0 6px #ffd23f)}
+@keyframes twk{50%{opacity:.15}}.tstar{animation:twk 2.4s ease-in-out infinite}
+@keyframes cloudGo{from{transform:translateX(-40px)}to{transform:translateX(40px)}}.tcloud{animation:cloudGo 7s ease-in-out infinite alternate}
+@keyframes flagW{50%{transform:skewY(-10deg) scaleX(.85)}}.tflag{transform-box:fill-box;transform-origin:left center;animation:flagW .9s ease-in-out infinite}
 #mapCard{width:100%;box-sizing:border-box;background:rgba(8,18,30,.92);border-top:3px solid #ffd23f;padding:12px 16px max(14px,env(safe-area-inset-bottom));display:flex;flex-direction:column;align-items:center;gap:4px;min-height:150px}
 #mapCard .t{font-size:20px;font-weight:900;color:#ffd23f}
 #mapCard .g{font-size:14px}
@@ -301,7 +313,7 @@ h2 .hb{-webkit-text-stroke:0;text-shadow:none;letter-spacing:0;font-family:"Jua"
 </div>
 
 <div class="ov" id="ovMap">
-  <div id="mapHead"><h2 style="margin:0">🗺 모험 지도</h2><button class="hb" id="bTower" style="width:auto;padding:0 10px;font-weight:800;background:#b5179e;color:#fff">🗼 무한 탑</button><button class="hb" id="bCave" style="width:auto;padding:0 10px;font-weight:800;background:#ffd23f;color:#222">🌟 동굴</button><button class="hb" id="bMapClose" style="width:auto;padding:0 12px;font-weight:800">✖ 닫기</button></div>
+  <div id="mapHead"><h2 style="margin:0">🗺 모험 지도</h2><button class="hb" id="bMapBack" style="display:none;width:auto;padding:0 10px;font-weight:800;background:#2a9d8f;color:#fff">🗺 지도</button><button class="hb" id="bTower" style="width:auto;padding:0 10px;font-weight:800;background:#b5179e;color:#fff">🗼 무한 탑</button><button class="hb" id="bCave" style="width:auto;padding:0 10px;font-weight:800;background:#ffd23f;color:#222">🌟 동굴</button><button class="hb" id="bMapClose" style="width:auto;padding:0 12px;font-weight:800">✖ 닫기</button></div>
   <div id="mapScroll"><div id="mapInner"></div></div>
   <div id="mapCard"></div>
 </div>
@@ -343,7 +355,7 @@ h2 .hb{-webkit-text-stroke:0;text-shadow:none;letter-spacing:0;font-family:"Jua"
 
 <script>
 'use strict';
-const BUILD = 159;
+const BUILD = 160;
 const BOSS_INTERVAL = 180;      // 보스 등장 간격(초)
 const WAVE_INTERVAL = 60;       // 대규모 몰이 이벤트 간격(초)
 const MAX_ENEMIES = 220;
@@ -2874,7 +2886,7 @@ let mapSel = 0;
 function openMap() {
   state = 'map'; joy = null;
   mapSel = Math.min(G.stageN, STAGES.length - 1);
-  renderMap(); showOv('ovMap'); $('bCave').style.display = caveOpen() ? '' : 'none';   // 비밀: 조건이 되면 나타남
+  mapView(false); renderMap(); showOv('ovMap'); $('bCave').style.display = caveOpen() ? '' : 'none';   // 비밀: 조건이 되면 나타남
   if (caveOpen()) showTip('cave'); else if (rushOpen()) showTip('rush');
   setTimeout(() => { const n = document.querySelector('.mnode.cur') || document.querySelector('.mnode.sel'); if (n) n.scrollIntoView({ block: 'center' }); }, 30);
   sfx('pick');
@@ -2911,16 +2923,99 @@ function renderMap() {
 }
 const stageReward = (i, first) => first ? 60 + i * 35 : 20 + i * 8;
 function towerOpen() { return bestStage() >= 3; }
-$('bTower').onclick = () => {
-  if (!towerOpen()) { sfx('hurt'); $('mapCard').innerHTML = '<div class="t">🗼 무한 탑</div><div class="g">🔒 모험 지도 3칸을 깨면 열려요</div>'; return; }
-  const best = (readJSON(META_KEY) || {}).bestFloor || 0;
-  $('mapCard').innerHTML = `<div class="t">🗼 무한 탑</div><div class="g">층마다 버티기 · 5층마다 보스 · 위로 갈수록 강해져요</div>
-    <div class="r">🏆 최고 기록 <b>${best}층</b> · 층마다 금화, 보스 층은 더 많이!</div><div class="r">층을 깨면 🗼 다음 층 / 🏠 마을로 중에 골라요</div>
+// 🗼 무한 탑 지도 (Build 160): 하늘로 솟은 탑 — 층마다 창문(깬 층은 불빛), 5층마다 보스 발코니, 구름·별·달, 꼭대기 깃발
+let towerSel = 1;
+const THEME_ICO = ['🌲', '🏛', '🕯', '🌋', '🏰', '❄️'];
+const towerBossOf = f => f % 5 ? null : f / 5 <= 9 ? f / 5 : f === 50 ? GOLD_GOLEM : -1;   // -1: 센 보스 중 하나 (spawnBoss와 같은 규칙)
+const towerPrize = f => 15 + f * 6 + (f % 5 === 0 ? 60 + f * 4 : 0);
+function mapView(tower) {
+  $('ovMap').classList.toggle('towerV', tower); $('bMapBack').style.display = tower ? '' : 'none'; $('bTower').style.display = tower ? 'none' : '';
+  $('mapHead').querySelector('h2').textContent = tower ? '🗼 무한 탑' : '🗺 모험 지도';
+  if (tower) $('bCave').style.display = 'none'; else $('bCave').style.display = caveOpen() ? '' : 'none';
+}
+function towerCard() {
+  const best = (readJSON(META_KEY) || {}).bestFloor || 0, f = towerSel, bn = towerBossOf(f), th = THEMES[Math.floor((f - 1) / 5) % THEMES.length];
+  const what = bn === null ? `⏱ ${Math.min(40, 22 + Math.floor(f / 3))}초 버티기` : bn < 0 ? '👑 보스 층 · ❓ 센 보스 중 하나' : `👑 보스 층 · ${BOSSES[bn].name}`;
+  $('mapCard').innerHTML = `<div class="t">🗼 ${f}층 <span style="font-size:13px;color:#fff;opacity:.7">· ${THEME_ICO[Math.floor((f - 1) / 5) % 6]} ${th.name}</span></div><div class="g">${what} · 보상 🪙${towerPrize(f)}${f <= best ? ' · ✅ 가 봤어요' : ''}</div>
+    <div class="r">🏆 최고 기록 <b>${best}층</b> · 층을 깨면 🗼 다음 층 / 🏠 마을로 중에 골라요</div>
     <button class="btn big" id="bGoTower" style="margin-top:6px">🗼 1층부터 도전!</button>` + rushHtml();
   $('bGoTower').onclick = () => { showOv(null); state = 'play'; G.towerGold = 0; enterStage(0, 1); };
   if ($('bGoRush')) $('bGoRush').onclick = startRush;
+}
+function renderTower() {
+  const box = $('mapInner'), best = (readJSON(META_KEY) || {}).bestFloor || 0, F = Math.max(30, Math.ceil((best + 8) / 5) * 5);
+  const rowH = 74, topPad = 190, botPad = 120, Hh = F * rowH + topPad + botPad, Wd = box.clientWidth || Math.min(innerWidth * 0.94, 440);
+  box.style.height = Hh + 'px';
+  const fy = f => Hh - botPad - (f - 0.5) * rowH, x0 = Wd * 0.30, x1 = Wd * 0.70, tw = x1 - x0, gy = Hh - botPad;
+  let rs = 7; const rnd = () => (rs = (rs * 16807) % 2147483647) / 2147483647;
+  let s = `<svg width="${Wd}" height="${Hh}" style="position:absolute;left:0;top:0"><defs>
+    <linearGradient id="tSky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#05021a"/><stop offset=".3" stop-color="#24106b"/><stop offset=".62" stop-color="#3a5bd9"/><stop offset=".9" stop-color="#8ecae6"/><stop offset="1" stop-color="#d8f3ff"/></linearGradient>
+    <linearGradient id="tShade" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#000" stop-opacity=".5"/><stop offset=".38" stop-color="#fff" stop-opacity=".16"/><stop offset=".62" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".55"/></linearGradient>
+    <linearGradient id="tRoof" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#6a0572"/><stop offset=".45" stop-color="#e056b5"/><stop offset="1" stop-color="#4a034f"/></linearGradient>
+    <radialGradient id="tGlow"><stop offset="0" stop-color="#fffbe0"/><stop offset=".6" stop-color="#ffd23f"/><stop offset="1" stop-color="#ff9f1c"/></radialGradient>
+    <radialGradient id="tHalo"><stop offset="0" stop-color="#ffd23f" stop-opacity=".55"/><stop offset="1" stop-color="#ffd23f" stop-opacity="0"/></radialGradient>
+    <pattern id="tBrick" width="28" height="16" patternUnits="userSpaceOnUse"><path d="M0 .5H28M0 8.5H28M.5 0V8M14.5 8V16" stroke="#000" stroke-opacity=".22" stroke-width="1.2" fill="none"/></pattern></defs>
+    <rect width="${Wd}" height="${Hh}" fill="url(#tSky)"/>`;
+  for (let i = 0; i < 90; i++) { const y = rnd() * Hh * 0.5, x = rnd() * Wd, r = 0.6 + rnd() * 1.6; s += `<circle class="tstar" style="animation-delay:${(rnd() * 2.4).toFixed(2)}s" cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${r.toFixed(1)}" fill="#fff"/>`; }
+  s += `<circle cx="${Wd * 0.84}" cy="70" r="26" fill="#fff4c2"/><circle cx="${Wd * 0.84 + 10}" cy="62" r="24" fill="#120a3a" opacity=".9"/>`;   // 초승달
+  const cloud = (x, y, k, op) => `<g class="tcloud" style="animation-duration:${(6 + rnd() * 6).toFixed(1)}s" opacity="${op}"><ellipse cx="${x}" cy="${y}" rx="${34 * k}" ry="${14 * k}" fill="#fff"/><ellipse cx="${x - 22 * k}" cy="${y + 4 * k}" rx="${22 * k}" ry="${11 * k}" fill="#fff"/><ellipse cx="${x + 16 * k}" cy="${y - 8 * k}" rx="${22 * k}" ry="${14 * k}" fill="#fff"/></g>`;
+  for (let y = Hh * 0.45; y < gy - 60; y += 210) s += cloud(rnd() < 0.5 ? Wd * (0.08 + rnd() * 0.18) : Wd * (0.78 + rnd() * 0.16), y, 0.8 + rnd() * 0.6, 0.55 + rnd() * 0.3);
+  // 땅: 언덕 + 풀
+  s += `<path d="M0 ${gy + 10} Q${Wd * 0.25} ${gy - 30} ${Wd * 0.5} ${gy + 4} T${Wd} ${gy - 10} V${Hh} H0Z" fill="#3a7d2c"/><path d="M0 ${gy + 40} Q${Wd * 0.3} ${gy + 14} ${Wd * 0.6} ${gy + 36} T${Wd} ${gy + 30} V${Hh} H0Z" fill="#5fae46"/>`;
+  // 탑 몸통: 5층마다 테마 색
+  for (let sct = 0; sct < F / 5; sct++) {
+    const yt = gy - (sct + 1) * 5 * rowH, th = THEMES[sct % THEMES.length];
+    s += `<rect x="${x0}" y="${yt}" width="${tw}" height="${5 * rowH}" fill="${th.map}"/><rect x="${x0}" y="${yt}" width="${tw}" height="${5 * rowH}" fill="url(#tBrick)"/>`;
+  }
+  s += `<rect x="${x0}" y="${gy - F * rowH}" width="${tw}" height="${F * rowH}" fill="url(#tShade)"/>`;
+  for (let f = 1; f <= F; f++) {
+    const yb = gy - (f - 1) * rowH, yc = fy(f), lit = f <= best, boss = f % 5 === 0;
+    s += `<rect x="${x0 - 5}" y="${yb - 5}" width="${tw + 10}" height="7" rx="2" fill="#2b2d42"/>`;   // 층 바닥 턱
+    for (const k of [0.27, 0.73]) {
+      const wx = x0 + tw * k;
+      if (lit) s += `<circle cx="${wx}" cy="${yc + 2}" r="20" fill="url(#tHalo)"/>`;
+      s += `<path d="M${wx - 9} ${yc + 14} V${yc - 6} A9 9 0 0 1 ${wx + 9} ${yc - 6} V${yc + 14} Z" fill="${lit ? 'url(#tGlow)' : '#141428'}" stroke="#1b1b2f" stroke-width="3"/><path d="M${wx} ${yc - 15} V${yc + 14} M${wx - 9} ${yc + 2} H${wx + 9}" stroke="#1b1b2f" stroke-width="2"/>`;
+    }
+    if (boss) {   // 보스 층: 톱니 성벽 + 오른쪽 발코니 + 빨간 깃발
+      const yt = yb - rowH;
+      for (let i = 0; i < 6; i++) s += `<rect x="${x0 - 8 + i * (tw + 16) / 5.5}" y="${yt - 10}" width="${(tw + 16) / 11}" height="12" fill="#2b2d42"/>`;
+      s += `<rect x="${x0 - 8}" y="${yt - 1}" width="${tw + 16}" height="6" fill="#2b2d42"/>`;
+      s += `<path d="M${x1} ${yb - 6} H${x1 + Wd * 0.11} V${yb + 2} H${x1}Z" fill="#2b2d42"/><path d="M${x1} ${yb - 24} H${x1 + Wd * 0.11}${[0, 1, 2, 3, 4].map(i => ` M${x1 + 3 + i * Wd * 0.11 / 4.4} ${yb - 24} V${yb - 6}`).join('')}" fill="none" stroke="#2b2d42" stroke-width="3" stroke-linecap="round"/><path d="M${x1} ${yb + 2} L${x1 + Wd * 0.11} ${yb + 2} L${x1 + 6} ${yb + 16}Z" fill="#1b1b2f" opacity=".7"/>`;
+      s += `<path d="M${x0 + tw / 2 - 12} ${yt + 6} h24 v30 l-12 -8 l-12 8z" fill="${lit ? '#e63946' : '#6c2a35'}" stroke="#1b1b2f" stroke-width="2"/>`;
+    }
+  }
+  // 받침 + 대문
+  s += `<rect x="${x0 - 16}" y="${gy}" width="${tw + 32}" height="34" fill="#4a4e69"/><rect x="${x0 - 16}" y="${gy}" width="${tw + 32}" height="34" fill="url(#tBrick)"/><path d="M${Wd / 2 - 16} ${gy + 34} V${gy + 2} A16 16 0 0 1 ${Wd / 2 + 16} ${gy + 2} V${gy + 34}Z" fill="#3d2314" stroke="#1b1b2f" stroke-width="3"/>`;
+  // 꼭대기: 지붕 + 깃발
+  const yT = gy - F * rowH;
+  s += `<path d="M${x0 - 14} ${yT} L${Wd / 2} ${yT - 130} L${x1 + 14} ${yT}Z" fill="url(#tRoof)" stroke="#1b1b2f" stroke-width="3"/><path d="M${Wd / 2} ${yT - 130} V${yT - 172}" stroke="#ddd" stroke-width="3"/><path class="tflag" d="M${Wd / 2 + 1} ${yT - 172} h34 l-8 10 l8 10 h-34z" fill="#ffd23f" stroke="#1b1b2f" stroke-width="2"/>`;
+  for (let y = gy - rowH * 3; y > yT; y -= 330) s += cloud(Wd * (0.5 + (rnd() - 0.5) * 0.6), y, 0.7 + rnd() * 0.4, 0.35);   // 탑 앞을 지나가는 옅은 구름
+  s += '</svg>';
+  let h = s;
+  for (let sct = 0; sct < F / 5; sct++) h += `<div class="tsec" style="top:${gy - sct * 5 * rowH - 30}px">${THEME_ICO[sct % 6]} ${THEMES[sct % THEMES.length].name} ${sct * 5 + 1}~${sct * 5 + 5}층</div>`;
+  for (let f = 1; f <= F; f++) {
+    const yc = fy(f), boss = f % 5 === 0, cls = `tfl${f <= best ? ' done' : f === best + 1 ? ' next' : ' lock'}${boss ? ' boss' : ''}${f === towerSel ? ' sel' : ''}`;
+    h += `<button class="${cls}" data-f="${f}" style="left:${Wd * 0.15}px;top:${yc}px">${boss ? '👑' + f : f}</button>`;
+    if (boss) {
+      const bn = towerBossOf(f), lock = f > best, bx = x1 + Wd * 0.155, yb = gy - (f - 1) * rowH - 6;
+      h += bn < 0 ? `<div class="ttro" style="left:${bx}px;top:${yb - 30}px">❓</div>` : `<img class="tbimg${lock ? ' lock' : ''}" src="img/boss${bn}.webp" style="left:${bx}px;top:${yb - 4}px">`;
+      h += `<div class="tbname" style="left:${bx}px;top:${yb + 4}px">${bn < 0 ? '???' : lock ? '???' : BOSSES[bn].name}</div>`;
+    }
+  }
+  if (best > 0) h += `<div class="ttro" style="left:${Wd * 0.15 - 30}px;top:${fy(best)}px">🏆</div>`;
+  h += `<img class="thero" src="img/hero.webp" style="left:${Wd / 2}px;top:${fy(Math.min(F, best + 1)) + 26}px">`;
+  h += `<div class="tbname" style="left:${Wd / 2}px;top:${yT - 205}px;font-size:13px;color:#ffd23f">✨ 끝없이 계속돼요! ✨</div>`;
+  box.innerHTML = h;
+  box.querySelectorAll('.tfl').forEach(b => b.onclick = () => { towerSel = +b.dataset.f; sfx('pick'); renderTower(); towerCard(); });
+}
+$('bTower').onclick = () => {
+  if (!towerOpen()) { sfx('hurt'); $('mapCard').innerHTML = '<div class="t">🗼 무한 탑</div><div class="g">🔒 모험 지도 3칸을 깨면 열려요</div>'; return; }
+  const best = (readJSON(META_KEY) || {}).bestFloor || 0; towerSel = best + 1;
+  mapView(true); renderTower(); towerCard();
+  setTimeout(() => { const n = document.querySelector('.tfl.sel'); if (n) n.scrollIntoView({ block: 'center' }); }, 30);
   sfx('pick');
 };
+$('bMapBack').onclick = () => { sfx('pick'); mapView(false); renderMap(); setTimeout(() => { const n = document.querySelector('.mnode.sel'); if (n) n.scrollIntoView({ block: 'center' }); }, 30); };
 // 🌟 비밀 보물 동굴 (Build 131): ⭐3으로 깬 칸이 5개 넘으면 열림, 하루(날짜) 1번 — 40초 동안 모두 황금 몬스터
 const star3 = () => (G.stars || []).filter(v => v >= 3).length;
 const caveOpen = () => star3() >= 5;
