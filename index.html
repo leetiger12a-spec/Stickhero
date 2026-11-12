@@ -75,6 +75,7 @@ canvas{display:block;position:fixed;inset:0;width:100%;height:100%}
 .dex b{font-weight:400;font-size:14px;line-height:1.15}.dex small{font-size:11px;line-height:1.25;color:#6b5b4b}.dex .cnt{color:#1d6fa5}
 .dex .stars{color:#ffb703;font-size:15px;letter-spacing:1px;text-shadow:0 1px 0 #7a4a00}.dex .stars i{font-style:normal;color:#d6cdbd;text-shadow:none}
 .dex .gold{position:absolute;top:4px;right:4px;font-size:10px;padding:0 5px;border-radius:7px;background:#ddd;color:#888}.dex .gold.on{background:linear-gradient(#ffe680,#ffc21a);color:#3a1a00}
+.master{color:#ffd23f}
 #evoList{display:flex;flex-direction:column;gap:6px;width:min(94vw,400px);max-height:60vh;overflow-y:auto}.evoNow{color:#1d6fa5;font-weight:800}
 #shopList{display:flex;flex-direction:column;gap:8px;width:min(94vw,400px);max-height:58vh;overflow-y:auto}
 .srow{display:flex;align-items:center;gap:10px;background:linear-gradient(#fffdf7,#fff1d6);color:#2b2d42;border:3px solid #2b2d42;border-radius:16px;padding:8px 10px;text-align:left;box-shadow:0 3px 0 #2b2d42}
@@ -337,7 +338,7 @@ h2 .hb{-webkit-text-stroke:0;text-shadow:none;letter-spacing:0;font-family:"Jua"
 
 <script>
 'use strict';
-const BUILD = 148;
+const BUILD = 149;
 const BOSS_INTERVAL = 180;      // 보스 등장 간격(초)
 const WAVE_INTERVAL = 60;       // 대규모 몰이 이벤트 간격(초)
 const MAX_ENEMIES = 220;
@@ -1118,6 +1119,8 @@ function drawWPoses() {
 // 진화 도감: 만든 진화는 이름·설명, 아직이면 ??? + 조합만 (기록은 ST.evoT)
 let evoBack = null;
 function openEvo() { evoBack = state; state = 'evo'; renderEvo(); showOv('ovEvo'); }
+const MASTER = [100, 500, 2000, 5000, 10000];   // 무기 숙련도 ★1~5 (그 무기로 잡은 적)
+const wMaster = id => MASTER.filter(v => ((ST.wk || {})[id] || 0) >= v).length;
 function renderEvo() {
   const ids = Object.keys(EVO), n = ids.filter(id => ST.evoT.includes(id)).length;
   $('evoSub').innerHTML = `만든 진화 <b>${n}/${ids.length}</b> · 무기 Lv5 + 짝 능력이 있으면 레벨업 때 진화 카드가 나와요`;
@@ -1133,7 +1136,7 @@ function renderEvo() {
     const lock = isUnlocked('w', id) ? '' : `<br><small>🔒 스테이지 ${UNLOCKS.find(u => u.id === id).at}칸 깨면 무기가 열려요</small>`;
     row.className = 'arow' + (ok ? '' : ' off');
     row.innerHTML = `<div class="ic">${ok ? wIco(id, 1) : '❓'}</div><div class="tx"><b>${ok ? E.name : '???'}</b><br><small>${wMini(id, 0)} ${W.name} Lv${MAX_WLV} + ${pMini(E.need)} ${P.name} → ${ok ? wMini(id, 1) : '❓'}</small>` +
-      (ok ? `<br><small>${E.desc}</small>` : '') + lock + now + '</div>';
+      (ok ? `<br><small>${E.desc}</small>` : '') + lock + now + (() => { const k = (ST.wk || {})[id] || 0, m = wMaster(id); return `<br><small class="master">🏹 숙련도 <b>${'★'.repeat(m)}${'☆'.repeat(5 - m)}</b> · ${k.toLocaleString()}마리${m < 5 ? ` (다음 ★ ${MASTER[m].toLocaleString()})` : ' 완성!'}</small>`; })() + '</div>';
     box.appendChild(row);
   });
 }
@@ -3189,6 +3192,7 @@ function addCombo() { G.combo = (G.comboT > 0 ? G.combo || 0 : 0) + 1; G.comboT 
 function updCombo(dt) { if (G.comboT > 0) { G.comboT -= dt; if (G.comboT <= 0) G.combo = 0; } if (G.comboPop > 0) G.comboPop -= dt; }
 function killEnemy(e) {
   e.dead = true; G.kills++; if (!e.boss && !e.camp) { addCombo(); petGain(); } if (e.lastSrc === 'poison') questEvent('poison'); else if (e.lastSrc === 'star') questEvent('meteor');
+  if (e.lastSrc && WEAP[e.lastSrc]) { ST.wk = ST.wk || {}; ST.wk[e.lastSrc] = (ST.wk[e.lastSrc] || 0) + 1; stDirty = true; }   // 무기별 처치 수
   if (G.allies.length) allyGainXp(e.x, e.y, e.boss ? 40 : e.camp ? 20 : e.xp);
   if (!e.boss && !e.camp) { questEvent('kill'); stAdd('kills'); ST.kc[e.type] = (ST.kc[e.type] || 0) + 1; if (e.golden) { stSet('goldT', e.type); goldDie(e); } if (e.type.startsWith('e_')) { questEvent('special'); if (SPECIALS.some(q => q[0] === e.type)) stSet('specT', e.type); } }
   if (e.boss) { bossDie(e); return; }
@@ -3325,7 +3329,7 @@ function fireWeapons(dt) {
     if (id === 'sword') continue;
     G.timers[id] = (G.timers[id] || 0) - dt;
     if (G.timers[id] > 0) continue;
-    const s = wStat(id);
+    const s = wStat(id), nb0 = G.bullets.length; G.hitSrc = id;   // 🏹 Build 149: 숙련도용 — 이 무기가 바로 주는 피해·새 탄에 무기 이름
     const tgt = nearest(p.x, p.y, id === 'shotgun' ? 260 : id === 'hammer' ? wStat('hammer').rad + 10 : 420);
     if (!tgt && id !== 'boomerang') { G.timers[id] = 0.1; continue; }
     let ang = tgt ? Math.atan2(tgt.y - (p.y - 12), tgt.x - p.x) : Math.atan2(p.ay, p.ax);
@@ -3406,8 +3410,10 @@ function fireWeapons(dt) {
         G.meteors.push({ x: e.x, y: e.y, t: -k * 0.12, dur: 0.5, dmg: s.dmg, rad: s.rad, big: s.n >= 6 }); }
       wPose('star', ang, 0.4); sfx('woosh');
     }
+    for (let i = nb0; i < G.bullets.length; i++) G.bullets[i].w = G.bullets[i].w || id;
     G.timers[id] = s.cd * p.cdMul;
   }
+  G.hitSrc = null;
 }
 
 function addFlame(x, y, r, life, o) { if (G.pflames.length < 60) G.pflames.push({ x, y, r, life, max: life, tick: 0, ...(o || {}) }); }   // o.poison: 초록 독 웅덩이 (o.dmg)
@@ -3529,7 +3535,7 @@ function update(dt) {
         const rr = e.r + 16;
         if ((e.x - bx) ** 2 + (e.y - by) ** 2 < rr * rr) {
           e.swordCd = 0.35;
-          hurtEnemy(e, s.dmg, Math.cos(a), Math.sin(a), s.kb || 260);
+          G.hitSrc = 'sword'; hurtEnemy(e, s.dmg, Math.cos(a), Math.sin(a), s.kb || 260); G.hitSrc = null;
           burst(bx, by, '#dff6ff', 3, 120, 3, 0.2);
           sfx('swing'); if (evolved('sword')) sfx('shing');
         }
@@ -3548,7 +3554,7 @@ function update(dt) {
         if (b.fireA && b.hits.length === 1) addFlame(e.x, e.y, 26, 1.6);   // 🔥 망루 Lv6 불화살
         const l = Math.hypot(b.vx, b.vy);
         if (b.slow) { e.slowT = Math.max(e.slowT || 0, b.slow); burst(b.x, b.y, '#dff6ff', 5, 100, 3, 0.25); }   // 얼음: 느려짐
-        hurtEnemy(e, b.dmg, b.vx / l, b.vy / l, b.kind === 'shot' || b.kind === 'flame' ? 220 : b.kind === 'xbow' ? 90 : 140);
+        G.hitSrc = b.w || null; hurtEnemy(e, b.dmg, b.vx / l, b.vy / l, b.kind === 'shot' || b.kind === 'flame' ? 220 : b.kind === 'xbow' ? 90 : 140); G.hitSrc = null;
         if (b.pierce-- <= 0) b.life = 0;
       }
     }
@@ -3572,7 +3578,7 @@ function update(dt) {
       const rr = e.r + (b.big ? 26 : 13);
       if ((e.x - b.x) ** 2 + (e.y - b.y) ** 2 < rr * rr && G.t - (b.hits.get(e.id) || -9) > 0.4) {
         b.hits.set(e.id, G.t);
-        hurtEnemy(e, b.dmg, b.back ? -b.dx : b.dx, b.back ? -b.dy : b.dy, 180);
+        G.hitSrc = 'boomerang'; hurtEnemy(e, b.dmg, b.back ? -b.dx : b.dx, b.back ? -b.dy : b.dy, 180); G.hitSrc = null;
       }
     }
   }
