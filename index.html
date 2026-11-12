@@ -111,6 +111,7 @@ canvas{display:block;position:fixed;inset:0;width:100%;height:100%}
 #mapCard .r{font-size:13px;opacity:.85}
 .unlock{margin-top:10px;padding:10px 14px;border:3px solid #ffd23f;border-radius:14px;background:rgba(255,210,63,.15);animation:pop .5s ease-out .8s backwards}
 .unlock small{font-size:13px;opacity:.85}
+#tipCard{position:fixed;left:50%;top:92px;transform:translate(-50%,-20px);width:min(88vw,340px);background:#fffaf0;color:#222;border:3px solid #ffd23f;border-radius:14px;padding:8px 12px;font-size:13px;font-weight:800;line-height:1.45;box-shadow:0 6px 18px rgba(0,0,0,.35);z-index:60;pointer-events:none;opacity:0;transition:opacity .3s,transform .3s}#tipCard.show{opacity:1;transform:translate(-50%,0)}#tipCard b{color:#d35400}
 #clrStars{font-size:56px;letter-spacing:6px;margin:4px 0 8px}
 #clrStars span{display:inline-block;animation:pop .4s ease-out backwards}#clrStars span:not(.off){animation:stamp .5s cubic-bezier(.2,1.6,.4,1) backwards;text-shadow:0 0 14px #ffd23f}
 @keyframes stamp{0%{transform:scale(3) rotate(-25deg);opacity:0}60%{transform:scale(.85) rotate(6deg);opacity:1}100%{transform:scale(1) rotate(0)}}
@@ -295,6 +296,7 @@ h2 .hb{-webkit-text-stroke:0;text-shadow:none;letter-spacing:0;font-family:"Jua"
   <div id="mapCard"></div>
 </div>
 
+<div id="tipCard"></div>
 <div class="ov" id="ovClear">
   <h2 id="clrTitle">스테이지 클리어!</h2>
   <div id="clrStars"></div>
@@ -331,7 +333,7 @@ h2 .hb{-webkit-text-stroke:0;text-shadow:none;letter-spacing:0;font-family:"Jua"
 
 <script>
 'use strict';
-const BUILD = 144;
+const BUILD = 145;
 const BOSS_INTERVAL = 180;      // 보스 등장 간격(초)
 const WAVE_INTERVAL = 60;       // 대규모 몰이 이벤트 간격(초)
 const MAX_ENEMIES = 220;
@@ -1603,7 +1605,7 @@ function weeklyBoss() { if (!G || !G.weekly) return; G.weeklyB = (G.weeklyB || 0
   if (G.weeklyB >= 3 && m.weeklyDone !== weekNo()) { m.weeklyDone = weekNo(); m.bank = (m.bank || 0) + 300; writeJSON(META_KEY, m); banner('🏆 이번 주 도전 성공!', '금고에 🪙300', '#ffd23f', 3); sfx('unlock'); }
   else if (G.weeklyB < 3) floatText(G.p.x, G.p.y - 70, `🎯 도전 보스 ${G.weeklyB}/3`, '#ffd23f', 15, 1.4); }
 function startGame() {
-  audioInit(); clearSave(); newGame(); state = 'play'; joy = null; showOv(null);
+  audioInit(); clearSave(); newGame(); if (totalStars() >= PETS[1].need && petSel === 0) setTimeout(() => showTip('pet'), 3500); state = 'play'; joy = null; showOv(null);
   $('hudBtns').classList.add('show');
   const meta = readJSON(META_KEY);
   G.gold += 25 * upLv('start');
@@ -1638,6 +1640,18 @@ function runSummary() { const ws = Object.keys(G.weapons).map(id => `${wMini(id,
 const LVL_GIFT = { 20: 50, 40: 100, 60: 200, 80: 300, 100: 500 };
 function lvlMilestone(l) { const v = LVL_GIFT[l]; if (!v) return; const m = readJSON(META_KEY) || {}; m.bank = (m.bank || 0) + v; writeJSON(META_KEY, m); G.lvlGifts = (G.lvlGifts || 0) + 1;
   const p = G.p; banner(`🎖 레벨 ${l} 돌파!`, `금고에 🪙${v}`, '#ffd23f', 2.6); sfx('unlock'); burst(p.x, p.y - 30, '#ffd23f', 40, 300, 6, 0.8); burst(p.x, p.y - 30, '#ff6bd6', 20, 240, 5, 0.7); G.lvlFlash = 0.5; }
+// 💡 처음 보는 기능 안내 (Build 145): 기능마다 딱 1번, 화면 위쪽 작은 카드 (누르기를 막지 않음)
+const TIPS = {
+  cards: '💡 <b>카드가 마음에 안 들면?</b><br>🔁 다시 뽑기 · 🚫 카드 빼기를 써 보세요 (한 판에 2번씩)',
+  pet: '💡 <b>펫 친구가 열렸어요!</b><br>시작 화면 🎨 꾸미기에서 펫을 데려가면 도와줘요',
+  cave: '💡 <b>비밀 보물 동굴 발견!</b><br>지도 위 🌟 동굴 — 황금 몬스터만 나와요 (하루 1번)',
+  rush: '💡 <b>보스 러시가 열렸어요!</b><br>🗼 무한 탑을 누르면 아래에 있어요 (하루 1번)',
+  item: '💡 <b>반짝이는 아이템!</b><br>🧲 자석 · 💣 폭탄 · 🎁 선물 — 25초 안에 주워요',
+  combo: '💡 <b>콤보!</b><br>2.5초 안에 계속 잡으면 이어져요 · 50콤보마다 금화 선물',
+};
+let tipT = 0;
+function showTip(id) { const m = readJSON(META_KEY) || {}; m.tips = m.tips || {}; if (m.tips[id] || !TIPS[id]) return false; m.tips[id] = 1; writeJSON(META_KEY, m);
+  const el = $('tipCard'); el.innerHTML = TIPS[id]; el.classList.add('show'); el.dataset.id = id; clearTimeout(tipT); tipT = setTimeout(() => el.classList.remove('show'), 5000); return true; }
 function togglePause() {
   if (state === 'play') { state = 'paused'; joy = null; renderPauseStats(); showOv('ovPause'); }
   else if (state === 'paused') { state = 'play'; showOv(null); }
@@ -1723,6 +1737,7 @@ function openLevelUp() {
   });
   // 🔁 다시 뽑기 (Build 113): 한 판에 2번
   if (G.rerolls === undefined) G.rerolls = 2;
+  if (G.lvl >= 4) showTip('cards');
   $('cardTools').style.display = ''; $('bReroll').textContent = `🔁 다시 뽑기 (${G.rerolls})`; $('bReroll').disabled = G.rerolls <= 0;
   $('bReroll').onclick = () => { if (G.rerolls <= 0 || state !== 'levelup') return; G.rerolls--; sfx('pick'); banMode = false; openLevelUp(); };
   if (G.bans === undefined) G.bans = 2;
@@ -2770,6 +2785,7 @@ function openMap() {
   state = 'map'; joy = null;
   mapSel = Math.min(G.stageN, STAGES.length - 1);
   renderMap(); showOv('ovMap'); $('bCave').style.display = caveOpen() ? '' : 'none';   // 비밀: 조건이 되면 나타남
+  if (caveOpen()) showTip('cave'); else if (rushOpen()) showTip('rush');
   setTimeout(() => { const n = document.querySelector('.mnode.cur') || document.querySelector('.mnode.sel'); if (n) n.scrollIntoView({ block: 'center' }); }, 30);
   sfx('pick');
 }
@@ -3146,6 +3162,7 @@ function dropCoin(x, y) {
 // 🔥 콤보 (Build 108): 2.5초 안에 다음 적을 잡으면 이어짐, 10·50·100·200·500 콤보마다 금화
 const COMBO_GIFT = { 10: 10, 50: 50, 100: 120, 200: 300, 500: 800 };
 function addCombo() { G.combo = (G.comboT > 0 ? G.combo || 0 : 0) + 1; G.comboT = 2.5; G.comboPop = 0.25; if (G.combo > (G.bestCombo || 0)) G.bestCombo = G.combo; stMax('bestCombo', G.combo); const cq = (G.quests || []).find(q => q.id === 'combo' && !q.done); if (cq && G.combo > cq.prog) questEvent('combo');   // 콤보 퀘스트: 가장 긴 콤보
+  if (G.combo === 10) showTip('combo');
   const gift = COMBO_GIFT[G.combo]; if (gift) { G.gold += gift; floatText(G.p.x, G.p.y - 74, `🔥 ${G.combo} 콤보! +🪙${gift}`, '#ff9f1c', 20, 1.4); sfx('coin'); if (G.combo >= 100) heroSay('combo', true); } }
 function updCombo(dt) { if (G.comboT > 0) { G.comboT -= dt; if (G.comboT <= 0) G.combo = 0; } if (G.comboPop > 0) G.comboPop -= dt; }
 function killEnemy(e) {
@@ -3183,7 +3200,7 @@ function killEnemy(e) {
 // 🧲 떨어지는 아이템 (Build 110~): 적을 잡으면 아주 가끔, 25초 뒤 사라짐 (마지막 5초 깜빡)
 const ITEMS = { magnet: { ic: '🧲', p: 0.004, col: '#ff6b6b' }, bomb: { ic: '💣', p: 0.0035, col: '#ff9f1c' }, gift: { ic: '🎁', img: 'i_gift', p: 0, col: '#2ecc71' }, candy: { ic: '🍬', img: 'i_candy', p: 0, col: '#ff4d6d' } };
 function rollItem(x, y) { for (const k in ITEMS) { if (G.items.some(i => i.kind === k)) continue; if (Math.random() < ITEMS[k].p) { dropItem(k, x, y); return; } } }
-function dropItem(kind, x, y) { G.items.push({ kind, x, y, bob: Math.random() * 6, t: 0 }); }
+function dropItem(kind, x, y) { G.items.push({ kind, x, y, bob: Math.random() * 6, t: 0 }); showTip('item'); }
 function useItem(it) { const p = G.p;
   if (it.kind === 'magnet') { for (const g of G.gems) g.pull = true; for (const c of G.coins) c.pull = true; floatText(p.x, p.y - 60, '🧲 모두 끌어와!', '#ff6b6b', 18, 1.2); sfx('unlock'); burst(p.x, p.y - 12, '#ff6b6b', 20, 220, 4, 0.5); G.rings.push({ x: p.x, y: p.y, r: 140, life: 0.4, max: 0.4, color: '#ff6b6b' }); }
   if (it.kind === 'bomb') { // 💣 폭탄 (Build 111): 영웅 둘레 260 안의 적 모두 큰 피해 (보스는 10%만)

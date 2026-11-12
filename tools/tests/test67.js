@@ -7,7 +7,7 @@ const { chromium } = require('/opt/node22/lib/node_modules/playwright');
   const page = await ctx.newPage(); const OUT = process.env.OUT || 'shots';
   page.on('pageerror', e => errors.push(e.message)); page.on('console', m => { if (m.type() === 'error') errors.push(m.text()); });
   await page.goto('http://localhost:8765/index.html'); await page.waitForTimeout(800); await page.click('#bStart'); await page.waitForTimeout(400);
-  await page.evaluate(() => { const G = SH.G; G.nextBoss = 999; G.nextWave = 999; G.spawnAcc = -1e9; G.enemies = []; G.p.inv = 0; G.p.hp = G.p.maxHp = 1e6; G.weapons = {}; G.p.meleeCd = 99; G.pending = 0; });
+  await page.evaluate(() => { const G = SH.G; G.nextBoss = 999; G.nextWave = 999; G.spawnAcc = -1e9; G.enemies = []; G.p.inv = 0; G.p.hp = G.p.maxHp = 1e6; G.weapons = {}; G.p.meleeCd = 99; G.pending = 0; G.quests = []; });   /* Build 145: 콤보 퀘스트(Build 141)가 뽑히면 완료 금화가 섞여서 비움 */
   const kill = n => page.evaluate(n => { const G = SH.G; for (let i = 0; i < n; i++) { const e = makeEnemy('grunt', 300, 300); G.enemies.push(e); killEnemy(e); } G.gems = []; G.coins = []; G.pending = 0; }, n);
   const g0 = await page.evaluate(() => SH.G.gold); await kill(9); check(await page.evaluate(() => SH.G.combo) === 9, 'combo not 9');
   await kill(1); const r = await page.evaluate(g0 => ({ c: SH.G.combo, gold: SH.G.gold - g0 }), g0); console.log('10 combo', JSON.stringify(r)); check(r.c === 10 && r.gold === 10, 'combo 10 gift wrong');
