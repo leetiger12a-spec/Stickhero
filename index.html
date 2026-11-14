@@ -363,7 +363,7 @@ h2 .hb{-webkit-text-stroke:0;text-shadow:none;letter-spacing:0;font-family:"Jua"
 
 <script>
 'use strict';
-const BUILD = 175;
+const BUILD = 176;
 const BOSS_INTERVAL = 180;      // 보스 등장 간격(초)
 const WAVE_INTERVAL = 60;       // 대규모 몰이 이벤트 간격(초)
 const MAX_ENEMIES = 220;
@@ -495,7 +495,7 @@ const $ = id => document.getElementById(id);
 const SPR = {};
 const SPR_WHITE = {}, SPR_GOLD = {};  // 맞았을 때 번쩍이는 흰 실루엣
 const SPR_INFO = {    // ax: 발 위치(그림 폭 대비), h: 화면 키(월드 단위)
-  hero: { ax: 0.42 }, grunt: { ax: 0.45, h: 50 }, runner: { ax: 0.5, h: 42 }, tank: { ax: 0.42, h: 62 },
+  hero: { ax: 0.55 }, grunt: { ax: 0.45, h: 50 }, runner: { ax: 0.5, h: 42 }, tank: { ax: 0.42, h: 62 },
   boss0: { ax: 0.5, h: 140 }, boss1: { ax: 0.5, h: 140 }, boss2: { ax: 0.5, h: 150 }, boss3: { ax: 0.5, h: 140 }, boss4: { ax: 0.5, h: 120 }, boss5: { ax: 0.5, h: 150 }, boss6: { ax: 0.5, h: 160 }, boss7: { ax: 0.5, h: 160 }, boss8: { ax: 0.5, h: 160 }, boss9: { ax: 0.5, h: 160 }, boss10: { ax: 0.5, h: 160 }, boss11: { ax: 0.5, h: 160 }, boss12: { ax: 0.5, h: 160 }, boss13: { ax: 0.5, h: 160 }, boss14: { ax: 0.5, h: 160 }, boss15: { ax: 0.5, h: 165 }, boss_final: { ax: 0.5, h: 175 },
   e_spider: { ax: 0.5, h: 30 }, e_skel: { ax: 0.5, h: 46 },
   e_agrunt: { ax: 0.45, h: 52 }, e_srunner: { ax: 0.5, h: 46 }, e_stank: { ax: 0.45, h: 70 }, e_knight: { ax: 0.5, h: 58 }, e_assassin: { ax: 0.5, h: 50 }, e_ogre: { ax: 0.5, h: 92 }, e_demon: { ax: 0.5, h: 60 }, e_ghost: { ax: 0.5, h: 56 }, e_golem: { ax: 0.5, h: 112 },
@@ -531,7 +531,7 @@ const HATS = [
   { id: 'dragon', name: '황금 용 투구', need: 40, w: 1.6, by: 0.68 },
 ];
 // 그림마다 머리 꼭대기 위치 (칸 폭·높이 대비, tools로 잰 값): [가운데 x, 꼭대기 y]
-const HEAD_AT = { hero: [[0.4506, 0.0406]], hero_walk: [[0.512, 0.035], [0.5072, 0.035], [0.512, 0.04], [0.5144, 0.04]], hero_slash: [[0.4727, 0.16], [0.4754, 0.165], [0.4891, 0.16], [0.4536, 0.18]] };
+const HEAD_AT = { hero: [[0.5483, 0.0625]], hero_walk: [[0.512, 0.035], [0.5072, 0.035], [0.512, 0.04], [0.5144, 0.04]], hero_slash: [[0.6449, 0.175], [0.659, 0.19], [0.6776, 0.195], [0.6753, 0.205]] };
 const HEAD_W = 23;   // 게임 속 머리 폭(px)
 // 🐾 펫 친구 (Build 135): 별로 열림, 영웅을 따라다니며 도와줌
 const PETS = [
@@ -820,7 +820,7 @@ function bakeSprite(n) {
 }
 // img/ 폴더에 실제로 있는 그림만 불러옴 (없는 파일을 부르면 오류가 남)
 const SPR_FILES = ['e_snowman', 'e_ginger', 'e_agrunt', 'e_srunner', 'e_stank', 'e_knight', 'e_assassin', 'e_ogre', 'e_demon', 'e_ghost', 'e_golem', 'boss3', 'boss4', 'boss5', 'boss6', 'boss7', 'boss8', 'boss9', 'boss10', 'boss11', 'boss12', 'boss13', 'boss14', 'boss15', 'boss_final', 'e_spider', 'e_skel', 'e_archer', 'e_bomber', 'e_bat', 'e_slime', 'e_shaman', 'e_charger', 'hall2', 'hall3', 'hall_broken', 'tower_broken', 'stonewall', 'repair', 'farm', 'mine', 'market', 'stone', 'rock', 'camp', 'hero', 'grunt', 'runner', 'tank', 'boss0', 'boss1', 'boss2', 'tree', 'stump', 'log', 'stake', 'tower', 'hall',
-  'smith', 'pillar', 'icepillar', 'snowman', 'snowtree', 'torch', 'coin', 'ally_sword', 'ally_archer', 'tavern', 'ally_bomber', 'skyfang_plane', 'ally_shield', 'hero_slash', 'hero_walk', 'ally_archer_shoot', 'ally_bomber_toss', 'ally_shield_bash', 'ally_sword_slash', 'ally_sword_walk', 'ally_archer_walk', 'ally_bomber_walk', 'ally_shield_walk', 'ally_golem', 'ally_golem_walk', 'ally_golem_slam', 'sf_plane0', 'sf_plane1', 'sf_plane2', 'sf_plane3', 'sf_plane4', 'sf_pilot0', 'sf_pilot1', 'sf_pilot2', 'sf_pilot3', 'sf_pilot4'];
+  'smith', 'pillar', 'icepillar', 'snowman', 'snowtree', 'torch', 'coin', 'ally_sword', 'ally_archer', 'tavern', 'ally_bomber', 'skyfang_plane', 'ally_shield', 'hero_slash', 'ally_archer_shoot', 'ally_bomber_toss', 'ally_shield_bash', 'ally_sword_slash', 'ally_sword_walk', 'ally_archer_walk', 'ally_bomber_walk', 'ally_shield_walk', 'ally_golem', 'ally_golem_walk', 'ally_golem_slam', 'sf_plane0', 'sf_plane1', 'sf_plane2', 'sf_plane3', 'sf_plane4', 'sf_pilot0', 'sf_pilot1', 'sf_pilot2', 'sf_pilot3', 'sf_pilot4'];
 SPR_FILES.forEach(n => {
   const im = new Image();
   im.onload = () => { SPR_ORIG[n] = im; SPR_SRC[n] = HERO_SPR.includes(n) ? recolorHero(im) : im; bakeSprite(n); };
@@ -4911,7 +4911,7 @@ function spr(n, h, white) {
 // ---------- 캐릭터 동작: 한 장 그림을 젖히고·내밀고·찌그러뜨려 움직임 + 칼 궤적 등 효과 ----------
 // 연속 동작 그림(가로 N컷): tools/sheet.py 로 만들고 정보를 여기에. body = 칸 높이 대비 몸 키
 const SHEETS = {
-  hero_slash:        { n: 4, ax: 0.4421, ay: 0.9807, body: 0.8199 },
+  hero_slash:        { n: 4, ax: 0.6301, ay: 0.9857, body: 0.85 },   // Build 176: 새 그림체
   hero_walk:         { n: 4, ax: 0.5047, ay: 0.9854, body: 0.9539, seq: [0, 3, 2, 3] },   // 2번 칸은 칼이 없어서 빼고 재생
   // 동료는 '1번 칸 전체 키 = 게임 속 그림 전체 키'로 맞춤 (body = 1번 칸 키 비율)
   ally_archer_shoot: { n: 4, ax: 0.4263, ay: 0.9834, body: 0.9669 },
@@ -4926,7 +4926,7 @@ const SHEETS = {
   ally_golem_slam:   { n: 4, ax: 0.5026, ay: 0.9688, body: 0.9375 },
 };
 // 게임 속 한 장 그림에서 같은 기준으로 잰 몸 키 비율 (시트 크기를 맞추는 데 씀)
-const STATIC_BODY = { ally_sword: 0.9531, hero: 0.9375, ally_archer: 0.9531, ally_bomber: 0.9531, ally_shield: 0.9531, ally_golem: 0.9531 };
+const STATIC_BODY = { ally_sword: 0.9531, hero: 0.9625, ally_archer: 0.9531, ally_bomber: 0.9531, ally_shield: 0.9531, ally_golem: 0.9531 };
 const WALK_SHEET = { ally_sword: 'ally_sword_walk', ally_archer: 'ally_archer_walk', ally_bomber: 'ally_bomber_walk', ally_shield: 'ally_shield_walk', ally_golem: 'ally_golem_walk' };   // 걸을 때 쓸 연속 그림
 const ACT_SHEET = { ally_sword: { slash: 'ally_sword_slash' }, ally_archer: { shoot: 'ally_archer_shoot' }, ally_bomber: { toss: 'ally_bomber_toss' }, ally_shield: { bash: 'ally_shield_bash' }, ally_golem: { slam: 'ally_golem_slam' } };
 // 시트의 k(0~1) 시점 칸을, 발이 원점에 오도록 그림. bodyPx = 화면에서의 몸 키
