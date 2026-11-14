@@ -9,7 +9,7 @@ const { chromium } = require('/opt/node22/lib/node_modules/playwright');
   await page.goto('http://localhost:8765/index.html'); await page.waitForTimeout(800); await page.click('#bStart'); await page.waitForTimeout(400);
   const ids = ['ghost1', 'ghost10', 'night10', 'hat1', 'hat8', 'newevo'];
   const got = () => page.evaluate(ids => { checkAch(); const a = (JSON.parse(localStorage.getItem('stickhero_meta')) || {}).ach || {}; return ids.map(i => !!a[i]); }, ids);
-  check(await page.evaluate(ids => ids.every(i => ACH.some(A => A.id === i)) && ACH.length === 44, ids), 'achievements missing');
+  check(await page.evaluate(ids => ids.every(i => ACH.some(A => A.id === i)) && ACH.length === 46, ids), 'achievements missing');
   let g = await got(); console.log('start', g.join()); check(g.every(x => !x), 'got too early');
   // 유령 상자 1개 잡기 (실제로 밤에 잡음) + 밤 1번 버티기
   await page.evaluate(() => { const G = SH.G; G.nextBoss = 999; G.nextWave = 999; G.spawnAcc = -1e9; G.enemies = []; G.p.inv = 0; G.p.hp = G.p.maxHp = 1e6; G.bt = NIGHT_START + 8.5; }); await page.waitForTimeout(300);

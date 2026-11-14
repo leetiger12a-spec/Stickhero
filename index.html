@@ -355,7 +355,7 @@ h2 .hb{-webkit-text-stroke:0;text-shadow:none;letter-spacing:0;font-family:"Jua"
 
 <script>
 'use strict';
-const BUILD = 166;
+const BUILD = 167;
 const BOSS_INTERVAL = 180;      // 보스 등장 간격(초)
 const WAVE_INTERVAL = 60;       // 대규모 몰이 이벤트 간격(초)
 const MAX_ENEMIES = 220;
@@ -723,6 +723,8 @@ const ACH = [
   { id: 'golemG',  icon: '💰', name: '황금을 잡아라',  desc: '도망가기 전에 황금 골렘 잡기', title: '황금 손',   bank: 300, p: () => [ST.bossT.includes('황금 골렘') ? 1 : 0, 1] },
   { id: 'golem5',  icon: '⛰', name: '골렘 왕국',     desc: '골렘 보스 5종 모두 잡기',   title: '골렘 대왕',  bank: 600, p: () => [GOLEMS.filter(n => ST.bossT.includes(n)).length, 5] },
   { id: 'ice15',   icon: '❄️', name: '얼음 나라 정복', desc: '모험 지도 15칸 모두 깨기',   title: '얼음 영웅',  bank: 800, p: () => [bestStage(), 15] },   // Build 94
+  { id: 'leg_boss', icon: '👹', name: '지옥 사냥꾼',   desc: '레전드 난이도로 보스 10마리 잡기',  title: '지옥 사냥꾼', bank: 800,  p: () => [ST.legBoss || 0, 10] },   // Build 167
+  { id: 'leg_day',  icon: '🔥', name: '진짜 레전드',   desc: '레전드 난이도로 10일째까지 버티기',  title: '진짜 레전드', bank: 1500, p: () => [ST.legDay || 0, 10] },
   { id: 'skull20', icon: '💀', name: '해골 왕국 정복', desc: '모험 지도 20칸 모두 깨기', title: '다섯 왕국 영웅', bank: 1000, p: () => [bestStage(), 20] },   // Build 159
   { id: 'floor25', icon: '🌤', name: '하늘 끝까지',   desc: '무한 탑 25층 돌파',        title: '하늘 정복자', bank: 600, p: () => [metaOf('bestFloor'), 25] },
   // Build 101: 새 업적 6개
@@ -1543,9 +1545,10 @@ const DIFFS = [
   { name: '쉬움',   ehp: 0.75, edmg: 0.65, rate: 0.8,  boss: 0.75, grow: 0.7, desc: '🙂 조금 여유롭게 마을을 키울 수 있어요' },
   { name: '보통',   ehp: 1,    edmg: 1,    rate: 1,    boss: 1,    grow: 1, desc: '😠 레전드 히어로의 기본 난이도' },
   { name: '어려움', ehp: 1.35, edmg: 1.35, rate: 1.2,  boss: 1.4,  grow: 1.3, desc: '🔥 진짜 레전드만 버틸 수 있어요!' },
-  { name: '레전드', ehp: 2,    edmg: 1.8,  rate: 1.4,  boss: 2.2,  grow: 1.6, desc: '👹 레벨이 아주 높은 영웅을 위한 지옥 난이도!' },   // Build 166
+  { name: '레전드', ehp: 2,    edmg: 1.8,  rate: 1.4,  boss: 2.2,  grow: 1.6, desc: '👹 지옥 난이도! 대신 금화 1.5배 · 전용 업적 2개' },   // Build 166
 ];
 // 💪 레벨 맞춤 세기 (Build 166): 영웅 Lv 30부터 적·보스가 레벨마다 강해짐 (Lv 94 → 체력 x2.6 · 공격 x1.77)
+const LEGEND = 4, legendOn = () => G && G.diff === LEGEND;   // 👹 레전드 난이도 번호
 const LVL_FREE = 30, LVL_HP = 0.025, LVL_DMG = 0.012;
 function lvlScale() { const ex = Math.max(0, ((G && G.lvl) || 1) - LVL_FREE); return { hp: 1 + LVL_HP * ex, dmg: 1 + LVL_DMG * ex }; }
 // 🗼 탑 21층부터 층마다 더 강해짐 (예전엔 21층 위로 그대로였음): 체력 +6% · 공격 +2.5% / 층
@@ -1621,7 +1624,7 @@ function buildSave() {
 function loadGame(d) {
   newGame();
   const p = G.p;
-  G.diff = diffSel;   // Build 166: 이어하기도 시작 화면에서 고른 난이도로 (예전엔 저장할 때 난이도 고정)
+  G.diff = diffSel; if (G.diff === LEGEND) stMax('legDay', d.day || 1);   // Build 166: 이어하기도 시작 화면에서 고른 난이도로 (예전엔 저장할 때 난이도 고정)
   G.stars = d.stars || [];
   d.stageN = Math.min(d.stageN || 0, STAGES.length);
   Object.assign(G, { t: d.t, bt: d.bt, kills: d.kills, lvl: d.lvl, xp: d.xp, need: d.need, pending: d.pending || 0, weapons: d.weapons, passives: d.passives,
@@ -3547,7 +3550,7 @@ function bossDie(e) {
       const v = 300, m2 = readJSON(META_KEY) || {}; m2.bank = (m2.bank || 0) + v; writeJSON(META_KEY, m2); stAdd('rushes'); banner('👑 보스 러시 완주!', `보스 ${R.list.length}마리 연속 · 금고에 🪙${v}`, '#ffd23f', 3.2); sfx('unlock'); }
     stageClear(e.x, e.y + 60); return;
   }
-  G.boss = null; G.bossKills = (G.bossKills || 0) + 1; allyCheer(); if (e.rage) stAdd('rageKills'); questEvent('boss'); weeklyBoss(); stAdd('bosses'); stSet('bossT', e.name); ST.bk[e.name] = (ST.bk[e.name] || 0) + 1; bossFast(e);
+  G.boss = null; G.bossKills = (G.bossKills || 0) + 1; allyCheer(); if (e.rage) stAdd('rageKills'); questEvent('boss'); weeklyBoss(); stAdd('bosses'); if (legendOn()) stAdd('legBoss'); stSet('bossT', e.name); ST.bk[e.name] = (ST.bk[e.name] || 0) + 1; bossFast(e);
   for (let i = 0; i < 5; i++) burst(e.x + rand(-40, 40), e.y + rand(-40, 40), [e.color, '#ffd23f', '#fff', '#ff9f1c', '#222'][i], 40, 380, 8, 1.2);
   for (let i = 0; i < 15; i++) { const a = Math.random() * Math.PI * 2, d = rand(10, 90); dropGem(e.x + Math.cos(a) * d, e.y + Math.sin(a) * d, 5); }   // 상자가 생겨서 구슬은 30 → 15
   dropChest(G.mode === 'stage' ? clamp(e.x, -STAGE_HW + 30, STAGE_HW - 30) : e.x, G.mode === 'stage' ? clamp(e.y + 20, -G.st.L - 350, 80) : e.y + 20, false, e.golden || e.goldG);
@@ -4013,7 +4016,7 @@ function update(dt) {
       c.pull = true; const sp = 300 + Math.max(0, 200 - d) * 3;
       c.x += dx / d * sp * dt; c.y += dy / d * sp * dt;
     }
-    if (d < 16) { c.dead = true; G.gold++; coinCombo = G.t - coinComboT < 0.6 ? coinCombo + 1 : 0; coinComboT = G.t; sfx('coinCombo'); }
+    if (d < 16) { c.dead = true; G.gold += legendOn() && Math.random() < 0.5 ? 2 : 1; coinCombo = G.t - coinComboT < 0.6 ? coinCombo + 1 : 0; coinComboT = G.t; sfx('coinCombo'); }
   }
   G.coins = G.coins.filter(c => !c.dead);
 
