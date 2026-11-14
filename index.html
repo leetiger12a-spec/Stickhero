@@ -363,7 +363,7 @@ h2 .hb{-webkit-text-stroke:0;text-shadow:none;letter-spacing:0;font-family:"Jua"
 
 <script>
 'use strict';
-const BUILD = 179;
+const BUILD = 180;
 const BOSS_INTERVAL = 180;      // 보스 등장 간격(초)
 const WAVE_INTERVAL = 60;       // 대규모 몰이 이벤트 간격(초)
 const MAX_ENEMIES = 220;
@@ -4188,7 +4188,8 @@ function update(dt) {
   }
 
   // 이펙트
-  for (const q of G.parts) { q.x += q.vx * dt; q.y += q.vy * dt; q.vx *= 0.92; q.vy *= 0.92; q.life -= dt; }
+  const pd = Math.pow(0.92, dt * 60);   // Build 180: 프레임과 상관없이 같은 감속
+  for (const q of G.parts) { q.x += q.vx * dt; q.y += q.vy * dt; q.vx *= pd; q.vy *= pd; q.life -= dt; }
   G.parts = G.parts.filter(q => q.life > 0);
   for (const t of G.texts) { t.y -= 40 * dt; t.life -= dt; if (t.pop > 0) t.pop -= dt; }
   G.texts = G.texts.filter(t => t.life > 0);
@@ -4715,7 +4716,7 @@ function drawAlly(a) {
   if (blink) ctx.globalAlpha = 0.45;
   if (a.lvl >= 5) { ctx.save(); ctx.translate(a.x, a.y); ctx.scale(1, IK); ctx.strokeStyle = `rgba(255,210,63,${0.6 + 0.3 * Math.sin(G.t * 5)})`; ctx.lineWidth = 3; ctx.beginPath(); ctx.ellipse(0, 2, 18, 6, 0, 0, 7); ctx.stroke(); ctx.restore(); }
   const nA = isGrown() && SPR[n + '_adult'] ? n + '_adult' : n;   // 🧑 성장한 동료 그림
-  if (SPR[n]) drawSpriteMan(nA, a.x, a.y, { face: a.face, phase: a.wob, hit: false, flash: false, lunge: 0, act: a.act, actT: a.actT, idle: !a.moving, walking: a.moving, s: a.lvl >= 5 ? 1.15 : 1 });
+  if (SPR[n]) drawSpriteMan(nA, a.x, a.y, { face: turnF(a), phase: a.wob, hit: false, flash: false, lunge: 0, act: a.act, actT: a.actT, idle: !a.moving, walking: a.moving, s: a.lvl >= 5 ? 1.15 : 1 });
   else {
     const P = actPose(a.act, a.actT);
     drawStickman(a.x + P.dx * a.face, a.y + P.dy, { color: T.color, s: 1, face: a.face, phase: a.wob, hit: false, flash: false, lunge: a.act ? Math.max(0, P.dx) / 60 : 0, type: 'ally' });
@@ -4821,9 +4822,9 @@ function drawTower(t) {
 function drawStick(p) {
   const blink = p.inv > 0 && Math.floor(p.inv * 20) % 2 === 0;
   ctx.save(); ctx.translate(p.x, p.y); ctx.scale(1, IK);
-  // 그림자
-  ctx.fillStyle = 'rgba(0,0,0,.18)'; ctx.beginPath(); ctx.ellipse(0, 14, 13, 4, 0, 0, 7); ctx.fill();
-  ctx.scale(p.face, 1);
+  // 그림자 (Build 180: 가장자리 흐리게)
+  softShadow(0, 14, 15, 5, 0.75);
+  ctx.scale(turnF(p), 1);
   const col = blink ? '#e63946' : '#1d1d1d';
   const sw = p.moving ? Math.sin(p.walk) : 0, bob = p.moving ? Math.abs(Math.cos(p.walk)) * 2 : Math.sin(G.t * 3) * 0.8;
   ctx.strokeStyle = col; ctx.lineWidth = 3.4; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
@@ -4843,7 +4844,7 @@ function drawStick(p) {
     if (blink) ctx.globalAlpha = 0.35;
     const sheetHat = (nm, f) => { const S = SHEETS[nm], im2 = SPR[nm], ch = h * STATIC_BODY.hero / S.body, cw = ch * (im2.width / S.n) / im2.height, A = HEAD_AT[nm][f]; drawHat(-cw * S.ax + A[0] * cw, -ch * S.ay + A[1] * ch, HEAD_W); };
     if (sheet) { drawSheet('hero_slash', p.actT / ACTS.slash, h * STATIC_BODY.hero); sheetHat('hero_slash', Math.min(3, Math.floor(p.actT / ACTS.slash * 4))); }
-    else if (walkSheet) { const S = SHEETS.hero_walk, f = S.seq[Math.floor(p.walk / (Math.PI / 2)) % 4]; drawSheetFrame('hero_walk', f, h * STATIC_BODY.hero); sheetHat('hero_walk', f); }
+    else if (walkSheet) { const S = SHEETS.hero_walk, wk = (p.walk / (Math.PI / 2)) % 4, f = S.seq[Math.floor(wk)]; drawSheet('hero_walk', (S.seq[Math.floor(wk)] + (wk % 1)) / S.n, h * STATIC_BODY.hero, true); sheetHat('hero_walk', f); }
     else {
       ctx.drawImage(img, -w * ax, -h - bob, w, h); // 몸 중심이 발 위에 오도록 (칼 쪽이 더 넓음)
       drawHat(-w * ax + HEAD_AT.hero[0][0] * w, -h - bob + HEAD_AT.hero[0][1] * h, HEAD_W);
@@ -4951,11 +4952,32 @@ const WALK_SHEET = { ally_golem: 'ally_golem_walk' };   // Build 179: 고양이�
 const ACT_SHEET = { ally_golem: { slam: 'ally_golem_slam' } };
 // 시트의 k(0~1) 시점 칸을, 발이 원점에 오도록 그림. bodyPx = 화면에서의 몸 키
 function drawSheetFrame(name, f, bodyPx) { const S = SHEETS[name]; return drawSheet(name, (f + 0.5) / S.n, bodyPx); }
-function drawSheet(name, k, bodyPx) {
+function drawSheet(name, k, bodyPx, loop) {
   const img = SPR[name], S = SHEETS[name]; if (!img) return false;
-  const f = S.seq && k === undefined ? 0 : Math.min(S.n - 1, Math.floor(k * S.n)), cwI = img.width / S.n, ch = bodyPx / S.body, cw = ch * cwI / img.height;
+  const fk = Math.max(0, k * S.n), f = S.seq && k === undefined ? 0 : Math.min(S.n - 1, Math.floor(fk)), cwI = img.width / S.n, ch = bodyPx / S.body, cw = ch * cwI / img.height;
   ctx.drawImage(img, f * cwI, 0, cwI, img.height, -cw * S.ax, -ch * S.ay, cw, ch);
+  // 🎞 Build 180: 칸이 바뀌기 직전 다음 칸을 살짝 겹쳐 그려서 뚝뚝 끊기지 않게
+  const nf = loop ? (f + 1) % S.n : f + 1, fr = fk - Math.floor(fk);
+  if (k !== undefined && nf < S.n && fr > 0.6) { const a0 = ctx.globalAlpha; ctx.globalAlpha = a0 * ease((fr - 0.6) / 0.4) * 0.85; ctx.drawImage(img, nf * cwI, 0, cwI, img.height, -cw * S.ax, -ch * S.ay, cw, ch); ctx.globalAlpha = a0; }
   return true;
+}
+// 🎞 부드러운 움직임 도우미 (Build 180)
+let FDT = 1 / 60;
+function turnF(o) { // 방향을 휙 바꾸지 않고 0.1초 동안 납작해졌다 돌아서기
+  if (o.fv === undefined) o.fv = o.face || 1;
+  o.fv += ((o.face || 1) - o.fv) * Math.min(1, FDT * 16);
+  return Math.abs(o.fv) < 0.12 ? (o.fv < 0 ? -0.12 : 0.12) : o.fv;
+}
+let SHADOW = null;
+function softShadow(x, y, rx, ry, a) { // 가장자리가 흐린 그림자 (미리 그린 그림 한 장을 늘려 씀)
+  if (!SHADOW) { SHADOW = document.createElement('canvas'); SHADOW.width = 64; SHADOW.height = 64; const c = SHADOW.getContext('2d'), g = c.createRadialGradient(32, 32, 0, 32, 32, 32);
+    g.addColorStop(0, 'rgba(0,0,0,.55)'); g.addColorStop(0.55, 'rgba(0,0,0,.32)'); g.addColorStop(1, 'rgba(0,0,0,0)'); c.fillStyle = g; c.fillRect(0, 0, 64, 64); }
+  const a0 = ctx.globalAlpha; ctx.globalAlpha = a0 * (a === undefined ? 1 : a); ctx.drawImage(SHADOW, x - rx * 1.25, y - ry * 1.25, rx * 2.5, ry * 2.5); ctx.globalAlpha = a0;
+}
+const GLOW = {};
+function glowImg(col) { // 색깔별 빛 번짐 그림 (한 번 만들어 둠)
+  if (GLOW[col]) return GLOW[col]; const c = document.createElement('canvas'); c.width = c.height = 32; const x = c.getContext('2d'), g = x.createRadialGradient(16, 16, 0, 16, 16, 16);
+  g.addColorStop(0, col); g.addColorStop(1, 'rgba(0,0,0,0)'); x.fillStyle = g; x.fillRect(0, 0, 32, 32); return (GLOW[col] = c);
 }
 const ACTS = { slash: 0.32, shoot: 0.45, toss: 0.5, bash: 0.36, slam: 0.6, cheer: 0.6 };
 const ease = k => k * k * (3 - 2 * k);
@@ -5008,7 +5030,7 @@ function drawSpriteMan(n, x, y, o) {
   // 그림 적: 걸을 때 좌우로 흔들·통통, 맞으면 찌그러지며 하얗게 번쩍, 쓰러지면 빙글빙글
   const img = SPR[n], inf = SPR_INFO[n], h = inf.h * (o.s || 1), w = h * img.width / img.height;
   ctx.save(); ctx.translate(x, y); ctx.scale(1, IK);
-  if (!o.rot) { ctx.fillStyle = 'rgba(0,0,0,.18)'; ctx.beginPath(); ctx.ellipse(0, 2, h * 0.24, h * 0.08, 0, 0, 7); ctx.fill(); }
+  if (!o.rot) softShadow(0, 2, h * 0.26, h * 0.09, 0.7);
   ctx.translate(Math.max(0, o.lunge || 0) * 24 * o.face, -(o.z || 0));
   if (o.alpha !== undefined) ctx.globalAlpha = o.alpha;
   if (o.rot) { ctx.translate(0, -h / 2); ctx.rotate(o.rot); ctx.translate(0, h / 2); }
@@ -5021,7 +5043,7 @@ function drawSpriteMan(n, x, y, o) {
   const wName = !o.act && o.walking && WALK_SHEET[n];
   if (wName && SPR[wName] && STATIC_BODY[n]) {
     const S = SHEETS[wName]; ctx.scale(o.face, 1);
-    drawSheetFrame(wName, S.seq[Math.floor(o.phase / 1.6) % S.seq.length], h * STATIC_BODY[n]);
+    const wk = (o.phase / 1.6) % S.seq.length; drawSheet(wName, (S.seq[Math.floor(wk)] + (wk % 1)) / S.n, h * STATIC_BODY[n], true);
     ctx.restore(); return;
   }
   // (적은 많아서 회전 없이 통통·찌그러짐만, 동료·영웅은 동작 포즈까지)
@@ -5030,7 +5052,9 @@ function drawSpriteMan(n, x, y, o) {
   const idle = o.idle ? Math.sin(performance.now() / 300 + x) * 0.025 : 0;
   const sq = (o.hit ? 1 + Math.sin(o.hitT * 40) * 0.12 : 1 + Math.abs(Math.cos(o.phase)) * 0.05) + idle;
   ctx.scale(o.face * (2 - sq) * P.sx, sq * P.sy);
-  ctx.drawImage(o.flash && SPR_WHITE[n] ? SPR_WHITE[n] : o.gold && SPR_GOLD[n] ? SPR_GOLD[n] : img, -w * inf.ax, -h - Math.abs(Math.sin(o.phase)) * 3, w, h);
+  const by = -h - Math.abs(Math.sin(o.phase)) * 3, base = o.gold && SPR_GOLD[n] ? SPR_GOLD[n] : img;
+  ctx.drawImage(base, -w * inf.ax, by, w, h);
+  if (o.flash && SPR_WHITE[n]) { const a0 = ctx.globalAlpha; ctx.globalAlpha = a0 * (o.flash === true ? 1 : Math.min(1, o.flash)); ctx.drawImage(SPR_WHITE[n], -w * inf.ax, by, w, h); ctx.globalAlpha = a0; }   // 하얀빛이 서서히 사라짐
   if (o.act) drawActFx(o.act, o.actT, w, h);
   ctx.restore();
 }
@@ -5075,7 +5099,7 @@ function drawEnemy(e) {
   if (e.slowT > 0 && !(e.hideT > 0)) { ctx.fillStyle = 'rgba(190,232,255,.55)'; ctx.strokeStyle = 'rgba(255,255,255,.8)'; ctx.lineWidth = 2; ctx.beginPath(); ctx.ellipse(e.x, e.y, e.r * 1.3, e.r * 0.9, 0, 0, 7); ctx.fill(); ctx.stroke(); }   // 얼음에 느려진 적: 발밑 얼음
   if (e.elite && !(e.hideT > 0)) { const k = 0.5 + 0.5 * Math.sin(G.t * 6 + e.id); ctx.fillStyle = `rgba(255,40,70,${0.18 + 0.14 * k})`; ctx.beginPath(); ctx.ellipse(e.x, e.y, e.r * 2.2 + k * 4, e.r * 1.4 + k * 3, 0, 0, 7); ctx.fill(); ctx.strokeStyle = 'rgba(255,77,109,.8)'; ctx.lineWidth = 2.5; ctx.stroke(); }
   if (e.hideT > 0) { ctx.globalAlpha = 0.18; }   // 숨은 암살자: 거의 안 보임
-  if (SPR[e.type]) drawSpriteMan(!e.golden && isGrown() && SPR[e.type + '_adult'] ? e.type + '_adult' : e.type, e.x, e.y, { face: e.face, phase: e.wob, hit: e.hitT > 0, hitT: e.hitT, flash: e.flash > 0, lunge: e.lunge, z: e.z, s: e.scale || (e.small ? 0.6 : 1), gold: e.golden });
+  if (SPR[e.type]) drawSpriteMan(!e.golden && isGrown() && SPR[e.type + '_adult'] ? e.type + '_adult' : e.type, e.x, e.y, { face: turnF(e), phase: e.wob, hit: e.hitT > 0, hitT: e.hitT, flash: e.flash > 0 ? Math.min(1, e.flash / 0.1) : 0, lunge: e.lunge, z: e.z, s: e.scale || (e.small ? 0.6 : 1), gold: e.golden });
   else drawStickman(e.x, e.y, { color: e.color, s: e.r / 11, face: e.face, phase: e.wob, hit: e.hitT > 0, flash: e.flash > 0, lunge: e.lunge, type: e.type });   // 그림이 없을 때만 막대 인간
   ctx.globalAlpha = 1;
   if (e.golden) { // 반짝임 2개
@@ -5356,9 +5380,12 @@ function drawWorld() {
   ctx.globalAlpha = 1;
   drawPlane();
   // 파티클
+  ctx.globalCompositeOperation = 'lighter';   // ✨ Build 180: 반짝이·불꽃에 은은한 빛 번짐
+  for (const q of G.parts) { if (q.size < 3) continue; const k = Math.max(0, q.life / q.max), r = q.size * (0.4 + 0.6 * k) * 3.2; ctx.globalAlpha = k * 0.45; ctx.drawImage(glowImg(q.color), q.x - r, q.y - r, r * 2, r * 2); }
+  ctx.globalCompositeOperation = 'source-over';
   for (const q of G.parts) {
-    ctx.globalAlpha = Math.max(0, q.life / q.max); ctx.fillStyle = q.color;
-    ctx.beginPath(); ctx.arc(q.x, q.y, q.size * (0.4 + 0.6 * q.life / q.max), 0, 7); ctx.fill();
+    const k = Math.max(0, q.life / q.max); ctx.globalAlpha = k < 0.3 ? k / 0.3 : 1; ctx.fillStyle = q.color;   // 끝에서만 스르르 사라짐
+    ctx.beginPath(); ctx.arc(q.x, q.y, q.size * (0.4 + 0.6 * k), 0, 7); ctx.fill();
   }
   ctx.globalAlpha = 1;
   // 레벨업 링
@@ -5729,7 +5756,7 @@ function perfWatch(raw) { // 놀고 있을 때 3초 평균이 45fps보다 낮으
   if (fps < 45 && DPR > 1.25) { dprCap = DPR > 2 ? 2 : DPR > 1.5 ? 1.5 : 1.25; try { localStorage.setItem('stickhero_dpr', dprCap); } catch (e) {} resize(); }
 }
 function frame(now) {
-  const raw = (now - last) / 1000, dt = Math.min(0.05, raw); last = now;
+  const raw = (now - last) / 1000, dt = Math.min(0.05, raw); last = now; FDT = dt;
   perfWatch(raw);
   if (state === 'play') update(dt);
   if (AC) { const k = bgmFor(); if (!bgmCur || bgmCur.key !== k) playBgm(k); }
