@@ -363,7 +363,7 @@ h2 .hb{-webkit-text-stroke:0;text-shadow:none;letter-spacing:0;font-family:"Jua"
 
 <script>
 'use strict';
-const BUILD = 190;
+const BUILD = 191;
 const BOSS_INTERVAL = 180;      // 보스 등장 간격(초)
 const WAVE_INTERVAL = 60;       // 대규모 몰이 이벤트 간격(초)
 const MAX_ENEMIES = 220;
@@ -501,7 +501,7 @@ const SPR_INFO = {    // ax: 발 위치(그림 폭 대비), h: 화면 키(월드
   e_agrunt: { ax: 0.45, h: 52 }, e_srunner: { ax: 0.5, h: 46 }, e_stank: { ax: 0.45, h: 70 }, e_knight: { ax: 0.5, h: 58 }, e_assassin: { ax: 0.5, h: 50 }, e_ogre: { ax: 0.5, h: 92 }, e_demon: { ax: 0.5, h: 60 }, e_ghost: { ax: 0.5, h: 56 }, e_golem: { ax: 0.5, h: 112 },
   tree: { h: 78 }, stump: { h: 20 }, log: { h: 8 }, stake: { h: 26 }, tower: { h: 76 }, hall: { h: 92 },
   smith: { h: 72 }, pillar: { h: 70 }, icepillar: { ax: 0.5, h: 70 }, snowman: { ax: 0.5, h: 46 }, snowtree: { ax: 0.5, h: 72 }, torch: { h: 58 }, coin: { h: 12 },
-  ally_sword: { ax: 0.5, h: 52 }, ally_archer: { ax: 0.5, h: 52 }, ally_bomber: { ax: 0.45, h: 52 }, ally_shield: { ax: 0.5, h: 54 }, ally_golem: { ax: 0.5, h: 58 }, ally_golem_walk: { h: 60 }, ally_golem_slam: { h: 60 }, hero_slash: { h: 72 }, hero_walk: { h: 72 }, ally_archer_shoot: { h: 60 }, ally_bomber_toss: { h: 60 }, ally_shield_bash: { h: 60 }, ally_sword_slash: { h: 60 }, ally_sword_walk: { h: 60 }, ally_archer_walk: { h: 60 }, ally_bomber_walk: { h: 60 }, ally_shield_walk: { h: 60 }, sf_plane0: { h: 80 }, sf_plane1: { h: 80 }, sf_plane2: { h: 80 }, sf_plane3: { h: 80 }, sf_plane4: { h: 80 }, sf_pilot0: { h: 70 }, sf_pilot1: { h: 70 }, sf_pilot2: { h: 70 }, sf_pilot3: { h: 70 }, sf_pilot4: { h: 70 }, tavern: { h: 72 }, skyfang_plane: { h: 80 },
+  ally_sword: { ax: 0.5, h: 52 }, ally_archer: { ax: 0.5, h: 52 }, ally_bomber: { ax: 0.45, h: 52 }, ally_shield: { ax: 0.5, h: 54 }, ally_golem: { ax: 0.5, h: 58 }, ally_golem_walk: { h: 60 }, ally_golem_slam: { h: 60 }, hero_slash: { h: 72 }, hero_walk: { h: 72 }, ally_archer_shoot: { h: 60 }, ally_bomber_toss: { h: 60 }, ally_shield_bash: { h: 60 }, ally_sword_slash: { h: 60 }, ally_sword_walk: { h: 60 }, grunt_walk: { h: 58 }, grunt_atk: { h: 58 }, ally_archer_walk: { h: 60 }, ally_bomber_walk: { h: 60 }, ally_shield_walk: { h: 60 }, sf_plane0: { h: 80 }, sf_plane1: { h: 80 }, sf_plane2: { h: 80 }, sf_plane3: { h: 80 }, sf_plane4: { h: 80 }, sf_pilot0: { h: 70 }, sf_pilot1: { h: 70 }, sf_pilot2: { h: 70 }, sf_pilot3: { h: 70 }, sf_pilot4: { h: 70 }, tavern: { h: 72 }, skyfang_plane: { h: 80 },
   e_archer: { ax: 0.45, h: 50 }, e_bomber: { ax: 0.42, h: 50 }, e_bat: { ax: 0.5, h: 48 }, e_slime: { ax: 0.5, h: 42 }, e_shaman: { ax: 0.42, h: 56 }, e_charger: { ax: 0.5, h: 52 }, e_snowman: { ax: 0.5, h: 56 }, e_ginger: { ax: 0.5, h: 46 },
   farm: { h: 72 }, mine: { h: 74 }, market: { h: 76 }, stone: { h: 14 }, rock: { h: 64 }, camp: { h: 100 }, hall2: { h: 100 }, hall3: { h: 108 }, hall_broken: { h: 96 }, tower_broken: { h: 70 }, stonewall: { h: 34 }, repair: { h: 40 },
 };
@@ -820,7 +820,7 @@ function bakeSprite(n) {
 }
 // img/ 폴더에 실제로 있는 그림만 불러옴 (없는 파일을 부르면 오류가 남)
 const SPR_FILES = ['e_snowman', 'e_ginger', 'e_agrunt', 'e_srunner', 'e_stank', 'e_knight', 'e_assassin', 'e_ogre', 'e_demon', 'e_ghost', 'e_golem', 'boss3', 'boss4', 'boss5', 'boss6', 'boss7', 'boss8', 'boss9', 'boss10', 'boss11', 'boss12', 'boss13', 'boss14', 'boss15', 'boss_final', 'e_spider', 'e_skel', 'e_archer', 'e_bomber', 'e_bat', 'e_slime', 'e_shaman', 'e_charger', 'hall2', 'hall3', 'hall_broken', 'tower_broken', 'stonewall', 'repair', 'farm', 'mine', 'market', 'stone', 'rock', 'camp', 'hero', 'grunt', 'runner', 'tank', 'boss0', 'boss1', 'boss2', 'tree', 'stump', 'log', 'stake', 'tower', 'hall',
-  'smith', 'pillar', 'icepillar', 'snowman', 'snowtree', 'torch', 'coin', 'ally_sword', 'ally_archer', 'tavern', 'ally_bomber', 'skyfang_plane', 'ally_shield', 'hero_slash', 'hero_walk', 'ally_sword_adult', 'ally_archer_adult', 'ally_bomber_adult', 'ally_shield_adult', 'runner_adult', 'ally_archer_shoot', 'ally_bomber_toss', 'ally_shield_bash', 'ally_sword_slash', 'ally_sword_walk', 'ally_archer_walk', 'ally_bomber_walk', 'ally_shield_walk', 'ally_golem', 'ally_golem_walk', 'ally_golem_slam', 'sf_plane0', 'sf_plane1', 'sf_plane2', 'sf_plane3', 'sf_plane4', 'sf_pilot0', 'sf_pilot1', 'sf_pilot2', 'sf_pilot3', 'sf_pilot4'];
+  'smith', 'pillar', 'icepillar', 'snowman', 'snowtree', 'torch', 'coin', 'ally_sword', 'ally_archer', 'tavern', 'ally_bomber', 'skyfang_plane', 'ally_shield', 'hero_slash', 'hero_walk', 'ally_sword_adult', 'ally_archer_adult', 'ally_bomber_adult', 'ally_shield_adult', 'runner_adult', 'ally_archer_shoot', 'ally_bomber_toss', 'ally_shield_bash', 'ally_sword_slash', 'ally_sword_walk', 'grunt_walk', 'grunt_atk', 'ally_archer_walk', 'ally_bomber_walk', 'ally_shield_walk', 'ally_golem', 'ally_golem_walk', 'ally_golem_slam', 'sf_plane0', 'sf_plane1', 'sf_plane2', 'sf_plane3', 'sf_plane4', 'sf_pilot0', 'sf_pilot1', 'sf_pilot2', 'sf_pilot3', 'sf_pilot4'];
 SPR_FILES.forEach(n => {
   const im = new Image();
   im.onload = () => { SPR_ORIG[n] = im; SPR_SRC[n] = HERO_SPR.includes(n) ? recolorHero(im) : im; bakeSprite(n); };
@@ -4939,6 +4939,8 @@ const SHEETS = {
   ally_bomber_toss:  { n: 6, ax: 0.4846, ay: 0.99, body: 0.9617 },   // Build 188: 새 그림체 폭탄 고양이 공격 6칸 (5번 칸에서 손을 떠남)
   ally_shield_bash:  { n: 6, ax: 0.3814, ay: 0.9899, body: 0.9581 },   // Build 190: 새 그림체 방패 시바 공격 6칸 (4번 칸 = 부딪힘, 0.18초)
   ally_sword_slash:  { n: 6, ax: 0.4913, ay: 0.9912, body: 0.8678 },   // Build 184: 새 그림체 칼 고양이 공격 6칸
+  grunt_walk:        { n: 4, ax: 0.6144, ay: 0.9902, body: 0.9082, seq: [0, 1, 2, 3] },   // Build 191: 새 그림체 졸개 걷기 4칸
+  grunt_atk:         { n: 4, ax: 0.5758, ay: 0.9899, body: 0.8936 },   // 졸개 공격 4칸
   ally_sword_walk:   { n: 6, ax: 0.5309, ay: 0.9906, body: 0.9734, seq: [0, 1, 2, 3, 4, 5] },   // Build 183: 새 그림체 칼 고양이 걷기 6칸
   ally_archer_walk:  { n: 6, ax: 0.5862, ay: 0.9905, body: 0.9511, seq: [0, 1, 2, 3, 4, 5] },   // Build 185: 새 그림체 활 고양이 걷기 6칸
   ally_bomber_walk:  { n: 6, ax: 0.5261, ay: 0.9904, body: 0.9662, seq: [0, 1, 2, 3, 4, 5] },   // Build 187: 새 그림체 폭탄 고양이 걷기 6칸
@@ -4947,9 +4949,9 @@ const SHEETS = {
   ally_golem_slam:   { n: 4, ax: 0.5026, ay: 0.9688, body: 0.9375 },
 };
 // 게임 속 한 장 그림에서 같은 기준으로 잰 몸 키 비율 (시트 크기를 맞추는 데 씀)
-const STATIC_BODY = { ally_sword: 0.9453, hero: 0.9625, ally_archer: 0.9453, ally_bomber: 0.9453, ally_shield: 0.9453, ally_golem: 0.9531 };
-const WALK_SHEET = { ally_golem: 'ally_golem_walk', ally_sword: 'ally_sword_walk', ally_archer: 'ally_archer_walk', ally_bomber: 'ally_bomber_walk', ally_shield: 'ally_shield_walk' };   // Build 179: 고양이·시바 동료는 새 그림체 — 새 동작 그림이 올 때까지 서 있는 그림이 통통 튀며 걸음   // 걸을 때 쓸 연속 그림
-const ACT_SHEET = { ally_golem: { slam: 'ally_golem_slam' }, ally_sword: { slash: 'ally_sword_slash' }, ally_archer: { shoot: 'ally_archer_shoot' }, ally_bomber: { toss: 'ally_bomber_toss' }, ally_shield: { bash: 'ally_shield_bash' } };
+const STATIC_BODY = { grunt: 0.9492, ally_sword: 0.9453, hero: 0.9625, ally_archer: 0.9453, ally_bomber: 0.9453, ally_shield: 0.9453, ally_golem: 0.9531 };
+const WALK_SHEET = { ally_golem: 'ally_golem_walk', ally_sword: 'ally_sword_walk', ally_archer: 'ally_archer_walk', ally_bomber: 'ally_bomber_walk', ally_shield: 'ally_shield_walk', grunt: 'grunt_walk' };   // Build 179: 고양이·시바 동료는 새 그림체 — 새 동작 그림이 올 때까지 서 있는 그림이 통통 튀며 걸음   // 걸을 때 쓸 연속 그림
+const ACT_SHEET = { ally_golem: { slam: 'ally_golem_slam' }, ally_sword: { slash: 'ally_sword_slash' }, ally_archer: { shoot: 'ally_archer_shoot' }, ally_bomber: { toss: 'ally_bomber_toss' }, ally_shield: { bash: 'ally_shield_bash' }, grunt: { eatk: 'grunt_atk' } };
 // 시트의 k(0~1) 시점 칸을, 발이 원점에 오도록 그림. bodyPx = 화면에서의 몸 키
 function drawSheetFrame(name, f, bodyPx) { const S = SHEETS[name]; return drawSheet(name, (f + 0.5) / S.n, bodyPx); }
 function drawSheet(name, k, bodyPx, loop) {
@@ -4979,7 +4981,7 @@ function glowImg(col) { // 색깔별 빛 번짐 그림 (한 번 만들어 둠)
   if (GLOW[col]) return GLOW[col]; const c = document.createElement('canvas'); c.width = c.height = 32; const x = c.getContext('2d'), g = x.createRadialGradient(16, 16, 0, 16, 16, 16);
   g.addColorStop(0, col); g.addColorStop(1, 'rgba(0,0,0,0)'); x.fillStyle = g; x.fillRect(0, 0, 32, 32); return (GLOW[col] = c);
 }
-const ACTS = { slash: 0.32, shoot: 0.45, toss: 0.5, bash: 0.36, slam: 0.6, cheer: 0.6 };
+const ACTS = { slash: 0.32, shoot: 0.45, toss: 0.5, bash: 0.36, slam: 0.6, cheer: 0.6, eatk: 0.25 };   // eatk: 몬스터 공격 (달려들기 0.25초)
 const ease = k => k * k * (3 - 2 * k);
 function startAct(o, type) { o.act = type; o.actT = 0; }
 function actPose(act, t) {
@@ -5025,6 +5027,11 @@ function drawActFx(act, t, w, h) {
     ctx.beginPath(); for (let i = 0; i < 16; i++) { const a = i / 16 * Math.PI * 2, r = i % 2 ? R * 0.45 : R; ctx.lineTo(Math.cos(a) * r, Math.sin(a) * r); } ctx.closePath(); ctx.fill(); ctx.stroke();
     ctx.restore();
   }
+}
+function enemyAnim(e) { // 🎞 몬스터 동작 그림 (Build 191~): 황금·맞는 중엔 기존 그림 (번쩍임·찌그러짐 유지)
+  if (e.golden || e.flash > 0 || e.hitT > 0 || e.elite && e.shieldT > 0) return {};
+  if (e.lunge > 0) return { act: 'eatk', actT: Math.min(ACTS.eatk * 0.999, ACTS.eatk - e.lunge) };
+  return { walking: !(G.mode === 'stage' && !e.awake && !e.boss) };
 }
 function drawSpriteMan(n, x, y, o) {
   // 그림 적: 걸을 때 좌우로 흔들·통통, 맞으면 찌그러지며 하얗게 번쩍, 쓰러지면 빙글빙글
@@ -5099,7 +5106,7 @@ function drawEnemy(e) {
   if (e.slowT > 0 && !(e.hideT > 0)) { ctx.fillStyle = 'rgba(190,232,255,.55)'; ctx.strokeStyle = 'rgba(255,255,255,.8)'; ctx.lineWidth = 2; ctx.beginPath(); ctx.ellipse(e.x, e.y, e.r * 1.3, e.r * 0.9, 0, 0, 7); ctx.fill(); ctx.stroke(); }   // 얼음에 느려진 적: 발밑 얼음
   if (e.elite && !(e.hideT > 0)) { const k = 0.5 + 0.5 * Math.sin(G.t * 6 + e.id); ctx.fillStyle = `rgba(255,40,70,${0.18 + 0.14 * k})`; ctx.beginPath(); ctx.ellipse(e.x, e.y, e.r * 2.2 + k * 4, e.r * 1.4 + k * 3, 0, 0, 7); ctx.fill(); ctx.strokeStyle = 'rgba(255,77,109,.8)'; ctx.lineWidth = 2.5; ctx.stroke(); }
   if (e.hideT > 0) { ctx.globalAlpha = 0.18; }   // 숨은 암살자: 거의 안 보임
-  if (SPR[e.type]) drawSpriteMan(!e.golden && isGrown() && SPR[e.type + '_adult'] ? e.type + '_adult' : e.type, e.x, e.y, { face: turnF(e), phase: e.wob, hit: e.hitT > 0, hitT: e.hitT, flash: e.flash > 0 ? Math.min(1, e.flash / 0.1) : 0, lunge: e.lunge, z: e.z, s: e.scale || (e.small ? 0.6 : 1), gold: e.golden });
+  if (SPR[e.type]) drawSpriteMan(!e.golden && isGrown() && SPR[e.type + '_adult'] ? e.type + '_adult' : e.type, e.x, e.y, { face: turnF(e), phase: e.wob, hit: e.hitT > 0, hitT: e.hitT, flash: e.flash > 0 ? Math.min(1, e.flash / 0.1) : 0, ...enemyAnim(e), lunge: e.lunge, z: e.z, s: e.scale || (e.small ? 0.6 : 1), gold: e.golden });
   else drawStickman(e.x, e.y, { color: e.color, s: e.r / 11, face: e.face, phase: e.wob, hit: e.hitT > 0, flash: e.flash > 0, lunge: e.lunge, type: e.type });   // 그림이 없을 때만 막대 인간
   ctx.globalAlpha = 1;
   if (e.golden) { // 반짝임 2개
