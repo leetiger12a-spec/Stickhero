@@ -363,7 +363,7 @@ h2 .hb{-webkit-text-stroke:0;text-shadow:none;letter-spacing:0;font-family:"Jua"
 
 <script>
 'use strict';
-const BUILD = 186;
+const BUILD = 187;
 const BOSS_INTERVAL = 180;      // 보스 등장 간격(초)
 const WAVE_INTERVAL = 60;       // 대규모 몰이 이벤트 간격(초)
 const MAX_ENEMIES = 220;
@@ -4941,14 +4941,14 @@ const SHEETS = {
   ally_sword_slash:  { n: 6, ax: 0.4913, ay: 0.9912, body: 0.8678 },   // Build 184: 새 그림체 칼 고양이 공격 6칸
   ally_sword_walk:   { n: 6, ax: 0.5309, ay: 0.9906, body: 0.9734, seq: [0, 1, 2, 3, 4, 5] },   // Build 183: 새 그림체 칼 고양이 걷기 6칸
   ally_archer_walk:  { n: 6, ax: 0.5862, ay: 0.9905, body: 0.9511, seq: [0, 1, 2, 3, 4, 5] },   // Build 185: 새 그림체 활 고양이 걷기 6칸
-  ally_bomber_walk:  { n: 4, ax: 0.4103, ay: 0.9861, body: 0.941, seq: [0, 1, 2, 3] },
+  ally_bomber_walk:  { n: 6, ax: 0.5261, ay: 0.9904, body: 0.9662, seq: [0, 1, 2, 3, 4, 5] },   // Build 187: 새 그림체 폭탄 고양이 걷기 6칸
   ally_shield_walk:  { n: 4, ax: 0.3943, ay: 0.9859, body: 0.937, seq: [0, 1, 2, 3] },   // 1·2번 칸은 칼을 치켜들어 빼고, 칼이 낮은 3·4번 칸으로 걷기
   ally_golem_walk:   { n: 4, ax: 0.5722, ay: 0.9679, body: 0.9358, seq: [0, 1, 2, 3] },   // Build 92
   ally_golem_slam:   { n: 4, ax: 0.5026, ay: 0.9688, body: 0.9375 },
 };
 // 게임 속 한 장 그림에서 같은 기준으로 잰 몸 키 비율 (시트 크기를 맞추는 데 씀)
-const STATIC_BODY = { ally_sword: 0.9453, hero: 0.9625, ally_archer: 0.9453, ally_bomber: 0.9531, ally_shield: 0.9531, ally_golem: 0.9531 };
-const WALK_SHEET = { ally_golem: 'ally_golem_walk', ally_sword: 'ally_sword_walk', ally_archer: 'ally_archer_walk' };   // Build 179: 고양이·시바 동료는 새 그림체 — 새 동작 그림이 올 때까지 서 있는 그림이 통통 튀며 걸음   // 걸을 때 쓸 연속 그림
+const STATIC_BODY = { ally_sword: 0.9453, hero: 0.9625, ally_archer: 0.9453, ally_bomber: 0.9453, ally_shield: 0.9531, ally_golem: 0.9531 };
+const WALK_SHEET = { ally_golem: 'ally_golem_walk', ally_sword: 'ally_sword_walk', ally_archer: 'ally_archer_walk', ally_bomber: 'ally_bomber_walk' };   // Build 179: 고양이·시바 동료는 새 그림체 — 새 동작 그림이 올 때까지 서 있는 그림이 통통 튀며 걸음   // 걸을 때 쓸 연속 그림
 const ACT_SHEET = { ally_golem: { slam: 'ally_golem_slam' }, ally_sword: { slash: 'ally_sword_slash' }, ally_archer: { shoot: 'ally_archer_shoot' } };
 // 시트의 k(0~1) 시점 칸을, 발이 원점에 오도록 그림. bodyPx = 화면에서의 몸 키
 function drawSheetFrame(name, f, bodyPx) { const S = SHEETS[name]; return drawSheet(name, (f + 0.5) / S.n, bodyPx); }
