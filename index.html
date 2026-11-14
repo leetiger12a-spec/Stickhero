@@ -355,7 +355,7 @@ h2 .hb{-webkit-text-stroke:0;text-shadow:none;letter-spacing:0;font-family:"Jua"
 
 <script>
 'use strict';
-const BUILD = 161;
+const BUILD = 162;
 const BOSS_INTERVAL = 180;      // 보스 등장 간격(초)
 const WAVE_INTERVAL = 60;       // 대규모 몰이 이벤트 간격(초)
 const MAX_ENEMIES = 220;
@@ -2927,6 +2927,7 @@ function towerOpen() { return bestStage() >= 3; }
 let towerSel = 1;
 const THEME_ICO = ['🌲', '🏛', '🕯', '🌋', '🏰', '❄️'];
 const towerBossOf = f => f % 5 ? null : f / 5 <= 9 ? f / 5 : f === 50 ? GOLD_GOLEM : -1;   // -1: 센 보스 중 하나 (spawnBoss와 같은 규칙)
+const towerCp = () => Math.floor(((readJSON(META_KEY) || {}).bestFloor || 0) / 10) * 10 + 1;   // 🚀 체크포인트 (Build 162): 10층마다
 const towerPrize = f => 15 + f * 6 + (f % 5 === 0 ? 60 + f * 4 : 0);
 function mapView(tower) {
   $('ovMap').classList.toggle('towerV', tower); $('bMapBack').style.display = tower ? '' : 'none'; $('bTower').style.display = tower ? 'none' : '';
@@ -2938,8 +2939,10 @@ function towerCard() {
   const what = bn === null ? `⏱ ${Math.min(40, 22 + Math.floor(f / 3))}초 버티기` : bn < 0 ? '👑 보스 층 · ❓ 센 보스 중 하나' : `👑 보스 층 · ${BOSSES[bn].name}`;
   $('mapCard').innerHTML = `<div class="t">🗼 ${f}층 <span style="font-size:13px;color:#fff;opacity:.7">· ${THEME_ICO[Math.floor((f - 1) / 5) % 6]} ${th.name}</span></div><div class="g">${what} · 보상 🪙${towerPrize(f)}${f <= best ? ' · ✅ 가 봤어요' : ''}</div>
     <div class="r">🏆 최고 기록 <b>${best}층</b> · 층을 깨면 🗼 다음 층 / 🏠 마을로 중에 골라요</div>
-    <button class="btn big" id="bGoTower" style="margin-top:6px">🗼 1층부터 도전!</button>` + rushHtml();
+    <div style="display:flex;gap:8px;margin-top:6px;width:min(100%,360px)"><button class="btn" id="bGoTower" style="flex:1;min-width:0;margin:0;white-space:nowrap;font-size:19px;padding:12px 4px">🗼 1층부터</button>${towerCp() > 1 ? `<button class="btn" id="bGoTowerCp" style="flex:1;min-width:0;margin:0;white-space:nowrap;font-size:19px;padding:12px 4px;background:#3a86ff;color:#fff">🚀 ${towerCp()}층부터</button>` : ''}</div>
+    <div class="r">${towerCp() > 1 ? `🚀 체크포인트: 10층마다 깬 곳 다음 층부터 바로 갈 수 있어요` : '🚀 10층을 깨면 다음부터 11층에서 바로 시작할 수 있어요'}</div>` + rushHtml();
   $('bGoTower').onclick = () => { showOv(null); state = 'play'; G.towerGold = 0; enterStage(0, 1); };
+  if ($('bGoTowerCp')) $('bGoTowerCp').onclick = () => { showOv(null); state = 'play'; G.towerGold = 0; G.cpUsed = (G.cpUsed || 0) + 1; enterStage(0, towerCp()); };
   if ($('bGoRush')) $('bGoRush').onclick = startRush;
 }
 function renderTower() {
@@ -2996,6 +2999,7 @@ function renderTower() {
   for (let f = 1; f <= F; f++) {
     const yc = fy(f), boss = f % 5 === 0, cls = `tfl${f <= best ? ' done' : f === best + 1 ? ' next' : ' lock'}${boss ? ' boss' : ''}${f === towerSel ? ' sel' : ''}`;
     h += `<button class="${cls}" data-f="${f}" style="left:${Wd * 0.15}px;top:${yc}px">${boss ? '👑' + f : f}</button>`;
+    if (f > 1 && f % 10 === 1) h += `<div class="ttro" style="left:${Wd * 0.15 + 34}px;top:${yc}px;font-size:18px${f > best + 1 ? ';opacity:.35;filter:grayscale(1)' : ''}">🚀</div>`;
     if (boss) {
       const bn = towerBossOf(f), lock = f > best, bx = x1 + Wd * 0.155, yb = gy - (f - 1) * rowH - 6;
       h += bn < 0 ? `<div class="ttro" style="left:${bx}px;top:${yb - 30}px">❓</div>` : `<img class="tbimg${lock ? ' lock' : ''}" src="img/boss${bn}.webp" style="left:${bx}px;top:${yb - 4}px">`;
