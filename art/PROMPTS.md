@@ -73,3 +73,28 @@ Attached image 1 is the ART STYLE reference (anime action chibi game style, thic
 
 ## 다음 (디자인을 받은 뒤)
 특수·강한 몬스터는 새 디자인을 받은 뒤 걷기 4칸을 **한 메시지 3장씩**(묶음 1과 같은 방식) 요청해요.
+
+---
+
+## ⭐ 정교한 공통 프롬프트 (Build 197~, 제미나이·마누스·ChatGPT 공용)
+첨부 2장: ① `art/ref/STYLE_MASTER.png` (새 그림체 완성 캐릭터 6명 = 그림체 정답) ② 바꿀 옛 캐릭터 그림.
+`[WHO]`, `[DESIGN]`, `[TOP ROW]`, `[BOTTOM ROW]`만 바꿔 써요.
+```
+TASK: one 2D game sprite sheet for a mobile action game.
+
+STYLE (most important — copy image 1 exactly): image 1 shows 6 finished characters. Match their art style 100%: same thick, uniform dark-brown/black outlines (about 3-4 px at this size), same flat cel shading with only 2-3 tones per color plus one sharp white highlight, same bright SATURATED colors, same chibi proportions (head about 1/3 of total height, short sturdy body, big hands and boots), same angry/confident expressions with big eyes. Clean vector-like game art. NOT painterly, NOT soft airbrush, NOT realistic, NOT thin sketchy lines, NOT muted or brownish colors, NOT 3D render.
+
+CHARACTER: [WHO] from image 2, redesigned in that style: [DESIGN]. Keep its main colors from image 2 but make them bright and saturated.
+
+LAYOUT (strict):
+- Exactly 8 frames: 2 rows x 4 columns, read left to right, top row first.
+- TOP ROW: [TOP ROW]
+- BOTTOM ROW: [BOTTOM ROW]
+- Every frame shows the SAME character at the SAME size, facing right, full body, 3/4 top-down game view.
+- The character fills about 70% of its cell height. All feet on the same ground line within a row.
+- VERY WIDE empty white space between frames and between the rows; no part of any frame (weapon, wing, effect) may come near another frame.
+- No extra items floating outside the character, no explosions, no dust clouds, no motion lines between frames.
+
+BACKGROUND: plain pure white (#FFFFFF) everywhere, no ground line, no shadows, no gradient, no frame borders, no text, no letters, no numbers, no watermark, no logo, no signature.
+QUALITY: ultra high resolution, QHD (2560x1440) or higher, crisp clean lines
+```
