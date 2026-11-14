@@ -358,7 +358,7 @@ h2 .hb{-webkit-text-stroke:0;text-shadow:none;letter-spacing:0;font-family:"Jua"
 
 <script>
 'use strict';
-const BUILD = 169;
+const BUILD = 170;
 const BOSS_INTERVAL = 180;      // 보스 등장 간격(초)
 const WAVE_INTERVAL = 60;       // 대규모 몰이 이벤트 간격(초)
 const MAX_ENEMIES = 220;
@@ -3093,8 +3093,11 @@ $('bCave').onclick = () => {
 };
 const rushOpen = () => G.stageN >= 5;
 function rushHtml() { if (!rushOpen()) return '<div class="r" style="margin-top:8px">👑 보스 러시: 🔒 모험 지도 5칸을 깨면 열려요</div>';
-  const used = G.rushDay === G.day; return `<div class="r" style="margin-top:8px">👑 <b>보스 러시</b>: 보스 5마리와 연달아 싸워요 (사이에 체력 25% 회복) · 완주하면 금고 🪙300 · 하루 1번</div>` + (used ? '<div class="r">오늘은 이미 도전했어요 · 내일 또!</div>' : '<button class="btn big" id="bGoRush" style="margin-top:6px;background:#ff9f1c">👑 보스 러시 도전!</button>'); }
-function startRush() { if (!rushOpen() || G.rushDay === G.day) return; const pool = [...Array(10).keys()]; const list = []; while (list.length < 5) list.push(pool.splice(Math.floor(Math.random() * pool.length), 1)[0]); list.sort((a, b) => a - b);
+  const used = G.rushDay === G.day; return `<div class="r" style="margin-top:8px">👑 <b>보스 러시</b>: 보스 5마리와 연달아 싸워요 (사이에 체력 25% 회복) · 완주하면 금고 🪙300 · 하루 1번${G.stageN >= 15 ? ' · 💀 해골 왕도 나와요' : ''}</div>` + (used ? '<div class="r">오늘은 이미 도전했어요 · 내일 또!</div>' : '<button class="btn big" id="bGoRush" style="margin-top:6px;background:#ff9f1c">👑 보스 러시 도전!</button>'); }
+function rushPool() { // 👑 러시 보스 후보 (Build 170): 해골 왕국을 열었으면(모험 16칸) 해골 왕 5마리도 · 영웅 Lv 30부터는 센 보스(4번째부터)만
+  let pool = [...Array(10).keys()]; if (G.stageN >= 15) pool.push(11, 12, 13, 14, 15);
+  if (G.lvl >= LVL_FREE) pool = pool.filter(n => n >= 3); return pool; }
+function startRush() { if (!rushOpen() || G.rushDay === G.day) return; const pool = rushPool(); const list = []; while (list.length < 5) list.push(pool.splice(Math.floor(Math.random() * pool.length), 1)[0]); list.sort((a, b) => a - b);
   showOv(null); state = 'play'; G.rushDay = G.day; G.rushes = (G.rushes || 0) + 1; enterStage(0, 0, list[0]); G.st.rush = { list, i: 0, won: 0 }; banner('👑 보스 러시 1/5', '보스 5마리를 연달아 물리쳐라!', '#ff9f1c', 2.6); }
 $('bMapClose').onclick = () => { sfx('pick'); closeMap(); };
 
