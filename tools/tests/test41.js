@@ -1,4 +1,4 @@
-// 보스 세기 고정 (Build 69): 같은 보스는 마을·모험·탑·며칠째든 같은 체력, 나중 보스일수록 셈, 마을 보스 순서 고정
+// 보스 세기 고정 (Build 69): 같은 보스는 마을·모험·탑·며칠째든 같은 체력, 나중 보스일수록 셈, 마을 보스 순서 고정 · Build 166: 탑 21층 위는 층 강화만큼 나눠서 비교
 const { chromium } = require('/opt/node22/lib/node_modules/playwright');
 (async () => {
   const b = await chromium.launch(); const errors = []; const check = (c, m) => { if (!c) errors.push(m); };
@@ -15,7 +15,7 @@ const { chromium } = require('/opt/node22/lib/node_modules/playwright');
     G.day = 3; G.bossCount = 1; SH.spawnBoss(0, 0); out.day3 = take(); G.day = 1;
     const mode = G.mode; G.mode = 'stage';
     for (const n of [0, 2, 4, 6, 8, 9]) { G.st = { n, tower: 0, def: { goal: n === 9 ? 'final' : 'boss' } }; SH.spawnBoss(0, 0); out.stage.push(take()); }
-    for (const f of [5, 10, 25]) { G.st = { n: 1 + f, tower: f, def: { goal: 'tboss' } }; SH.spawnBoss(0, 0); out.tower.push(take()); }
+    for (const f of [5, 10, 25]) { G.st = { n: 1 + f, tower: f, def: { goal: 'tboss' } }; SH.spawnBoss(0, 0); const t = take(); t[1] = Math.round(t[1] / (1 + 0.06 * Math.max(0, f - 20))); out.tower.push(t); }   // Build 166: 21층부터 층마다 +6% (그만큼 빼고 비교)
     G.mode = mode; G.st = null;
     return out;
   });
