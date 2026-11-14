@@ -355,7 +355,7 @@ h2 .hb{-webkit-text-stroke:0;text-shadow:none;letter-spacing:0;font-family:"Jua"
 
 <script>
 'use strict';
-const BUILD = 164;
+const BUILD = 165;
 const BOSS_INTERVAL = 180;      // 보스 등장 간격(초)
 const WAVE_INTERVAL = 60;       // 대규모 몰이 이벤트 간격(초)
 const MAX_ENEMIES = 220;
@@ -2959,17 +2959,12 @@ function towerCard() {
 }
 function renderTower() {
   const box = $('mapInner'), best = (readJSON(META_KEY) || {}).bestFloor || 0, F = Math.max(30, Math.ceil((best + 8) / 5) * 5);
-  const rowH = 74, topPad = 190, botPad = 120, Hh = F * rowH + topPad + botPad, Wd = box.clientWidth || Math.min(innerWidth * 0.94, 440);
+  const Wd = box.clientWidth || Math.min(innerWidth * 0.94, 440), sk = Wd * 0.4 / 409, rowH = Math.round(224 * sk), topPad = Math.round(385 * sk) + 70, botPad = 120, Hh = F * rowH + topPad + botPad;   // 🎨 탑 그림 (Build 165): 몸통 폭 409 기준 비율
   box.style.height = Hh + 'px';
   const fy = f => Hh - botPad - (f - 0.5) * rowH, x0 = Wd * 0.30, x1 = Wd * 0.70, tw = x1 - x0, gy = Hh - botPad;
   let rs = 7; const rnd = () => (rs = (rs * 16807) % 2147483647) / 2147483647;
   let s = `<svg width="${Wd}" height="${Hh}" style="position:absolute;left:0;top:0"><defs>
-    <linearGradient id="tSky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#05021a"/><stop offset=".3" stop-color="#24106b"/><stop offset=".62" stop-color="#3a5bd9"/><stop offset=".9" stop-color="#8ecae6"/><stop offset="1" stop-color="#d8f3ff"/></linearGradient>
-    <linearGradient id="tShade" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#000" stop-opacity=".5"/><stop offset=".38" stop-color="#fff" stop-opacity=".16"/><stop offset=".62" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".55"/></linearGradient>
-    <linearGradient id="tRoof" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#6a0572"/><stop offset=".45" stop-color="#e056b5"/><stop offset="1" stop-color="#4a034f"/></linearGradient>
-    <radialGradient id="tGlow"><stop offset="0" stop-color="#fffbe0"/><stop offset=".6" stop-color="#ffd23f"/><stop offset="1" stop-color="#ff9f1c"/></radialGradient>
-    <radialGradient id="tHalo"><stop offset="0" stop-color="#ffd23f" stop-opacity=".55"/><stop offset="1" stop-color="#ffd23f" stop-opacity="0"/></radialGradient>
-    <pattern id="tBrick" width="28" height="16" patternUnits="userSpaceOnUse"><path d="M0 .5H28M0 8.5H28M.5 0V8M14.5 8V16" stroke="#000" stroke-opacity=".22" stroke-width="1.2" fill="none"/></pattern></defs>
+    <linearGradient id="tSky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#05021a"/><stop offset=".3" stop-color="#24106b"/><stop offset=".62" stop-color="#3a5bd9"/><stop offset=".9" stop-color="#8ecae6"/><stop offset="1" stop-color="#d8f3ff"/></linearGradient></defs>
     <rect width="${Wd}" height="${Hh}" fill="url(#tSky)"/>`;
   for (let i = 0; i < 90; i++) { const y = rnd() * Hh * 0.5, x = rnd() * Wd, r = 0.6 + rnd() * 1.6; s += `<circle class="tstar" style="animation-delay:${(rnd() * 2.4).toFixed(2)}s" cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${r.toFixed(1)}" fill="#fff"/>`; }
   s += `<circle cx="${Wd * 0.84}" cy="70" r="26" fill="#fff4c2"/><circle cx="${Wd * 0.84 + 10}" cy="62" r="24" fill="#120a3a" opacity=".9"/>`;   // 초승달
@@ -2977,33 +2972,18 @@ function renderTower() {
   for (let y = Hh * 0.45; y < gy - 60; y += 210) s += cloud(rnd() < 0.5 ? Wd * (0.08 + rnd() * 0.18) : Wd * (0.78 + rnd() * 0.16), y, 0.8 + rnd() * 0.6, 0.55 + rnd() * 0.3);
   // 땅: 언덕 + 풀
   s += `<path d="M0 ${gy + 10} Q${Wd * 0.25} ${gy - 30} ${Wd * 0.5} ${gy + 4} T${Wd} ${gy - 10} V${Hh} H0Z" fill="#3a7d2c"/><path d="M0 ${gy + 40} Q${Wd * 0.3} ${gy + 14} ${Wd * 0.6} ${gy + 36} T${Wd} ${gy + 30} V${Hh} H0Z" fill="#5fae46"/>`;
-  // 탑 몸통: 5층마다 테마 색
-  for (let sct = 0; sct < F / 5; sct++) {
-    const yt = gy - (sct + 1) * 5 * rowH, th = THEMES[sct % THEMES.length];
-    s += `<rect x="${x0}" y="${yt}" width="${tw}" height="${5 * rowH}" fill="${th.map}"/><rect x="${x0}" y="${yt}" width="${tw}" height="${5 * rowH}" fill="url(#tBrick)"/>`;
+  // 탑 몸통: 그림 조각 + 5층마다 테마 색 살짝 (SVG 필터로 그림 픽셀에만 색을 겹침)
+  s += '<defs>' + THEMES.map((th, i) => [0, 1].map(d => `<filter id="tT${i}${d}" color-interpolation-filters="sRGB"><feFlood flood-color="${th.map}" flood-opacity="${d ? 0.55 : 0.4}"/><feComposite in2="SourceGraphic" operator="in"/><feBlend in2="SourceGraphic" mode="multiply"/>${d ? '<feComponentTransfer><feFuncR type="linear" slope=".55"/><feFuncG type="linear" slope=".55"/><feFuncB type="linear" slope=".6"/></feComponentTransfer>' : ''}</filter>`).join('')).join('') + '</defs>';
+  const img = (n, x, y, w, h, flt) => `<image href="img/tw_${n}.webp" x="${x.toFixed(1)}" y="${y.toFixed(1)}" width="${w.toFixed(1)}" height="${h.toFixed(1)}" preserveAspectRatio="none"${flt ? ` filter="url(#${flt})"` : ''}/>`;
+  for (let f = F; f >= 1; f--) {
+    const yb = gy - (f - 1) * rowH, lit = f <= best, th = Math.floor((f - 1) / 5) % THEMES.length;
+    if (f % 5 === 0) { const w = 426 * sk, h = 263 * sk; s += img('boss', Wd / 2 - w / 2, yb - h, w, h, `tT${th}${lit ? 0 : 1}`); }
+    else s += img(lit ? 'lit' : 'dark', x0, yb - rowH, tw, rowH, `tT${th}0`);
+    if (f % 5 === 0) s += `<path d="M${x1} ${yb - 6} H${x1 + Wd * 0.11} V${yb + 2} H${x1}Z" fill="#2b2d42"/><path d="M${x1} ${yb - 24} H${x1 + Wd * 0.11}${[0, 1, 2, 3, 4].map(i => ` M${x1 + 3 + i * Wd * 0.11 / 4.4} ${yb - 24} V${yb - 6}`).join('')}" fill="none" stroke="#2b2d42" stroke-width="3" stroke-linecap="round"/>`;   // 오른쪽 발코니
   }
-  s += `<rect x="${x0}" y="${gy - F * rowH}" width="${tw}" height="${F * rowH}" fill="url(#tShade)"/>`;
-  for (let f = 1; f <= F; f++) {
-    const yb = gy - (f - 1) * rowH, yc = fy(f), lit = f <= best, boss = f % 5 === 0;
-    s += `<rect x="${x0 - 5}" y="${yb - 5}" width="${tw + 10}" height="7" rx="2" fill="#2b2d42"/>`;   // 층 바닥 턱
-    for (const k of [0.27, 0.73]) {
-      const wx = x0 + tw * k;
-      if (lit) s += `<circle cx="${wx}" cy="${yc + 2}" r="20" fill="url(#tHalo)"/>`;
-      s += `<path d="M${wx - 9} ${yc + 14} V${yc - 6} A9 9 0 0 1 ${wx + 9} ${yc - 6} V${yc + 14} Z" fill="${lit ? 'url(#tGlow)' : '#141428'}" stroke="#1b1b2f" stroke-width="3"/><path d="M${wx} ${yc - 15} V${yc + 14} M${wx - 9} ${yc + 2} H${wx + 9}" stroke="#1b1b2f" stroke-width="2"/>`;
-    }
-    if (boss) {   // 보스 층: 톱니 성벽 + 오른쪽 발코니 + 빨간 깃발
-      const yt = yb - rowH;
-      for (let i = 0; i < 6; i++) s += `<rect x="${x0 - 8 + i * (tw + 16) / 5.5}" y="${yt - 10}" width="${(tw + 16) / 11}" height="12" fill="#2b2d42"/>`;
-      s += `<rect x="${x0 - 8}" y="${yt - 1}" width="${tw + 16}" height="6" fill="#2b2d42"/>`;
-      s += `<path d="M${x1} ${yb - 6} H${x1 + Wd * 0.11} V${yb + 2} H${x1}Z" fill="#2b2d42"/><path d="M${x1} ${yb - 24} H${x1 + Wd * 0.11}${[0, 1, 2, 3, 4].map(i => ` M${x1 + 3 + i * Wd * 0.11 / 4.4} ${yb - 24} V${yb - 6}`).join('')}" fill="none" stroke="#2b2d42" stroke-width="3" stroke-linecap="round"/><path d="M${x1} ${yb + 2} L${x1 + Wd * 0.11} ${yb + 2} L${x1 + 6} ${yb + 16}Z" fill="#1b1b2f" opacity=".7"/>`;
-      s += `<path d="M${x0 + tw / 2 - 12} ${yt + 6} h24 v30 l-12 -8 l-12 8z" fill="${lit ? '#e63946' : '#6c2a35'}" stroke="#1b1b2f" stroke-width="2"/>`;
-    }
-  }
-  // 받침 + 대문
-  s += `<rect x="${x0 - 16}" y="${gy}" width="${tw + 32}" height="34" fill="#4a4e69"/><rect x="${x0 - 16}" y="${gy}" width="${tw + 32}" height="34" fill="url(#tBrick)"/><path d="M${Wd / 2 - 16} ${gy + 34} V${gy + 2} A16 16 0 0 1 ${Wd / 2 + 16} ${gy + 2} V${gy + 34}Z" fill="#3d2314" stroke="#1b1b2f" stroke-width="3"/>`;
-  // 꼭대기: 지붕 + 깃발
-  const yT = gy - F * rowH;
-  s += `<path d="M${x0 - 14} ${yT} L${Wd / 2} ${yT - 130} L${x1 + 14} ${yT}Z" fill="url(#tRoof)" stroke="#1b1b2f" stroke-width="3"/><path d="M${Wd / 2} ${yT - 130} V${yT - 172}" stroke="#ddd" stroke-width="3"/><path class="tflag" d="M${Wd / 2 + 1} ${yT - 172} h34 l-8 10 l8 10 h-34z" fill="#ffd23f" stroke="#1b1b2f" stroke-width="2"/>`;
+  s += img('base', Wd / 2 - 483 * sk / 2, gy - 6, 483 * sk, 241 * sk);
+  const yT = gy - F * rowH, rw = 359 * sk * 1.12, rh = 385 * sk * 1.12;
+  s += img('roof', Wd / 2 - rw / 2, yT - rh + 10 * sk, rw, rh);
   for (let y = gy - rowH * 3; y > yT; y -= 330) s += cloud(Wd * (0.5 + (rnd() - 0.5) * 0.6), y, 0.7 + rnd() * 0.4, 0.35);   // 탑 앞을 지나가는 옅은 구름
   s += '</svg>';
   let h = s;
@@ -3011,7 +2991,7 @@ function renderTower() {
   for (let f = 1; f <= F; f++) {
     const yc = fy(f), boss = f % 5 === 0, cls = `tfl${f <= best ? ' done' : f === best + 1 ? ' next' : ' lock'}${boss ? ' boss' : ''}${f === towerSel ? ' sel' : ''}`;
     h += `<button class="${cls}" data-f="${f}" style="left:${Wd * 0.15}px;top:${yc}px">${boss ? '👑' + f : f}</button>`;
-    if (f % 10 === 0) h += `<div class="ttro" style="left:${Wd / 2}px;top:${yc + 16}px;font-size:20px${f > best ? ';opacity:.45' : ''}">${f > best ? '🎁' : '✅'}</div>`;
+    if (f % 10 === 0) h += `<div class="ttro" style="left:${x0 - 2}px;top:${yc + 4}px;font-size:20px${f > best ? ';opacity:.45' : ''}">${f > best ? '🎁' : '✅'}</div>`;
     if (f > 1 && f % 10 === 1) h += `<div class="ttro" style="left:${Wd * 0.15 + 34}px;top:${yc}px;font-size:18px${f > best + 1 ? ';opacity:.35;filter:grayscale(1)' : ''}">🚀</div>`;
     if (boss) {
       const bn = towerBossOf(f), lock = f > best, bx = x1 + Wd * 0.155, yb = gy - (f - 1) * rowH - 6;
@@ -3021,7 +3001,7 @@ function renderTower() {
   }
   if (best > 0) h += `<div class="ttro" style="left:${Wd * 0.15 - 30}px;top:${fy(best)}px">🏆</div>`;
   h += `<img class="thero" src="img/hero.webp" style="left:${Wd / 2}px;top:${fy(Math.min(F, best + 1)) + 26}px">`;
-  h += `<div class="tbname" style="left:${Wd / 2}px;top:${yT - 205}px;font-size:13px;color:#ffd23f">✨ 끝없이 계속돼요! ✨</div>`;
+  h += `<div class="tbname" style="left:${Wd / 2}px;top:${yT - rh - 26}px;font-size:13px;color:#ffd23f">✨ 끝없이 계속돼요! ✨</div>`;
   box.innerHTML = h;
   box.querySelectorAll('.tfl').forEach(b => b.onclick = () => { towerSel = +b.dataset.f; sfx('pick'); renderTower(); towerCard(); });
 }
