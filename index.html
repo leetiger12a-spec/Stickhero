@@ -355,7 +355,7 @@ h2 .hb{-webkit-text-stroke:0;text-shadow:none;letter-spacing:0;font-family:"Jua"
 
 <script>
 'use strict';
-const BUILD = 163;
+const BUILD = 164;
 const BOSS_INTERVAL = 180;      // 보스 등장 간격(초)
 const WAVE_INTERVAL = 60;       // 대규모 몰이 이벤트 간격(초)
 const MAX_ENEMIES = 220;
@@ -1983,7 +1983,10 @@ function gameOver() {
 }
 
 // ---------- 효과 ----------
-function banner(text, sub, color, dur) { G.banner = { text, sub, color, t: 0, dur }; }
+function banner(text, sub, color, dur) {
+  if (G.banner && G.banner.keep && G.banner.t < G.banner.dur - 0.4) { G.bannerQ = { text, sub, color, t: 0, dur }; return; }   // 중요한 알림(특별 층)은 끝까지 보여 주고 다음 것은 뒤에 (Build 164)
+  G.banner = { text, sub, color, t: 0, dur };
+}
 function burst(x, y, color, n, spd, size, life) {
   for (let i = 0; i < n && G.parts.length < 700; i++) {
     const a = Math.random() * Math.PI * 2, s = rand(0.3, 1) * spd;
@@ -2110,7 +2113,7 @@ const GOLD_P = 1 / 1500, GOLD_BOSS_P = 1 / 20;   // 보스는 봇 한 판 2~15�
 let goldAnnT = -99;
 function makeGolden(e) {
   e.golden = true; e.hp *= 3; e.maxHp *= 3; e.gold = e.gold * 10 + 5; e.xp *= 3;
-  if (G && state === 'play' && G.t - goldAnnT > 8) { goldAnnT = G.t; banner('✨ 황금 몬스터!', '잡으면 금화가 와르르 · 도감에 황금 칸', '#ffd23f', 2.2); sfx('reward'); }
+  if (G && state === 'play' && G.t - goldAnnT > 8 && !(G.mode === 'stage' && G.st && G.st.rule === 'gold')) { goldAnnT = G.t; banner('✨ 황금 몬스터!', '잡으면 금화가 와르르 · 도감에 황금 칸', '#ffd23f', 2.2); sfx('reward'); }   // 황금 층에선 알림 안 띄움
 }
 function goldDie(e) { burst(e.x, e.y - 12, '#ffd23f', 30, 260, 5, 0.7); burst(e.x, e.y - 12, '#fff7c2', 14, 180, 4, 0.5); floatText(e.x, e.y - 40, '✨ 황금!', '#ffd23f', 18, 1); sfx('rewardEvo'); }
 function makeEnemy(type, x, y) {
@@ -2119,6 +2122,7 @@ function makeEnemy(type, x, y) {
   const e = { id: ++eid, type, x, y, r: T.r, hp: T.hp * hm, maxHp: T.hp * hm, spd: T.spd * rand(0.9, 1.1), dmg: T.dmg * DF().edmg, color: T.color, xp: T.xp, gold: T.gold, flash: 0, hitT: 0, kx: 0, ky: 0, swordCd: 0, wob: Math.random() * 6, inside: Math.hypot(x, y) < WALL_R, atk: 0.5, lunge: 0, face: 1 };
   if (G && G.weekly) { if (WK('giant')) { e.hp *= 1.6; e.maxHp *= 1.6; e.gold *= 2; } else if (WK('swift')) e.spd *= 1.25; else if (WK('swarm')) { e.hp *= 0.6; e.maxHp *= 0.6; } }   // 이번 주 도전
   if (G && G.mode === 'stage' && G.st && G.st.cave) { makeGolden(e); e.hp /= 3; e.maxHp /= 3; }   // 동굴: 모두 황금 (체력은 보통)
+  else if (G && G.mode === 'stage' && G.st && G.st.rule === 'gold' && Math.random() < 0.3) makeGolden(e);   // 💰 황금 층
   else if (!window.__noGold && Math.random() < GOLD_P) makeGolden(e);   // __noGold: 정확한 기록을 보는 시험용
   return e;
 }
@@ -2927,6 +2931,13 @@ function towerOpen() { return bestStage() >= 3; }
 let towerSel = 1;
 const THEME_ICO = ['🌲', '🏛', '🕯', '🌋', '🏰', '❄️'];
 const towerBossOf = f => f % 5 ? null : f / 5 <= 9 ? f / 5 : f === 50 ? GOLD_GOLEM : -1;   // -1: 센 보스 중 하나 (spawnBoss와 같은 규칙)
+// 🎲 특별 층 (Build 164): 6층부터 보스 층이 아닌 곳에 35% — 보상 배수
+const TOWER_RULES = {
+  bolt: { ico: '⚡', name: '번개 층', desc: '빨간 원에 번개가 떨어져요! 피하세요 · 적도 맞아요', mul: 1.5, col: '#ffe066' },
+  gold: { ico: '💰', name: '황금 층', desc: '황금 몬스터가 잔뜩 나와요!', mul: 2, col: '#ffd23f' },
+  dark: { ico: '🌑', name: '어둠 층', desc: '내 주변만 보여요 · 조심조심!', mul: 1.5, col: '#c77dff' },
+  wind: { ico: '💨', name: '바람 층', desc: '영웅도 적도 모두 빨라져요!', mul: 1.3, col: '#9fd8ff' },
+};
 const towerCp = () => Math.floor(((readJSON(META_KEY) || {}).bestFloor || 0) / 10) * 10 + 1;   // 🚀 체크포인트 (Build 162): 10층마다
 const towerPrize = f => 15 + f * 6 + (f % 5 === 0 ? 60 + f * 4 : 0);
 function mapView(tower) {
@@ -2939,6 +2950,7 @@ function towerCard() {
   const what = bn === null ? `⏱ ${Math.min(40, 22 + Math.floor(f / 3))}초 버티기` : bn < 0 ? '👑 보스 층 · ❓ 센 보스 중 하나' : `👑 보스 층 · ${BOSSES[bn].name}`;
   $('mapCard').innerHTML = `<div class="t">🗼 ${f}층 <span style="font-size:13px;color:#fff;opacity:.7">· ${THEME_ICO[Math.floor((f - 1) / 5) % 6]} ${th.name}</span></div><div class="g">${what} · 보상 🪙${towerPrize(f)}${f % 10 === 0 ? ' + 🌟 대박 상자' + (f > best ? ` + 🏦${10 * f}` : '') : ''}${f <= best ? ' · ✅ 가 봤어요' : ''}</div>
     <div class="r">🏆 최고 기록 <b>${best}층</b> · 층을 깨면 🗼 다음 층 / 🏠 마을로 중에 골라요</div>
+    <div class="r">🎲 6층부터 가끔 특별 층: ⚡번개 · 💰황금 · 🌑어둠 · 💨바람 (보상 더 많이!)</div>
     <div style="display:flex;gap:8px;margin-top:6px;width:min(100%,360px)"><button class="btn" id="bGoTower" style="flex:1;min-width:0;margin:0;white-space:nowrap;font-size:19px;padding:12px 4px">🗼 1층부터</button>${towerCp() > 1 ? `<button class="btn" id="bGoTowerCp" style="flex:1;min-width:0;margin:0;white-space:nowrap;font-size:19px;padding:12px 4px;background:#3a86ff;color:#fff">🚀 ${towerCp()}층부터</button>` : ''}</div>
     <div class="r">${towerCp() > 1 ? `🚀 체크포인트: 10층마다 깬 곳 다음 층부터 바로 갈 수 있어요` : '🚀 10층을 깨면 다음부터 11층에서 바로 시작할 수 있어요'}</div>` + rushHtml();
   $('bGoTower').onclick = () => { showOv(null); state = 'play'; G.towerGold = 0; enterStage(0, 1); };
@@ -3061,12 +3073,18 @@ function enterStage(idx, tower, practice, hard, cave) {   // cave: 🌟 비밀 �
     st.ice = []; for (let i = 0; i < L / 170; i++) { const y = rand(-L - 300, -120); st.ice.push({ x: rand(-STAGE_HW + 50, STAGE_HW - 50), y, r: rand(55, 85) }); }
     st.blizT = rand(10, 16); st.blizOn = 0;
   }
+  if (tower && tower % 5 && tower >= 6) { const k = window.__towerRule !== undefined ? window.__towerRule : Math.random() < 0.35 ? Object.keys(TOWER_RULES)[Math.floor(Math.random() * 4)] : null;
+    if (k) { st.rule = k; def.name += ' ' + TOWER_RULES[k].ico; if (k === 'bolt') { st.bolts = []; st.boltT = 2.5; } } }
   G.st = st; G.mode = 'stage';
   p.x = 0; p.y = surv ? -L / 2 : -40; G.cam.x = 0; G.cam.y = p.y - 12; joy = null;
   placeAllies();
   if (cave) banner('🌟 비밀 보물 동굴!', '⏱ 40초 동안 황금 몬스터를 잡아 금화를 모아요!', '#ffd23f', 2.6);
   else if (practice !== undefined) banner(hard ? '🔥 보스 도전' : '⚔ 보스 연습', hard ? '체력 2배 · 공격 1.5배! 기록·업적엔 안 남아요' : '기록·업적엔 안 남아요 · 져도 괜찮아!', hard ? '#ff9f1c' : '#9fd8ff', 2.2);
-  else if (tower) { banner(`🗼 ${tower}층`, def.goal === 'tboss' ? '👑 보스 층! 보스를 물리쳐라' : `⏱ ${def.time}초 버텨라!`, tower % 5 === 0 ? '#ff6b6b' : '#9fd8ff', 2.4); G.banner.tw = tower; G.towerRise = 0.8; }
+  else if (tower) { const R = st.rule && TOWER_RULES[st.rule];
+    G.banner = null; G.bannerQ = null;
+    if (R) { banner(`${R.ico} ${tower}층 · ${R.name}!`, `${R.desc} · 보상 x${R.mul}`, R.col, 3); G.banner.keep = true; }
+    else banner(`🗼 ${tower}층`, def.goal === 'tboss' ? '👑 보스 층! 보스를 물리쳐라' : `⏱ ${def.time}초 버텨라!`, tower % 5 === 0 ? '#ff6b6b' : '#9fd8ff', 2.4);
+    G.banner.tw = tower; G.towerRise = 0.8; }
   else banner(`${n + 1}. ${def.name}`, def.goal === 'survive' ? `⏱ ${def.time}초 버텨라!` : GOAL_TXT[def.goal], '#ffd23f', 2.6);
   sfx('wave');
 }
@@ -3078,7 +3096,8 @@ function stageClear(x, y) {
   if (st.practice !== undefined || st.cave) { st.portal = { x, y, t: 0, hold: 0, on: false }; return; }   // 연습·동굴: 마을로 가는 포털만
   if (st.tower) {
     questEvent('tower');
-    const f = st.tower, prize = 15 + f * 6 + (f % 5 === 0 ? 60 + f * 4 : 0);
+    const f = st.tower, prize = Math.round((15 + f * 6 + (f % 5 === 0 ? 60 + f * 4 : 0)) * (st.rule ? TOWER_RULES[st.rule].mul : 1));
+    if (st.rule) { G.ruleClears = (G.ruleClears || 0) + 1; floatText(p.x, p.y - 128, `${TOWER_RULES[st.rule].ico} ${TOWER_RULES[st.rule].name} 보상 x${TOWER_RULES[st.rule].mul}!`, TOWER_RULES[st.rule].col, 16, 1.8); }
     G.gold += prize; G.towerGold = (G.towerGold || 0) + prize;
     const meta = readJSON(META_KEY) || {}; if (f > (meta.bestFloor || 0)) { meta.bestFloor = f;
       if (f % 10 === 0) { const bk = 100 * f / 10; meta.bank = (meta.bank || 0) + bk; floatText(p.x, p.y - 104, `🏦 ${f}층 첫 돌파! 금고 +${bk}`, '#7bed9f', 17, 2); }   // 🎁 10층마다 첫 돌파 금고 보너스 (Build 163)
@@ -3169,6 +3188,7 @@ function updStage(dt) {
     if (st.blizOn > 0) { st.blizOn -= dt; if (st.blizOn <= 0) floatText(p.x, p.y - 50, '눈보라가 그쳤다', '#dff6ff', 14, 1); }
     else if ((st.blizT -= dt) <= 0) { st.blizOn = 6; st.blizT = rand(20, 28); banner('🌨 눈보라다!', '잠깐 느려져요 · 적도 느려져요', '#dff6ff', 1.8); sfx('woosh'); }
   }
+  if (st.rule === 'bolt') updBolts(dt);
   // 앞쪽 무리가 가까워지면 등장
   for (const g of st.groups) {
     if (g.done || p.y - g.y > 430) continue;
@@ -3267,6 +3287,7 @@ function drawStageGround() {
     ctx.fillStyle = 'rgba(0,0,0,.18)'; ctx.beginPath(); ctx.ellipse(r.x, r.y, 9 * r.s, 6 * r.s, 0, 0, 7); ctx.fill();
   }
   if (st.tower) towerFloor(top, bot);
+  if (st.rule === 'bolt') drawBoltWarn();
 }
 // 🗼 탑 안 꾸미기 (Build 161): 길 밖은 하늘(높을수록 밤하늘), 양옆 톱니 성벽, 가운데 마법진, 층 돌파 빛기둥
 const TOWER_SKY = [['#4ea8de', '#a9def9'], ['#3a5bd9', '#8fb3ff'], ['#3a0ca3', '#4361ee'], ['#24106b', '#3a0ca3'], ['#05021a', '#24106b']];
@@ -3323,7 +3344,33 @@ function towerFloor(top, bot) {
   ctx.globalAlpha = 0.35; ctx.font = '900 72px Jua,system-ui,sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(st.tower, 0, 4);
   ctx.restore(); ctx.globalAlpha = 1;
 }
-function drawTowerFx() { // 층 돌파: 다음 층 포털에서 하늘로 솟는 빛기둥 + 올라가는 반짝이
+function updBolts(dt) { // ⚡ 번개 층: 1.6~2.6초마다 영웅 근처에 빨간 원 → 0.9초 뒤 번개 (적·영웅 모두)
+  const st = G.st, p = G.p;
+  if (!st.clear && !p.dead && (st.boltT -= dt) <= 0) { st.boltT = rand(1.6, 2.6);
+    for (let i = 0; i < (st.tower >= 20 ? 2 : 1); i++) st.bolts.push({ x: clamp(p.x + rand(-150, 150), -STAGE_HW + 30, STAGE_HW - 30), y: p.y + rand(-130, 130), t: 0.9, fl: 0 }); }
+  for (const b of st.bolts) {
+    if (b.t > 0) { b.t -= dt; if (b.t <= 0) { b.fl = 0.35; sfx('bigBoom'); G.shake = Math.max(G.shake, 6); burst(b.x, b.y, '#ffe066', 18, 260, 4, 0.5);
+      G.hitSrc = null; for (const e of G.enemies) if (!e.dead && (e.x - b.x) ** 2 + (e.y - b.y) ** 2 < 80 * 80) hurtEnemy(e, e.boss ? 40 : Math.max(40, e.maxHp * 0.6), 0, 0, 0);
+      if ((p.x - b.x) ** 2 + (p.y - b.y) ** 2 < 70 * 70) { hurtPlayer(p.maxHp * 0.12); floatText(p.x, p.y - 60, '⚡ 찌릿!', '#ffe066', 16, 0.8); } } }
+    else b.fl -= dt;
+  }
+  st.bolts = st.bolts.filter(b => b.t > 0 || b.fl > 0);
+}
+function drawBoltWarn() { const st = G.st; if (!st.bolts) return;
+  for (const b of st.bolts) if (b.t > 0) { const k = 1 - b.t / 0.9;
+    ctx.fillStyle = `rgba(255,60,60,${0.12 + 0.25 * k})`; ctx.beginPath(); ctx.arc(b.x, b.y, 80 * k, 0, 7); ctx.fill();
+    ctx.strokeStyle = `rgba(255,80,80,${0.5 + 0.5 * Math.sin(G.t * 30)})`; ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(b.x, b.y, 80, 0, 7); ctx.stroke(); }
+}
+function drawBoltStrikes() { const st = G.st; if (!st.bolts) return;
+  for (const b of st.bolts) if (b.t <= 0 && b.fl > 0) {
+    ctx.save(); ctx.translate(b.x, b.y); ctx.scale(1, IK); ctx.globalAlpha = Math.min(1, b.fl / 0.2); ctx.globalCompositeOperation = 'lighter';
+    let x = 0; ctx.beginPath(); ctx.moveTo(0, 0); for (let y = -40; y > -620; y -= 40) { x = rand(-22, 22); ctx.lineTo(x, y); }
+    ctx.strokeStyle = 'rgba(255,240,150,.6)'; ctx.lineWidth = 16; ctx.stroke(); ctx.strokeStyle = '#fff'; ctx.lineWidth = 5; ctx.stroke();
+    ctx.fillStyle = 'rgba(255,240,150,.5)'; ctx.beginPath(); ctx.ellipse(0, 0, 90, 40, 0, 0, 7); ctx.fill(); ctx.restore();
+  }
+}
+function drawTowerFx() {
+  if (G.st.rule === 'bolt') drawBoltStrikes(); // 층 돌파: 다음 층 포털에서 하늘로 솟는 빛기둥 + 올라가는 반짝이
   const st = G.st, q = st.portal; if (!st.clear || !q) return;
   ctx.save(); ctx.translate(q.x, q.y); ctx.scale(1, IK); ctx.globalCompositeOperation = 'lighter';
   const w = 34 + Math.sin(G.t * 6) * 5, gr = ctx.createLinearGradient(0, 0, 0, -760);
@@ -3712,7 +3759,7 @@ function update(dt) {
       if (!p.moving) { p.x += p.ivx * dt; p.y += p.ivy * dt; p.x = clamp(p.x, -STAGE_HW + 12, STAGE_HW - 12); p.y = clamp(p.y, -G.st.L - 380, 100); }
     } else { p.ivx = p.ivy = 0; }
     if (p.moving) {
-      const sm = (p.slowT > 0 ? 0.6 : 1) * (G.mode === 'stage' && G.st && G.st.blizOn > 0 ? 0.75 : 1);   // 눈보라: 0.75배
+      const sm = (p.slowT > 0 ? 0.6 : 1) * (G.mode === 'stage' && G.st && G.st.blizOn > 0 ? 0.75 : 1) * (G.mode === 'stage' && G.st && G.st.rule === 'wind' ? 1.3 : 1);   // 눈보라: 0.75배 · 💨 바람 층 1.3배
       if (ice) { p.x += p.ivx * dt; p.y += p.ivy * dt; } else { p.x += d.x * p.speed * sm * dt; p.y += d.y * p.speed * sm * dt; }
       const l = Math.hypot(d.x, d.y); p.ax = d.x / l; p.ay = d.y / l;
       if (Math.abs(d.x) > 0.1) p.face = d.x > 0 ? 1 : -1;
@@ -3909,7 +3956,7 @@ function update(dt) {
       if (T === 'e_demon') e.z = 16 + Math.sin(e.wob * 0.7) * 5;
       if (T === 'e_ghost') e.z = 8 + Math.sin(e.wob * 0.5) * 6;
       if (T === 'e_bomber' && chase && pd < e.r + p.r + 12) { bomberBoom(e); continue; }
-      const sp = (e.hitT > 0 ? 0.35 : 1) * (idle ? 0.15 : 1) * (e.slowT > 0 ? 0.5 : 1) * (G.mode === 'stage' && G.st.blizOn > 0 ? 0.8 : 1) * (G.rainOn && G.mode === 'base' ? 0.9 : 1) * e.spd * far * spm;   // 얼음 맞으면 절반 속도, 비 오면 -10%
+      const sp = (e.hitT > 0 ? 0.35 : 1) * (idle ? 0.15 : 1) * (e.slowT > 0 ? 0.5 : 1) * (G.mode === 'stage' && G.st.blizOn > 0 ? 0.8 : 1) * (G.mode === 'stage' && G.st.rule === 'wind' ? 1.2 : 1) * (G.rainOn && G.mode === 'base' ? 0.9 : 1) * e.spd * far * spm;   // 얼음 맞으면 절반 속도, 비 오면 -10%
       e.x += mx * sp * dt; e.y += my * sp * dt;
     }
     e.x += e.kx * dt; e.y += e.ky * dt;
@@ -4035,7 +4082,7 @@ function update(dt) {
   G.parts = G.parts.filter(q => q.life > 0);
   for (const t of G.texts) { t.y -= 40 * dt; t.life -= dt; if (t.pop > 0) t.pop -= dt; }
   G.texts = G.texts.filter(t => t.life > 0);
-  if (G.banner) { G.banner.t += dt; if (G.banner.t > G.banner.dur) G.banner = null; }
+  if (G.banner) { G.banner.t += dt; if (G.banner.t > G.banner.dur) { G.banner = G.bannerQ || null; G.bannerQ = null; } }
   if (G.towerRise > 0) G.towerRise = Math.max(0, G.towerRise - dt);
   G.shake = Math.max(0, G.shake - dt * 30);
   G.lvlFlash = Math.max(0, G.lvlFlash - dt);
@@ -5528,6 +5575,16 @@ function drawTitleScene() {
   ctx.fillText('Build ' + BUILD, W - 6, H - 4);
 }
 
+function drawTowerScreen() { // 🌑 어둠 · 💨 바람 층 화면 효과 (HUD 아래, Build 164)
+  if (G.mode === 'stage' && G.st && G.st.rule === 'dark' && !G.st.clear) { // 🌑 어둠 층: 영웅 주변만 밝게
+    const p = G.p, sx = W / 2 + (p.x - G.cam.x) * SCALE, sy = H / 2 + (p.y - 20 - G.cam.y) * SCALE * K, r0 = 110 * SCALE, r1 = 260 * SCALE;
+    const gr = ctx.createRadialGradient(sx, sy, r0, sx, sy, r1); gr.addColorStop(0, 'rgba(8,4,24,0)'); gr.addColorStop(1, 'rgba(8,4,24,.93)'); ctx.fillStyle = gr; ctx.fillRect(0, 0, W, H);
+  }
+  if (G.mode === 'stage' && G.st && G.st.rule === 'wind' && !G.st.clear) { // 💨 바람 층: 옆으로 휙휙 바람 줄
+    ctx.strokeStyle = 'rgba(255,255,255,.45)'; ctx.lineWidth = 2; ctx.lineCap = 'round';
+    for (let i = 0; i < 12; i++) { const y = (i * 131.7) % H, x = ((G.t * 900 + i * 211) % (W + 300)) - 150; ctx.beginPath(); ctx.moveTo(x, y); ctx.quadraticCurveTo(x + 40, y - 6, x + 90 + (i % 3) * 30, y); ctx.stroke(); }
+  }
+}
 function render() {
   ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
   if (!G || state === 'title') { drawTitleScene(); return; }
@@ -5539,7 +5596,7 @@ function render() {
   drawWorld();
   if (G.mode === 'stage' && G.st && G.st.tower) drawTowerFx();
   ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
-  if (G.mode === 'base') { drawRain(); drawFog(); drawRainbowArc(); drawNight(); drawGhostChest(); drawWish(); } else drawBlizzard();
+  if (G.mode === 'base') { drawRain(); drawFog(); drawRainbowArc(); drawNight(); drawGhostChest(); drawWish(); } else { drawBlizzard(); drawTowerScreen(); }
   drawHUD();
 }
 
