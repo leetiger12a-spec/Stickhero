@@ -98,3 +98,21 @@ LAYOUT (strict):
 BACKGROUND: plain pure white (#FFFFFF) everywhere, no ground line, no shadows, no gradient, no frame borders, no text, no letters, no numbers, no watermark, no logo, no signature.
 QUALITY: ultra high resolution, QHD (2560x1440) or higher, crisp clean lines
 ```
+
+---
+
+## 🎬 GIF 동작 프롬프트 틀 (사진 → GIF/MP4, 24칸)
+첨부: 그 캐릭터의 서 있는 그림 1장. `[ACTION]`과 `[WHO]`만 바꿔요.
+```
+Animate the attached character as a seamless looping game sprite animation.
+
+ACTION: [ACTION], facing right, IN PLACE (the character does NOT move across the screen). Exactly one full cycle, and the last frame must flow back into the first frame perfectly.
+
+KEEP EXACTLY THE SAME: [WHO]'s design, colors, outlines, proportions and art style in every frame (2D cel-shaded game art, thick dark outlines). Same size in every frame, feet stay on the same ground line, character stays centered.
+
+CAMERA: completely static. No zoom, no pan, no camera shake, no rotation, no perspective change.
+
+BACKGROUND: plain pure white (#FFFFFF) in every frame. No ground, no shadows, no dust, no particles, no new objects, no text, no watermark.
+
+OUTPUT: 1 second long, 24 frames (24 fps), looping. Export as GIF (or MP4). Highest resolution available.
+```
