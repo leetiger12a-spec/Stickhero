@@ -363,7 +363,7 @@ h2 .hb{-webkit-text-stroke:0;text-shadow:none;letter-spacing:0;font-family:"Jua"
 
 <script>
 'use strict';
-const BUILD = 180;
+const BUILD = 181;
 const BOSS_INTERVAL = 180;      // 보스 등장 간격(초)
 const WAVE_INTERVAL = 60;       // 대규모 몰이 이벤트 간격(초)
 const MAX_ENEMIES = 220;
@@ -531,7 +531,7 @@ const HATS = [
   { id: 'dragon', name: '황금 용 투구', need: 40, w: 1.6, by: 0.68 },
 ];
 // 그림마다 머리 꼭대기 위치 (칸 폭·높이 대비, tools로 잰 값): [가운데 x, 꼭대기 y]
-const HEAD_AT = { hero: [[0.5483, 0.0625]], hero_walk: [[0.7195, 0.155], [0.7042, 0.16], [0.7212, 0.16], [0.7037, 0.16]], hero_slash: [[0.6449, 0.175], [0.659, 0.19], [0.6776, 0.195], [0.6753, 0.205]] };
+const HEAD_AT = { hero: [[0.5483, 0.0625]], hero_walk: [[0.6823, 0.14], [0.6749, 0.11], [0.6887, 0.12], [0.6759, 0.095], [0.6556, 0.09], [0.6745, 0.065], [0.6831, 0.07], [0.6765, 0.07]], hero_slash: [[0.6449, 0.175], [0.659, 0.19], [0.6776, 0.195], [0.6753, 0.205]] };
 const HEAD_W = 23;   // 게임 속 머리 폭(px)
 // 🐾 펫 친구 (Build 135): 별로 열림, 영웅을 따라다니며 도와줌
 const PETS = [
@@ -4844,7 +4844,7 @@ function drawStick(p) {
     if (blink) ctx.globalAlpha = 0.35;
     const sheetHat = (nm, f) => { const S = SHEETS[nm], im2 = SPR[nm], ch = h * STATIC_BODY.hero / S.body, cw = ch * (im2.width / S.n) / im2.height, A = HEAD_AT[nm][f]; drawHat(-cw * S.ax + A[0] * cw, -ch * S.ay + A[1] * ch, HEAD_W); };
     if (sheet) { drawSheet('hero_slash', p.actT / ACTS.slash, h * STATIC_BODY.hero); sheetHat('hero_slash', Math.min(3, Math.floor(p.actT / ACTS.slash * 4))); }
-    else if (walkSheet) { const S = SHEETS.hero_walk, wk = (p.walk / (Math.PI / 2)) % 4, f = S.seq[Math.floor(wk)]; drawSheet('hero_walk', (S.seq[Math.floor(wk)] + (wk % 1)) / S.n, h * STATIC_BODY.hero, true); sheetHat('hero_walk', f); }
+    else if (walkSheet) { const S = SHEETS.hero_walk, wk = (p.walk / (Math.PI * 2) * S.seq.length) % S.seq.length, f = S.seq[Math.floor(wk)]; drawSheet('hero_walk', (S.seq[Math.floor(wk)] + (wk % 1)) / S.n, h * STATIC_BODY.hero, true); sheetHat('hero_walk', f); }
     else {
       ctx.drawImage(img, -w * ax, -h - bob, w, h); // 몸 중심이 발 위에 오도록 (칼 쪽이 더 넓음)
       drawHat(-w * ax + HEAD_AT.hero[0][0] * w, -h - bob + HEAD_AT.hero[0][1] * h, HEAD_W);
@@ -4933,7 +4933,7 @@ function spr(n, h, white) {
 // 연속 동작 그림(가로 N컷): tools/sheet.py 로 만들고 정보를 여기에. body = 칸 높이 대비 몸 키
 const SHEETS = {
   hero_slash:        { n: 4, ax: 0.6301, ay: 0.9857, body: 0.85 },   // Build 176: 새 그림체
-  hero_walk:         { n: 4, ax: 0.6763, ay: 0.9865, body: 0.8697, seq: [0, 1, 2, 3] },   // Build 177: 새 그림체 걷기 4칸
+  hero_walk:         { n: 8, ax: 0.6345, ay: 0.9826, body: 0.9535, seq: [0, 1, 2, 3, 4, 5, 6, 7] },   // Build 181: 새 그림체 걷기 8칸
   // 동료는 '1번 칸 전체 키 = 게임 속 그림 전체 키'로 맞춤 (body = 1번 칸 키 비율)
   ally_archer_shoot: { n: 4, ax: 0.4263, ay: 0.9834, body: 0.9669 },
   ally_bomber_toss:  { n: 4, ax: 0.4409, ay: 0.9856, body: 0.7957 },
