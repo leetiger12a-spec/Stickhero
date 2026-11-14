@@ -344,6 +344,7 @@ h2 .hb{-webkit-text-stroke:0;text-shadow:none;letter-spacing:0;font-family:"Jua"
   <button class="btn" id="bResume">계속하기</button>
   <button class="btn blue" id="bShopP">💪 영웅 강화</button>
   <button class="btn" id="bAchP">🏅 업적</button>
+  <button class="btn" id="bReborn" style="display:none;background:linear-gradient(#c77dff,#7b2cbf);color:#fff">🌀 환생하기</button>
   <div class="mrow" style="margin:6px 0 10px"><button class="hb" id="bMusicP" style="width:auto;padding:0 14px;font-weight:800">🎵 음악</button><button class="hb" id="bVolP" style="width:auto;padding:0 14px;font-weight:800">🔈 소리 크기</button><button class="hb" id="bVibP" style="width:auto;padding:0 14px;font-weight:800">📳 진동</button><button class="hb" id="bNumP" style="width:auto;padding:0 14px;font-weight:800">🔢 숫자</button><button class="hb" id="bShakeP" style="width:auto;padding:0 14px;font-weight:800">🎚 흔들림</button><button class="hb" id="bEvoP" style="width:auto;padding:0 14px;font-weight:800">✨ 진화 도감</button><button class="hb" id="bDexP" style="width:auto;padding:0 14px;font-weight:800">📖 몬스터 도감</button></div>
   <button class="btn gray" id="bQuit">처음으로</button>
 </div>
@@ -358,7 +359,7 @@ h2 .hb{-webkit-text-stroke:0;text-shadow:none;letter-spacing:0;font-family:"Jua"
 
 <script>
 'use strict';
-const BUILD = 170;
+const BUILD = 171;
 const BOSS_INTERVAL = 180;      // 보스 등장 간격(초)
 const WAVE_INTERVAL = 60;       // 대규모 몰이 이벤트 간격(초)
 const MAX_ENEMIES = 220;
@@ -1274,7 +1275,8 @@ function recalcStats() {
   p.hp = Math.min(p.hp, p.maxHp);
   p.speed = 150 * (1 + 0.1 * (ps.speed || 0)) * (1 + 0.04 * U('spd')) * (WK('swift') ? 1.15 : 1);   // 🍬 사탕 빠르기는 이동 때 곱함
   p.magnet = 70 * (1 + 0.4 * (ps.magnet || 0)) * (1 + 0.12 * U('mag'));
-  p.dmgMul = (1 + 0.15 * (ps.power || 0)) * (1 + 0.1 * (G.forge || 0)) * (1 + 0.06 * U('atk'));
+  p.dmgMul = (1 + 0.15 * (ps.power || 0)) * (1 + 0.1 * (G.forge || 0)) * (1 + 0.06 * U('atk')) * rebornMul();
+  p.maxHp = Math.round(p.maxHp * rebornMul()); p.hp = Math.min(p.hp, p.maxHp);   // 🌀 환생 보너스
   p.cdMul = Math.max(0.5, 1 - 0.1 * (ps.haste || 0));
   p.cap = 12 + 6 * (ps.bag || 0);
 }
@@ -1554,7 +1556,7 @@ const DIFFS = [
 // 💪 레벨 맞춤 세기 (Build 166): 영웅 Lv 30부터 적·보스가 레벨마다 강해짐 (Lv 94 → 체력 x2.6 · 공격 x1.77)
 const LEGEND = 4, legendOn = () => G && G.diff === LEGEND;   // 👹 레전드 난이도 번호
 const LVL_FREE = 30, LVL_HP = 0.025, LVL_DMG = 0.012;
-function lvlScale() { const ex = Math.max(0, ((G && G.lvl) || 1) - LVL_FREE); return { hp: 1 + LVL_HP * ex, dmg: 1 + LVL_DMG * ex }; }
+function lvlScale() { const ex = Math.max(0, ((G && G.lvl) || 1) + 10 * (rebornMul() - 1) * 10 - LVL_FREE); return { hp: 1 + LVL_HP * ex, dmg: 1 + LVL_DMG * ex }; }
 // 🗼 탑 21층부터 층마다 더 강해짐 (예전엔 21층 위로 그대로였음): 체력 +6% · 공격 +2.5% / 층
 function towerScale() { const f = G && G.mode === 'stage' && G.st && G.st.tower || 0, ex = Math.max(0, f - 20); return { hp: 1 + 0.06 * ex, dmg: 1 + 0.025 * ex }; }
 let diffSel = 2;
@@ -1722,7 +1724,24 @@ function dayMilestone(d) { const v = DAY_GIFT[d]; if (!v) return false; const m 
   m.dayGift.push(d); m.bank = (m.bank || 0) + v; writeJSON(META_KEY, m); G.dayGiftT = 3.5;
   setTimeout(() => { if (G && state === 'play') { banner(`📆 ${d}일째! 대단해요!`, `${d}일을 버텼다 · 금고에 🪙${v}`, '#ffd23f', 3); sfx('unlock'); heroSay('morning', true); } }, 3300); return true; }
 // 📋 일시정지 화면 능력치 (Build 115)
-function renderPauseStats() { const p = G.p, pct = v => `${v >= 1 ? '+' : ''}${Math.round((v - 1) * 100)}%`;
+// 🌀 환생 (Build 171): Lv 100이면 일시정지 메뉴에서 — 레벨·무기·능력은 처음부터, 마을·동료·금화·기록은 그대로, 영구 공격·체력 +10% (최대 10번 = +100%)
+const REBORN_LV = 100, REBORN_MAX = 10;
+const rebornN = () => (readJSON(META_KEY) || {}).reborn || 0;
+let rebornC = null; const rebornMul = () => 1 + 0.1 * Math.min(REBORN_MAX, rebornC === null ? (rebornC = rebornN()) : rebornC);
+function doReborn() {
+  if (!G || G.lvl < REBORN_LV) return false;
+  const m = readJSON(META_KEY) || {}; m.reborn = (m.reborn || 0) + 1; writeJSON(META_KEY, m); rebornC = m.reborn; stAdd('reborns');
+  const p = G.p; G.lvl = 1; G.xp = 0; G.need = xpNeed(1); G.pending = 0; G.weapons = { pistol: 1 }; G.passives = {}; G.timers = {}; G.forge = G.forge || 0;
+  recalcStats(); p.hp = p.maxHp; G.ult = ULT_MAX;
+  state = 'play'; showOv(null);
+  banner(`🌀 ${m.reborn}번째 환생!`, `영구 보너스: 공격·체력 +${10 * Math.min(REBORN_MAX, m.reborn)}% · 필살기 가득!`, '#c77dff', 3.2);
+  burst(p.x, p.y - 20, '#c77dff', 60, 360, 6, 1); burst(p.x, p.y - 20, '#fff', 30, 240, 5, 0.8); G.lvlFlash = 0.8; G.shake = 12; sfx('unlock'); sfx('cheer'); saveGame(); return true;
+}
+$('bReborn').onclick = () => { sfx('pick'); if (confirm(`🌀 환생할까요?\n\n레벨·무기·능력은 처음(Lv 1)부터 다시 시작해요.\n마을·동료·금화·기록은 그대로예요.\n대신 영원히 공격·체력 +10%!`)) doReborn(); };
+function drawReborn(p) { const n = rebornC === null ? rebornN() : rebornC; if (!n) return;
+  ctx.save(); ctx.translate(p.x, p.y - (heroTitleCache ? 104 : 88) * IK); ctx.scale(1, IK); ctx.font = '900 14px Jua,system-ui,sans-serif'; ctx.textAlign = 'center';
+  const t = `🌀×${n}`; ctx.lineWidth = 3; ctx.strokeStyle = '#2a0845'; ctx.strokeText(t, 0, 0); ctx.fillStyle = '#e0aaff'; ctx.fillText(t, 0, 0); ctx.restore(); }
+function renderPauseStats() { $('bReborn').style.display = G && G.lvl >= REBORN_LV ? '' : 'none'; const p = G.p, pct = v => `${v >= 1 ? '+' : ''}${Math.round((v - 1) * 100)}%`;
   const ws = Object.keys(G.weapons).map(id => `${wMini(id, G.weapons[id] > MAX_WLV)} ${G.weapons[id] > MAX_WLV ? '✨진화' : 'Lv' + G.weapons[id]}`).join(' · ');
   const cells = [['⚔ 공격력', pct(p.dmgMul)], ['⏱ 공격 빠르기', pct(1 / p.cdMul)], ['💨 이동 속도', Math.round(p.speed)], ['❤ 최대 체력', p.maxHp], ['🧲 자석 범위', Math.round(p.magnet)], ['🎒 통나무', `${p.cap}개`]];
   const al = G.allies.map((a, i) => `<button class="anm" data-i="${i}">${ALLY_TYPES[a.type].icon} ${a.name || '?'} 🔄</button>`).join('');
@@ -4129,7 +4148,8 @@ function update(dt) {
   // 레벨업
   while (G.xp >= G.need) {
     G.xp -= G.need; G.lvl++; G.need = xpNeed(G.lvl); G.pending++; lvlMilestone(G.lvl);
-    if (G.lvl >= LVL_FREE + 10 && (G.lvl - LVL_FREE) % 10 === 0) { const s = lvlScale(); banner('😈 적들도 강해졌다!', `영웅 Lv ${G.lvl} · 적 체력 x${s.hp.toFixed(2)} · 공격 x${s.dmg.toFixed(2)}`, '#ff6b6b', 2.4); }
+    if (G.lvl === REBORN_LV) banner('🌀 Lv 100! 환생할 수 있어요', '⏸ 일시정지 → 🌀 환생하기 · 영원히 공격·체력 +10%', '#c77dff', 3);
+    else if (G.lvl >= LVL_FREE + 10 && (G.lvl - LVL_FREE) % 10 === 0) { const s = lvlScale(); banner('😈 적들도 강해졌다!', `영웅 Lv ${G.lvl} · 적 체력 x${s.hp.toFixed(2)} · 공격 x${s.dmg.toFixed(2)}`, '#ff6b6b', 2.4); }
   }
 
   // 이펙트
@@ -5165,7 +5185,7 @@ function drawWorld() {
     for (const d of G.st.deco) if (vis(d)) list.push({ y: d.y, draw: () => drawDeco(d) });
     for (const c of G.st.cages) if (vis(c)) list.push({ y: c.y, draw: () => drawCage(c) });
   }
-  if (!p.dead && G.deadT <= 0) list.push({ y: p.y, draw: () => { if (p.slowT > 0) { ctx.save(); ctx.translate(p.x, p.y); ctx.scale(1, IK); ctx.strokeStyle = 'rgba(160,210,255,.9)'; ctx.lineWidth = 3; ctx.beginPath(); ctx.ellipse(0, 2, 16, 6, 0, 0, 7); ctx.stroke(); ctx.restore(); } drawStick(p); drawHeroTitle(p); drawSay(p); } });
+  if (!p.dead && G.deadT <= 0) list.push({ y: p.y, draw: () => { if (p.slowT > 0) { ctx.save(); ctx.translate(p.x, p.y); ctx.scale(1, IK); ctx.strokeStyle = 'rgba(160,210,255,.9)'; ctx.lineWidth = 3; ctx.beginPath(); ctx.ellipse(0, 2, 16, 6, 0, 0, 7); ctx.stroke(); ctx.restore(); } drawStick(p); drawHeroTitle(p); drawReborn(p); drawSay(p); } });
   if (G.pet && !p.dead) list.push({ y: G.pet.y, draw: drawPet });
   if (G.pet2 && !p.dead) list.push({ y: G.pet2.y, draw: drawPet2 });
   for (const a of G.allies) if (!a.dead) list.push({ y: a.y, draw: () => { drawAlly(a); if (a.say) drawBubble(a.say, a.x, a.y - 80 * IK); } });
