@@ -355,7 +355,7 @@ h2 .hb{-webkit-text-stroke:0;text-shadow:none;letter-spacing:0;font-family:"Jua"
 
 <script>
 'use strict';
-const BUILD = 162;
+const BUILD = 163;
 const BOSS_INTERVAL = 180;      // 보스 등장 간격(초)
 const WAVE_INTERVAL = 60;       // 대규모 몰이 이벤트 간격(초)
 const MAX_ENEMIES = 220;
@@ -464,7 +464,7 @@ const STAGES = [
 ];
 const FINAL_IDX = STAGES.findIndex(d => d.goal === 'final');
 const GOAL_TXT = { boss: '👑 끝까지 가서 보스를 물리쳐라', rescue: '🐱 갇힌 고양이 3마리를 구하고 보스를 물리쳐라', survive: '⏱ 몰려오는 적을 버텨라', final: '🏰 왕관 괴물 대왕을 쓰러뜨려라!' };
-const GOAL_ICON = { boss: '👑', rescue: '🐱', survive: '⏱', final: '🏰' };
+const GOAL_ICON = { boss: '👑', rescue: '🐱', survive: '⏱', final: '🏰', tboss: '👑' };   // tboss: 탑 보스 층·보스 연습 (Build 163: 빠져 있어서 'undefined'가 보였음)
 
 const cv = document.getElementById('cv'), ctx = cv.getContext('2d');
 let W = 0, H = 0, DPR = 1, SCALE = 1, VW = 0, VH = 0;
@@ -2937,7 +2937,7 @@ function mapView(tower) {
 function towerCard() {
   const best = (readJSON(META_KEY) || {}).bestFloor || 0, f = towerSel, bn = towerBossOf(f), th = THEMES[Math.floor((f - 1) / 5) % THEMES.length];
   const what = bn === null ? `⏱ ${Math.min(40, 22 + Math.floor(f / 3))}초 버티기` : bn < 0 ? '👑 보스 층 · ❓ 센 보스 중 하나' : `👑 보스 층 · ${BOSSES[bn].name}`;
-  $('mapCard').innerHTML = `<div class="t">🗼 ${f}층 <span style="font-size:13px;color:#fff;opacity:.7">· ${THEME_ICO[Math.floor((f - 1) / 5) % 6]} ${th.name}</span></div><div class="g">${what} · 보상 🪙${towerPrize(f)}${f <= best ? ' · ✅ 가 봤어요' : ''}</div>
+  $('mapCard').innerHTML = `<div class="t">🗼 ${f}층 <span style="font-size:13px;color:#fff;opacity:.7">· ${THEME_ICO[Math.floor((f - 1) / 5) % 6]} ${th.name}</span></div><div class="g">${what} · 보상 🪙${towerPrize(f)}${f % 10 === 0 ? ' + 🌟 대박 상자' + (f > best ? ` + 🏦${10 * f}` : '') : ''}${f <= best ? ' · ✅ 가 봤어요' : ''}</div>
     <div class="r">🏆 최고 기록 <b>${best}층</b> · 층을 깨면 🗼 다음 층 / 🏠 마을로 중에 골라요</div>
     <div style="display:flex;gap:8px;margin-top:6px;width:min(100%,360px)"><button class="btn" id="bGoTower" style="flex:1;min-width:0;margin:0;white-space:nowrap;font-size:19px;padding:12px 4px">🗼 1층부터</button>${towerCp() > 1 ? `<button class="btn" id="bGoTowerCp" style="flex:1;min-width:0;margin:0;white-space:nowrap;font-size:19px;padding:12px 4px;background:#3a86ff;color:#fff">🚀 ${towerCp()}층부터</button>` : ''}</div>
     <div class="r">${towerCp() > 1 ? `🚀 체크포인트: 10층마다 깬 곳 다음 층부터 바로 갈 수 있어요` : '🚀 10층을 깨면 다음부터 11층에서 바로 시작할 수 있어요'}</div>` + rushHtml();
@@ -2999,6 +2999,7 @@ function renderTower() {
   for (let f = 1; f <= F; f++) {
     const yc = fy(f), boss = f % 5 === 0, cls = `tfl${f <= best ? ' done' : f === best + 1 ? ' next' : ' lock'}${boss ? ' boss' : ''}${f === towerSel ? ' sel' : ''}`;
     h += `<button class="${cls}" data-f="${f}" style="left:${Wd * 0.15}px;top:${yc}px">${boss ? '👑' + f : f}</button>`;
+    if (f % 10 === 0) h += `<div class="ttro" style="left:${Wd / 2}px;top:${yc + 16}px;font-size:20px${f > best ? ';opacity:.45' : ''}">${f > best ? '🎁' : '✅'}</div>`;
     if (f > 1 && f % 10 === 1) h += `<div class="ttro" style="left:${Wd * 0.15 + 34}px;top:${yc}px;font-size:18px${f > best + 1 ? ';opacity:.35;filter:grayscale(1)' : ''}">🚀</div>`;
     if (boss) {
       const bn = towerBossOf(f), lock = f > best, bx = x1 + Wd * 0.155, yb = gy - (f - 1) * rowH - 6;
@@ -3079,9 +3080,12 @@ function stageClear(x, y) {
     questEvent('tower');
     const f = st.tower, prize = 15 + f * 6 + (f % 5 === 0 ? 60 + f * 4 : 0);
     G.gold += prize; G.towerGold = (G.towerGold || 0) + prize;
-    const meta = readJSON(META_KEY) || {}; if (f > (meta.bestFloor || 0)) { meta.bestFloor = f; writeJSON(META_KEY, meta); floatText(p.x, p.y - 80, `🏆 최고 기록 ${f}층!`, '#ffd23f', 20, 1.6); }
+    const meta = readJSON(META_KEY) || {}; if (f > (meta.bestFloor || 0)) { meta.bestFloor = f;
+      if (f % 10 === 0) { const bk = 100 * f / 10; meta.bank = (meta.bank || 0) + bk; floatText(p.x, p.y - 104, `🏦 ${f}층 첫 돌파! 금고 +${bk}`, '#7bed9f', 17, 2); }   // 🎁 10층마다 첫 돌파 금고 보너스 (Build 163)
+      writeJSON(META_KEY, meta); floatText(p.x, p.y - 80, `🏆 최고 기록 ${f}층!`, '#ffd23f', 20, 1.6); }
+    if (f % 10 === 0) { dropChest(clamp(p.x, -STAGE_HW + 50, STAGE_HW - 50), clamp(p.y + 70, -st.L - 300, 40), false, true); G.chests[G.chests.length - 1].jack = true; G.towerJacks = (G.towerJacks || 0) + 1; }   // 🌟 10층마다 대박 상자 (Build 163)
     floatText(p.x, p.y - 56, `+🪙${prize}`, '#ffd23f', 20, 1.4);
-    banner(`🗼 ${f}층 돌파!`, '🗼 위로 갈까, 🏠 마을로 갈까?', '#7bed9f', 2.2); G.banner.tw = f; sfx('cheer'); burst(p.x, p.y - 20, '#e0aaff', 40, 300, 5, 1);
+    banner(`🗼 ${f}층 돌파!`, f % 10 === 0 ? '🌟 10층 보물! 대박 상자가 나왔어요!' : '🗼 위로 갈까, 🏠 마을로 갈까?', '#7bed9f', 2.2); G.banner.tw = f; sfx('cheer'); burst(p.x, p.y - 20, '#e0aaff', 40, 300, 5, 1);
     if (!p.dead) p.hp = Math.min(p.maxHp, p.hp + p.maxHp * 0.15);   // 층마다 조금 회복
     st.portal = { x: p.x + 70, y: p.y - 80, t: 0, hold: 0, on: false };
     st.portal2 = { x: p.x - 70, y: p.y - 80, t: 0, hold: 0, on: false };
