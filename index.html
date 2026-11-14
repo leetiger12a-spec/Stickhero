@@ -363,7 +363,7 @@ h2 .hb{-webkit-text-stroke:0;text-shadow:none;letter-spacing:0;font-family:"Jua"
 
 <script>
 'use strict';
-const BUILD = 173;
+const BUILD = 174;
 const BOSS_INTERVAL = 180;      // 보스 등장 간격(초)
 const WAVE_INTERVAL = 60;       // 대규모 몰이 이벤트 간격(초)
 const MAX_ENEMIES = 220;
@@ -476,10 +476,10 @@ const GOAL_ICON = { boss: '👑', rescue: '🐱', survive: '⏱', final: '🏰',
 
 const cv = document.getElementById('cv'), ctx = cv.getContext('2d');
 let W = 0, H = 0, DPR = 1, SCALE = 1, VW = 0, VH = 0;
-// 화질 자동 조절: 느린 기기는 그리는 해상도를 2 → 1.5 → 1.25배로 낮춤 (기기마다 기억)
-let dprCap = 2;
+// 화질 자동 조절: 느린 기기는 그리는 해상도를 3 → 2 → 1.5 → 1.25배로 낮춤 (기기마다 기억) · Build 174: 최고 2 → 3 (3배 화면 폰에서 선명하게)
+let dprCap = 3;
 if (document.fonts) { document.fonts.load('20px Jua'); document.fonts.load('20px BHS'); }   // 캔버스 글자용 글꼴 미리 불러오기
-try { const v = +localStorage.getItem('stickhero_dpr'); if (v >= 1 && v <= 2) dprCap = v; } catch (e) {}
+try { const v = +localStorage.getItem('stickhero_dpr'); if (v >= 1 && v <= 3) dprCap = v; } catch (e) {}
 function resize() {
   DPR = Math.min(window.devicePixelRatio || 1, dprCap);
   W = window.innerWidth; H = window.innerHeight;
@@ -5706,7 +5706,7 @@ function perfWatch(raw) { // 놀고 있을 때 3초 평균이 45fps보다 낮으
   pf.t += raw; pf.n++;
   if (pf.t < 3) return;
   const fps = pf.n / pf.t; pf.t = pf.n = 0;
-  if (fps < 45 && DPR > 1.25) { dprCap = DPR > 1.5 ? 1.5 : 1.25; try { localStorage.setItem('stickhero_dpr', dprCap); } catch (e) {} resize(); }
+  if (fps < 45 && DPR > 1.25) { dprCap = DPR > 2 ? 2 : DPR > 1.5 ? 1.5 : 1.25; try { localStorage.setItem('stickhero_dpr', dprCap); } catch (e) {} resize(); }
 }
 function frame(now) {
   const raw = (now - last) / 1000, dt = Math.min(0.05, raw); last = now;
