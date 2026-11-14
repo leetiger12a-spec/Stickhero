@@ -355,7 +355,7 @@ h2 .hb{-webkit-text-stroke:0;text-shadow:none;letter-spacing:0;font-family:"Jua"
 
 <script>
 'use strict';
-const BUILD = 165;
+const BUILD = 166;
 const BOSS_INTERVAL = 180;      // 보스 등장 간격(초)
 const WAVE_INTERVAL = 60;       // 대규모 몰이 이벤트 간격(초)
 const MAX_ENEMIES = 220;
@@ -1543,7 +1543,13 @@ const DIFFS = [
   { name: '쉬움',   ehp: 0.75, edmg: 0.65, rate: 0.8,  boss: 0.75, grow: 0.7, desc: '🙂 조금 여유롭게 마을을 키울 수 있어요' },
   { name: '보통',   ehp: 1,    edmg: 1,    rate: 1,    boss: 1,    grow: 1, desc: '😠 레전드 히어로의 기본 난이도' },
   { name: '어려움', ehp: 1.35, edmg: 1.35, rate: 1.2,  boss: 1.4,  grow: 1.3, desc: '🔥 진짜 레전드만 버틸 수 있어요!' },
+  { name: '레전드', ehp: 2,    edmg: 1.8,  rate: 1.4,  boss: 2.2,  grow: 1.6, desc: '👹 레벨이 아주 높은 영웅을 위한 지옥 난이도!' },   // Build 166
 ];
+// 💪 레벨 맞춤 세기 (Build 166): 영웅 Lv 30부터 적·보스가 레벨마다 강해짐 (Lv 94 → 체력 x2.6 · 공격 x1.77)
+const LVL_FREE = 30, LVL_HP = 0.025, LVL_DMG = 0.012;
+function lvlScale() { const ex = Math.max(0, ((G && G.lvl) || 1) - LVL_FREE); return { hp: 1 + LVL_HP * ex, dmg: 1 + LVL_DMG * ex }; }
+// 🗼 탑 21층부터 층마다 더 강해짐 (예전엔 21층 위로 그대로였음): 체력 +6% · 공격 +2.5% / 층
+function towerScale() { const f = G && G.mode === 'stage' && G.st && G.st.tower || 0, ex = Math.max(0, f - 20); return { hp: 1 + 0.06 * ex, dmg: 1 + 0.025 * ex }; }
 let diffSel = 2;
 try { const v = +localStorage.getItem('stickhero_diff'); if (v >= 0 && v < DIFFS.length && localStorage.getItem('stickhero_diff') !== null) diffSel = v; } catch (e) {}
 const DF = () => DIFFS[G && G.diff !== undefined ? G.diff : diffSel];
@@ -1615,7 +1621,7 @@ function buildSave() {
 function loadGame(d) {
   newGame();
   const p = G.p;
-  G.diff = d.diff !== undefined ? d.diff : 2;
+  G.diff = diffSel;   // Build 166: 이어하기도 시작 화면에서 고른 난이도로 (예전엔 저장할 때 난이도 고정)
   G.stars = d.stars || [];
   d.stageN = Math.min(d.stageN || 0, STAGES.length);
   Object.assign(G, { t: d.t, bt: d.bt, kills: d.kills, lvl: d.lvl, xp: d.xp, need: d.need, pending: d.pending || 0, weapons: d.weapons, passives: d.passives,
@@ -1699,7 +1705,7 @@ function continueGame() {
   audioInit(); loadGame(d); state = 'play'; joy = null; showOv(null);
   $('hudBtns').classList.add('show');
   if (G.broken.hall) { banner(`🌅 ${G.day}일째 아침`, '부서진 건물에 서서 🔨 고쳐요 · 마을회관부터!', '#ffd23f', 3.2); sfx('cheer'); }
-  else banner('이어하기!', `${G.day > 1 ? G.day + '일째 · ' : ''}스테이지 ${G.stageN} 클리어한 마을로 돌아왔다`, '#7bed9f', 2.5);
+  else banner('이어하기!', `${G.day > 1 ? G.day + '일째 · ' : ''}스테이지 ${G.stageN} 클리어 · 난이도 ${DF().name}`, '#7bed9f', 2.5);
   dayMilestone(G.day);
   if (G.pending > 0) openLevelUp();
 }
@@ -2118,8 +2124,8 @@ function makeGolden(e) {
 function goldDie(e) { burst(e.x, e.y - 12, '#ffd23f', 30, 260, 5, 0.7); burst(e.x, e.y - 12, '#fff7c2', 14, 180, 4, 0.5); floatText(e.x, e.y - 40, '✨ 황금!', '#ffd23f', 18, 1); sfx('rewardEvo'); }
 function makeEnemy(type, x, y) {
   announceType(type);
-  const T = ETYPES[type], hm = DF().ehp;   // Build 67: 같은 적은 세기 고정 (시간이 지나면 센 종류가 나옴 — tierType)
-  const e = { id: ++eid, type, x, y, r: T.r, hp: T.hp * hm, maxHp: T.hp * hm, spd: T.spd * rand(0.9, 1.1), dmg: T.dmg * DF().edmg, color: T.color, xp: T.xp, gold: T.gold, flash: 0, hitT: 0, kx: 0, ky: 0, swordCd: 0, wob: Math.random() * 6, inside: Math.hypot(x, y) < WALL_R, atk: 0.5, lunge: 0, face: 1 };
+  const ls = lvlScale(), ts = towerScale(), T = ETYPES[type], hm = DF().ehp * ls.hp * ts.hp;   // Build 67: 같은 적은 세기 고정 · Build 166: 영웅 레벨·탑 층 맞춤
+  const e = { id: ++eid, type, x, y, r: T.r, hp: T.hp * hm, maxHp: T.hp * hm, spd: T.spd * rand(0.9, 1.1), dmg: T.dmg * DF().edmg * ls.dmg * ts.dmg, color: T.color, xp: T.xp, gold: T.gold, flash: 0, hitT: 0, kx: 0, ky: 0, swordCd: 0, wob: Math.random() * 6, inside: Math.hypot(x, y) < WALL_R, atk: 0.5, lunge: 0, face: 1 };
   if (G && G.weekly) { if (WK('giant')) { e.hp *= 1.6; e.maxHp *= 1.6; e.gold *= 2; } else if (WK('swift')) e.spd *= 1.25; else if (WK('swarm')) { e.hp *= 0.6; e.maxHp *= 0.6; } }   // 이번 주 도전
   if (G && G.mode === 'stage' && G.st && G.st.cave) { makeGolden(e); e.hp /= 3; e.maxHp /= 3; }   // 동굴: 모두 황금 (체력은 보통)
   else if (G && G.mode === 'stage' && G.st && G.st.rule === 'gold' && Math.random() < 0.3) makeGolden(e);   // 💰 황금 층
@@ -2219,8 +2225,8 @@ function spawnBoss(bx, by) {
   const a = Math.random() * Math.PI * 2, R = MAP_R - 60;
   if (bx === undefined) { bx = Math.cos(a) * R; by = Math.sin(a) * R; }
   // 스테이지 보스는 스테이지 번호로, 마을 보스는 등장 횟수로 체력이 정해짐
-  const hp = DF().boss * (final ? BOSS_FINAL.hp : BOSS_HP[n]);
-  const b = { id: ++eid, type: 'boss', boss: true, name: B.name, x: bx, y: by, inside: false, atk: 0, lunge: 0, r: 58, hp, maxHp: hp, spd: final ? BOSS_FINAL.spd : n <= 5 ? 50 + n * 6 : n === GOLD_GOLEM ? 75 : 58, dmg: (final ? BOSS_FINAL.dmg : BOSS_DMG[n]) * DF().edmg, color: B.color, xp: 0, flash: 0, hitT: 0, kx: 0, ky: 0, swordCd: 0, wob: 0, mode: 'walk', st: 3, rings: 0, ax: 0, ay: 0, lvl: Math.min(5, n), spr: final ? (SPR.boss_final ? 'boss_final' : 'boss0') : 'boss' + BOSSES.indexOf(B) };
+  const ls = lvlScale(), ts = towerScale(), hp = DF().boss * (final ? BOSS_FINAL.hp : BOSS_HP[n]) * ls.hp * ts.hp;   // Build 166: 레벨·탑 층 맞춤
+  const b = { id: ++eid, type: 'boss', boss: true, name: B.name, x: bx, y: by, inside: false, atk: 0, lunge: 0, r: 58, hp, maxHp: hp, spd: final ? BOSS_FINAL.spd : n <= 5 ? 50 + n * 6 : n === GOLD_GOLEM ? 75 : 58, dmg: (final ? BOSS_FINAL.dmg : BOSS_DMG[n]) * DF().edmg * ls.dmg * ts.dmg, color: B.color, xp: 0, flash: 0, hitT: 0, kx: 0, ky: 0, swordCd: 0, wob: 0, mode: 'walk', st: 3, rings: 0, ax: 0, ay: 0, lvl: Math.min(5, n), spr: final ? (SPR.boss_final ? 'boss_final' : 'boss0') : 'boss' + BOSSES.indexOf(B) };
   if (final) { b.r = 76; b.final = true; }
   b.bornT = G.t;
   if (pr !== undefined && G.st.hard) { b.hard = true; b.hp *= 2; b.maxHp *= 2; b.dmg *= 1.5; }   // 🔥 도전: 체력 2배 · 공격 1.5배   // 보스 연습 기록용 (등장 장면 동안은 G.t가 멈춤)
@@ -4055,6 +4061,7 @@ function update(dt) {
   // 레벨업
   while (G.xp >= G.need) {
     G.xp -= G.need; G.lvl++; G.need = xpNeed(G.lvl); G.pending++; lvlMilestone(G.lvl);
+    if (G.lvl >= LVL_FREE + 10 && (G.lvl - LVL_FREE) % 10 === 0) { const s = lvlScale(); banner('😈 적들도 강해졌다!', `영웅 Lv ${G.lvl} · 적 체력 x${s.hp.toFixed(2)} · 공격 x${s.dmg.toFixed(2)}`, '#ff6b6b', 2.4); }
   }
 
   // 이펙트
