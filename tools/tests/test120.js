@@ -17,7 +17,7 @@ const { chromium } = require('/opt/node22/lib/node_modules/playwright');
   console.log('gold from 200 coins', got); check(got > 250 && got < 350, 'legend coin x1.5 ' + got);
   // 업적
   const a = await page.evaluate(() => { ST.legBoss = 10; ST.legDay = 10; checkAch(); const m = JSON.parse(localStorage.getItem('stickhero_meta')); return [m.ach.leg_boss, m.ach.leg_day, ACH.length]; });
-  check(a[0] && a[1] && a[2] === 46, 'legend ach ' + a);
+  check(a[0] && a[1] && a[2] === 50, 'legend ach ' + a);
   // 보스 잡으면 legBoss +1
   const lb = await page.evaluate(async () => { ST.legBoss = 0; SH.spawnBoss(0, 0); SH.skipIntro && SH.skipIntro(); const bo = SH.G.boss; bo.hp = 1; hurtEnemy(bo, 999999, 0, 0, 0); await new Promise(r => setTimeout(r, 200)); return ST.legBoss; });
   check(lb === 1, 'legBoss count ' + lb);

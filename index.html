@@ -359,7 +359,7 @@ h2 .hb{-webkit-text-stroke:0;text-shadow:none;letter-spacing:0;font-family:"Jua"
 
 <script>
 'use strict';
-const BUILD = 171;
+const BUILD = 172;
 const BOSS_INTERVAL = 180;      // 보스 등장 간격(초)
 const WAVE_INTERVAL = 60;       // 대규모 몰이 이벤트 간격(초)
 const MAX_ENEMIES = 220;
@@ -678,7 +678,9 @@ function statRows() { const b = loadBest(), m = readJSON(META_KEY) || {};
     // Build 146: 새 칸
     ['🐾 펫 최고 레벨', (() => { const P = PETS.filter(q => q.id), best = P.reduce((a, q) => petLv(q.id) > petLv(a.id) ? q : a, P[0]); return ((ST.petXp || {})[best.id] ? `${best.name} Lv${petLv(best.id)}` : '-'); })()],
     ['🔥 최고 콤보', ST.bestCombo || 0], ['🌟 동굴 탐험', `${ST.caves || 0}번`], ['🎁 대박 상자', `${ST.jacks || 0}개`],
-    ['⚡ 동료 필살기', `${ST.ults || 0}번`], ['👑 보스 러시 완주', `${ST.rushes || 0}번`], ['😡 화난 보스 처치', ST.rageKills || 0], ['🌕 보름달 밤', ST.moons || 0]]; }
+    ['⚡ 동료 필살기', `${ST.ults || 0}번`], ['👑 보스 러시 완주', `${ST.rushes || 0}번`], ['😡 화난 보스 처치', ST.rageKills || 0], ['🌕 보름달 밤', ST.moons || 0],
+    // Build 172: 탑 기록 · 새 기능
+    ['🎲 탑 특별 층 돌파', `${ST.ruleClears || 0}번`], ['🎁 탑 보물 상자', `${ST.towerJacks || 0}개`], ['⚔ 정예 처치', ST.elites || 0], ['💥 레전드 버스트', `${ST.heroUlts || 0}번`], ['🌀 환생', `${m.reborn || 0}번`]]; }
 function openStats() { state = 'stats'; showOv('ovStats'); $('statList').innerHTML = statRows().map(([k, v]) => `<div class="st">${k}<b>${v}</b></div>`).join('');
   $('bStatsOk').onclick = () => { sfx('pick'); state = 'title'; refreshTitle(); showOv('ovTitle'); }; }
 $('bStats').onclick = () => { audioInit(); sfx('pick'); openStats(); };
@@ -729,6 +731,10 @@ const ACH = [
   { id: 'ice15',   icon: '❄️', name: '얼음 나라 정복', desc: '모험 지도 15칸 모두 깨기',   title: '얼음 영웅',  bank: 800, p: () => [bestStage(), 15] },   // Build 94
   { id: 'leg_boss', icon: '👹', name: '지옥 사냥꾼',   desc: '레전드 난이도로 보스 10마리 잡기',  title: '지옥 사냥꾼', bank: 800,  p: () => [ST.legBoss || 0, 10] },   // Build 167
   { id: 'leg_day',  icon: '🔥', name: '진짜 레전드',   desc: '레전드 난이도로 10일째까지 버티기',  title: '진짜 레전드', bank: 1500, p: () => [ST.legDay || 0, 10] },
+  { id: 'rule10',   icon: '🎲', name: '특별한 등반가', desc: '무한 탑 특별 층 10번 깨기',  title: '날씨 정복자', bank: 500,  p: () => [ST.ruleClears || 0, 10] },   // Build 172
+  { id: 'floor50',  icon: '🗼', name: '구름 위의 탑',  desc: '무한 탑 50층 돌파',          title: '탑의 주인',   bank: 1000, p: () => [metaOf('bestFloor'), 50] },
+  { id: 'elite50',  icon: '⚔', name: '정예 사냥꾼',   desc: '정예 몬스터 50마리 잡기',     title: '정예 킬러',   bank: 500,  p: () => [ST.elites || 0, 50] },
+  { id: 'reborn1',  icon: '🌀', name: '다시 태어난 영웅', desc: '처음으로 환생하기',        title: '환생 영웅',   bank: 1000, p: () => [metaOf('reborn'), 1] },
   { id: 'skull20', icon: '💀', name: '해골 왕국 정복', desc: '모험 지도 20칸 모두 깨기', title: '다섯 왕국 영웅', bank: 1000, p: () => [bestStage(), 20] },   // Build 159
   { id: 'floor25', icon: '🌤', name: '하늘 끝까지',   desc: '무한 탑 25층 돌파',        title: '하늘 정복자', bank: 600, p: () => [metaOf('bestFloor'), 25] },
   // Build 101: 새 업적 6개
@@ -2856,7 +2862,7 @@ function ultGain(n) { if (!G) return; const was = (G.ult || 0) >= ULT_MAX; G.ult
   if (!was && G.ult >= ULT_MAX && state === 'play') { floatText(G.p.x, G.p.y - 90, '💥 필살기 준비!', '#ff9f1c', 18, 1.4); sfx('unlock'); if (!G.ultTold) { G.ultTold = true; banner('💥 필살기 준비!', '오른쪽 💥 버튼을 눌러요 (PC: 스페이스)', '#ff9f1c', 2.2); } } }
 function castUlt() {
   const p = G && G.p; if (!p || (G.ult || 0) < ULT_MAX || p.dead || G.deadT > 0) return false;
-  G.ult = 0; G.ultFx = { t: 0, x: p.x, y: p.y }; p.inv = Math.max(p.inv, 1.5); stAdd('ults'); G.ults = (G.ults || 0) + 1;
+  G.ult = 0; G.ultFx = { t: 0, x: p.x, y: p.y }; p.inv = Math.max(p.inv, 1.5); stAdd('heroUlts'); G.ults = (G.ults || 0) + 1;
   G.shake = Math.max(G.shake, 18); vib([80, 40, 160], true); sfx('bigBoom'); setTimeout(() => sfx('bigBoom'), 180);
   G.hitSrc = 'ult';
   for (const e of [...G.enemies]) { if (e.dead) continue; const d = Math.hypot(e.x - p.x, e.y - p.y); if (d > 470) continue; e.shieldT = 0;
@@ -3167,12 +3173,12 @@ function stageClear(x, y) {
   if (st.tower) {
     questEvent('tower');
     const f = st.tower, prize = Math.round((15 + f * 6 + (f % 5 === 0 ? 60 + f * 4 : 0)) * (st.rule ? TOWER_RULES[st.rule].mul : 1));
-    if (st.rule) { G.ruleClears = (G.ruleClears || 0) + 1; floatText(p.x, p.y - 128, `${TOWER_RULES[st.rule].ico} ${TOWER_RULES[st.rule].name} 보상 x${TOWER_RULES[st.rule].mul}!`, TOWER_RULES[st.rule].col, 16, 1.8); }
+    if (st.rule) { G.ruleClears = (G.ruleClears || 0) + 1; stAdd('ruleClears'); floatText(p.x, p.y - 128, `${TOWER_RULES[st.rule].ico} ${TOWER_RULES[st.rule].name} 보상 x${TOWER_RULES[st.rule].mul}!`, TOWER_RULES[st.rule].col, 16, 1.8); }
     G.gold += prize; G.towerGold = (G.towerGold || 0) + prize;
     const meta = readJSON(META_KEY) || {}; if (f > (meta.bestFloor || 0)) { meta.bestFloor = f;
       if (f % 10 === 0) { const bk = 100 * f / 10; meta.bank = (meta.bank || 0) + bk; floatText(p.x, p.y - 104, `🏦 ${f}층 첫 돌파! 금고 +${bk}`, '#7bed9f', 17, 2); }   // 🎁 10층마다 첫 돌파 금고 보너스 (Build 163)
       writeJSON(META_KEY, meta); floatText(p.x, p.y - 80, `🏆 최고 기록 ${f}층!`, '#ffd23f', 20, 1.6); }
-    if (f % 10 === 0) { dropChest(clamp(p.x, -STAGE_HW + 50, STAGE_HW - 50), clamp(p.y + 70, -st.L - 300, 40), false, true); G.chests[G.chests.length - 1].jack = true; G.towerJacks = (G.towerJacks || 0) + 1; }   // 🌟 10층마다 대박 상자 (Build 163)
+    if (f % 10 === 0) { dropChest(clamp(p.x, -STAGE_HW + 50, STAGE_HW - 50), clamp(p.y + 70, -st.L - 300, 40), false, true); G.chests[G.chests.length - 1].jack = true; G.towerJacks = (G.towerJacks || 0) + 1; stAdd('towerJacks'); }   // 🌟 10층마다 대박 상자 (Build 163)
     floatText(p.x, p.y - 56, `+🪙${prize}`, '#ffd23f', 20, 1.4);
     banner(`🗼 ${f}층 돌파!`, f % 10 === 0 ? '🌟 10층 보물! 대박 상자가 나왔어요!' : '🗼 위로 갈까, 🏠 마을로 갈까?', '#7bed9f', 2.2); G.banner.tw = f; sfx('cheer'); burst(p.x, p.y - 20, '#e0aaff', 40, 300, 5, 1);
     if (!p.dead) p.hp = Math.min(p.maxHp, p.hp + p.maxHp * 0.15);   // 층마다 조금 회복
