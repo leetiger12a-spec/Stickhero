@@ -177,6 +177,9 @@ h2{margin:0 0 14px;font:400 clamp(30px,9vw,46px) "BHS","Jua",system-ui,-apple-sy
 #questBox .bar{height:4px;background:rgba(255,255,255,.25);border-radius:2px;margin-top:2px}#questBox .bar i{display:block;height:100%;background:#ffd23f;border-radius:2px}
 #bSos{position:fixed;right:10px;bottom:190px;z-index:4;width:66px;height:66px;border-radius:50%;border:4px solid #222;padding:0;cursor:pointer;display:none;
   background:conic-gradient(#3fa9f5 var(--k,100%),#555 0);box-shadow:0 4px 0 #111;color:#fff;font-weight:900;font-family:inherit;touch-action:none}
+#bUlt{position:fixed;right:10px;bottom:270px;z-index:4;width:66px;height:66px;border-radius:50%;border:4px solid #222;padding:0;cursor:pointer;display:none;background:conic-gradient(#ff9f1c var(--k,0%),#555 0);box-shadow:0 4px 0 #111;color:#fff;font-weight:900;font-family:inherit;touch-action:none}
+#bUlt.show{display:block}#bUlt .in{position:absolute;inset:5px;border-radius:50%;background:#4a1d0a;display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1.05}#bUlt .ic{font-size:24px}#bUlt .tx{font-size:11px}
+#bUlt.ready{animation:sosPulse .6s infinite}#bUlt.ready .in{background:radial-gradient(#ffd23f,#e85d04)}#bUlt.ready .tx{color:#222}
 #bSos.show{display:block}#bSos .in{position:absolute;inset:5px;border-radius:50%;background:#16324f;display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1.05}
 #bSos .ic{font-size:24px}#bSos .tx{font-size:11px}#bSos.ready{animation:sosPulse 1s infinite}#bSos.ready .in{background:#1d5c94}
 @keyframes sosPulse{50%{transform:scale(1.07)}}
@@ -189,7 +192,7 @@ h2 .hb{-webkit-text-stroke:0;text-shadow:none;letter-spacing:0;font-family:"Jua"
 <canvas id="cv"></canvas>
 
 <div id="questBox"></div>
-<button id="bSos" aria-label="SKYFANG 지원 요청"><div class="in"><span class="ic">📻</span><span class="tx" id="sosTx">지원</span></div></button>
+<button id="bUlt" aria-label="필살기"><div class="in"><span class="ic">💥</span><span class="tx" id="ultTx">0%</span></div></button><button id="bSos" aria-label="SKYFANG 지원 요청"><div class="in"><span class="ic">📻</span><span class="tx" id="sosTx">지원</span></div></button>
 <div id="hudBtns"><button class="hb" id="bPause" aria-label="일시정지">⏸</button><button class="hb" id="bSound" aria-label="소리">🔊</button></div>
 
 <div class="ov show" id="ovTitle">
@@ -355,7 +358,7 @@ h2 .hb{-webkit-text-stroke:0;text-shadow:none;letter-spacing:0;font-family:"Jua"
 
 <script>
 'use strict';
-const BUILD = 168;
+const BUILD = 169;
 const BOSS_INTERVAL = 180;      // 보스 등장 간격(초)
 const WAVE_INTERVAL = 60;       // 대규모 몰이 이벤트 간격(초)
 const MAX_ENEMIES = 220;
@@ -1500,6 +1503,7 @@ window.addEventListener('keydown', e => {
   if (state === 'levelup' && ['1', '2', '3'].includes(e.key)) chooseCard(+e.key - 1);
   if (state === 'chest' && (e.key === 'Enter' || e.key === ' ')) { if (chestAnim) $('ovChest').onclick({ target: {} }); else closeChest(); }
   if ((e.key === 'e' || e.key === 'E') && state === 'play') callSos();   // PC: E키로 지원 요청
+  if ((e.key === 'q' || e.key === 'Q' || (e.key === ' ' && !(G && G.intro))) && state === 'play') castUlt();   // PC: Q·스페이스로 필살기
   if (state === 'allypick' && ['1', '2', '3', '4'].includes(e.key)) chooseAlly(+e.key - 1);
   if ((e.key === 'p' || e.key === 'P' || e.key === 'Escape') && (state === 'play' || state === 'paused')) togglePause();
   if (e.key === 'Enter' || e.key === ' ') {
@@ -2827,6 +2831,37 @@ function callSos() {
   G.sosCd = SOS_CD; G.planeT = Math.max(G.planeT || 0, 30);   // 직접 부른 뒤 자동 지원은 잠시 쉼
 }
 $('bSos').addEventListener('pointerdown', e => { e.preventDefault(); e.stopPropagation(); callSos(); });
+// 💥 영웅 필살기 (Build 169): 적을 잡으면 게이지 (일반 2 · 정예 8 · 보스 30), 100이면 버튼 → 영웅 주변 큰 폭발
+const ULT_MAX = 100;
+function ultGain(n) { if (!G) return; const was = (G.ult || 0) >= ULT_MAX; G.ult = Math.min(ULT_MAX, (G.ult || 0) + n);
+  if (!was && G.ult >= ULT_MAX && state === 'play') { floatText(G.p.x, G.p.y - 90, '💥 필살기 준비!', '#ff9f1c', 18, 1.4); sfx('unlock'); if (!G.ultTold) { G.ultTold = true; banner('💥 필살기 준비!', '오른쪽 💥 버튼을 눌러요 (PC: 스페이스)', '#ff9f1c', 2.2); } } }
+function castUlt() {
+  const p = G && G.p; if (!p || (G.ult || 0) < ULT_MAX || p.dead || G.deadT > 0) return false;
+  G.ult = 0; G.ultFx = { t: 0, x: p.x, y: p.y }; p.inv = Math.max(p.inv, 1.5); stAdd('ults'); G.ults = (G.ults || 0) + 1;
+  G.shake = Math.max(G.shake, 18); vib([80, 40, 160], true); sfx('bigBoom'); setTimeout(() => sfx('bigBoom'), 180);
+  G.hitSrc = 'ult';
+  for (const e of [...G.enemies]) { if (e.dead) continue; const d = Math.hypot(e.x - p.x, e.y - p.y); if (d > 470) continue; e.shieldT = 0;
+    const dmg = e.boss ? e.maxHp * 0.1 / G.p.dmgMul : e.camp ? e.maxHp * 0.2 / G.p.dmgMul : e.maxHp * 2;
+    hurtEnemy(e, dmg, (e.x - p.x) / (d || 1), (e.y - p.y) / (d || 1), 400); }
+  G.hitSrc = null; G.ebullets.length = 0;
+  for (let i = 0; i < 4; i++) burst(p.x, p.y - 20, ['#ffd23f', '#ff9f1c', '#e85d04', '#fff'][i], 30, 520 - i * 80, 6, 0.9);
+  banner('💥 레전드 버스트!', '', '#ff9f1c', 1.4); return true;
+}
+$('bUlt').addEventListener('pointerdown', e => { e.preventDefault(); e.stopPropagation(); castUlt(); });
+let ultShown = '';
+function updUltBtn() {
+  const b = $('bUlt'), on = G && $('hudBtns').classList.contains('show') && state !== 'title';
+  b.classList.toggle('show', !!on); if (!on) return;
+  const u = Math.floor(G.ult || 0), key = '' + u; if (key === ultShown) return; ultShown = key;
+  b.style.setProperty('--k', u + '%'); b.classList.toggle('ready', u >= ULT_MAX); $('ultTx').textContent = u >= ULT_MAX ? '필살!' : u + '%';
+}
+function drawUltFx() { const f = G.ultFx; if (!f) return; const k = f.t / 1.1;
+  ctx.save(); ctx.translate(f.x, f.y);
+  for (let i = 0; i < 3; i++) { const q = Math.max(0, Math.min(1, k * 1.4 - i * 0.18)); if (q <= 0 || q >= 1) continue;
+    ctx.strokeStyle = `rgba(${i === 1 ? '255,255,255' : '255,159,28'},${1 - q})`; ctx.lineWidth = 18 * (1 - q) + 3; ctx.beginPath(); ctx.arc(0, 0, 470 * q, 0, 7); ctx.stroke(); }
+  if (k < 0.5) { ctx.fillStyle = `rgba(255,210,63,${0.35 * (1 - k * 2)})`; ctx.beginPath(); ctx.arc(0, 0, 470 * k * 2, 0, 7); ctx.fill(); }
+  ctx.restore(); }
+function drawUltScreen() { const f = G.ultFx; if (!f || f.t > 0.35) return; ctx.fillStyle = `rgba(255,250,220,${0.7 * (1 - f.t / 0.35)})`; ctx.fillRect(0, 0, W, H); }
 let sosShown = '';
 function updSosBtn() {
   const b = $('bSos'), on = G && $('hudBtns').classList.contains('show') && state !== 'title';
@@ -3489,7 +3524,7 @@ function addCombo() { G.combo = (G.comboT > 0 ? G.combo || 0 : 0) + 1; G.comboT 
   const gift = COMBO_GIFT[G.combo]; if (gift) { G.gold += gift; floatText(G.p.x, G.p.y - 74, `🔥 ${G.combo} 콤보! +🪙${gift}`, '#ff9f1c', 20, 1.4); sfx('coin'); if (G.combo >= 100) heroSay('combo', true); } }
 function updCombo(dt) { if (G.comboT > 0) { G.comboT -= dt; if (G.comboT <= 0) G.combo = 0; } if (G.comboPop > 0) G.comboPop -= dt; }
 function killEnemy(e) {
-  e.dead = true; G.kills++; if (!e.boss && !e.camp) { addCombo(); petGain(); } if (e.lastSrc === 'poison') questEvent('poison'); else if (e.lastSrc === 'star') questEvent('meteor');
+  e.dead = true; G.kills++; if (!e.boss && !e.camp) { addCombo(); petGain(); } ultGain(e.boss ? 30 : e.elite ? 8 : e.camp ? 10 : 2); if (e.lastSrc === 'poison') questEvent('poison'); else if (e.lastSrc === 'star') questEvent('meteor');
   if (e.lastSrc && WEAP[e.lastSrc]) { ST.wk = ST.wk || {}; ST.wk[e.lastSrc] = (ST.wk[e.lastSrc] || 0) + 1; stDirty = true; }   // 무기별 처치 수
   if (G.allies.length) allyGainXp(e.x, e.y, e.boss ? 40 : e.camp ? 20 : e.xp);
   if (!e.boss && !e.camp) { questEvent('kill'); stAdd('kills'); ST.kc[e.type] = (ST.kc[e.type] || 0) + 1; if (e.golden) { stSet('goldT', e.type); goldDie(e); } if (e.type.startsWith('e_')) { questEvent('special'); if (SPECIALS.some(q => q[0] === e.type)) stSet('specT', e.type); } }
@@ -4101,6 +4136,7 @@ function update(dt) {
   G.texts = G.texts.filter(t => t.life > 0);
   if (G.banner) { G.banner.t += dt; if (G.banner.t > G.banner.dur) { G.banner = G.bannerQ || null; G.bannerQ = null; } }
   if (G.towerRise > 0) G.towerRise = Math.max(0, G.towerRise - dt);
+  if (G.ultFx && (G.ultFx.t += dt) > 1.1) G.ultFx = null;
   G.shake = Math.max(0, G.shake - dt * 30);
   G.lvlFlash = Math.max(0, G.lvlFlash - dt);
 
@@ -5618,8 +5654,10 @@ function render() {
   if (G.mode === 'stage') drawStageGround(); else drawGround();
   drawWorld();
   if (G.mode === 'stage' && G.st && G.st.tower) drawTowerFx();
+  drawUltFx();
   ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
   if (G.mode === 'base') { drawRain(); drawFog(); drawRainbowArc(); drawNight(); drawGhostChest(); drawWish(); } else { drawBlizzard(); drawTowerScreen(); }
+  drawUltScreen();
   drawHUD();
 }
 
@@ -5636,7 +5674,7 @@ function frame(now) {
   perfWatch(raw);
   if (state === 'play') update(dt);
   if (AC) { const k = bgmFor(); if (!bgmCur || bgmCur.key !== k) playBgm(k); }
-  render(); updSosBtn(); updQuestBox();
+  render(); updSosBtn(); updUltBtn(); updQuestBox();
   requestAnimationFrame(frame);
 }
 requestAnimationFrame(frame);
