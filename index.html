@@ -355,7 +355,7 @@ h2 .hb{-webkit-text-stroke:0;text-shadow:none;letter-spacing:0;font-family:"Jua"
 
 <script>
 'use strict';
-const BUILD = 167;
+const BUILD = 168;
 const BOSS_INTERVAL = 180;      // 보스 등장 간격(초)
 const WAVE_INTERVAL = 60;       // 대규모 몰이 이벤트 간격(초)
 const MAX_ENEMIES = 220;
@@ -2133,7 +2133,31 @@ function makeEnemy(type, x, y) {
   if (G && G.mode === 'stage' && G.st && G.st.cave) { makeGolden(e); e.hp /= 3; e.maxHp /= 3; }   // 동굴: 모두 황금 (체력은 보통)
   else if (G && G.mode === 'stage' && G.st && G.st.rule === 'gold' && Math.random() < 0.3) makeGolden(e);   // 💰 황금 층
   else if (!window.__noGold && Math.random() < GOLD_P) makeGolden(e);   // __noGold: 정확한 기록을 보는 시험용
+  if (!e.golden && eliteOk() && Math.random() < (window.__eliteP !== undefined ? window.__eliteP : ELITE_P + (G.lvl >= LVL_FREE ? 0.02 : 0))) makeElite(e);
   return e;
+}
+// ⚔ 정예 몬스터 (Build 168): 빨간 기운 · 이름표 · 체력 4배 · 공격 1.5배 · 특기 하나 (🛡 방패 / ✂ 분열 / 🌀 순간이동) · 잡으면 작은 상자
+const ELITE_P = 0.03, ELITE_K = { shield: ['🛡', '방패'], split: ['✂', '분열'], blink: ['🌀', '순간이동'] };
+let eliteBlock = false;
+function eliteOk() { if (!G || eliteBlock || (window.__noGold && window.__eliteP === undefined)) return false;
+  if (G.mode === 'stage') return G.st && !G.st.cave && (G.st.tower ? G.st.tower >= 6 : G.st.n >= 3);
+  return tierNow() >= 1; }
+function makeElite(e, kind) {
+  e.elite = kind || Object.keys(ELITE_K)[Math.floor(Math.random() * 3)]; e.hp *= 4; e.maxHp *= 4; e.dmg *= 1.5; e.r *= 1.2; e.scale = 1.25; e.xp *= 4; e.gold += 3; e.eT = rand(2, 4); e.shieldT = 0;
+  if (state === 'play' && !G.seenElite) { G.seenElite = true; banner('⚔ 정예 몬스터!', '빨간 기운 · 특기가 있어요 · 잡으면 상자!', '#ff4d6d', 2.4); }
+}
+function updElite(e, dt, p) {
+  if (e.shieldT > 0) e.shieldT -= dt;
+  if ((e.eT -= dt) > 0) return;
+  if (e.elite === 'shield') { e.shieldT = 1.5; e.eT = 4.5; sfx('woosh'); }
+  else if (e.elite === 'blink' && Math.hypot(p.x - e.x, p.y - e.y) < 420) { e.eT = rand(3.2, 4.2); burst(e.x, e.y - 20, '#c77dff', 14, 160, 3, 0.4);
+    const a = Math.random() * 7; e.x = p.x + Math.cos(a) * 90; e.y = p.y + Math.sin(a) * 70; if (G.mode === 'stage') e.x = clamp(e.x, -STAGE_HW + 20, STAGE_HW - 20);
+    burst(e.x, e.y - 20, '#c77dff', 14, 160, 3, 0.4); sfx('woosh'); }
+  else e.eT = 1;
+}
+function eliteDie(e) { stAdd('elites'); G.elitesN = (G.elitesN || 0) + 1;
+  dropChest(G.mode === 'stage' ? clamp(e.x, -STAGE_HW + 30, STAGE_HW - 30) : e.x, e.y + 16, true);
+  if (e.elite === 'split') { eliteBlock = true; for (let i = 0; i < 3; i++) { const c = makeEnemy(e.type, e.x + rand(-30, 30), e.y + rand(-20, 20)); c.hp *= 0.5; c.maxHp *= 0.5; c.scale = 0.8; c.awake = true; G.enemies.push(c); } eliteBlock = false; burst(e.x, e.y - 20, '#ff4d6d', 20, 220, 4, 0.5); }
 }
 // ---------- 야생 지대: 적 진지 ----------
 function makeCamp(c, frac) {
@@ -3420,6 +3444,7 @@ function nearest(x, y, maxD) {
 }
 function hurtEnemy(e, dmg, fx, fy, kb) {
   if (e.dead || e.transT > 0) return;   // 변신 중인 마지막 보스는 안 맞음
+  if (e.shieldT > 0) { if (G.t - (e.shTxt || 0) > 0.5) { e.shTxt = G.t; floatText(e.x, e.y - 50, '🛡 막음!', '#9fd8ff', 13, 0.5); } return; }   // ⚔ 정예 방패
   const crit = Math.random() < 0.1;
   dmg = Math.round(dmg * G.p.dmgMul * (crit ? 2 : 1) * (e.boss && e.weakT > 0 ? 1.5 : 1) * (G.fogOn > 0 && G.mode === 'base' ? 1.15 : 1));   // 안개: +15%   // 🎯 보스 약점 타임
   if (e.boss && e.weakT > 0) { G.weakHits = (G.weakHits || 0) + 1; if (G.t - (e.weakTxt || 0) > 0.6) { e.weakTxt = G.t; floatText(e.x + rand(-20, 20), e.y - (e.r || 40) - 40, '약점!', '#ff4d6d', 18, 0.6); } }
@@ -3470,6 +3495,7 @@ function killEnemy(e) {
   if (!e.boss && !e.camp) { questEvent('kill'); stAdd('kills'); ST.kc[e.type] = (ST.kc[e.type] || 0) + 1; if (e.golden) { stSet('goldT', e.type); goldDie(e); } if (e.type.startsWith('e_')) { questEvent('special'); if (SPECIALS.some(q => q[0] === e.type)) stSet('specT', e.type); } }
   if (e.boss) { bossDie(e); return; }
   if (e.camp) { campDie(e); return; }
+  if (e.elite) eliteDie(e);
   if (e.type === 'e_snowman' || e.type === 'e_ginger') questEvent('winter');
   if (e.type === 'e_golem' && !e.small) for (let k = 0; k < 3; k++) { // 바위 골렘 → 작은 바위 3개
     const a = k / 3 * Math.PI * 2, m = makeEnemy('e_golem', e.x + Math.cos(a) * 22, e.y + Math.sin(a) * 22);
@@ -3866,6 +3892,7 @@ function update(dt) {
     if (e.dead) continue;
     e.flash -= dt; e.hitT -= dt; e.swordCd -= dt; e.lunge -= dt; e.wob += dt * (e.hitT > 0 ? 3 : 9); if (e.slowT > 0) e.slowT -= dt;
     if (e.camp) continue;   // 적 진지는 움직이지 않음
+    if (e.elite) updElite(e, dt, p);
     const pdx = p.x - e.x, pdy = p.y - 6 - e.y, pd = Math.hypot(pdx, pdy) || 1;
     // 마을: 영웅이 가까우면 영웅을, 아니면 마을을 노림 / 스테이지: 영웅을 발견하면 쫓아옴
     let chase = !p.dead && pd < (e.boss ? 260 : 170);
@@ -4951,6 +4978,7 @@ function drawEnemy(e) {
   if (e.slamT > 0) { const k = 1 - e.slamT / 0.85; ctx.fillStyle = `rgba(255,40,40,${0.12 + 0.18 * k})`; ctx.strokeStyle = `rgba(255,40,40,${0.5 + 0.4 * Math.sin(G.t * 30)})`; ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(e.x, e.y, 95, 0, 7); ctx.fill(); ctx.stroke(); }   // 오우거 내려찍기 경고
   if (e.aimT > 0) { ctx.strokeStyle = `rgba(255,40,40,${0.4 + 0.35 * Math.sin(G.t * 30)})`; ctx.lineWidth = e.r * 1.4; ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(e.x, e.y); ctx.lineTo(e.x + e.ddx * 200, e.y + e.ddy * 200); ctx.stroke(); }   // 기사 돌진 경고선
   if (e.slowT > 0 && !(e.hideT > 0)) { ctx.fillStyle = 'rgba(190,232,255,.55)'; ctx.strokeStyle = 'rgba(255,255,255,.8)'; ctx.lineWidth = 2; ctx.beginPath(); ctx.ellipse(e.x, e.y, e.r * 1.3, e.r * 0.9, 0, 0, 7); ctx.fill(); ctx.stroke(); }   // 얼음에 느려진 적: 발밑 얼음
+  if (e.elite && !(e.hideT > 0)) { const k = 0.5 + 0.5 * Math.sin(G.t * 6 + e.id); ctx.fillStyle = `rgba(255,40,70,${0.18 + 0.14 * k})`; ctx.beginPath(); ctx.ellipse(e.x, e.y, e.r * 2.2 + k * 4, e.r * 1.4 + k * 3, 0, 0, 7); ctx.fill(); ctx.strokeStyle = 'rgba(255,77,109,.8)'; ctx.lineWidth = 2.5; ctx.stroke(); }
   if (e.hideT > 0) { ctx.globalAlpha = 0.18; }   // 숨은 암살자: 거의 안 보임
   if (SPR[e.type]) drawSpriteMan(e.type, e.x, e.y, { face: e.face, phase: e.wob, hit: e.hitT > 0, hitT: e.hitT, flash: e.flash > 0, lunge: e.lunge, z: e.z, s: e.scale || (e.small ? 0.6 : 1), gold: e.golden });
   else drawStickman(e.x, e.y, { color: e.color, s: e.r / 11, face: e.face, phase: e.wob, hit: e.hitT > 0, flash: e.flash > 0, lunge: e.lunge, type: e.type });   // 그림이 없을 때만 막대 인간
@@ -4960,6 +4988,11 @@ function drawEnemy(e) {
     for (let k = 0; k < 2; k++) { const a = t + k * Math.PI, r = 0.6 + 0.4 * Math.sin(t * 2 + k);
       ctx.fillStyle = `rgba(255,247,194,${r})`; ctx.beginPath(); ctx.arc(e.x + Math.cos(a) * 16, e.y - h * 0.6 + Math.sin(a) * 10, 2.5 * r + 1, 0, 7); ctx.fill(); }
   }
+  if (e.elite) { const h = (SPR_INFO[e.type] ? SPR_INFO[e.type].h * (e.scale || 1) : e.r * 2.6) * IK;
+    if (e.shieldT > 0) { ctx.fillStyle = 'rgba(159,216,255,.28)'; ctx.strokeStyle = 'rgba(220,240,255,.9)'; ctx.lineWidth = 3; ctx.beginPath(); ctx.ellipse(e.x, e.y - h * 0.45, e.r * 2.2, h * 0.65, 0, 0, 7); ctx.fill(); ctx.stroke(); }
+    ctx.save(); ctx.translate(e.x, e.y - h - 10); ctx.scale(1, IK); ctx.font = '900 12px Jua,system-ui,sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    const tx = `${ELITE_K[e.elite][0]} 정예`; ctx.lineWidth = 3; ctx.strokeStyle = '#222'; ctx.strokeText(tx, 0, 0); ctx.fillStyle = '#ff8fa3'; ctx.fillText(tx, 0, 0);
+    ctx.fillStyle = '#222'; ctx.fillRect(-18, 8, 36, 5); ctx.fillStyle = '#ff4d6d'; ctx.fillRect(-17, 9, 34 * Math.max(0, e.hp / e.maxHp), 3); ctx.restore(); }
   if ((e.type === 'tank' || e.type === 'e_shaman' || e.type === 'e_charger') && e.hp < e.maxHp) {
     const by = e.y - (SPR[e.type] ? SPR_INFO[e.type].h * IK + 6 : e.r * 2.8);
     ctx.fillStyle = '#222'; ctx.fillRect(e.x - 16, by, 32, 5);
