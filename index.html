@@ -363,7 +363,7 @@ h2 .hb{-webkit-text-stroke:0;text-shadow:none;letter-spacing:0;font-family:"Jua"
 
 <script>
 'use strict';
-const BUILD = 177;
+const BUILD = 178;
 const BOSS_INTERVAL = 180;      // 보스 등장 간격(초)
 const WAVE_INTERVAL = 60;       // 대규모 몰이 이벤트 간격(초)
 const MAX_ENEMIES = 220;
@@ -428,7 +428,7 @@ function allyGainXp(x, y, v) { // 근처에서 적이 쓰러지면 동료 경험
     a.xp += v; if (a.xp >= ALLY_NEED[a.lvl]) allyLevelUp(a);
   }
 }
-const allyMul = a => 1 + 0.15 * ((a.lvl || 1) - 1);
+const allyMul = a => (1 + 0.15 * ((a.lvl || 1) - 1)) * (typeof isGrown === 'function' && isGrown() ? 1.2 : 1);   // 🧑 성장하면 +20%
 const ALLY_TYPES = {
   sword:  { name: '고양이 검사', color: '#3fa9f5', hp: 120, icon: '🗡️', desc: '가까이 달려가 칼로 베어요 · 튼튼함' },
   archer: { name: '고양이 궁수', color: '#2ecc71', hp: 80,  icon: '🏹', desc: '멀리서 화살을 쏴요 · 안전하게' },
@@ -495,7 +495,7 @@ const $ = id => document.getElementById(id);
 const SPR = {};
 const SPR_WHITE = {}, SPR_GOLD = {};  // 맞았을 때 번쩍이는 흰 실루엣
 const SPR_INFO = {    // ax: 발 위치(그림 폭 대비), h: 화면 키(월드 단위)
-  hero: { ax: 0.55 }, grunt: { ax: 0.45, h: 50 }, runner: { ax: 0.5, h: 42 }, tank: { ax: 0.42, h: 62 },
+  hero: { ax: 0.55 }, hero_adult: { ax: 0.5 }, ally_sword_adult: { ax: 0.42, h: 60 }, ally_archer_adult: { ax: 0.45, h: 60 }, ally_bomber_adult: { ax: 0.45, h: 58 }, ally_shield_adult: { ax: 0.42, h: 62 }, runner_adult: { ax: 0.5, h: 50 }, grunt: { ax: 0.45, h: 50 }, runner: { ax: 0.5, h: 42 }, tank: { ax: 0.42, h: 62 },
   boss0: { ax: 0.5, h: 140 }, boss1: { ax: 0.5, h: 140 }, boss2: { ax: 0.5, h: 150 }, boss3: { ax: 0.5, h: 140 }, boss4: { ax: 0.5, h: 120 }, boss5: { ax: 0.5, h: 150 }, boss6: { ax: 0.5, h: 160 }, boss7: { ax: 0.5, h: 160 }, boss8: { ax: 0.5, h: 160 }, boss9: { ax: 0.5, h: 160 }, boss10: { ax: 0.5, h: 160 }, boss11: { ax: 0.5, h: 160 }, boss12: { ax: 0.5, h: 160 }, boss13: { ax: 0.5, h: 160 }, boss14: { ax: 0.5, h: 160 }, boss15: { ax: 0.5, h: 165 }, boss_final: { ax: 0.5, h: 175 },
   e_spider: { ax: 0.5, h: 30 }, e_skel: { ax: 0.5, h: 46 },
   e_agrunt: { ax: 0.45, h: 52 }, e_srunner: { ax: 0.5, h: 46 }, e_stank: { ax: 0.45, h: 70 }, e_knight: { ax: 0.5, h: 58 }, e_assassin: { ax: 0.5, h: 50 }, e_ogre: { ax: 0.5, h: 92 }, e_demon: { ax: 0.5, h: 60 }, e_ghost: { ax: 0.5, h: 56 }, e_golem: { ax: 0.5, h: 112 },
@@ -820,7 +820,7 @@ function bakeSprite(n) {
 }
 // img/ 폴더에 실제로 있는 그림만 불러옴 (없는 파일을 부르면 오류가 남)
 const SPR_FILES = ['e_snowman', 'e_ginger', 'e_agrunt', 'e_srunner', 'e_stank', 'e_knight', 'e_assassin', 'e_ogre', 'e_demon', 'e_ghost', 'e_golem', 'boss3', 'boss4', 'boss5', 'boss6', 'boss7', 'boss8', 'boss9', 'boss10', 'boss11', 'boss12', 'boss13', 'boss14', 'boss15', 'boss_final', 'e_spider', 'e_skel', 'e_archer', 'e_bomber', 'e_bat', 'e_slime', 'e_shaman', 'e_charger', 'hall2', 'hall3', 'hall_broken', 'tower_broken', 'stonewall', 'repair', 'farm', 'mine', 'market', 'stone', 'rock', 'camp', 'hero', 'grunt', 'runner', 'tank', 'boss0', 'boss1', 'boss2', 'tree', 'stump', 'log', 'stake', 'tower', 'hall',
-  'smith', 'pillar', 'icepillar', 'snowman', 'snowtree', 'torch', 'coin', 'ally_sword', 'ally_archer', 'tavern', 'ally_bomber', 'skyfang_plane', 'ally_shield', 'hero_slash', 'hero_walk', 'ally_archer_shoot', 'ally_bomber_toss', 'ally_shield_bash', 'ally_sword_slash', 'ally_sword_walk', 'ally_archer_walk', 'ally_bomber_walk', 'ally_shield_walk', 'ally_golem', 'ally_golem_walk', 'ally_golem_slam', 'sf_plane0', 'sf_plane1', 'sf_plane2', 'sf_plane3', 'sf_plane4', 'sf_pilot0', 'sf_pilot1', 'sf_pilot2', 'sf_pilot3', 'sf_pilot4'];
+  'smith', 'pillar', 'icepillar', 'snowman', 'snowtree', 'torch', 'coin', 'ally_sword', 'ally_archer', 'tavern', 'ally_bomber', 'skyfang_plane', 'ally_shield', 'hero_slash', 'hero_walk', 'ally_sword_adult', 'ally_archer_adult', 'ally_bomber_adult', 'ally_shield_adult', 'runner_adult', 'ally_archer_shoot', 'ally_bomber_toss', 'ally_shield_bash', 'ally_sword_slash', 'ally_sword_walk', 'ally_archer_walk', 'ally_bomber_walk', 'ally_shield_walk', 'ally_golem', 'ally_golem_walk', 'ally_golem_slam', 'sf_plane0', 'sf_plane1', 'sf_plane2', 'sf_plane3', 'sf_plane4', 'sf_pilot0', 'sf_pilot1', 'sf_pilot2', 'sf_pilot3', 'sf_pilot4'];
 SPR_FILES.forEach(n => {
   const im = new Image();
   im.onload = () => { SPR_ORIG[n] = im; SPR_SRC[n] = HERO_SPR.includes(n) ? recolorHero(im) : im; bakeSprite(n); };
@@ -1285,8 +1285,8 @@ function recalcStats() {
   p.hp = Math.min(p.hp, p.maxHp);
   p.speed = 150 * (1 + 0.1 * (ps.speed || 0)) * (1 + 0.04 * U('spd')) * (WK('swift') ? 1.15 : 1);   // 🍬 사탕 빠르기는 이동 때 곱함
   p.magnet = 70 * (1 + 0.4 * (ps.magnet || 0)) * (1 + 0.12 * U('mag'));
-  p.dmgMul = (1 + 0.15 * (ps.power || 0)) * (1 + 0.1 * (G.forge || 0)) * (1 + 0.06 * U('atk')) * rebornMul();
-  p.maxHp = Math.round(p.maxHp * rebornMul()); p.hp = Math.min(p.hp, p.maxHp);   // 🌀 환생 보너스
+  p.dmgMul = (1 + 0.15 * (ps.power || 0)) * (1 + 0.1 * (G.forge || 0)) * (1 + 0.06 * U('atk')) * rebornMul() * grownMul();
+  p.maxHp = Math.round(p.maxHp * rebornMul() * grownMul()); p.hp = Math.min(p.hp, p.maxHp);   // 🌀 환생 보너스
   p.cdMul = Math.max(0.5, 1 - 0.1 * (ps.haste || 0));
   p.cap = 12 + 6 * (ps.bag || 0);
 }
@@ -1587,6 +1587,21 @@ const STORY = [
   { img: 'op3', cap: '영웅은 머리띠를 질끈 묶고 칼을 들었어요. "우리 마을은 내가 지킨다!"' },
 ];
 const HAS_LOGO = true;    // img/logo.webp 사용
+// 🧑 성장 이야기 (Build 178): 해골 왕국(20칸)까지 지켜 내면 몇 년 뒤… 영웅과 동료가 어른으로 성장 (그림 grow1~3은 나중에, 없으면 글만)
+const GROW = [
+  { img: 'grow1', cap: '해골 왕국까지 모두 지켜 낸 영웅. 사람들은 영웅을 "다섯 왕국의 영웅"이라고 불렀어요.' },
+  { img: 'grow2', cap: '그리고 몇 년이 흘렀어요… 꼬마 영웅과 친구들은 훌쩍 자라 어엿한 전사가 되었어요.' },
+  { img: 'grow3', cap: '"더 강해진 우리가 지킨다!" 하지만 숲 너머 어둠 속에서 몬스터들도 더 무섭게 자라고 있었어요…' },
+];
+let grownC = null;
+const isGrown = () => grownC === null ? (grownC = !!((readJSON(META_KEY) || {}).grown)) : grownC;
+const grownMul = () => isGrown() ? 1.2 : 1;
+function setGrown() { const m = readJSON(META_KEY) || {}; if (m.grown) return; m.grown = 1; writeJSON(META_KEY, m); grownC = true; stAdd('grown'); if (G) recalcStats(); }
+function growBanner() { if (G) { banner('🧑 영웅이 성장했다!', '영웅·동료 공격·체력 +20% · 동료와 몬스터 모습이 바뀌어요', '#ffd23f', 3.4); sfx('cheer'); burst(G.p.x, G.p.y - 20, '#ffd23f', 50, 320, 6, 1); } }
+function growCheck() { // 이미 20칸을 깬 사람: 다음 판 시작할 때 한 번 보여 줌
+  if (isGrown() || bestStage() < STAGES.length) return;
+  setTimeout(() => { if (state !== 'play' || isGrown()) return; setGrown(); playStory(() => { state = 'play'; showOv(null); growBanner(); }, GROW); }, 900);
+}
 const ENDING = [
   { img: 'end1', cap: '쿵!! 왕관 괴물 대왕이 쓰러지자, 빨간 막대 군단은 모두 숲 너머로 도망쳤어요.' },
   { img: 'end2', cap: '마을에 다시 평화가 찾아왔어요. 영웅과 고양이 친구들은 밤새 축제를 열었답니다.' },
@@ -1717,6 +1732,7 @@ function startGame() {
   { const m = readJSON(META_KEY) || {}; if (m.startBonus) { G.gold += m.startBonus; setTimeout(() => G && floatText(G.p.x, G.p.y - 70, `🎰 룰렛 보너스 +🪙${m.startBonus}`, '#ffd23f', 18, 1.6), 600); m.startBonus = 0; writeJSON(META_KEY, m); } }
   if (meta && meta.forge > 0) { G.forge = meta.forge; recalcStats(); banner('마을을 지켜라!', `⚒ 무기 강화 Lv ${G.forge} 그대로 유지!`, '#ffd23f', 3); }
   else banner('마을을 지켜라!', '나무를 베어 망루를 짓자', '#ffd23f', 3);
+  growCheck();
   if ((meta || {}).weeklyOn) { const w = weekNow(); G.weekly = w.id; G.weeklyB = 0; if (w.id === 'magic') { G.weapons.bolt = 1; G.weapons.ice = 1; G.timers.bolt = G.timers.ice = 1; } recalcStats(); banner(`🎯 ${w.name}`, w.desc, '#ffd23f', 3); }
 }
 function continueGame() {
@@ -1727,6 +1743,7 @@ function continueGame() {
   else banner('이어하기!', `${G.day > 1 ? G.day + '일째 · ' : ''}스테이지 ${G.stageN} 클리어 · 난이도 ${DF().name}`, '#7bed9f', 2.5);
   dayMilestone(G.day);
   if (G.pending > 0) openLevelUp();
+  growCheck();
 }
 // 📆 버틴 날 축하 (Build 118): 5·10·20·30·50일째 아침에 한 번만 (영원히) 금고 보상
 const DAY_GIFT = { 5: 100, 10: 200, 20: 400, 30: 600, 50: 1000 };
@@ -3258,13 +3275,15 @@ function showClear(st, prize, first, old) {
     (st.newHat ? `<div class="unlock">🎩 새 모자! <b>${mIco('hat_' + st.newHat.id, '')} ${st.newHat.name}</b><br><small>시작 화면 '꾸미기'에서 쓸 수 있어요</small></div>` : '') +
     (G.raidIn > 0 ? '<br><span style="color:#ff9f1c">⚠ 적의 대군이 다가온다… 마을을 지켜라!</span>' : '');
   if (st.newUnlock) setTimeout(() => sfx('unlock'), 900);
-  $('bClrOk').textContent = all ? '엔딩 보기 ▶' : '마을로 ▶';
+  $('bClrOk').textContent = all ? '엔딩 보기 ▶' : skullAll && !isGrown() ? '성장 이야기 ▶' : '마을로 ▶';
   showOv('ovClear');
 }
 $('bClrOk').onclick = () => {
   sfx('pick');
   const back = () => { state = 'play'; showOv(null); if (G.pending > 0) openLevelUp(); };
-  if ($('bClrOk').textContent.startsWith('엔딩')) playStory(back, ENDING); else back();
+  if ($('bClrOk').textContent.startsWith('엔딩')) playStory(back, ENDING);
+  else if ($('bClrOk').textContent.startsWith('성장')) { setGrown(); playStory(() => { back(); growBanner(); }, GROW); }
+  else back();
 };
 
 function updStage(dt) {
@@ -4695,7 +4714,8 @@ function drawAlly(a) {
   const T = ALLY_TYPES[a.type], n = 'ally_' + a.type, blink = a.inv > 0 && Math.floor(a.inv * 20) % 2 === 0;
   if (blink) ctx.globalAlpha = 0.45;
   if (a.lvl >= 5) { ctx.save(); ctx.translate(a.x, a.y); ctx.scale(1, IK); ctx.strokeStyle = `rgba(255,210,63,${0.6 + 0.3 * Math.sin(G.t * 5)})`; ctx.lineWidth = 3; ctx.beginPath(); ctx.ellipse(0, 2, 18, 6, 0, 0, 7); ctx.stroke(); ctx.restore(); }
-  if (SPR[n]) drawSpriteMan(n, a.x, a.y, { face: a.face, phase: a.wob, hit: false, flash: false, lunge: 0, act: a.act, actT: a.actT, idle: !a.moving, walking: a.moving, s: a.lvl >= 5 ? 1.15 : 1 });
+  const nA = isGrown() && SPR[n + '_adult'] ? n + '_adult' : n;   // 🧑 성장한 동료 그림
+  if (SPR[n]) drawSpriteMan(nA, a.x, a.y, { face: a.face, phase: a.wob, hit: false, flash: false, lunge: 0, act: a.act, actT: a.actT, idle: !a.moving, walking: a.moving, s: a.lvl >= 5 ? 1.15 : 1 });
   else {
     const P = actPose(a.act, a.actT);
     drawStickman(a.x + P.dx * a.face, a.y + P.dy, { color: T.color, s: 1, face: a.face, phase: a.wob, hit: false, flash: false, lunge: a.act ? Math.max(0, P.dx) / 60 : 0, type: 'ally' });
@@ -4810,11 +4830,11 @@ function drawStick(p) {
   const hipY = -2 - bob, neckY = -18 - bob;
   if (SPR.hero) { // 그림 주인공: 통통 튀며 걷고, 도끼질 때는 몸을 기울임
     for (let i = 0; i < p.logs; i++) drawLog(-12 + (i % 2) * 1.5, -14 - bob - i * 4.6, 0.85);
-    const img = SPR.hero, h = 64, ax = SPR_INFO.hero.ax, w = h * img.width / img.height;
+    const HA = isGrown() && SPR.hero_adult, img = HA || SPR.hero, h = HA ? 72 : 64, ax = (HA ? SPR_INFO.hero_adult : SPR_INFO.hero).ax, w = h * img.width / img.height;   // 🧑 성장한 영웅 그림이 오면 그걸로
     const ch = p.chop > 0 ? Math.sin((1 - p.chop / 0.2) * Math.PI) : 0;
     const tilt = p.moving ? sw * 0.08 : 0, sl = p.slam > 0 ? Math.sin(p.slam / 0.25 * Math.PI) : 0;
-    const sheet = p.act === 'slash' && SPR.hero_slash;   // 베기는 연속 동작 그림으로
-    const walkSheet = !p.act && p.moving && p.chop <= 0 && SPR.hero_walk;   // 걷기도
+    const sheet = !HA && p.act === 'slash' && SPR.hero_slash;   // 베기는 연속 동작 그림으로
+    const walkSheet = !HA && !p.act && p.moving && p.chop <= 0 && SPR.hero_walk;   // 걷기도
     const P = actPose(sheet ? null : p.act, p.actT);
     if (sheet) P.dx = Math.sin(Math.min(1, p.actT / ACTS.slash) * Math.PI) * 6;
     ctx.save(); ctx.translate(P.dx, 14 + P.dy + (walkSheet ? bob : 0)); ctx.rotate((walkSheet ? 0 : tilt) + ch * 0.35 + P.rot);
@@ -5055,7 +5075,7 @@ function drawEnemy(e) {
   if (e.slowT > 0 && !(e.hideT > 0)) { ctx.fillStyle = 'rgba(190,232,255,.55)'; ctx.strokeStyle = 'rgba(255,255,255,.8)'; ctx.lineWidth = 2; ctx.beginPath(); ctx.ellipse(e.x, e.y, e.r * 1.3, e.r * 0.9, 0, 0, 7); ctx.fill(); ctx.stroke(); }   // 얼음에 느려진 적: 발밑 얼음
   if (e.elite && !(e.hideT > 0)) { const k = 0.5 + 0.5 * Math.sin(G.t * 6 + e.id); ctx.fillStyle = `rgba(255,40,70,${0.18 + 0.14 * k})`; ctx.beginPath(); ctx.ellipse(e.x, e.y, e.r * 2.2 + k * 4, e.r * 1.4 + k * 3, 0, 0, 7); ctx.fill(); ctx.strokeStyle = 'rgba(255,77,109,.8)'; ctx.lineWidth = 2.5; ctx.stroke(); }
   if (e.hideT > 0) { ctx.globalAlpha = 0.18; }   // 숨은 암살자: 거의 안 보임
-  if (SPR[e.type]) drawSpriteMan(e.type, e.x, e.y, { face: e.face, phase: e.wob, hit: e.hitT > 0, hitT: e.hitT, flash: e.flash > 0, lunge: e.lunge, z: e.z, s: e.scale || (e.small ? 0.6 : 1), gold: e.golden });
+  if (SPR[e.type]) drawSpriteMan(!e.golden && isGrown() && SPR[e.type + '_adult'] ? e.type + '_adult' : e.type, e.x, e.y, { face: e.face, phase: e.wob, hit: e.hitT > 0, hitT: e.hitT, flash: e.flash > 0, lunge: e.lunge, z: e.z, s: e.scale || (e.small ? 0.6 : 1), gold: e.golden });
   else drawStickman(e.x, e.y, { color: e.color, s: e.r / 11, face: e.face, phase: e.wob, hit: e.hitT > 0, flash: e.flash > 0, lunge: e.lunge, type: e.type });   // 그림이 없을 때만 막대 인간
   ctx.globalAlpha = 1;
   if (e.golden) { // 반짝임 2개
@@ -5224,7 +5244,7 @@ function drawWorld() {
       ctx.restore();
     }
   }
-  for (const c of G.corpses) if (SPR[c.type]) drawSpriteMan(c.type, c.x, c.y, { face: 1, phase: 0, hit: false, flash: false, lunge: 0, rot: c.rot, z: c.z + 6, alpha: Math.min(1, c.life * 2) }); else drawStickman(c.x, c.y, { color: c.color, s: c.s, face: 1, phase: 0, hit: true, flash: false, lunge: 0, type: c.type, rot: c.rot, z: c.z + 6, alpha: Math.min(1, c.life * 2) });
+  for (const c of G.corpses) if (SPR[c.type]) drawSpriteMan(!c.golden && isGrown() && SPR[c.type + '_adult'] ? c.type + '_adult' : c.type, c.x, c.y, { face: 1, phase: 0, hit: false, flash: false, lunge: 0, rot: c.rot, z: c.z + 6, alpha: Math.min(1, c.life * 2) }); else drawStickman(c.x, c.y, { color: c.color, s: c.s, face: 1, phase: 0, hit: true, flash: false, lunge: 0, type: c.type, rot: c.rot, z: c.z + 6, alpha: Math.min(1, c.life * 2) });
   // 회전 칼
   if (G.weapons.sword && G.deadT <= 0 && !p.dead) {
     const s = wStat('sword');
