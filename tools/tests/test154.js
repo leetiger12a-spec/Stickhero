@@ -8,7 +8,7 @@ const { chromium } = require('/opt/node22/lib/node_modules/playwright');
   page.on('pageerror', e => errors.push(e.message)); page.on('console', m => { if (m.type() === 'error') errors.push(m.text()); });
   await page.goto('http://localhost:8765/index.html'); await page.waitForTimeout(900); await page.click('#bStart'); await page.waitForTimeout(500);
   const sc = await page.evaluate(() => ({ SCALE, VW }));
-  console.log(JSON.stringify(sc)); check(Math.abs(sc.SCALE - 412 / 540) < 0.01 && sc.VW > 530, 'wider view');
+  console.log(JSON.stringify(sc)); check(Math.abs(sc.SCALE - 412 / 620) < 0.01 && sc.VW > 610, 'wider view');
   const r = await page.evaluate(async () => {
     const G = SH.G; G.nextBoss = 999; G.nextWave = 999; G.spawnAcc = -1e9; G.enemies = [];
     G.tavern = true; const pd = G.pads.find(q => q.kind === 'tavern'); if (pd) pd.built = true;
