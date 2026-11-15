@@ -185,3 +185,4 @@ OUTPUT: 1 second long, 24 frames (24 fps), looping. Export as an animated GIF on
 ## 🎞 제미나이용 동작 칸 시트 (Build 215~, 제미나이는 GIF를 못 만듦 → 그림 한 장에 12칸)
 몬스터는 게임에서 12칸만 쓰므로 12칸(4열×3행)으로 요청 (칸이 커서 더 선명). 첨부: ① `art/ref/STYLE_MASTER.png` ② 그 몬스터 옛 그림 `art/ref/old_이름.png`.
 받은 시트는 `tools/grid2sheet.py`로 칸을 잘라 GIF와 같은 게임 그림으로 만듦.
+- (Build 215) 제미나이가 옛 그림체를 따라 그려서 → 옛 그림은 첨부하지 않고 `art/ref/STYLE_MONSTERS.png`(새 그림체 몬스터 6마리) 1장만 첨부, 한 번에 한 마리, 모습은 글로만 설명.
