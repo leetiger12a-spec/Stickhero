@@ -116,3 +116,29 @@ BACKGROUND: plain pure white (#FFFFFF) in every frame. No ground, no shadows, no
 
 OUTPUT: 1 second long, 24 frames (24 fps), looping. Export as GIF (or MP4). Highest resolution available.
 ```
+
+---
+
+## 🧙 묶음 S1 — 주술사·거미·해골 새 디자인 (Build 205~, 1장)
+첨부 2장: ① `art/ref/STYLE_MASTER.png` ② `art/ref/B2b_shaman_spider_skel_old.png`
+```
+TASK: one 2D game character design sheet for a mobile action game.
+
+STYLE (most important — copy image 1 exactly): image 1 shows 6 finished characters. Match their art style 100%: same thick, uniform dark-brown/black outlines (about 3-4 px at this size), same flat cel shading with only 2-3 tones per color plus one sharp white highlight, same bright SATURATED colors, same chibi proportions (head about 1/3 of total height, short sturdy body, big hands and boots), same angry/confident expressions with big eyes, same detailed leather straps, belts, buckles and metal plates. Clean vector-like game art. NOT painterly, NOT soft airbrush, NOT realistic, NOT thin sketchy lines, NOT muted or brownish colors, NOT 3D render, NOT babyish or round blob shapes.
+
+CHARACTERS: image 2 shows 3 old enemies (left to right). Redraw each one in the style of image 1, keeping its identity and main colors:
+1) GOBLIN SHAMAN: dark-blue hooded robe with gold trim, glowing purple crystal on a twisted wooden staff held in one hand, glowing eyes and sharp grin inside the hood, leather belt with pouches and small bone charms, sturdy boots.
+2) VENOMOUS SPIDER: big purple spider with darker stripes, 8 armored segmented legs with bright magenta tips, glowing red eyes, sharp fangs, a few metal plates on its back. Same height as the other two, wide body.
+3) SKELETON WARRIOR: cream-white bones, glowing green eyes, rusty short sword in one hand and a small round wooden shield, torn purple cloth and a leather belt with a metal buckle, bone boots.
+
+LAYOUT (strict):
+- ONE sheet, 3 characters in ONE row, left to right in the order above.
+- Each character: full body, standing ready pose, facing RIGHT, 3/4 top-down game view, light from top-left.
+- All 3 about the same height, feet on the same ground line, each fills about 70% of the sheet height.
+- VERY WIDE empty white space between characters; no weapon, leg or effect may come near another character.
+- No extra items floating, no magic particles away from the body, no effects, no dust.
+
+BACKGROUND: plain pure white (#FFFFFF) everywhere, no ground line, no shadows, no gradient, no frame borders, no text, no letters, no numbers, no watermark, no logo, no signature.
+QUALITY: ultra high resolution, QHD (2560x1440) or higher, crisp clean lines
+```
+받은 뒤: 한 마리씩 GIF 틀(위 🎬)로 동작 요청 → 몬스터는 12칸으로 줄여 넣음.
