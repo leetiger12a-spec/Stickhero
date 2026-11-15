@@ -367,11 +367,11 @@ h2 .hb{-webkit-text-stroke:0;text-shadow:none;letter-spacing:0;font-family:"Jua"
 
 <script>
 'use strict';
-const BUILD = 203;
+const BUILD = 204;
 const BOSS_INTERVAL = 180;      // 보스 등장 간격(초)
 const WAVE_INTERVAL = 60;       // 대규모 몰이 이벤트 간격(초)
 const MAX_ENEMIES = 110;   // Build 202: 220 → 110 (화면이 너무 정신없어서) — 대신 마을 적이 조금 더 튼튼(CROWD_K)
-const CROWD_K = 1.3, RATE_CAP = 3;   // 마을 적 체력·경험치 ×1.3, 기본 등장 속도는 초당 최대 3마리
+const CROWD_K = 1.6, RATE_CAP = 3;   // 마을 적 체력·경험치 ×1.6 (Build 204: 1.3 → 1.6, 동료 2명 제한 대신 몬스터를 세게), 기본 등장 속도는 초당 최대 3마리
 const MAP_R = 720;              // 싸움터 반지름 (이 안이 원래 들판, 바깥은 야생 지대)
 const WORLD_R = 1100;           // 월드 끝: 야생 지대에 적 진지·바위
 const CAMP_REBUILD = 240;       // 적 진지가 다시 지어지는 시간(초)
@@ -1572,9 +1572,9 @@ const DIFFS = [
   { name: '어려움', ehp: 1.35, edmg: 1.35, rate: 1.2,  boss: 1.4,  grow: 1.3, desc: '🔥 진짜 레전드만 버틸 수 있어요!' },
   { name: '레전드', ehp: 2,    edmg: 1.8,  rate: 1.4,  boss: 2.2,  grow: 1.6, desc: '👹 지옥 난이도! 대신 금화 1.5배 · 전용 업적 2개' },   // Build 166
 ];
-// 💪 레벨 맞춤 세기 (Build 166): 영웅 Lv 30부터 적·보스가 레벨마다 강해짐 (Lv 94 → 체력 x2.6 · 공격 x1.77)
+// 💪 레벨 맞춤 세기 (Build 166): 영웅 Lv 30부터 적·보스가 레벨마다 강해짐 (Build 204: Lv 94 → 체력 x2.6→x3.56 · 공격 x1.77→x2.28)
 const LEGEND = 4, legendOn = () => G && G.diff === LEGEND;   // 👹 레전드 난이도 번호
-const LVL_FREE = 30, LVL_HP = 0.025, LVL_DMG = 0.012;
+const LVL_FREE = 30, LVL_HP = 0.04, LVL_DMG = 0.02;
 function lvlScale() { const ex = Math.max(0, ((G && G.lvl) || 1) + 10 * (rebornMul() - 1) * 10 - LVL_FREE); return { hp: 1 + LVL_HP * ex, dmg: 1 + LVL_DMG * ex }; }
 // 🗼 탑 21층부터 층마다 더 강해짐 (예전엔 21층 위로 그대로였음): 체력 +6% · 공격 +2.5% / 층
 function towerScale() { const f = G && G.mode === 'stage' && G.st && G.st.tower || 0, ex = Math.max(0, f - 20); return { hp: 1 + 0.06 * ex, dmg: 1 + 0.025 * ex }; }

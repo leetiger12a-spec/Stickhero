@@ -17,7 +17,7 @@ const { chromium } = require('/opt/node22/lib/node_modules/playwright');
     return { h1: base.hp, h94: hi.hp, d1: base.dmg, d94: hi.dmg, h30: at30.hp };
   });
   console.log(JSON.stringify(r));
-  check(Math.abs(r.h94 / r.h1 - 2.6) < 0.01 && Math.abs(r.d94 / r.d1 - 1.768) < 0.01 && r.h30 === r.h1, 'level scale');
+  check(Math.abs(r.h94 / r.h1 - 3.56) < 0.01 && Math.abs(r.d94 / r.d1 - 2.28) < 0.01 && r.h30 === r.h1, 'level scale');
   // 10레벨마다 알림
   await page.evaluate(() => { const G = SH.G; G.lvl = 39; G.xp = G.need + 1; G.p.hp = G.p.maxHp = 1e6; }); await page.waitForTimeout(500);
   check(await page.evaluate(() => SH.G.lvl === 40 && SH.G.banner && SH.G.banner.text.includes('강해졌다')), 'lvl 40 banner');
