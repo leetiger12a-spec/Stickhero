@@ -101,7 +101,7 @@ QUALITY: ultra high resolution, QHD (2560x1440) or higher, crisp clean lines
 
 ---
 
-## 🎬 GIF 동작 프롬프트 틀 (사진 → GIF/MP4, 24칸)
+## 🎬 GIF 동작 프롬프트 틀 (사진 → GIF, 24칸 · MP4·동영상 생성 금지)
 첨부: 그 캐릭터의 서 있는 그림 1장. `[ACTION]`과 `[WHO]`만 바꿔요.
 ```
 Animate the attached character as a seamless looping game sprite animation.
@@ -114,7 +114,7 @@ CAMERA: completely static. No zoom, no pan, no camera shake, no rotation, no per
 
 BACKGROUND: plain pure white (#FFFFFF) in every frame. No ground, no shadows, no dust, no particles, no new objects, no text, no watermark.
 
-OUTPUT: 1 second long, 24 frames (24 fps), looping. Export as GIF (or MP4). Highest resolution available.
+OUTPUT: 1 second long, 24 frames (24 fps), looping. Export as an animated GIF only. Highest resolution available.
 ```
 
 ---
@@ -169,7 +169,7 @@ CAMERA: completely static. No zoom, no pan, no camera shake, no rotation, no per
 
 BACKGROUND: plain pure white (#FFFFFF) in every frame. No ground, no shadows, no dust, no smoke, no motion blur, no slash trails, no impact effects, no projectiles, no particles, no new objects, no text, no watermark.
 
-OUTPUT: 1 second long, 24 frames (24 fps), looping. Export as GIF (or MP4). Highest resolution available, at least 1920x1080. ultra high resolution, QHD (2560x1440) or higher, crisp clean lines
+OUTPUT: 1 second long, 24 frames (24 fps), looping. Export as an animated GIF only. Highest resolution available, at least 1920x1080. ultra high resolution, QHD (2560x1440) or higher, crisp clean lines
 ```
 | 몬스터 | 첨부 | `[WHO]` | `[ATTACK]` |
 |---|---|---|---|
