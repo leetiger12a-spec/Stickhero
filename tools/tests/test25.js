@@ -41,7 +41,7 @@ const { chromium } = require('/opt/node22/lib/node_modules/playwright');
   for (let i = 0; i < 30 && await page.evaluate(() => SH.state !== 'over'); i++) { await page.waitForTimeout(150); await pick(); }
   check(await page.evaluate(() => SH.state === 'over'), 'game over not reached from levelup');
   await page.click('#bRetry'); await page.waitForFunction(() => SH.G && SH.G.day === 2, null, { timeout: 15000 }); await page.waitForTimeout(200); await pick();
-  const d2 = await page.evaluate(() => ({ day: SH.G.day, vLvl: SH.G.vLvl, allies: SH.G.allies.map(a => a.lvl).join(), st: SH.state, raid: !!SH.G.raid, boss: !!SH.G.boss }));
+  const d2 = await page.evaluate(() => ({ day: SH.G.day, vLvl: SH.G.vLvl, allies: [...SH.G.allies, ...(SH.G.bench || [])].map(a => a.lvl).join(), st: SH.state, raid: !!SH.G.raid, boss: !!SH.G.boss }));
   console.log('day2', JSON.stringify(d2)); check(d2.day === 2 && d2.vLvl === 3 && d2.allies === '3,3,3,3' && !d2.boss, 'day2 state wrong');
   // 2일째 2초 놀다가 저장 → 새로고침 → 이어하기
   for (let i = 0; i < 8; i++) { await page.waitForTimeout(250); await pick(); }

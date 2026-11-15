@@ -22,7 +22,7 @@ const { chromium } = require('/opt/node22/lib/node_modules/playwright');
       await page.tap(`.card >> nth=${order[n]}`); await page.waitForTimeout(150);
     }
   }
-  const n = await page.evaluate(() => SH.G.allies.map(a => a.type).join(','));
+  const n = await page.evaluate(() => [...SH.G.allies, ...(SH.G.bench || [])].map(a => a.type).join(','));
   console.log('allies', n); check(n === 'sword,archer,bomber,bomber', 'allies wrong: ' + n);
   // 전투
   await page.evaluate(() => { const G = SH.G; G.p.x = 0; G.p.y = 250; G.p.hp = G.p.maxHp = 1e6; G.weapons = {}; for (let i = 0; i < 14; i++) G.enemies.push(makeEnemy('grunt', rand(-120, 120), 380 + rand(0, 80))); });

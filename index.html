@@ -154,6 +154,7 @@ h2{margin:0 0 14px;font:400 clamp(30px,9vw,46px) "BHS","Jua",system-ui,-apple-sy
 .best{margin-top:14px;font-size:15px;opacity:.85;line-height:1.6}
 .hint{margin-top:14px;font-size:13px;opacity:.65;line-height:1.5}
 #cards{display:flex;flex-direction:column;gap:12px;width:min(92vw,420px)}
+.apk{font:inherit;font-size:12px;font-weight:800;margin:3px 2px;padding:4px 8px;border-radius:10px;border:2px solid #888;background:#eee;color:#666;cursor:pointer}.apk.on{border-color:#2a9d8f;background:#d8f3dc;color:#1b4332}
 #pauseStats{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;width:min(92vw,380px);margin:4px 0 10px}#pauseStats .ps{background:rgba(255,250,240,.95);color:#222;border:2px solid #222;border-radius:10px;padding:4px 2px;font-size:11px;font-weight:800;text-align:center}#pauseStats .ps b{display:block;font-size:15px;color:#d35400}#pauseStats .anm{font:inherit;font-size:12px;font-weight:800;border:2px solid #222;border-radius:10px;background:#fff3c4;padding:4px 8px;margin:3px 2px;min-height:32px;cursor:pointer}#pauseStats .pw{grid-column:1/-1;font-size:12px;line-height:1.6}
 #overStats .runSum{display:grid;grid-template-columns:1fr 1fr;gap:2px 12px;margin-top:8px;padding-top:8px;border-top:2px dashed rgba(255,255,255,.35);font-size:13px;text-align:left}#overStats .runW{grid-column:1/-1;text-align:center;margin-top:4px}
 #cardTools{display:flex;gap:10px;margin-top:12px}#cardTools button{font:inherit;font-size:14px;font-weight:800;border:3px solid #222;border-radius:14px;background:#fffaf0;color:#222;padding:8px 14px;min-height:44px;cursor:pointer}#cardTools button:disabled{opacity:.4}#cardTools button.on{background:#ffd6d6;outline:3px solid #ff4d6d}#cards .card.banable{outline:4px dashed #ff4d6d}
@@ -366,7 +367,7 @@ h2 .hb{-webkit-text-stroke:0;text-shadow:none;letter-spacing:0;font-family:"Jua"
 
 <script>
 'use strict';
-const BUILD = 202;
+const BUILD = 203;
 const BOSS_INTERVAL = 180;      // 보스 등장 간격(초)
 const WAVE_INTERVAL = 60;       // 대규모 몰이 이벤트 간격(초)
 const MAX_ENEMIES = 110;   // Build 202: 220 → 110 (화면이 너무 정신없어서) — 대신 마을 적이 조금 더 튼튼(CROWD_K)
@@ -403,6 +404,9 @@ const SMITH = { x: -122, y: -8 }; // 대장간 자리
 const FORGE_MAX = 10;
 const TAVERN = { x: 122, y: -8 };  // 영웅 숙소(동료 고용) 자리
 const ALLY_MAX = 4, ALLY_COST = [60, 120, 200, 300, 420];
+// 🐱 함께 다니는 동료는 최대 2명 (Build 203): 나머지는 숙소에서 쉬고(G.bench), ⏸ 일시정지에서 바꿔요
+const ALLY_ACTIVE = 2;
+const allyCount = () => G ? G.allies.length + (G.bench || []).length : 0;
 const allyMax = () => ALLY_MAX + (G && G.vLvl >= 3 ? 1 : 0);   // 마을 Lv3이면 동료 5명
 const ALLY_NEED = [0, 60, 180, 360, 600];  // 다음 레벨까지 경험치 (Lv1→2: 60 …)
 const ALLY_TRAIN = l => 50 + 60 * l;       // 숙소 훈련 비용 (금화)
@@ -1460,7 +1464,7 @@ function newGame() {
     weapons: { pistol: 1 }, passives: {}, timers: {},
     enemies: [], bullets: [], ebullets: [], booms: [], bombs: [], meteors: [], items: [], zaps: [], rings: [], fists: [], hazards: [], gems: [], hearts: [], chests: [], parts: [], texts: [], coins: [], corpses: [],
     trees: [], flyers: [], pflames: [], bag: [], hint: null, mode: 'base', bt: 0, diff: diffSel, stageN: 0, stars: [], st: null, stash: null, gateT: 0,
-    smith: false, forge: 0, tavern: false, allies: [], raid: null, raidIn: 0, raidCount: 0, drumT: 0,
+    smith: false, forge: 0, tavern: false, allies: [], bench: [], raid: null, raidIn: 0, raidCount: 0, drumT: 0,
     gold: 0, base: { hp: 1500, maxHp: 1500, hitT: 0 }, respawnT: 0, squadAng: Math.random() * 7, squadT: 6,
     walls: Array.from({ length: WALL_SEGS }, () => ({ hp: 0, maxHp: 0, shake: 0 })), wallLvl: 0,
     towers: [], pads: [], baseDead: false, rocks: [], camps: [], day: 1, broken: {}, mineHitT: 0, vLvl: 1, stone: 0, bld: { farm: 0, mine: 0, market: 0 }, mineT: 0, marketT: 0,
@@ -1649,7 +1653,7 @@ function buildSave() {
     weapons: G.weapons, passives: G.passives, gold: G.gold, bag: G.bag || [], chests: G.mode === 'base' ? (G.chests || []).map(c => [Math.round(c.x), Math.round(c.y), c.small ? 1 : 0, c.gold ? 1 : 0]) : [], logs: p.logs, hp: p.dead ? -1 : p.hp,
     base: G.base.hp, wallLvl: G.wallLvl, walls: G.walls.map(w => w.hp), towers: G.towers.map(t => t.lvl),
     pads: G.pads.map(q => [q.built, q.pw, q.pg, q.ps || 0]), smith: G.smith, forge: G.forge, tavern: G.tavern,
-    allies: G.allies.map(a => [a.type, a.lvl || 1, Math.round(a.xp || 0), a.name]), stageN: G.stageN, stars: G.stars, bossCount: G.bossCount - (G.boss ? 1 : 0), bossKills: G.bossKills || 0,
+    allies: [...G.allies.map(a => [a.type, a.lvl || 1, Math.round(a.xp || 0), a.name, 0]), ...(G.bench || []).map(a => [a.type, a.lvl || 1, Math.round(a.xp || 0), a.name, 1])], stageN: G.stageN, stars: G.stars, bossCount: G.bossCount - (G.boss ? 1 : 0), bossKills: G.bossKills || 0,
     vLvl: G.vLvl, stone: G.stone, bld: G.bld,
     rocks: G.rocks.map(o => [Math.round(o.x), Math.round(o.y), o.s, Math.round(o.regrow)]),
     camps: G.camps.map(c => [Math.round(c.x), Math.round(c.y), c.lvl, Math.round(c.rebuild), c.e && !c.e.dead ? Math.round(c.e.hp / c.e.maxHp * 100) / 100 : 0]),
@@ -1683,7 +1687,8 @@ function loadGame(d) {
   if (d.rocks) G.rocks = d.rocks.map(([x, y, s, rg]) => ({ x, y, s, max: 6, regrow: rg, shake: 0 }));
   if (d.camps) { G.enemies = G.enemies.filter(e => !e.camp); G.camps = d.camps.map(([x, y, lvl, rebuild, hp]) => ({ x, y, lvl, rebuild, spawnT: rand(8, 16), e: null })); G.camps.forEach((c, i) => { if (d.camps[i][4] > 0) makeCamp(c, d.camps[i][4]); }); }
   G.allies = [];
-  for (const it of d.allies) { const [type, lvl, xp, nm] = Array.isArray(it) ? it : [it, 1, 0]; G.allies.push(makeAlly(type, lvl, xp, nm)); }   // 예전 저장은 종류만
+  G.bench = []; for (const it of d.allies) { const [type, lvl, xp, nm, rest] = Array.isArray(it) ? it : [it, 1, 0]; const a = makeAlly(type, lvl, xp, nm); if (rest || G.allies.length >= ALLY_ACTIVE) G.bench.push(a); else G.allies.push(a); }   // Build 203: 3명째부터는 숙소에서 쉼
+  G.allies.forEach((a, i) => a.slot = i);   // 예전 저장은 종류만
   if (d.raidPending) G.raidIn = 10;
   for (const t of G.weapons ? Object.keys(G.weapons) : []) G.timers[t] = 0.5;
 }
@@ -1778,7 +1783,9 @@ function renderPauseStats() { $('bReborn').style.display = G && G.lvl >= REBORN_
   const ws = Object.keys(G.weapons).map(id => `${wMini(id, G.weapons[id] > MAX_WLV)} ${G.weapons[id] > MAX_WLV ? '✨진화' : 'Lv' + G.weapons[id]}`).join(' · ');
   const cells = [['⚔ 공격력', pct(p.dmgMul)], ['⏱ 공격 빠르기', pct(1 / p.cdMul)], ['💨 이동 속도', Math.round(p.speed)], ['❤ 최대 체력', p.maxHp], ['🧲 자석 범위', Math.round(p.magnet)], ['🎒 통나무', `${p.cap}개`]];
   const al = G.allies.map((a, i) => `<button class="anm" data-i="${i}">${ALLY_TYPES[a.type].icon} ${a.name || '?'} 🔄</button>`).join('');
-  $('pauseStats').innerHTML = (al ? `<div class="ps pw">🐱 동료 이름 (눌러서 바꾸기)<br>${al}</div>` : '') + cells.map(([k, v]) => `<div class="ps">${k}<b>${v}</b></div>`).join('') + `<div class="ps pw">${ws || '무기 없음'}${G.combo ? '' : ''}<br><small>🔥 최고 콤보 ${G.bestCombo || 0} · 🔁 ${G.rerolls ?? 2} · 🚫 ${G.bans ?? 2}</small></div>`; }
+  const all = [...G.allies.map((a, i) => ({ a, on: true, i })), ...(G.bench || []).map((a, i) => ({ a, on: false, i }))];
+  const pk = all.length > ALLY_ACTIVE ? `<div class="ps pw">🐱 함께 다닐 동료 (최대 ${ALLY_ACTIVE}명 · 눌러서 바꾸기)<br>${all.map(o => `<button class="apk${o.on ? ' on' : ''}" data-on="${o.on ? 1 : 0}" data-i="${o.i}">${o.on ? '✅' : '💤'} ${ALLY_TYPES[o.a.type].icon} ${o.a.name || '?'} Lv${o.a.lvl || 1}</button>`).join('')}</div>` : '';
+  $('pauseStats').innerHTML = pk + (al ? `<div class="ps pw">🐱 동료 이름 (눌러서 바꾸기)<br>${al}</div>` : '') + cells.map(([k, v]) => `<div class="ps">${k}<b>${v}</b></div>`).join('') + `<div class="ps pw">${ws || '무기 없음'}${G.combo ? '' : ''}<br><small>🔥 최고 콤보 ${G.bestCombo || 0} · 🔁 ${G.rerolls ?? 2} · 🚫 ${G.bans ?? 2}</small></div>`; }
 // 🧾 이번 판 요약 (Build 116): 게임오버 화면에 최고 콤보·치명타·유령 상자·아이템·무지개 구슬·버틴 밤·무기
 function runSummary() { const ws = Object.keys(G.weapons).map(id => `${wMini(id, G.weapons[id] > MAX_WLV)}${G.weapons[id] > MAX_WLV ? '✨' : G.weapons[id]}`).join(' ');
   const L = [['🔥 최고 콤보', G.bestCombo || 0], ['💥 치명타', G.crits || 0], ['👻 유령 상자', G.ghostCaught || 0], ['🧲💣 아이템', G.itemsUsed || 0], ['🌈 무지개 구슬', G.rainbows || 0], ['🌙 버틴 밤', G.nights || 0]];
@@ -1799,6 +1806,13 @@ const TIPS = {
 let tipT = 0;
 function showTip(id) { const m = readJSON(META_KEY) || {}; m.tips = m.tips || {}; if (m.tips[id] || !TIPS[id]) return false; m.tips[id] = 1; writeJSON(META_KEY, m);
   const el = $('tipCard'); el.innerHTML = TIPS[id]; el.classList.add('show'); el.dataset.id = id; clearTimeout(tipT); tipT = setTimeout(() => el.classList.remove('show'), 5000); return true; }
+document.addEventListener('click', ev => { const b = ev.target.closest && ev.target.closest('.apk'); if (!b || !G) return; swapAlly(+b.dataset.on === 1, +b.dataset.i); });
+function swapAlly(on, i) { // ✅ 함께 → 💤 쉬기 / 💤 → ✅ (자리가 꽉 차 있으면 마지막 동료와 바꿈)
+  G.bench = G.bench || []; const p = G.p;
+  if (on) { const [a] = G.allies.splice(i, 1); if (a) G.bench.push(a); }
+  else { const [a] = G.bench.splice(i, 1); if (!a) return; if (G.allies.length >= ALLY_ACTIVE) G.bench.push(G.allies.pop()); a.dead = false; a.hp = a.maxHp; a.x = p.x + rand(-30, 30); a.y = p.y + 30; G.allies.push(a); }
+  G.allies.forEach((a, k) => a.slot = k); sfx('pick'); saveGame(); renderPauseStats();
+}
 document.addEventListener('click', ev => { const b = ev.target.closest && ev.target.closest('.anm'); if (!b || !G) return; const a = G.allies[+b.dataset.i]; if (!a) return; a.name = pickAllyName(a.type, a.name); sfx('pick'); renderPauseStats(); });
 function togglePause() {
   if (state === 'play') { state = 'paused'; joy = null; renderPauseStats(); showOv('ovPause'); }
@@ -2018,7 +2032,7 @@ function openAllyPick() {
     box.appendChild(b);
   });
   $('lvlTitle').textContent = '동료 고용!'; $('cardTools').style.display = 'none';
-  $('lvlSub').textContent = `함께 싸울 동료를 골라요 (${G.allies.length + 1}/${allyMax()})`;
+  $('lvlSub').textContent = `함께 싸울 동료를 골라요 (${allyCount() + 1}/${allyMax()})`;
   showOv('ovLevel');
 }
 function chooseAlly(i) {
@@ -2111,7 +2125,7 @@ function padCost(pd) {
   if (bk && G.broken[bk]) return repairCost(bk);
   if (!padVisible(pd)) return null;
   if (pd.kind === 'tower') { const l = G.towers[pd.idx].lvl; return l < TOWER_MAX() ? { w: TOWER_W[l], g: TOWER_G[l] } : null; }
-  if (pd.kind === 'tavern') { if (!G.tavern) return { w: 12, g: 40 }; if (G.allies.length < allyMax()) return { w: 0, g: ALLY_COST[G.allies.length] }; const a = trainee(); return a ? { w: 0, g: ALLY_TRAIN(a.lvl) } : null; }
+  if (pd.kind === 'tavern') { if (!G.tavern) return { w: 12, g: 40 }; if (allyCount() < allyMax()) return { w: 0, g: ALLY_COST[allyCount()] }; const a = trainee(); return a ? { w: 0, g: ALLY_TRAIN(a.lvl) } : null; }
   if (pd.kind === 'smith') return !G.smith ? { w: 10, g: 20 } : G.forge < FORGE_MAX ? { w: 0, g: 25 + 15 * G.forge } : null;
   if (pd.kind === 'hall') return G.vLvl < VILLAGE.length ? VILLAGE[G.vLvl].cost : null;
   if (pd.kind === 'bld') { const l = G.bld[pd.id]; return l < 3 ? BLD[pd.id].cost[l] : null; }
@@ -2124,7 +2138,7 @@ function padLabel(pd) {
   if (bk && G.broken[bk]) return bk === 'hall' ? '🔨 마을회관 수리' : bk[0] === 't' && bk !== 'tavern' ? '🔨 망루 수리' : `🔨 ${bk === 'smith' ? '대장간' : bk === 'tavern' ? '영웅 숙소' : BLD[bk].name.slice(3)} 수리`;
   if (pd.kind === 'tower') { const l = G.towers[pd.idx].lvl; return l === 0 ? '망루 짓기' : l < TOWER_MAX() ? (l === 5 ? '🔥 망루 Lv6' : `망루 Lv${l + 1}`) : '망루 MAX'; }
   if (pd.kind === 'smith') return G.smith ? `⚒ 강화 Lv${G.forge + 1}` : '대장간 짓기';
-  if (pd.kind === 'tavern') { if (!G.tavern) return '영웅 숙소 짓기'; if (G.allies.length < allyMax()) return `👥 동료 고용 ${G.allies.length + 1}/${allyMax()}`; const a = trainee(); return `🎓 ${ALLY_TYPES[a.type].name.split(' ').pop()} 훈련 Lv${a.lvl}→${a.lvl + 1}`; }
+  if (pd.kind === 'tavern') { if (!G.tavern) return '영웅 숙소 짓기'; if (allyCount() < allyMax()) return `👥 동료 고용 ${allyCount() + 1}/${allyMax()}`; const a = trainee(); return `🎓 ${ALLY_TYPES[a.type].name.split(' ').pop()} 훈련 Lv${a.lvl}→${a.lvl + 1}`; }
   if (pd.kind === 'hall') return `🏛 마을 Lv${G.vLvl + 1}`;
   if (pd.kind === 'bld') { const l = G.bld[pd.id]; return l ? `${BLD[pd.id].name} Lv${l + 1}` : `${BLD[pd.id].name} 짓기`; }
   return G.wallLvl < wallMax() ? (G.wallLvl >= 5 ? `🪨 돌 성벽 Lv${G.wallLvl + 1}` : `울타리 Lv${G.wallLvl + 1}`) : '울타리 수리';
@@ -2163,7 +2177,7 @@ function padDone(pd) {
     burst(t.x, t.y - 20, '#ffd23f', 30, 220, 5, 0.6);
   } else if (pd.kind === 'tavern') {
     if (!G.tavern) { G.tavern = true; banner('영웅 숙소 완성!', '금화로 동료를 고용해요', '#7bed9f', 1.8); }
-    else if (G.allies.length < allyMax()) openAllyPick();
+    else if (allyCount() < allyMax()) openAllyPick();
     else { const a = trainee(); if (a) { allyLevelUp(a); banner('🎓 훈련 완료!', `${ALLY_TYPES[a.type].name} Lv ${a.lvl}`, '#3fa9f5', 1.6); } }
     burst(TAVERN.x, TAVERN.y - 20, '#3fa9f5', 30, 220, 5, 0.6);
   } else if (pd.kind === 'hall') {
@@ -2681,7 +2695,9 @@ function trainee() { // 훈련받을 동료: 레벨이 가장 낮은 동료 (최
 }
 function hireAlly(type) {
   const T = ALLY_TYPES[type];
-  G.allies.push(makeAlly(type)); stMax('allies', G.allies.length);
+  if (G.allies.length >= ALLY_ACTIVE) { G.bench = G.bench || []; G.bench.push(makeAlly(type)); stMax('allies', allyCount());
+    banner(`${T.name} 합류!`, '함께 다니는 동료는 2명까지 · 숙소에서 쉬어요 (⏸에서 바꾸기)', '#3fa9f5', 2.4); sfx('level'); return; }
+  G.allies.push(makeAlly(type)); stMax('allies', allyCount());
   banner(`${T.name} 합류!`, '영웅을 따라다니며 함께 싸워요', '#3fa9f5', 1.8);
   setTimeout(() => sfx(type === 'shield' ? 'bark' : type === 'golem' ? 'thud' : 'meow'), 250);
   startAct(G.allies[G.allies.length - 1], 'cheer');
@@ -4737,7 +4753,7 @@ function drawTavernInner() {
     ctx.font = '9px sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillStyle = '#000'; ctx.fillText('⚔', 16, -17);
   }
   ctx.font = '10px Jua,system-ui,sans-serif'; ctx.textAlign = 'center'; ctx.lineWidth = 3; ctx.strokeStyle = '#222';
-  const lb = `👥 ${G.allies.length}/${allyMax()}`; ctx.strokeText(lb, 0, SPR.tavern ? -66 : -56); ctx.fillStyle = '#9fd8ff'; ctx.fillText(lb, 0, SPR.tavern ? -66 : -56);
+  const lb = `👥 ${allyCount()}/${allyMax()}`; ctx.strokeText(lb, 0, SPR.tavern ? -66 : -56); ctx.fillStyle = '#9fd8ff'; ctx.fillText(lb, 0, SPR.tavern ? -66 : -56);
   ctx.restore();
 }
 function drawAlly(a) {

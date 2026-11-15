@@ -15,7 +15,7 @@ const { chromium } = require('/opt/node22/lib/node_modules/playwright');
   const n1 = await page.evaluate(() => SH.G.allies.filter(a => a.say && a.say.kind === 'fight').length); console.log('fight speakers', n1); check(n1 === 1, 'not exactly one');
   // 보스 처치 → 모두 응원
   await page.evaluate(() => { SH.G.allies.forEach(a => a.say = null); SH.spawnBoss(); SH.G.intro = null; killEnemy(SH.G.boss); }); await page.waitForTimeout(500);
-  const n2 = await page.evaluate(() => SH.G.allies.filter(a => a.say && a.say.kind === 'cheer').length); console.log('cheer', n2); check(n2 === 3, 'not all cheer');
+  const n2 = await page.evaluate(() => SH.G.allies.filter(a => a.say && a.say.kind === 'cheer').length); console.log('cheer', n2); check(n2 === await page.evaluate(() => SH.G.allies.length), 'not all cheer');
   await page.evaluate(() => { const G = SH.G; G.cam.x = G.allies[0].x; G.cam.y = G.allies[0].y; }); await page.waitForTimeout(150); await page.screenshot({ path: `${OUT}/b120_ally.png` });
   await page.waitForTimeout(3600); check(await page.evaluate(() => SH.G.allies.every(a => !a.say || a.say.kind !== 'cheer')), 'cheer did not go away');
   console.log(errors.length ? 'ERRORS:\n' + errors.join('\n') : 'OK');

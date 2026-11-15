@@ -39,9 +39,9 @@ const { chromium } = require('/opt/node22/lib/node_modules/playwright');
   await page.evaluate(() => { const G = SH.G; G.allies.forEach(a => { while (a.lvl < 5) allyLevelUp(a); }); G.allies[1].lvl = 3; G.allies[1].xp = 60; G.p.x = 0; G.p.y = 300; G.cam.y = 280; placeAllies(); });
   await page.waitForTimeout(500); await page.screenshot({ path: `${OUT}/b43_allies.png` });
   // 저장/이어하기
-  const s0 = await page.evaluate(() => { saveGame(); return SH.G.allies.map(a => a.type + a.lvl).join(); });
+  const s0 = await page.evaluate(() => { saveGame(); return [...SH.G.allies, ...(SH.G.bench || [])].map(a => a.type + a.lvl).sort().join(); });
   await page.reload(); await page.waitForTimeout(500); await page.click('#bContinue'); await page.waitForTimeout(300);
-  const s1 = await page.evaluate(() => SH.G.allies.map(a => a.type + a.lvl).join()); console.log(s0, '|', s1); check(s0 === s1, 'ally levels not saved');
+  const s1 = await page.evaluate(() => [...SH.G.allies, ...(SH.G.bench || [])].map(a => a.type + a.lvl).sort().join()); console.log(s0, '|', s1); check(s0 === s1, 'ally levels not saved');
   // 예전 저장(종류만)도 읽힘
   const old = await page.evaluate(() => { const d = JSON.parse(localStorage.getItem('stickhero_save')); d.allies = ['sword', 'archer']; loadGame(d); return SH.G.allies.map(a => a.type + a.lvl).join(); });
   check(old === 'sword1,archer1', 'old save allies not loaded');
