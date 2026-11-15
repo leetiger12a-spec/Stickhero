@@ -13,7 +13,7 @@ const { chromium } = require('/opt/node22/lib/node_modules/playwright');
     const G = SH.G; G.nextBoss = 999; G.nextWave = 999; G.spawnAcc = -1e9; G.enemies = []; G.p.hp = G.p.maxHp = 1e6;
     ['e_shaman', 'e_spider', 'e_skel'].forEach((t, i) => { const e = makeEnemy(t, G.p.x - 60 + i * 60, G.p.y - 70); e.spd = 0; e.dmg = 0; G.enemies.push(e); });
     const seen = new Set(), d = CanvasRenderingContext2D.prototype.drawImage;
-    CanvasRenderingContext2D.prototype.drawImage = function (img) { for (const k of ['e_shaman', 'e_spider', 'e_skel']) if (img === SPR[k]) seen.add(k); return d.apply(this, arguments); };
+    CanvasRenderingContext2D.prototype.drawImage = function (img) { for (const k of ['e_shaman', 'e_spider', 'e_skel']) if (img === SPR[k] || img === SPR[k + '_walk']) seen.add(k); return d.apply(this, arguments); };
     await new Promise(q => setTimeout(q, 300)); CanvasRenderingContext2D.prototype.drawImage = d; return [...seen].length;
   });
   check(drawn === 3, 'drawn ' + drawn);
