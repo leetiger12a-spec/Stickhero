@@ -149,3 +149,7 @@ S2a CHARACTERS:
 1) ARMORED GOBLIN GRUNT: red goblin in a spiked steel helmet and steel chest armor, curved short sword in one hand, round wooden shield with a steel boss in the other, red pants, heavy boots.
 2) SHADOW RUNNER: fast ninja goblin in a purple hood and wrap with long flowing headband tails, dark face with big white angry eyes and sharp grin, a curved dagger in each hand, purple gi with a dark belt, light running pose.
 3) STEEL GIANT: big blue brute in heavy riveted steel armor and helmet, holding a huge double-barrel shoulder cannon with both hands, steel boots, wide and heavy.
+S2b CHARACTERS (첨부 ② `art/ref/B3b_tier_old.png`):
+1) KNIGHT: silver plate-armored knight with a visored helmet and a red plume, red cape, long steel sword in one hand, red-and-gold cross-free heraldic shield (plain gold emblem) in the other, red belt.
+2) ASSASSIN: dark hooded assassin in a black tattered cloak, glowing yellow eyes and sharp grin in the dark hood, a curved blade in each hand, leather belt and bracers with gold buckles.
+3) OGRE: big green ogre with small horns and tusks, angry face, bare muscular arms with spiked leather bracers, brown fur loincloth with a skull buckle, holding a spiked wooden club.
