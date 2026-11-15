@@ -3,7 +3,7 @@ const { chromium } = require('/opt/node22/lib/node_modules/playwright');
 (async () => {
   const b = await chromium.launch({ args: ['--autoplay-policy=no-user-gesture-required'] }); const errors = []; const check = (c, m) => { if (!c) errors.push(m); };
   const ctx = await b.newContext({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 2 });
-  await ctx.addInitScript(() => { localStorage.setItem('stickhero_story', '1');
+  await ctx.addInitScript(() => { localStorage.setItem('stickhero_story', '1'); window.__chestNow = true;
     window.__sfx = {}; const hook = () => { if (window.sfx && !window.sfx.__h) { const S = window.sfx; window.sfx = function (n) { __sfx[n] = (__sfx[n] || 0) + 1; return S(n); }; window.sfx.__h = 1; } }; setInterval(hook, 50); });
   const page = await ctx.newPage();
   page.on('pageerror', e => errors.push(e.message)); page.on('console', m => { if (m.type() === 'error') errors.push(m.text()); });
