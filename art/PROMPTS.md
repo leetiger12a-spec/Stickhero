@@ -153,3 +153,29 @@ S2b CHARACTERS (첨부 ② `art/ref/B3b_tier_old.png`):
 1) KNIGHT: silver plate-armored knight with a visored helmet and a red plume, red cape, long steel sword in one hand, red-and-gold cross-free heraldic shield (plain gold emblem) in the other, red belt.
 2) ASSASSIN: dark hooded assassin in a black tattered cloak, glowing yellow eyes and sharp grin in the dark hood, a curved blade in each hand, leather belt and bracers with gold buckles.
 3) OGRE: big green ogre with small horns and tusks, angry face, bare muscular arms with spiked leather bracers, brown fur loincloth with a skull buckle, holding a spiked wooden club.
+
+---
+
+## 💥 몬스터 공격 GIF 틀 (Build 211~, 한 마리씩)
+첨부: 그 몬스터 서 있는 그림 1장 (`art/e_이름_src.png`). `[WHO]`와 `[ATTACK]`만 바꿔요. 게임에선 공격이 0.25초라 빠르게 한 번 치는 동작이 좋아요.
+```
+Animate the attached character as a seamless looping game sprite animation.
+
+ACTION: [ATTACK], facing right, IN PLACE (the character does NOT move across the screen). Structure: short wind-up (frames 1-8), one fast powerful strike (frames 9-14), then return to the starting ready pose (frames 15-24). The last frame must match the first frame so it loops perfectly.
+
+KEEP EXACTLY THE SAME: [WHO]'s design, colors, outlines, proportions and art style in every frame (2D cel-shaded game art, thick dark outlines, chibi proportions). Weapons stay in the same hands. Same size in every frame, feet stay on the same ground line, character stays centered.
+
+CAMERA: completely static. No zoom, no pan, no camera shake, no rotation, no perspective change.
+
+BACKGROUND: plain pure white (#FFFFFF) in every frame. No ground, no shadows, no dust, no smoke, no motion blur, no slash trails, no impact effects, no projectiles, no particles, no new objects, no text, no watermark.
+
+OUTPUT: 1 second long, 24 frames (24 fps), looping. Export as GIF (or MP4). Highest resolution available, at least 1920x1080. ultra high resolution, QHD (2560x1440) or higher, crisp clean lines
+```
+| 몬스터 | 첨부 | `[WHO]` | `[ATTACK]` |
+|---|---|---|---|
+| 방패 고블린 | e_agrunt_src.png | the red armored goblin | a fast overhead sword slash while keeping the shield in front |
+| 그림자 닌자 | e_srunner_src.png | the purple ninja goblin | a lightning-fast double dagger stab forward, both daggers thrusting |
+| 강철 거인 | e_stank_src.png | the blue steel giant | firing the double-barrel cannon: brace, strong recoil pushing the body back, then steady again (no fire, no smoke, no cannonball) |
+| 주술사 | e_shaman_src.png | the goblin shaman | thrusting the crystal staff forward to cast a spell, the crystal glowing brighter only during the thrust |
+| 거미 | e_spider_src.png | the purple spider | rearing up on its back legs and lunging forward to bite with its fangs (always exactly 8 legs) |
+| 해골 | e_skel_src.png | the skeleton warrior | a fast diagonal slash with the rusty sword while the shield stays raised |
