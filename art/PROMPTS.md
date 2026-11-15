@@ -179,3 +179,9 @@ OUTPUT: 1 second long, 24 frames (24 fps), looping. Export as an animated GIF on
 | 주술사 | e_shaman_src.png | the goblin shaman | thrusting the crystal staff forward to cast a spell, the crystal glowing brighter only during the thrust |
 | 거미 | e_spider_src.png | the purple spider | rearing up on its back legs and lunging forward to bite with its fangs (always exactly 8 legs) |
 | 해골 | e_skel_src.png | the skeleton warrior | a fast diagonal slash with the rusty sword while the shield stays raised |
+
+---
+
+## 🎞 제미나이용 동작 칸 시트 (Build 215~, 제미나이는 GIF를 못 만듦 → 그림 한 장에 12칸)
+몬스터는 게임에서 12칸만 쓰므로 12칸(4열×3행)으로 요청 (칸이 커서 더 선명). 첨부: ① `art/ref/STYLE_MASTER.png` ② 그 몬스터 옛 그림 `art/ref/old_이름.png`.
+받은 시트는 `tools/grid2sheet.py`로 칸을 잘라 GIF와 같은 게임 그림으로 만듦.
