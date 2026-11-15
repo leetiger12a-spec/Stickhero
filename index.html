@@ -363,7 +363,7 @@ h2 .hb{-webkit-text-stroke:0;text-shadow:none;letter-spacing:0;font-family:"Jua"
 
 <script>
 'use strict';
-const BUILD = 199;
+const BUILD = 200;
 const BOSS_INTERVAL = 180;      // 보스 등장 간격(초)
 const WAVE_INTERVAL = 60;       // 대규모 몰이 이벤트 간격(초)
 const MAX_ENEMIES = 220;
@@ -1911,7 +1911,9 @@ function applyChoice(c, quiet) { // 레벨업 카드·보물 상자 공통: 무�
 
 // ---------- 보물 상자: 보스를 쓰러뜨리면 떨어짐, 닿으면 열기 → 무기·능력 1~3개 (진화 먼저) ----------
 const CHEST_ROLL = [[1, 0.6], [2, 0.3], [3, 0.1]];   // [개수, 확률]
-function dropChest(x, y, small, gold) { G.chests = G.chests || []; G.chests.push({ x, y, bob: 0, t: 0, small: !!small, gold: !!gold, jack: !small && Math.random() < JACK_P }); }   // jack: 🌟 대박 상자 (Build 130)
+const SMALL_CHEST_MAX = 3;   // Build 200: 바닥에 작은 상자는 최대 3개 — 넘으면 바로 금화로
+function dropChest(x, y, small, gold) { G.chests = G.chests || [];
+  if (small && G.chests.filter(c => c.small && !c.dead).length >= SMALL_CHEST_MAX) { const g = 20 + 2 * (G.lvl || 1); G.gold += g; floatText(x, y - 30, `🎁→🪙${g}`, '#ffd23f', 15, 1); sfx('coin'); return; } G.chests.push({ x, y, bob: 0, t: 0, small: !!small, gold: !!gold, jack: !small && Math.random() < JACK_P }); }   // jack: 🌟 대박 상자 (Build 130)
 const JACK_P = 0.08;   // 큰 상자 중 대박 상자 확률   // small: 진지 작은 상자(1개·진화 없음), gold: 황금 보스(최소 2개)
 function chestPick(noEvo) { // 지금 상태에서 상자가 줄 것 하나 (진화 → 가진 무기·능력 → 새 무기·능력 → 금화)
   const evo = noEvo ? [] : Object.keys(EVO).filter(id => canEvolve(id));
@@ -2205,8 +2207,11 @@ function updElite(e, dt, p) {
     burst(e.x, e.y - 20, '#c77dff', 14, 160, 3, 0.4); sfx('woosh'); }
   else e.eT = 1;
 }
+// Build 200: 정예 상자는 4마리에 1번꼴 (예전엔 매번 → 상자가 너무 많이 깔림), 나머지는 금화 5개
+const ELITE_CHEST_P = 0.25;
 function eliteDie(e) { stAdd('elites'); G.elitesN = (G.elitesN || 0) + 1;
-  dropChest(G.mode === 'stage' ? clamp(e.x, -STAGE_HW + 30, STAGE_HW - 30) : e.x, e.y + 16, true);
+  if (Math.random() < (window.__eliteChestP !== undefined ? window.__eliteChestP : ELITE_CHEST_P)) dropChest(G.mode === 'stage' ? clamp(e.x, -STAGE_HW + 30, STAGE_HW - 30) : e.x, e.y + 16, true);
+  else for (let i = 0; i < 5; i++) dropCoin(e.x + rand(-14, 14), e.y + rand(-10, 10));
   if (e.elite === 'split') { eliteBlock = true; for (let i = 0; i < 3; i++) { const c = makeEnemy(e.type, e.x + rand(-30, 30), e.y + rand(-20, 20)); c.hp *= 0.5; c.maxHp *= 0.5; c.scale = 0.8; c.awake = true; G.enemies.push(c); } eliteBlock = false; burst(e.x, e.y - 20, '#ff4d6d', 20, 220, 4, 0.5); }
 }
 // ---------- 야생 지대: 적 진지 ----------

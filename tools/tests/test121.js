@@ -22,7 +22,7 @@ const { chromium } = require('/opt/node22/lib/node_modules/playwright');
   await page.evaluate(() => { const G = SH.G; for (const k of ['shield', 'split', 'blink']) { const e = makeEnemy(k === 'split' ? 'tank' : 'grunt', G.p.x + rand(-120, 120), G.p.y - 120); makeElite(e, k); G.enemies.push(e); } }); await page.waitForTimeout(400);
   await page.screenshot({ path: `${OUT}/b168_elite.png` });
   // 분열 + 상자
-  const sp = await page.evaluate(() => { const G = SH.G; G.chests = []; G.enemies.length = 0; const e = makeEnemy('tank', 0, -150); makeElite(e, 'split'); G.enemies.push(e); const n0 = ST.elites || 0; hurtEnemy(e, 1e9, 0, 0, 0);
+  const sp = await page.evaluate(() => { const G = SH.G; G.chests = []; window.__eliteChestP = 1; G.enemies.length = 0; const e = makeEnemy('tank', 0, -150); makeElite(e, 'split'); G.enemies.push(e); const n0 = ST.elites || 0; hurtEnemy(e, 1e9, 0, 0, 0);
     return { kids: G.enemies.filter(x => !x.dead && x.type === 'tank').length, kidsElite: G.enemies.some(x => !x.dead && x.elite), chest: G.chests.length, small: G.chests[0] && G.chests[0].small, st: (ST.elites || 0) - n0 }; });
   check(sp.kids === 3 && !sp.kidsElite && sp.chest === 1 && sp.small && sp.st === 1, 'split/chest ' + JSON.stringify(sp));
   await b.close(); console.log('ERRORS:', errors.length); errors.forEach(e => console.log(e)); process.exit(errors.length ? 1 : 0);
