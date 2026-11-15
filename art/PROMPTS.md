@@ -142,3 +142,10 @@ BACKGROUND: plain pure white (#FFFFFF) everywhere, no ground line, no shadows, n
 QUALITY: ultra high resolution, QHD (2560x1440) or higher, crisp clean lines
 ```
 받은 뒤: 한 마리씩 GIF 틀(위 🎬)로 동작 요청 → 몬스터는 12칸으로 줄여 넣음.
+
+## ⚔ 묶음 S2a~c — 강한 몬스터 9종 새 디자인 (Build 209~, 3장을 하나씩)
+첨부 2장: ① `art/ref/STYLE_MASTER.png` ② `art/ref/B3a_tier_old.png` (b·c는 같은 틀에 그림·CHARACTERS만 바꿈)
+S2a CHARACTERS:
+1) ARMORED GOBLIN GRUNT: red goblin in a spiked steel helmet and steel chest armor, curved short sword in one hand, round wooden shield with a steel boss in the other, red pants, heavy boots.
+2) SHADOW RUNNER: fast ninja goblin in a purple hood and wrap with long flowing headband tails, dark face with big white angry eyes and sharp grin, a curved dagger in each hand, purple gi with a dark belt, light running pose.
+3) STEEL GIANT: big blue brute in heavy riveted steel armor and helmet, holding a huge double-barrel shoulder cannon with both hands, steel boots, wide and heavy.
