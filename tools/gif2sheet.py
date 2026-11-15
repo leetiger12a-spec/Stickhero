@@ -1,5 +1,5 @@
 # GIF(또는 MP4에서 뽑은 그림들) → 게임 동작 시트 (Build 199)
-# 사용: python3 tools/gif2sheet.py art/gif/이름.gif 출력이름 칸높이 [step=1] [keep=0.06]
+# 사용: python3 tools/gif2sheet.py art/gif/이름.gif 출력이름 칸높이 [step=1] [keep=0.06] [holes=면적] [holesy=0~1]
 # - 칸마다 흰 배경 제거(가장자리와 이어진 흰색만), 카메라가 고정이라 모든 칸을 같은 틀(합친 범위)로 잘라 위치가 흔들리지 않음
 # - 몸에서 떨어져 멀리 날아가는 조각(화살·폭탄 등)은 빼고 몸 주변 조각만 남김 (게임이 따로 그림)
 import sys, json, numpy as np
@@ -23,7 +23,9 @@ for a in frames:
     fg = ~np.isin(bl, list(edge))
     if opts.get('holes'):   # 활줄 안쪽처럼 갇힌 큰 흰 칸도 배경 (눈 흰자 같은 작은 칸은 남김)
         hs = ndimage.sum(bgish, bl, range(1, bl.max() + 1))
-        big = [i + 1 for i, v in enumerate(hs) if v > int(opts['holes'])]
+        hy = float(opts.get('holesy', 0)) * a.shape[0]   # holesy=0.4: 그림 높이 40% 아래쪽 구멍만 (머리 반짝이 같은 흰 칸은 남김)
+        ob = ndimage.find_objects(bl)
+        big = [i + 1 for i, v in enumerate(hs) if v > int(opts['holes']) and ob[i][0].start >= hy]
         fg &= ~np.isin(bl, big)
     fg = ndimage.binary_opening(fg, iterations=1) | (fg & ndimage.binary_erosion(fg, iterations=1))
     lab, k = ndimage.label(fg)

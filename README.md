@@ -4,7 +4,7 @@
 
 막대 영웅 서바이벌 게임 — 아빠와 아들이 함께 만드는 HTML5 게임.
 
-- **현재 빌드: Build 207** (화면 오른쪽 아래에도 표시)
+- **현재 빌드: Build 208** (화면 오른쪽 아래에도 표시)
 - 플레이: https://leetiger12a-spec.github.io/Stickhero/ (GitHub Pages를 켠 뒤)
 
 ## 그림 제작 규칙 (ChatGPT · 제미나이)
@@ -17,6 +17,11 @@
 ## 조작
 - 📱 폰: 화면 아무 곳이나 끌면 가상 조이스틱으로 이동, 공격은 자동
 - 💻 PC: WASD / 방향키 이동, P·Esc 일시정지, 레벨업 카드는 1·2·3 키
+
+## Build 208 내용 — 해골 걷기 GIF
+- 💀 **해골이 GIF로 덜컥덜컥 걸어요** (24칸 → 12칸). 원본 `art/gif/e_skel_walk.gif`(1920×1080) → `img/e_skel_walk.webp`.
+- 🛠 `tools/gif2sheet.py`에 `holesy=` 추가: 그림 아래쪽(다리 사이) 갇힌 흰 칸만 지우고 머리 반짝이는 남겨요.
+- 특수 몬스터 3종(주술사·거미·해골) 새 그림체 + 움직이는 그림 완료.
 
 ## Build 207 내용 — 거미 기어가기 GIF
 - 🕷 **거미가 GIF로 기어와요**: 다리 8개가 번갈아 움직여요 (24칸 → 12칸). 원본 `art/gif/e_spider_walk.gif` → `img/e_spider_walk.webp`.
