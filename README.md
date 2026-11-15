@@ -4,7 +4,7 @@
 
 막대 영웅 서바이벌 게임 — 아빠와 아들이 함께 만드는 HTML5 게임.
 
-- **현재 빌드: Build 208** (화면 오른쪽 아래에도 표시)
+- **현재 빌드: Build 209** (화면 오른쪽 아래에도 표시)
 - 플레이: https://leetiger12a-spec.github.io/Stickhero/ (GitHub Pages를 켠 뒤)
 
 ## 그림 제작 규칙 (ChatGPT · 제미나이)
@@ -17,6 +17,10 @@
 ## 조작
 - 📱 폰: 화면 아무 곳이나 끌면 가상 조이스틱으로 이동, 공격은 자동
 - 💻 PC: WASD / 방향키 이동, P·Esc 일시정지, 레벨업 카드는 1·2·3 키
+
+## Build 209 내용 — 새 그림체 방패 고블린·닌자·강철 거인
+- ⚔ **새 그림체: 방패 고블린·그림자 닌자·강철 거인** (강한 몬스터 9종 중 첫 3마리, 2560×1440 원본 `art/S2a_tier_src.png`).
+- 🛠 `tools/splitsheet.py`: 한 줄 캐릭터 시트를 캐릭터별 원본으로 나누기. `tools/gif2sheet.py`에 `crop=`: 한 GIF에 3마리가 나란히 걸으면 한 마리씩 잘라 쓰기.
 
 ## Build 208 내용 — 해골 걷기 GIF
 - 💀 **해골이 GIF로 덜컥덜컥 걸어요** (24칸 → 12칸). 원본 `art/gif/e_skel_walk.gif`(1920×1080) → `img/e_skel_walk.webp`.

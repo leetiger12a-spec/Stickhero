@@ -367,7 +367,7 @@ h2 .hb{-webkit-text-stroke:0;text-shadow:none;letter-spacing:0;font-family:"Jua"
 
 <script>
 'use strict';
-const BUILD = 208;
+const BUILD = 209;
 const BOSS_INTERVAL = 180;      // 보스 등장 간격(초)
 const WAVE_INTERVAL = 60;       // 대규모 몰이 이벤트 간격(초)
 const MAX_ENEMIES = 110;   // Build 202: 220 → 110 (화면이 너무 정신없어서) — 대신 마을 적이 조금 더 튼튼(CROWD_K)
@@ -506,7 +506,7 @@ const SPR_INFO = {    // ax: 발 위치(그림 폭 대비), h: 화면 키(월드
   hero: { ax: 0.55 }, hero_adult: { ax: 0.5 }, ally_sword_adult: { ax: 0.42, h: 60 }, ally_archer_adult: { ax: 0.45, h: 60 }, ally_bomber_adult: { ax: 0.45, h: 58 }, ally_shield_adult: { ax: 0.42, h: 62 }, runner_adult: { ax: 0.5, h: 50 }, grunt: { ax: 0.45, h: 50 }, runner: { ax: 0.5, h: 42 }, tank: { ax: 0.42, h: 62 },
   boss0: { ax: 0.5, h: 140 }, boss1: { ax: 0.5, h: 140 }, boss2: { ax: 0.5, h: 150 }, boss3: { ax: 0.5, h: 140 }, boss4: { ax: 0.5, h: 120 }, boss5: { ax: 0.5, h: 150 }, boss6: { ax: 0.5, h: 160 }, boss7: { ax: 0.5, h: 160 }, boss8: { ax: 0.5, h: 160 }, boss9: { ax: 0.5, h: 160 }, boss10: { ax: 0.5, h: 160 }, boss11: { ax: 0.5, h: 160 }, boss12: { ax: 0.5, h: 160 }, boss13: { ax: 0.5, h: 160 }, boss14: { ax: 0.5, h: 160 }, boss15: { ax: 0.5, h: 165 }, boss_final: { ax: 0.5, h: 175 },
   e_spider: { ax: 0.5, h: 32 }, e_skel: { ax: 0.45, h: 48 },
-  e_agrunt: { ax: 0.45, h: 52 }, e_srunner: { ax: 0.5, h: 46 }, e_stank: { ax: 0.45, h: 70 }, e_knight: { ax: 0.5, h: 58 }, e_assassin: { ax: 0.5, h: 50 }, e_ogre: { ax: 0.5, h: 92 }, e_demon: { ax: 0.5, h: 60 }, e_ghost: { ax: 0.5, h: 56 }, e_golem: { ax: 0.5, h: 112 },
+  e_agrunt: { ax: 0.48, h: 52 }, e_srunner: { ax: 0.46, h: 48 }, e_stank: { ax: 0.48, h: 70 }, e_knight: { ax: 0.5, h: 58 }, e_assassin: { ax: 0.5, h: 50 }, e_ogre: { ax: 0.5, h: 92 }, e_demon: { ax: 0.5, h: 60 }, e_ghost: { ax: 0.5, h: 56 }, e_golem: { ax: 0.5, h: 112 },
   tree: { h: 78 }, stump: { h: 20 }, log: { h: 8 }, stake: { h: 26 }, tower: { h: 76 }, hall: { h: 92 },
   smith: { h: 72 }, pillar: { h: 70 }, icepillar: { ax: 0.5, h: 70 }, snowman: { ax: 0.5, h: 46 }, snowtree: { ax: 0.5, h: 72 }, torch: { h: 58 }, coin: { h: 12 },
   ally_sword: { ax: 0.5, h: 52 }, ally_archer: { ax: 0.5, h: 52 }, ally_bomber: { ax: 0.45, h: 52 }, ally_shield: { ax: 0.5, h: 54 }, ally_golem: { ax: 0.5, h: 58 }, ally_golem_walk: { h: 60 }, ally_golem_slam: { h: 60 }, hero_slash: { h: 72 }, hero_walk: { h: 72 }, ally_archer_shoot: { h: 60 }, ally_bomber_toss: { h: 60 }, ally_shield_bash: { h: 60 }, ally_sword_slash: { h: 60 }, ally_sword_walk: { h: 60 }, grunt_walk: { h: 58 }, grunt_atk: { h: 58 }, runner_walk: { h: 48 }, runner_atk: { h: 48 }, tank_walk: { h: 66 }, tank_atk: { h: 66 }, e_slime_walk: { h: 36 }, e_slime_atk: { h: 36 }, e_archer_walk: { h: 52 }, e_archer_atk: { h: 52 }, e_bomber_walk: { h: 52 }, e_bomber_atk: { h: 52 }, e_bat_walk: { h: 46 }, e_bat_atk: { h: 46 }, e_charger_walk: { h: 56 }, e_shaman_walk: { h: 58 }, e_spider_walk: { h: 34 }, e_skel_walk: { h: 50 }, e_charger_atk: { h: 56 }, ally_archer_walk: { h: 60 }, ally_bomber_walk: { h: 60 }, ally_shield_walk: { h: 60 }, sf_plane0: { h: 80 }, sf_plane1: { h: 80 }, sf_plane2: { h: 80 }, sf_plane3: { h: 80 }, sf_plane4: { h: 80 }, sf_pilot0: { h: 70 }, sf_pilot1: { h: 70 }, sf_pilot2: { h: 70 }, sf_pilot3: { h: 70 }, sf_pilot4: { h: 70 }, tavern: { h: 72 }, skyfang_plane: { h: 80 },
