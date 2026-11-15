@@ -8,7 +8,7 @@ const { chromium } = require('/opt/node22/lib/node_modules/playwright');
   page.on('pageerror', e => errors.push(e.message)); page.on('console', m => { if (m.type() === 'error') errors.push(m.text()); });
   await page.goto('http://localhost:8765/index.html'); await page.waitForTimeout(800); await page.click('#bStart'); await page.waitForTimeout(400);
   const hit = () => page.evaluate(() => { const G = SH.G; G.weapons = {}; G.p.meleeCd = 99; G.texts = []; const e = makeEnemy('tank', 300, 300); e.hp = e.maxHp = 1e9; G.enemies = [e]; for (let i = 0; i < 20; i++) hurtEnemy(e, 10, 0, 0, 0); return G.texts.filter(t => /^\d+!?$/.test(t.text)).length; });
-  { const n = await hit(); check(n >= 10 && n <= 20, 'numbers missing when on ' + n); }   /* Build 202: 보통 숫자는 동시에 10개까지 */
+  { const n = await hit(); check(n >= 4 && n <= 7, 'numbers missing when on ' + n); }   /* Build 218: 보통 숫자 4개 + 치명타 3개까지 */
   await page.evaluate(() => togglePause()); await page.waitForTimeout(100); check(await page.evaluate(() => $('bNumP').textContent.includes('켬')), 'button text');
   await page.click('#bNumP'); await page.waitForTimeout(100); check(await page.evaluate(() => $('bNumP').textContent.includes('끔') && localStorage.getItem('stickhero_num') === '0'), 'toggle not saved');
   await page.screenshot({ path: `${OUT}/b121_pause.png` });

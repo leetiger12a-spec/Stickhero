@@ -13,7 +13,7 @@ const { chromium } = require('/opt/node22/lib/node_modules/playwright');
     return G.texts.map(t => ({ text: t.text, size: t.size, color: t.color, crit: !!t.crit, pop: t.pop > 0 })); });
   console.log(JSON.stringify(r));
   const c = r.find(t => t.crit), n = r.find(t => !t.crit && /^\d+$/.test(t.text));
-  check(c && c.size === 24 && c.color === '#ffd23f' && c.pop && c.text.endsWith('!'), 'crit text wrong'); check(n && n.size === 14 && n.color === '#fff', 'normal text wrong');
+  check(c && c.size === 20 && c.color === '#ffd23f' && c.pop && c.text.endsWith('!'), 'crit text wrong'); check(n && n.size === 13 && n.color === '#fff', 'normal text wrong');
   check(!r.some(t => t.text === '치명타!'), '치명타 label should be gone (Build 202)');
   await page.evaluate(() => { const G = SH.G, e = G.enemies[0]; for (let i = 0; i < 12; i++) hurtEnemy(e, 10, 0, 0, 0); }); await page.waitForTimeout(60);
   await page.screenshot({ path: `${OUT}/b109_crit.png` });

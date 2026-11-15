@@ -367,7 +367,7 @@ h2 .hb{-webkit-text-stroke:0;text-shadow:none;letter-spacing:0;font-family:"Jua"
 
 <script>
 'use strict';
-const BUILD = 217;
+const BUILD = 218;
 const BOSS_INTERVAL = 180;      // 보스 등장 간격(초)
 const WAVE_INTERVAL = 60;       // 대규모 몰이 이벤트 간격(초)
 const MAX_ENEMIES = 110;   // Build 202: 220 → 110 (화면이 너무 정신없어서) — 대신 마을 적이 조금 더 튼튼(CROWD_K)
@@ -1805,7 +1805,7 @@ const TIPS = {
 };
 let tipT = 0;
 function showTip(id) { const m = readJSON(META_KEY) || {}; m.tips = m.tips || {}; if (m.tips[id] || !TIPS[id]) return false; m.tips[id] = 1; writeJSON(META_KEY, m);
-  const el = $('tipCard'); el.innerHTML = TIPS[id]; el.classList.add('show'); el.dataset.id = id; clearTimeout(tipT); tipT = setTimeout(() => el.classList.remove('show'), 5000); return true; }
+  const el = $('tipCard'); el.innerHTML = TIPS[id]; el.classList.add('show'); el.dataset.id = id; clearTimeout(tipT); tipT = setTimeout(() => el.classList.remove('show'), 3500); return true; }   // Build 218: 안내 카드 5초 → 3.5초
 document.addEventListener('click', ev => { const b = ev.target.closest && ev.target.closest('.apk'); if (!b || !G) return; swapAlly(+b.dataset.on === 1, +b.dataset.i); });
 function swapAlly(on, i) { // ✅ 함께 → 💤 쉬기 / 💤 → ✅ (자리가 꽉 차 있으면 마지막 동료와 바꿈)
   G.bench = G.bench || []; const p = G.p;
@@ -2084,7 +2084,7 @@ function gameOver() {
 function bannerSoft(text, sub, color, dur) { if (G.banner) return; banner(text, sub, color, dur); }   // Build 202: 덜 중요한 알림 (다른 알림이 있으면 생략)
 function banner(text, sub, color, dur) {
   if (G.banner && G.banner.keep && G.banner.t < G.banner.dur - 0.4) { G.bannerQ = { text, sub, color, t: 0, dur }; return; }   // 중요한 알림(특별 층)은 끝까지 보여 주고 다음 것은 뒤에 (Build 164)
-  G.banner = { text, sub, color, t: 0, dur };
+  G.banner = { text, sub, color, t: 0, dur: Math.min(dur || 2, 2.2) };   // Build 218: 알림은 길어도 2.2초
 }
 function burst(x, y, color, n, spd, size, life) {
   for (let i = 0; i < n && G.parts.length < 700; i++) {
@@ -2093,6 +2093,9 @@ function burst(x, y, color, n, spd, size, life) {
   }
 }
 function ebPush(b) { if (G.ebullets.length < 40) G.ebullets.push(b); }   // Build 202: 적 총알은 화면에 최대 40개
+// 🧹 Build 218: 영웅 가까이에 적이 있으면 '싸우는 중' → 안내 글·이름표 숨김 (0.25초마다 다시 계산)
+let calmAt = -1, calmV = true;
+function fighting() { if (!G || !G.p) return false; if (Math.abs(G.t - calmAt) < 0.25) return !calmV; calmAt = G.t; const p = G.p; calmV = !G.enemies.some(e => (e.x - p.x) ** 2 + (e.y - p.y) ** 2 < 280 * 280); return !calmV; }
 function floatText(x, y, text, color, size, life) {
   if (G.texts.length > 40) G.texts.shift();   // Build 202: 90 → 40
   G.texts.push({ x, y, text, color, size, life: life || 0.7, max: life || 0.7 }); return G.texts[G.texts.length - 1];
@@ -2895,7 +2898,7 @@ function questEvent(id, n) {
   }
 }
 let questShown = '', questOpen = true;
-try { questOpen = localStorage.getItem('stickhero_questfold') !== '1'; } catch (e) {}
+try { questOpen = localStorage.getItem('stickhero_questfold') === '0'; } catch (e) {}   // Build 218: 처음엔 한 줄로 접혀 있음 (눌러서 펼치기)
 function updQuestBox() {
   const box = $('questBox'), on = G && G.quests && G.quests.length && $('hudBtns').classList.contains('show') && state !== 'title';
   box.classList.toggle('show', !!on); if (!on) return;
@@ -3592,9 +3595,9 @@ function hurtEnemy(e, dmg, fx, fy, kb) {
   const k = e.boss ? kb * 0.05 : kb;
   e.kx += fx * k; e.ky += fy * k;
   if (!numOn) {} else if (crit) { // 💥 치명타 (Build 109): 크고 통통 튀는 노란 숫자 + "치명타!" + 반짝
-    const t = floatText(e.x + rand(-6, 6), e.y - e.r - 6, dmg + '!', '#ffd23f', 24, 0.75); t.pop = 0.18; t.crit = true; G.crits = (G.crits || 0) + 1;
+    G.crits = (G.crits || 0) + 1; if (G.texts.filter(t => t.crit).length < 3) { const t = floatText(e.x + rand(-6, 6), e.y - e.r - 6, dmg + '!', '#ffd23f', 20, 0.6); t.pop = 0.18; t.crit = true; }   // Build 218: 치명타 숫자는 동시에 3개까지, 조금 작게
     burst(e.x, e.y - e.r, '#ffe066', 6, 140, 3, 0.3);
-  } else if (G.texts.filter(t => t.dmg).length < 10) floatText(e.x + rand(-6, 6), e.y - e.r - 4, '' + dmg, '#fff', 14, 0.6).dmg = true;   // Build 202: 보통 피해 숫자는 동시에 10개까지만
+  } else if (G.texts.filter(t => t.dmg).length < 4) floatText(e.x + rand(-6, 6), e.y - e.r - 4, '' + dmg, '#fff', 13, 0.5).dmg = true;   // Build 218: 보통 피해 숫자는 동시에 4개까지만 (202: 10)
   sfx('hit');
   if (e.hp <= 0 && e.final && !e.phase2) { finalTransform(e); return; }   // Build 88: 마지막 보스 2단계
   if (e.hp <= 0) killEnemy(e);
@@ -4061,13 +4064,13 @@ function update(dt) {
         if (e.healT <= 0 && !idle) {
           e.healT = 3; let n = 0;
           for (const f of G.enemies) if (!f.dead && !f.camp && f !== e && f.hp < f.maxHp && (f.x - e.x) ** 2 + (f.y - e.y) ** 2 < 130 * 130) { f.hp = Math.min(f.maxHp, f.hp + f.maxHp * 0.25); burst(f.x, f.y - 14, '#7bed9f', 4, 80, 3, 0.4); n++; }
-          if (n) { burst(e.x, e.y - 30, '#b388ff', 12, 120, 4, 0.5); floatText(e.x, e.y - 50, '✨회복', '#b388ff', 14, 0.8); }
+          if (n) { burst(e.x, e.y - 30, '#b388ff', 12, 120, 4, 0.5); if (!G.texts.some(t => t.heal)) floatText(e.x, e.y - 50, '✨회복', '#b388ff', 13, 0.6).heal = true; }   // Build 218: '회복' 글자는 화면에 1개만
         }
       }
       if (T === 'e_charger') {
         e.dashCd = (e.dashCd || 0) - dt;
         if (e.dashT > 0) { e.dashT -= dt; mx = e.ddx; my = e.ddy; spm = 3.6; }
-        else if (chase && pd < 190 && e.dashCd <= 0) { e.dashT = 0.55; e.dashCd = 3; e.ddx = pdx / pd; e.ddy = pdy / pd; e.lunge = 0.3; floatText(e.x, e.y - 40, '돌진!', '#ffd23f', 14, 0.7); }
+        else if (chase && pd < 190 && e.dashCd <= 0) { e.dashT = 0.55; e.dashCd = 3; e.ddx = pdx / pd; e.ddy = pdy / pd; e.lunge = 0.3; }   // Build 218: '돌진!' 글자 뺌 (돌진 그림으로 보임)
       }
       if (T === 'e_bat') e.z = 18 + Math.sin(e.wob * 0.8) * 5;   // 날아다님
       // ---- 단계 적 특기 (Build 68) ----
@@ -4089,7 +4092,7 @@ function update(dt) {
         e.dashCd = (e.dashCd === undefined ? rand(1, 3) : e.dashCd) - dt;
         if (e.aimT > 0) { e.aimT -= dt; spm = 0; if (e.aimT <= 0) { e.dashT = 0.5; e.lunge = 0.3; } }
         else if (e.dashT > 0) { e.dashT -= dt; mx = e.ddx; my = e.ddy; spm = 3.4; }
-        else if (chase && pd < 180 && e.dashCd <= 0) { e.aimT = 0.45; e.dashCd = 4; e.ddx = pdx / pd; e.ddy = pdy / pd; floatText(e.x, e.y - 50, '돌진!', '#ff6b6b', 13, 0.6); }
+        else if (chase && pd < 180 && e.dashCd <= 0) { e.aimT = 0.45; e.dashCd = 4; e.ddx = pdx / pd; e.ddy = pdy / pd; }
       }
       if (T === 'e_assassin') { // 숨었다가 영웅 뒤에 나타남
         e.hideCd = (e.hideCd === undefined ? rand(1, 2.5) : e.hideCd) - dt;
@@ -4781,7 +4784,7 @@ function drawAlly(a) {
     ctx.save(); ctx.translate(a.x, hy - 13); ctx.scale(1, IK); ctx.font = '9px Jua,system-ui,sans-serif'; ctx.textAlign = 'center'; ctx.lineWidth = 2.5; ctx.strokeStyle = '#222';
     const st = '★'.repeat(a.lvl - 1); ctx.strokeText(st, 0, 0); ctx.fillStyle = a.lvl >= 5 ? '#ffd23f' : '#ffe58f'; ctx.fillText(st, 0, 0); ctx.restore();
   }
-  if (a.name) { ctx.save(); ctx.translate(a.x, a.y + 18); ctx.scale(1, IK); ctx.font = 'bold 9px Jua,system-ui,sans-serif'; ctx.textAlign = 'center'; ctx.lineWidth = 2.5; ctx.strokeStyle = 'rgba(0,0,0,.7)'; ctx.strokeText(a.name, 0, 0); ctx.fillStyle = '#fff'; ctx.fillText(a.name, 0, 0); ctx.restore(); }   // 발밑 이름표
+  if (a.name && !fighting()) { ctx.save(); ctx.translate(a.x, a.y + 18); ctx.scale(1, IK); ctx.font = 'bold 9px Jua,system-ui,sans-serif'; ctx.textAlign = 'center'; ctx.lineWidth = 2.5; ctx.strokeStyle = 'rgba(0,0,0,.7)'; ctx.strokeText(a.name, 0, 0); ctx.fillStyle = '#fff'; ctx.fillText(a.name, 0, 0); ctx.restore(); }   // 발밑 이름표
   if (a.lvl > 1) {
     if (a.lvl < 5 && a.xp > 0) { ctx.fillStyle = '#222'; ctx.fillRect(a.x - 10, hy - 26, 20, 3); ctx.fillStyle = '#ffd23f'; ctx.fillRect(a.x - 10, hy - 26, 20 * Math.min(1, a.xp / ALLY_NEED[a.lvl]), 3); }
   }
@@ -5597,7 +5600,7 @@ function drawHUD() {
   if (G.mode === 'base') hudText(`🪵 ${p.logs}/${p.cap}`, W - 12, top + 86, 16, p.logs >= p.cap ? '#ff6b6b' : '#ffe0b3', 'right');
   if (G.mode === 'base') hudText(`🪨 ${G.stone}`, W - 12, top + 108, 16, '#dee2e6', 'right');
   if (G.mode === 'base') drawMinimap(8, top + 72, 76);
-  if (G.hint && !G.radio) {
+  if (G.hint && !G.radio && !fighting()) {   // Build 218: 싸울 땐 아래 안내 글 숨김
     ctx.font = '15px Jua,system-ui,sans-serif'; const tw = ctx.measureText(G.hint.text).width;
     const hy = Object.values(G.passives).some(l => l > 0) ? 26 : 0;   // 능력 줄이 있으면 위로
     roundRect(W / 2 - tw / 2 - 12, H - 92 - hy, tw + 24, 30, 15); ctx.fillStyle = 'rgba(0,0,0,.55)'; ctx.fill();
@@ -5694,16 +5697,16 @@ function drawHUD() {
     const k = bn.t < 0.25 ? bn.t / 0.25 : bn.t > bn.dur - 0.4 ? (bn.dur - bn.t) / 0.4 : 1;
     ctx.globalAlpha = Math.max(0, k);
     const sc = bn.t < 0.25 ? 0.5 + k * 0.5 : 1;
-    ctx.save(); ctx.translate(W / 2, H * 0.3); ctx.scale(sc, sc);
+    ctx.save(); ctx.translate(W / 2, bn.tw ? H * 0.3 : H * 0.2); ctx.scale(sc, sc);   // Build 218: 보통 알림은 위쪽에 작게
     if (bn.tw) { // 🗼 탑 층 배너: 뒤에 빙글 도는 빛살 + 돌 현판
       const bc = bn.tw % 5 === 0 ? '255,77,109' : '199,125,255';
       ctx.save(); ctx.rotate(G.t * 0.6); for (let i = 0; i < 12; i++) { ctx.rotate(Math.PI / 6); ctx.fillStyle = `rgba(${bc},.22)`; ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(-22, -W * 0.7); ctx.lineTo(22, -W * 0.7); ctx.fill(); } ctx.restore();
       const pw = Math.min(W * 0.9, 340), gr = ctx.createLinearGradient(0, -44, 0, 44); gr.addColorStop(0, '#4a4e69'); gr.addColorStop(1, '#22223b');
       ctx.fillStyle = gr; ctx.strokeStyle = '#ffd23f'; ctx.lineWidth = 4; ctx.beginPath(); ctx.roundRect(-pw / 2, -44, pw, 88, 16); ctx.fill(); ctx.stroke();
       ctx.strokeStyle = 'rgba(255,210,63,.4)'; ctx.lineWidth = 2; ctx.beginPath(); ctx.roundRect(-pw / 2 + 7, -37, pw - 14, 74, 11); ctx.stroke();
-    } else { ctx.fillStyle = 'rgba(0,0,0,.45)'; ctx.fillRect(-W / 2, -38, W, 76); }
-    hudText(bn.text, 0, -10, Math.min(36, W / 11), bn.color, 'center', true);
-    if (bn.sub) hudText(bn.sub, 0, 22, 16, '#fff', 'center');
+    } else { ctx.fillStyle = 'rgba(0,0,0,.4)'; ctx.fillRect(-W / 2, -30, W, 60); }
+    hudText(bn.text, 0, -8, bn.tw ? Math.min(36, W / 11) : Math.min(26, W / 14), bn.color, 'center', true);
+    if (bn.sub) hudText(bn.sub, 0, bn.tw ? 22 : 17, bn.tw ? 16 : 13, '#fff', 'center');
     ctx.restore(); ctx.globalAlpha = 1;
   }
   // 보스 등장 붉은 테두리
