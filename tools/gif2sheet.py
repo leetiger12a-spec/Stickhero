@@ -1,5 +1,5 @@
 # GIF(또는 MP4에서 뽑은 그림들) → 게임 동작 시트 (Build 199)
-# 사용: python3 tools/gif2sheet.py art/gif/이름.gif 출력이름 칸높이 [step=1] [keep=0.06] [holes=면적] [holesy=0~1] [crop=x0,x1]
+# 사용: python3 tools/gif2sheet.py art/gif/이름.gif 출력이름 칸높이 [step=1] [keep=0.06] [holes=면적] [holesy=0~1] [crop=x0,x1] [bgmin=225] [bgsat=30]
 # - 칸마다 흰 배경 제거(가장자리와 이어진 흰색만), 카메라가 고정이라 모든 칸을 같은 틀(합친 범위)로 잘라 위치가 흔들리지 않음
 # - 몸에서 떨어져 멀리 날아가는 조각(화살·폭탄 등)은 빼고 몸 주변 조각만 남김 (게임이 따로 그림)
 import sys, json, numpy as np
@@ -20,7 +20,7 @@ if opts.get('crop'):   # crop=0.33,0.66 → 한 GIF에 여러 캐릭터가 나�
     frames = [f[:, int(f.shape[1] * c0):int(f.shape[1] * c1)] for f in frames]
 masks = []
 for a in frames:
-    bgish = (a.min(-1) > 225) & (a.max(-1) - a.min(-1) < 30)
+    bgish = (a.min(-1) > int(opts.get('bgmin', 225))) & (a.max(-1) - a.min(-1) < int(opts.get('bgsat', 30)))   # bgmin·bgsat: 스티커처럼 연한 빛 테두리도 배경으로 (예: bgmin=120 bgsat=110)
     bl, _ = ndimage.label(bgish)
     edge = set(np.unique(np.concatenate([bl[0], bl[-1], bl[:, 0], bl[:, -1]]))) - {0}
     fg = ~np.isin(bl, list(edge))
