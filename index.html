@@ -363,7 +363,7 @@ h2 .hb{-webkit-text-stroke:0;text-shadow:none;letter-spacing:0;font-family:"Jua"
 
 <script>
 'use strict';
-const BUILD = 198;
+const BUILD = 199;
 const BOSS_INTERVAL = 180;      // 보스 등장 간격(초)
 const WAVE_INTERVAL = 60;       // 대규모 몰이 이벤트 간격(초)
 const MAX_ENEMIES = 220;
@@ -531,7 +531,7 @@ const HATS = [
   { id: 'dragon', name: '황금 용 투구', need: 40, w: 1.6, by: 0.68 },
 ];
 // 그림마다 머리 꼭대기 위치 (칸 폭·높이 대비, tools로 잰 값): [가운데 x, 꼭대기 y]
-const HEAD_AT = { hero: [[0.5483, 0.0625]], hero_walk: [[0.6823, 0.14], [0.6749, 0.11], [0.6887, 0.12], [0.6759, 0.095], [0.6556, 0.09], [0.6745, 0.065], [0.6831, 0.07], [0.6765, 0.07]], hero_slash: [[0.681, 0.17], [0.6706, 0.18], [0.6536, 0.165], [0.6837, 0.195], [0.6736, 0.145], [0.6618, 0.13], [0.6418, 0.14], [0.6856, 0.105]] };
+const HEAD_AT = { hero: [[0.5483, 0.0625]], hero_walk: [[0.546, 0.07], [0.545, 0.07], [0.547, 0.07], [0.536, 0.07], [0.546, 0.07], [0.539, 0.065], [0.538, 0.06], [0.541, 0.06], [0.537, 0.06], [0.537, 0.065], [0.536, 0.065], [0.536, 0.07], [0.535, 0.075], [0.535, 0.075], [0.537, 0.075], [0.541, 0.075], [0.543, 0.07], [0.545, 0.065], [0.544, 0.065], [0.544, 0.06], [0.548, 0.06], [0.546, 0.06], [0.544, 0.065], [0.547, 0.07]], hero_slash: [[0.476, 0.165], [0.479, 0.17], [0.482, 0.17], [0.468, 0.165], [0.507, 0.19], [0.512, 0.165], [0.491, 0.17], [0.513, 0.18], [0.532, 0.19], [0.546, 0.165], [0.486, 0.155], [0.49, 0.14], [0.49, 0.135], [0.487, 0.13], [0.488, 0.125], [0.488, 0.13], [0.492, 0.135], [0.492, 0.14], [0.485, 0.13], [0.473, 0.12], [0.459, 0.11], [0.452, 0.1], [0.463, 0.12], [0.468, 0.145]] };
 const HEAD_W = 23;   // 게임 속 머리 폭(px)
 // 🐾 펫 친구 (Build 135): 별로 열림, 영웅을 따라다니며 도와줌
 const PETS = [
@@ -2714,7 +2714,7 @@ function updAllies(dt) {
           if (Math.random() < 0.06) sfx('meow'); });
       } else if (a.type === 'archer' && fd < 250) { // 활을 당겼다가 슝!
         startAct(a, 'shoot'); a.cd = 0.8; a.face = ux > 0 ? 1 : -1;
-        later(SPR.ally_archer_shoot ? 0.34 : 0.22, () => { const tx = foe.dead ? a.x + ux * 100 : foe.x, ty = foe.dead ? a.y + uy * 100 : foe.y, d2 = Math.hypot(tx - a.x, ty - a.y) || 1;
+        later(SPR.ally_archer_shoot ? 0.28 : 0.22, () => { const tx = foe.dead ? a.x + ux * 100 : foe.x, ty = foe.dead ? a.y + uy * 100 : foe.y, d2 = Math.hypot(tx - a.x, ty - a.y) || 1;
           const ba = Math.atan2(ty - a.y, tx - a.x);
           for (const off of sk ? [-0.18, 0, 0.18] : [0]) G.bullets.push({ x: a.x + a.face * 12, y: a.y - 22, vx: Math.cos(ba + off) * 520, vy: Math.sin(ba + off) * 520, r: 4, dmg: 9 * fm, life: 0.8, pierce: 0, hits: [], kind: 'arrow' });   // Lv3 특기: 3발
           sfx('arrow'); });
@@ -2730,7 +2730,7 @@ function updAllies(dt) {
       } else if (a.type === 'bomber' && fd < 230) { // 크게 뒤로 젖혔다가 휙 던지기 (손에서 출발)
         startAct(a, 'toss'); a.cd = 2.2; a.face = ux > 0 ? 1 : -1;
         const fx = foe.x, fy = foe.y;
-        later(SPR.ally_bomber_toss ? 0.33 : 0.22, () => { G.bombs.push({ x0: a.x + a.face * (SPR.ally_bomber_toss ? 26 : 10), y0: a.y - (SPR.ally_bomber_toss ? 28 : 34), x1: fx, y1: fy, t: 0, dur: 0.6, dmg: 30 * fm, twice: sk }); sfx('toss'); });
+        later(SPR.ally_bomber_toss ? 0.21 : 0.22, () => { G.bombs.push({ x0: a.x + a.face * (SPR.ally_bomber_toss ? 26 : 10), y0: a.y - (SPR.ally_bomber_toss ? 28 : 34), x1: fx, y1: fy, t: 0, dur: 0.6, dmg: 30 * fm, twice: sk }); sfx('toss'); });
       }
     }
     // 맞기
@@ -4932,13 +4932,13 @@ function spr(n, h, white) {
 // ---------- 캐릭터 동작: 한 장 그림을 젖히고·내밀고·찌그러뜨려 움직임 + 칼 궤적 등 효과 ----------
 // 연속 동작 그림(가로 N컷): tools/sheet.py 로 만들고 정보를 여기에. body = 칸 높이 대비 몸 키
 const SHEETS = {
-  hero_slash:        { n: 8, ax: 0.6494, ay: 0.9841, body: 0.9204, play: [0, 2, 3, 4, 5, 6, 7] },   // Build 182: 베기 8칸 (2번 칸은 칼이 없어서 빼고 재생)
-  hero_walk:         { n: 8, ax: 0.6345, ay: 0.9826, body: 0.9535, seq: [0, 1, 2, 3, 4, 5, 6, 7] },   // Build 181: 새 그림체 걷기 8칸
+  hero_slash:        { n: 24, ax: 0.2862, ay: 0.992, body: 0.874 },   // Build 199: GIF 24칸
+  hero_walk:         { n: 24, ax: 0.541, ay: 0.9812, body: 0.9708, seq: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23] },   // Build 199: GIF 24칸
   // 동료는 '1번 칸 전체 키 = 게임 속 그림 전체 키'로 맞춤 (body = 1번 칸 키 비율)
-  ally_archer_shoot: { n: 6, ax: 0.6937, ay: 0.9907, body: 0.946 },   // Build 186: 새 그림체 활 고양이 공격 6칸
-  ally_bomber_toss:  { n: 6, ax: 0.4846, ay: 0.99, body: 0.9617 },   // Build 188: 새 그림체 폭탄 고양이 공격 6칸 (5번 칸에서 손을 떠남)
-  ally_shield_bash:  { n: 6, ax: 0.3814, ay: 0.9899, body: 0.9581 },   // Build 190: 새 그림체 방패 시바 공격 6칸 (4번 칸 = 부딪힘, 0.18초)
-  ally_sword_slash:  { n: 6, ax: 0.4913, ay: 0.9912, body: 0.8678 },   // Build 184: 새 그림체 칼 고양이 공격 6칸
+  ally_archer_shoot:  { n: 24, ax: 0.3166, ay: 0.9892, body: 0.9769 },   // Build 199: GIF 24칸 (15칸째 화살 놓음)
+  ally_bomber_toss:  { n: 24, ax: 0.3981, ay: 0.9884, body: 0.9701, play: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 17, 18, 19, 20, 21, 22, 23] },   // Build 199: GIF 24칸 (10칸째 폭탄 놓음 · 17번째 칸은 영상 번짐이라 빼고 재생)
+  ally_shield_bash:  { n: 24, ax: 0.6, ay: 0.99, body: 0.9766 },   // Build 199: GIF 24칸 (12칸째 쾅)
+  ally_sword_slash:  { n: 24, ax: 0.326, ay: 0.9897, body: 0.868 },   // Build 199: GIF 24칸
   grunt_walk:        { n: 4, ax: 0.6144, ay: 0.9902, body: 0.9082, seq: [0, 1, 2, 3] },   // Build 191: 새 그림체 졸개 걷기 4칸
   grunt_atk:         { n: 4, ax: 0.5758, ay: 0.9899, body: 0.8936 },   // 졸개 공격 4칸
   runner_walk:       { n: 4, ax: 0.6754, ay: 0.9891, body: 0.96, seq: [0, 1, 2, 3] },   // Build 192: 달리기 졸개 달리기 4칸 (body = 1번 칸 키)
@@ -4955,10 +4955,10 @@ const SHEETS = {
   e_bat_atk:         { n: 4, ax: 0.6055, ay: 0.9779, body: 0.9557 },   // 박쥐병 내리꽂기 4칸
   e_charger_walk:    { n: 4, ax: 0.5603, ay: 0.9897, body: 0.9742, seq: [0, 1, 2, 3] },   // Build 198: 새 그림체 돌격병 걷기 4칸
   e_charger_atk:     { n: 4, ax: 0.5492, ay: 0.9883, body: 0.8466 },   // 돌격병 돌진 4칸 (돌진 0.55초 동안 재생)
-  ally_sword_walk:   { n: 6, ax: 0.5309, ay: 0.9906, body: 0.9734, seq: [0, 1, 2, 3, 4, 5] },   // Build 183: 새 그림체 칼 고양이 걷기 6칸
-  ally_archer_walk:  { n: 6, ax: 0.5862, ay: 0.9905, body: 0.9511, seq: [0, 1, 2, 3, 4, 5] },   // Build 185: 새 그림체 활 고양이 걷기 6칸
-  ally_bomber_walk:  { n: 6, ax: 0.5261, ay: 0.9904, body: 0.9662, seq: [0, 1, 2, 3, 4, 5] },   // Build 187: 새 그림체 폭탄 고양이 걷기 6칸
-  ally_shield_walk:  { n: 6, ax: 0.3741, ay: 0.9896, body: 0.9635, seq: [0, 1, 2, 3, 4, 5] },   // Build 189: 새 그림체 방패 시바 걷기 6칸
+  ally_sword_walk:   { n: 24, ax: 0.6079, ay: 0.9906, body: 0.9781, seq: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23] },   // Build 199: GIF 24칸
+  ally_archer_walk:  { n: 24, ax: 0.5324, ay: 0.9905, body: 0.9716, seq: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23] },   // Build 199: GIF 24칸
+  ally_bomber_walk:  { n: 24, ax: 0.56, ay: 0.9888, body: 0.9744, seq: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23] },   // Build 199: GIF 24칸
+  ally_shield_walk:  { n: 24, ax: 0.4789, ay: 0.9896, body: 0.9722, seq: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23] },   // Build 199: GIF 24칸
   ally_golem_walk:   { n: 4, ax: 0.5722, ay: 0.9679, body: 0.9358, seq: [0, 1, 2, 3] },   // Build 92
   ally_golem_slam:   { n: 4, ax: 0.5026, ay: 0.9688, body: 0.9375 },
 };
@@ -5065,7 +5065,8 @@ function drawSpriteMan(n, x, y, o) {
   const wName = !o.act && o.walking && WALK_SHEET[n];
   if (wName && SPR[wName] && STATIC_BODY[n]) {
     const S = SHEETS[wName]; ctx.scale(o.face, 1);
-    const wk = (o.phase / 1.6) % S.seq.length; drawSheet(wName, (S.seq[Math.floor(wk)] + (wk % 1)) / S.n, h * STATIC_BODY[n], true);
+    const L = S.seq.length, wk = (o.phase / (L >= 12 ? 9.6 / L : 1.6)) % L;   // 24칸 GIF도 한 바퀴 시간은 6칸과 같게
+    drawSheet(wName, (S.seq[Math.floor(wk)] + (wk % 1)) / S.n, h * STATIC_BODY[n], true);
     ctx.restore(); return;
   }
   // (적은 많아서 회전 없이 통통·찌그러짐만, 동료·영웅은 동작 포즈까지)
