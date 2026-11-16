@@ -367,7 +367,7 @@ h2 .hb{-webkit-text-stroke:0;text-shadow:none;letter-spacing:0;font-family:"Jua"
 
 <script>
 'use strict';
-const BUILD = 220;
+const BUILD = 221;
 const BOSS_INTERVAL = 180;      // 보스 등장 간격(초)
 const WAVE_INTERVAL = 60;       // 대규모 몰이 이벤트 간격(초)
 const MAX_ENEMIES = 110;   // Build 202: 220 → 110 (화면이 너무 정신없어서) — 대신 마을 적이 조금 더 튼튼(CROWD_K)
@@ -2610,6 +2610,12 @@ function updBase(dt) {
   for (const f of G.flyers) f.t += dt;
   G.flyers = G.flyers.filter(f => f.t < f.dur);
 
+  // 💤 Build 221: 쉬는 동료 옆에 1초 서 있으면 교대 (꽉 차 있으면 마지막 동료와 바꿈)
+  { const sp = p.dead ? [] : benchSpots(), near = sp.find(r => (r.x - p.x) ** 2 + (r.y - p.y) ** 2 < 30 * 30);
+    if (!near) G.benchStand = null;   // 자리에서 벗어나면 다시 교대 가능
+    else if (!G.benchStand || (!G.benchStand.lock && G.benchStand.a !== near.a)) G.benchStand = { a: near.a, t: 0 };
+    if (near && !G.benchStand.lock && (G.benchStand.t += dt) >= 1) { const a = near.a, out = G.allies.length >= ALLY_ACTIVE ? G.allies[G.allies.length - 1] : null; swapAlly(false, G.bench.indexOf(a)); G.benchStand = { lock: true, t: 0 };
+      floatText(p.x, p.y - 60, out ? `🔄 ${a.name || '동료'} 출동! (${out.name || '동료'} 휴식)` : `🔄 ${a.name || '동료'} 출동!`, '#9fd8ff', 13, 1.2); } }
   // 처음 하는 사람을 위한 안내 화살표
   G.hint = null;
   if (!p.dead) {
@@ -4771,6 +4777,7 @@ function drawResting(r) {
   ctx.save(); ctx.globalAlpha = 0.95; ctx.translate(r.x, r.y);
   drawSpriteMan(n, 0, 0, { face: r.f, phase: 0, hit: false, flash: false, lunge: 0, idle: false, s: 0.8 * breathe });
   ctx.restore();
+  const bs = G.benchStand; if (bs && bs.a === r.a && bs.t > 0) { ctx.save(); ctx.translate(r.x, r.y); ctx.scale(1, IK); ctx.strokeStyle = '#9fd8ff'; ctx.lineWidth = 4; ctx.beginPath(); ctx.arc(0, 0, 20, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * Math.min(1, bs.t)); ctx.stroke(); ctx.restore(); }   // 교대 게이지
   // zZ 가 위로 둥실
   const k = (G.t * 0.5 + r.i * 0.37) % 1;
   ctx.save(); ctx.globalAlpha = Math.sin(k * Math.PI) * 0.9; ctx.font = `bold ${10 + k * 6}px Jua,system-ui,sans-serif`; ctx.textAlign = 'center';
