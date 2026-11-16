@@ -180,16 +180,16 @@ h2{margin:0 0 14px;font:400 clamp(30px,9vw,46px) "BHS","Jua",system-ui,-apple-sy
 #questBox{position:fixed;left:8px;top:164px;z-index:4;display:none;background:rgba(20,20,30,.55);border:2px solid rgba(255,255,255,.35);border-radius:10px;padding:5px 8px;color:#fff;font:inherit;font-size:12px;max-width:190px;cursor:pointer;touch-action:none;user-select:none;-webkit-user-select:none}
 #questBox.show{display:block}#questBox .qh{color:#ffd23f;font-size:12px}#questBox .q{margin-top:3px;display:flex;align-items:center;gap:4px}#questBox .q>span{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}#questBox .qh{white-space:nowrap}#questBox .qh small{color:#9fd8ff;font-size:10px}#questBox.sw .q{margin-top:9px}#questBox .qsw::after{content:'';position:absolute;left:-18px;right:-7px;top:-7px;bottom:-7px}#questBox .qsw{position:relative;flex:none;font-weight:400;font-size:14px;line-height:1;padding:3px 4px;margin:-3px -4px -3px 0;border-radius:6px;background:rgba(159,216,255,.25)}#questBox .q.done{color:#7bed9f;text-decoration:line-through}
 #questBox .bar{height:4px;background:rgba(255,255,255,.25);border-radius:2px;margin-top:2px}#questBox .bar i{display:block;height:100%;background:#ffd23f;border-radius:2px}
-#bSos{position:fixed;right:10px;bottom:190px;z-index:4;width:66px;height:66px;border-radius:50%;border:4px solid #222;padding:0;cursor:pointer;display:none;
+#bSos{position:fixed;right:8px;bottom:150px;z-index:4;width:54px;height:54px;border-radius:50%;border:4px solid #222;padding:0;cursor:pointer;display:none;
   background:conic-gradient(#3fa9f5 var(--k,100%),#555 0);box-shadow:0 4px 0 #111;color:#fff;font-weight:900;font-family:inherit;touch-action:none}
-#bUlt{position:fixed;right:10px;bottom:270px;z-index:4;width:66px;height:66px;border-radius:50%;border:4px solid #222;padding:0;cursor:pointer;display:none;background:conic-gradient(#ff9f1c var(--k,0%),#555 0);box-shadow:0 4px 0 #111;color:#fff;font-weight:900;font-family:inherit;touch-action:none}
-#bUlt.show{display:block}#bUlt .in{position:absolute;inset:5px;border-radius:50%;background:#4a1d0a;display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1.05}#bUlt .ic{font-size:24px}#bUlt .tx{font-size:11px}
+#bUlt{position:fixed;right:8px;bottom:214px;z-index:4;width:54px;height:54px;border-radius:50%;border:4px solid #222;padding:0;cursor:pointer;display:none;background:conic-gradient(#ff9f1c var(--k,0%),#555 0);box-shadow:0 4px 0 #111;color:#fff;font-weight:900;font-family:inherit;touch-action:none}
+#bUlt.show{display:block}#bUlt .in{position:absolute;inset:5px;border-radius:50%;background:#4a1d0a;display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1.05}#bUlt .ic{font-size:19px}#bUlt .tx{font-size:11px}
 #bUlt.ready{animation:sosPulse .6s infinite}#bUlt.ready .in{background:radial-gradient(#ffd23f,#e85d04)}#bUlt.ready .tx{color:#222}
-#bBag{position:fixed;right:10px;bottom:350px;z-index:4;width:66px;height:66px;border-radius:50%;border:4px solid #222;padding:0;cursor:pointer;display:none;background:radial-gradient(#ffe066,#e09f1f);box-shadow:0 4px 0 #111;font-family:inherit;touch-action:none}
-#bBag.show{display:block;animation:sosPulse 1.2s infinite}#bBag .ic{font-size:30px;line-height:58px}#bBag .n{position:absolute;right:-6px;top:-6px;min-width:24px;height:24px;border-radius:12px;background:#e63946;color:#fff;font-size:14px;font-weight:900;line-height:24px;border:2px solid #222}
+#bBag{position:fixed;right:8px;bottom:278px;z-index:4;width:54px;height:54px;border-radius:50%;border:4px solid #222;padding:0;cursor:pointer;display:none;background:radial-gradient(#ffe066,#e09f1f);box-shadow:0 4px 0 #111;font-family:inherit;touch-action:none}
+#bBag.show{display:block;animation:sosPulse 1.2s infinite}#bBag .ic{font-size:24px;line-height:46px}#bBag .n{position:absolute;right:-6px;top:-6px;min-width:24px;height:24px;border-radius:12px;background:#e63946;color:#fff;font-size:14px;font-weight:900;line-height:24px;border:2px solid #222}
 #chestItems.many{max-height:52vh;overflow-y:auto;gap:6px}#chestItems.many .ci{width:76px;padding:5px 2px;font-size:11px}#chestItems.many .ci .nm{font-size:11px}
 #bSos.show{display:block}#bSos .in{position:absolute;inset:5px;border-radius:50%;background:#16324f;display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1.05}
-#bSos .ic{font-size:24px}#bSos .tx{font-size:11px}#bSos.ready{animation:sosPulse 1s infinite}#bSos.ready .in{background:#1d5c94}
+#bSos .ic{font-size:19px}#bSos .tx{font-size:10px}#bSos.ready{animation:sosPulse 1s infinite}#bSos.ready .in{background:#1d5c94}
 @keyframes sosPulse{50%{transform:scale(1.07)}}
 .hb{width:44px;height:44px;border-radius:12px;border:3px solid #2b2d42;background:linear-gradient(#fffdf6,#f1e6cf);font:inherit;font-size:18px;cursor:pointer;padding:0;color:#2b2d42;box-shadow:inset 0 2px 0 #fff,0 3px 0 #2b2d42}
 h2 .hb{-webkit-text-stroke:0;text-shadow:none;letter-spacing:0;font-family:"Jua",system-ui,sans-serif}
@@ -367,7 +367,7 @@ h2 .hb{-webkit-text-stroke:0;text-shadow:none;letter-spacing:0;font-family:"Jua"
 
 <script>
 'use strict';
-const BUILD = 222;
+const BUILD = 223;
 const BOSS_INTERVAL = 180;      // 보스 등장 간격(초)
 const WAVE_INTERVAL = 60;       // 대규모 몰이 이벤트 간격(초)
 const MAX_ENEMIES = 110;   // Build 202: 220 → 110 (화면이 너무 정신없어서) — 대신 마을 적이 조금 더 튼튼(CROWD_K)
@@ -5629,7 +5629,7 @@ function drawHUD() {
   if (G.mode === 'base') drawMinimap(8, top + 72, 76);
   if (G.hint && !G.radio && !fighting()) {   // Build 218: 싸울 땐 아래 안내 글 숨김
     ctx.font = '13px Jua,system-ui,sans-serif'; const tw = ctx.measureText(G.hint.text).width;   // Build 219: 15 → 13
-    const hy = Object.values(G.passives).some(l => l > 0) ? 26 : 0;   // 능력 줄이 있으면 위로
+    const hy = Object.values(G.passives).some(l => l > 0) ? 14 : 0;   // 능력 줄이 있으면 위로
     roundRect(W / 2 - tw / 2 - 10, H - 90 - hy, tw + 20, 25, 12); ctx.fillStyle = 'rgba(0,0,0,.5)'; ctx.fill();
     hudText(G.hint.text, W / 2, H - 77 - hy, 13, '#ffd23f', 'center');
   }
@@ -5693,22 +5693,22 @@ function drawHUD() {
   ctx.font = '20px sans-serif'; ctx.textBaseline = 'middle';
   for (const id in G.weapons) {
     const ev = evolved(id);
-    roundRect(ix, H - 46, 38, 38, 9); ctx.fillStyle = ev ? '#ffe9a0' : 'rgba(255,250,240,.85)'; ctx.fill(); ctx.strokeStyle = ev ? '#ff9f1c' : '#222'; ctx.lineWidth = ev ? 3.5 : 2.5; ctx.stroke();
+    roundRect(ix, H - 38, 30, 30, 7); ctx.fillStyle = ev ? '#ffe9a0' : 'rgba(255,250,240,.85)'; ctx.fill(); ctx.strokeStyle = ev ? '#ff9f1c' : '#222'; ctx.lineWidth = ev ? 3.5 : 2.5; ctx.stroke();   // Build 223: 무기 칸 38 → 30
     const wi = WICON[id + (ev ? '_evo' : '')];
-    if (wi) { const k = Math.min(32 / wi.width, 32 / wi.height); ctx.drawImage(wi, ix + 19 - wi.width * k / 2, H - 27 - wi.height * k / 2, wi.width * k, wi.height * k); }
-    else { ctx.textAlign = 'center'; ctx.fillStyle = '#000'; ctx.font = '20px sans-serif'; ctx.fillText(ev ? EVO[id].icon : WEAP[id].icon, ix + 19, H - 28); }
-    hudText(ev ? '★' : '' + G.weapons[id], ix + 33, H - 12, 11, '#ffd23f', 'center');
-    if (!ev && canEvolve(id) && Math.floor(G.t * 3) % 2) hudText('✨', ix + 6, H - 40, 12, '#ffd23f', 'center');   // 다음 레벨업에 진화 가능
-    ix += 44;
+    if (wi) { const k = Math.min(25 / wi.width, 25 / wi.height); ctx.drawImage(wi, ix + 15 - wi.width * k / 2, H - 23 - wi.height * k / 2, wi.width * k, wi.height * k); }
+    else { ctx.textAlign = 'center'; ctx.fillStyle = '#000'; ctx.font = '16px sans-serif'; ctx.fillText(ev ? EVO[id].icon : WEAP[id].icon, ix + 15, H - 23); }
+    hudText(ev ? '★' : '' + G.weapons[id], ix + 27, H - 10, 10, '#ffd23f', 'center');
+    if (!ev && canEvolve(id) && Math.floor(G.t * 3) % 2) hudText('✨', ix + 5, H - 34, 11, '#ffd23f', 'center');   // 다음 레벨업에 진화 가능
+    ix += 34;
   }
   // 가진 능력: 무기 칸 위 작은 그림 + 레벨 (Build 65)
   let px = 12;
   for (const id in PASS) {
     const l = G.passives[id] || 0; if (!l) continue;
     const pi = bakedHudIco('p_' + id);
-    if (pi) ctx.drawImage(pi, px, H - 72, 22, 22); else { ctx.textAlign = 'center'; ctx.font = '16px sans-serif'; ctx.fillStyle = '#000'; ctx.fillText(PASS[id].icon, px + 11, H - 61); }
-    hudText(l >= PASS[id].max ? 'M' : '' + l, px + 22, H - 52, 10, l >= PASS[id].max ? '#7bed9f' : '#fff', 'center');
-    px += 30;
+    if (pi) ctx.drawImage(pi, px, H - 58, 17, 17); else { ctx.textAlign = 'center'; ctx.font = '13px sans-serif'; ctx.fillStyle = '#000'; ctx.fillText(PASS[id].icon, px + 8, H - 49); }   // Build 223: 능력 22 → 17
+    hudText(l >= PASS[id].max ? 'M' : '' + l, px + 17, H - 42, 9, l >= PASS[id].max ? '#7bed9f' : '#fff', 'center');
+    px += 23;
   }
   // 빌드 번호
   ctx.font = '10px Jua,system-ui,sans-serif'; ctx.textAlign = 'right'; ctx.textBaseline = 'bottom'; ctx.fillStyle = 'rgba(255,255,255,.7)';
