@@ -1,6 +1,6 @@
 // Build 225~: 새 그림체 보스들 — 각 보스 그림이 불러와지고 등장 시 그려짐 (BN 목록만 늘리면 됨)
 const { chromium } = require('/opt/node22/lib/node_modules/playwright');
-const BN = [0, 1, 2];
+const BN = [0, 1, 2, 3, 4, 5];
 (async () => {
   const b = await chromium.launch(); const errors = []; const check = (c, m) => { if (!c) errors.push(m); };
   const ctx = await b.newContext({ viewport: { width: 412, height: 860 }, deviceScaleFactor: 1 });
@@ -19,5 +19,6 @@ const BN = [0, 1, 2];
     }, n);
     check(r.seen && r.h === 480, `boss${n} ` + JSON.stringify(r));
   }
+  check(await page.evaluate(() => SPR_SRC.boss_final && SPR_SRC.boss_final.naturalHeight === 480 && SPR.boss_final.width > 0), 'final boss loaded');
   await b.close(); console.log('ERRORS:', errors.length); errors.forEach(e => console.log(e)); process.exit(errors.length ? 1 : 0);
 })();
