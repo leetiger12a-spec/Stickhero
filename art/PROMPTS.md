@@ -186,3 +186,6 @@ OUTPUT: 1 second long, 24 frames (24 fps), looping. Export as an animated GIF on
 몬스터는 게임에서 12칸만 쓰므로 12칸(4열×3행)으로 요청 (칸이 커서 더 선명). 첨부: ① `art/ref/STYLE_MASTER.png` ② 그 몬스터 옛 그림 `art/ref/old_이름.png`.
 받은 시트는 `tools/grid2sheet.py`로 칸을 잘라 GIF와 같은 게임 그림으로 만듦.
 - (Build 215) 제미나이가 옛 그림체를 따라 그려서 → 옛 그림은 첨부하지 않고 `art/ref/STYLE_MONSTERS.png`(새 그림체 몬스터 6마리) 1장만 첨부, 한 번에 한 마리, 모습은 글로만 설명.
+
+## 👑 보스 새 그림체 (Build 224~, 제미나이, 한 번에 1마리)
+첨부: `art/ref/STYLE_MONSTERS.png` 1장만 (옛 그림 첨부 금지). `THE NEW BOSS:` 줄만 바꿈. 목록은 대화 답변의 표 참고 (boss0~5, boss_final 먼저).
