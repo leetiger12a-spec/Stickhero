@@ -1,6 +1,6 @@
 // Build 229~: 새 그림체 마을 건물 — 그림이 불러와지고 마을 화면이 오류 없이 그려짐 (NB 목록만 늘리면 됨)
 const { chromium } = require('/opt/node22/lib/node_modules/playwright');
-const NB = ['hall', 'hall2', 'hall3', 'hall_broken', 'tower', 'tower_broken', 'stonewall', 'farm', 'mine', 'market', 'smith'];
+const NB = ['hall', 'hall2', 'hall3', 'hall_broken', 'tower', 'tower_broken', 'stonewall', 'farm', 'mine', 'market', 'smith', 'tavern', 'camp', 'tree', 'stump', 'log', 'stake', 'rock', 'stone', 'torch', 'pillar'];
 (async () => {
   const b = await chromium.launch(); const errors = []; const check = (c, m) => { if (!c) errors.push(m); };
   const ctx = await b.newContext({ viewport: { width: 412, height: 860 }, deviceScaleFactor: 2 });
