@@ -249,3 +249,28 @@ BACKGROUND: plain pure white (#FFFFFF) everywhere else, no shadow on the backgro
 QUALITY: ultra high resolution, QHD (2560x1440) or higher, crisp clean lines
 ```
 
+
+---
+
+## 🌳 자연물 8개 한 장 시트 (Build 231~)
+첨부: `art/ref/STYLE_MONSTERS.png` 1장만. 2줄 × 4칸, 칸 사이 아주 넓게.
+```
+Draw ONE sprite sheet of 8 small environment objects for my mobile game village, in EXACTLY the same art style as the attached image.
+
+STYLE (copy the attached image exactly — this is the most important rule): THICK, BOLD, uniform black outlines (as thick as in the attached image, never thin), flat cel shading with only 2-3 tones per color plus one sharp white highlight, VERY bright SATURATED colors (never muted, never brownish-grey, never pastel), chunky slightly cartoon-exaggerated shapes. Clean vector-like 2D game art. NOT painterly, NOT sketchy, NOT soft airbrush, NOT realistic, NOT 3D, NOT babyish.
+
+OBJECTS (2 rows x 4 columns, read left to right, top row first):
+1) TREE: a round bushy bright-green oak tree with a thick short brown trunk and a few leaf clumps.
+2) TREE STUMP: a short cut tree stump with light wood rings on top and bark on the sides.
+3) LOG: one chopped wooden log lying on its side, wood rings visible at the end.
+4) WOODEN STAKE: one tall thin sharpened wooden fence stake standing upright.
+5) ROCK PILE: a big pile of grey boulders with a few small pebbles at the bottom.
+6) STONE: one single chunky grey stone block.
+7) TORCH: a tall iron torch post with an empty iron bowl on top (no fire), standing on small iron feet.
+8) STONE PILLAR: a short ruined grey stone pillar with cracks and a little green moss.
+
+LAYOUT (strict): every object full and whole, facing the viewer, 3/4 top-down game view, light from top-left, each centered in its own cell, VERY WIDE empty white space between all objects and rows so nothing touches. No ground under them.
+
+BACKGROUND: plain pure white (#FFFFFF) everywhere, no ground, no shadows, no grass patches, no glow halo, no sticker border, no fire, no smoke, no text, no letters, no numbers, no watermark, no logo.
+QUALITY: ultra high resolution, QHD (2560x1440) or higher, crisp clean lines
+```
