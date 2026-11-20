@@ -371,7 +371,7 @@ h2 .hb{-webkit-text-stroke:0;text-shadow:none;letter-spacing:0;font-family:"Jua"
 
 <script>
 'use strict';
-const BUILD = 247;
+const BUILD = 248;
 const BOSS_INTERVAL = 180;      // 보스 등장 간격(초)
 const WAVE_INTERVAL = 60;       // 대규모 몰이 이벤트 간격(초)
 const MAX_ENEMIES = 110;   // Build 202: 220 → 110 (화면이 너무 정신없어서) — 대신 마을 적이 조금 더 튼튼(CROWD_K)
@@ -4336,8 +4336,12 @@ function updBoss(e, dt, dx, dy, d) {
       const r = Math.random();
       if (e.rage && Math.random() < 0.3) { e.mode = 'spiral'; e.st = 1.4; e.spA = Math.random() * 7; floatText(e.x, e.y - 100, '🌀 회오리!', '#ff9f1c', 16, 0.9); }
       else if (r < 0.38) { startSpecial(e, dx, dy, d); }
-      else if (r < 0.6) { e.mode = 'aim'; e.st = 0.9; sfx('warn'); }
-      else if (r < 0.75) { e.mode = 'ring'; e.st = 0.3; e.rings = 2 + Math.min(3, e.lvl); }
+      else if (r < 0.55) { e.mode = 'aim'; e.st = 0.9; sfx('warn'); }
+      else if (r < 0.68) { e.mode = 'ring'; e.st = 0.3; e.rings = 2 + Math.min(3, e.lvl); }
+      else if (r < 0.8) { // 🎯 Build 248: 표적 쿵 — 영웅 자리와 그 둘레에 빨간 원 3~5개, 1초 뒤 쿵! (피하면 안 아파요)
+        e.mode = 'summon'; e.st = 0.8; const p = G.p, n = 3 + Math.min(2, Math.floor(e.lvl / 2));
+        for (let i = 0; i < n; i++) { const a = Math.random() * 7, rr = i ? rand(80, 170) : 0; G.hazards.push({ x: p.x + Math.cos(a) * rr, y: p.y + Math.sin(a) * rr, r: 58, warn: 1 + i * 0.12, life: 1, max: 1, tick: 0, slam: true, dmg: (18 + e.lvl * 5) * DF().edmg }); }
+        floatText(e.x, e.y - 100, '🎯 표적 쿵!', '#ff6b6b', 16, 0.9); sfx('warn'); }
       else {
         e.mode = 'summon'; e.st = 0.8;
         for (let i = 0; i < 6 + e.lvl * 2; i++) { const a = i / (6 + e.lvl * 2) * Math.PI * 2; G.enemies.push(makeEnemy('runner', e.x + Math.cos(a) * 80, e.y + Math.sin(a) * 80)); }
@@ -4492,7 +4496,9 @@ function updHazards(dt) {
   // 불길 장판: 경고 → 타오름(밟으면 0.5초마다 피해)
   for (const h of G.hazards) {
     if (h.w0 === undefined) h.w0 = h.warn;
-    if (h.warn > 0) { h.warn -= dt; if (h.warn <= 0) { burst(h.x, h.y, '#ff7b00', 12, 140, 5, 0.4); sfx('bombBoom'); } continue; }
+    if (h.warn > 0) { h.warn -= dt; if (h.warn <= 0) { burst(h.x, h.y, '#ff7b00', 12, 140, 5, 0.4); sfx('bombBoom');
+      if (h.slam) { burst(h.x, h.y, '#ffd23f', 20, 240, 6, 0.5); G.shake = Math.max(G.shake, 7); h.life = 0.25; if (!p.dead && (p.x - h.x) ** 2 + ((p.y - h.y) / 0.8) ** 2 < h.r * h.r) { hurtPlayer(h.dmg); floatText(p.x, p.y - 60, '쿵!', '#ff6b6b', 18, 0.8); } } } continue; }   // 🎯 Build 248: 표적 쿵 — 한 번만 크게
+    if (h.slam) { h.life -= dt; continue; }
     h.life -= dt; h.tick -= dt;
     if (h.web) { if (!p.dead && (p.x - h.x) ** 2 + ((p.y - h.y) / 0.8) ** 2 < h.r * h.r) slowHero(0.3); continue; }
     if (h.tick <= 0 && !p.dead && (p.x - h.x) ** 2 + ((p.y - h.y) / 0.8) ** 2 < h.r * h.r) { h.tick = 0.5; p.inv = 0; hurtPlayer(h.dmg); }
