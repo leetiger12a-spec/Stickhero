@@ -153,3 +153,35 @@ GRID RULES (strict):
 BACKGROUND: plain pure white (#FFFFFF) everywhere, no grid lines, no frame borders, no ground line, no shadows, no glow halo, no sticker border, no effects, no slash trails, no speed lines, no dust, no text, no letters, no numbers, no watermark.
 QUALITY: ultra high resolution, QHD (2560x1440) or higher, crisp clean lines
 ```
+
+## ⑧ 탱크 걷기 — 첨부 `art/ref/tank_new_pose.png`
+```
+TASK: one 2D game ANIMATION SPRITE SHEET of the attached character: exactly 12 frames arranged in a grid of 4 columns x 3 rows, read left to right, top row first.
+
+CHARACTER: the attached character (a big, heavy blue brute in a steel helmet, spiked steel shoulder plates, leather straps with a gold belt buckle, steel boots, a bare blue right fist and a wooden spiked round-top shield on the left arm). Keep EXACTLY the same design, colors, thick black outlines, cel shading, proportions and art style in every frame. The shield is held in EVERY frame.
+
+ANIMATION: a slow, HEAVY STOMPING WALK CYCLE in place, facing right. The legs MUST be in a DIFFERENT position in every frame, exactly like this:
+- Frame 1: right foot forward flat on the ground, left foot back, body low (wide stance).
+- Frame 2: weight on the right foot, left heel lifting.
+- Frame 3: left knee lifting up and forward, body rising slightly.
+- Frame 4: left knee at its highest in front, right leg straight.
+- Frame 5: left foot reaching forward, about to land.
+- Frame 6: left foot STOMPS down flat in front, body lowest, shoulders dipping.
+- Frame 7: left foot forward flat, right foot back (mirror of frame 1).
+- Frame 8: weight on the left foot, right heel lifting.
+- Frame 9: right knee lifting up and forward, body rising slightly.
+- Frame 10: right knee at its highest in front, left leg straight.
+- Frame 11: right foot reaching forward, about to land.
+- Frame 12: right foot STOMPS down flat in front, body lowest, flowing back into frame 1.
+The fist swings a little opposite to the legs; the shield bobs up and down with the steps. The body sways slowly side to side like a heavy giant.
+
+GRID RULES (strict):
+- Every frame: the SAME character at the SAME size, facing right, full body, 3/4 top-down game view.
+- Same ground line in every frame; the character stays in the center of its cell.
+- The character fills about 70% of its cell height.
+- VERY WIDE empty white gaps between all cells and between the rows; no shield, spike, fist, boot or body part may touch or come near another cell.
+- Only the 12 frames. No extra poses, no labels.
+
+BACKGROUND: plain pure white (#FFFFFF) everywhere, no grid lines, no frame borders, no ground line, no shadows, no glow halo, no sticker border, no effects, no dust, no impact marks, no speed lines, no text, no letters, no numbers, no watermark.
+QUALITY: ultra high resolution, QHD (2560x1440) or higher, crisp clean lines
+```
