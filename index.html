@@ -371,7 +371,7 @@ h2 .hb{-webkit-text-stroke:0;text-shadow:none;letter-spacing:0;font-family:"Jua"
 
 <script>
 'use strict';
-const BUILD = 246;
+const BUILD = 247;
 const BOSS_INTERVAL = 180;      // 보스 등장 간격(초)
 const WAVE_INTERVAL = 60;       // 대규모 몰이 이벤트 간격(초)
 const MAX_ENEMIES = 110;   // Build 202: 220 → 110 (화면이 너무 정신없어서) — 대신 마을 적이 조금 더 튼튼(CROWD_K)
@@ -2272,22 +2272,25 @@ function makeEnemy(type, x, y) {
   return e;
 }
 // ⚔ 정예 몬스터 (Build 168): 빨간 기운 · 이름표 · 체력 4배 · 공격 1.5배 · 특기 하나 (🛡 방패 / ✂ 분열 / 🌀 순간이동) · 잡으면 작은 상자
-const ELITE_P = 0.03, ELITE_K = { shield: ['🛡', '방패'], split: ['✂', '분열'], blink: ['🌀', '순간이동'] };
+const ELITE_P = 0.03, ELITE_K = { shield: ['🛡', '방패'], split: ['✂', '분열'], blink: ['🌀', '순간이동'], regen: ['🩹', '재생'], haste: ['💨', '질주'] };   // Build 247: 재생·질주
 let eliteBlock = false;
 function eliteOk() { if (!G || eliteBlock || (window.__noGold && window.__eliteP === undefined)) return false;
   if (G.mode === 'stage') return G.st && !G.st.cave && (G.st.tower ? G.st.tower >= 6 : G.st.n >= 3);
   return tierNow() >= 1; }
 function makeElite(e, kind) {
-  e.elite = kind || Object.keys(ELITE_K)[Math.floor(Math.random() * 3)]; e.hp *= 4; e.maxHp *= 4; e.dmg *= 1.5; e.r *= 1.2; e.scale = 1.25; e.xp *= 4; e.gold += 3; e.eT = rand(2, 4); e.shieldT = 0;
+  e.elite = kind || Object.keys(ELITE_K)[Math.floor(Math.random() * Object.keys(ELITE_K).length)]; e.hp *= 4; e.maxHp *= 4; e.dmg *= 1.5; e.r *= 1.2; e.scale = 1.25; e.xp *= 4; e.gold += 3; e.eT = rand(2, 4); e.shieldT = 0;
   if (state === 'play' && !G.seenElite) { G.seenElite = true; bannerSoft('⚔ 정예 몬스터!', '빨간 기운 · 특기가 있어요 · 잡으면 상자!', '#ff4d6d', 2.4); }
 }
 function updElite(e, dt, p) {
   if (e.shieldT > 0) e.shieldT -= dt;
+  if (e.hasteT > 0) e.hasteT -= dt;
   if ((e.eT -= dt) > 0) return;
   if (e.elite === 'shield') { e.shieldT = 1.5; e.eT = 4.5; sfx('woosh'); }
   else if (e.elite === 'blink' && Math.hypot(p.x - e.x, p.y - e.y) < 420) { e.eT = rand(3.2, 4.2); burst(e.x, e.y - 20, '#c77dff', 14, 160, 3, 0.4);
     const a = Math.random() * 7; e.x = p.x + Math.cos(a) * 90; e.y = p.y + Math.sin(a) * 70; if (G.mode === 'stage') e.x = clamp(e.x, -STAGE_HW + 20, STAGE_HW - 20);
     burst(e.x, e.y - 20, '#c77dff', 14, 160, 3, 0.4); sfx('woosh'); }
+  else if (e.elite === 'regen') { e.eT = 1; if (G.t - (e.hurtAt ?? -9) > 1.5 && e.hp < e.maxHp) { e.hp = Math.min(e.maxHp, e.hp + e.maxHp * 0.04); burst(e.x, e.y - 24, '#7bed9f', 8, 90, 3, 0.4); } }   // 🩹 1.5초 안 맞으면 1초마다 4% 회복
+  else if (e.elite === 'haste' && Math.hypot(p.x - e.x, p.y - e.y) < 380) { e.hasteT = 1; e.eT = rand(3.5, 4.5); burst(e.x, e.y - 10, '#9fd8ff', 10, 140, 3, 0.35); sfx('woosh'); }   // 💨 1초 동안 2배 빠르게
   else e.eT = 1;
 }
 // Build 200: 정예 상자는 4마리에 1번꼴 (예전엔 매번 → 상자가 너무 많이 깔림), 나머지는 금화 5개
@@ -3644,7 +3647,7 @@ function hurtEnemy(e, dmg, fx, fy, kb) {
   dmg = Math.round(dmg * G.p.dmgMul * (crit ? 2 : 1) * (e.boss && e.weakT > 0 ? 1.5 : 1) * (G.fogOn > 0 && G.mode === 'base' ? 1.15 : 1));   // 안개: +15%   // 🎯 보스 약점 타임
   if (e.boss && e.weakT > 0) { G.weakHits = (G.weakHits || 0) + 1; if (G.t - (e.weakTxt || 0) > 0.6) { e.weakTxt = G.t; floatText(e.x + rand(-20, 20), e.y - (e.r || 40) - 40, '약점!', '#ff4d6d', 18, 0.6); } }
   if (e.type === 'e_agrunt' && fx * e.face < 0) { dmg = Math.round(dmg * 0.7); if (Math.random() < 0.15) floatText(e.x, e.y - 50, '막음!', '#dee2e6', 12, 0.5); }   // 갑옷 졸개: 앞(보는 쪽)에서 맞으면 방패로 −30%
-  e.hp -= dmg; e.flash = 0.1; e.hitT = 0.25; e.hx = fx; e.hy = fy; e.lastSrc = G.hitSrc || null;   // 마지막으로 때린 것 (퀘스트용)
+  e.hp -= dmg; e.flash = 0.1; e.hitT = 0.25; e.hurtAt = G.t; e.hx = fx; e.hy = fy; e.lastSrc = G.hitSrc || null;   // 마지막으로 때린 것 (퀘스트용)
   if (e.goldG && G.t - (e.coinAt || 0) > 0.25) { e.coinAt = G.t; dropCoin(e.x + rand(-40, 40), e.y + rand(-30, 30)); }   // 황금 골렘: 맞을 때 금화 (1초에 최대 4개)
   const k = e.boss ? kb * 0.05 : kb;
   e.kx += fx * k; e.ky += fy * k;
@@ -4168,7 +4171,7 @@ function update(dt) {
       if (T === 'e_demon') e.z = 16 + Math.sin(e.wob * 0.7) * 5;
       if (T === 'e_ghost') e.z = 8 + Math.sin(e.wob * 0.5) * 6;
       if (T === 'e_bomber' && chase && pd < e.r + p.r + 12) { bomberBoom(e); continue; }
-      const sp = (e.hitT > 0 ? 0.35 : 1) * (idle ? 0.15 : 1) * (e.slowT > 0 ? 0.5 : 1) * (G.mode === 'stage' && G.st.blizOn > 0 ? 0.8 : 1) * (G.mode === 'stage' && G.st.rule === 'wind' ? 1.2 : 1) * (G.rainOn && G.mode === 'base' ? 0.9 : 1) * e.spd * far * spm;   // 얼음 맞으면 절반 속도, 비 오면 -10%
+      const sp = (e.hasteT > 0 ? 2 : 1) * (e.hitT > 0 ? 0.35 : 1) * (idle ? 0.15 : 1) * (e.slowT > 0 ? 0.5 : 1) * (G.mode === 'stage' && G.st.blizOn > 0 ? 0.8 : 1) * (G.mode === 'stage' && G.st.rule === 'wind' ? 1.2 : 1) * (G.rainOn && G.mode === 'base' ? 0.9 : 1) * e.spd * far * spm;   // 얼음 맞으면 절반 속도, 비 오면 -10%
       e.x += mx * sp * dt; e.y += my * sp * dt;
     }
     e.x += e.kx * dt; e.y += e.ky * dt;
