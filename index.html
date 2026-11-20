@@ -372,7 +372,7 @@ h2 .hb{-webkit-text-stroke:0;text-shadow:none;letter-spacing:0;font-family:"Jua"
 
 <script>
 'use strict';
-const BUILD = 257;
+const BUILD = 258;
 const BOSS_INTERVAL = 180;      // 보스 등장 간격(초)
 const WAVE_INTERVAL = 60;       // 대규모 몰이 이벤트 간격(초)
 const MAX_ENEMIES = 110;   // Build 202: 220 → 110 (화면이 너무 정신없어서) — 대신 마을 적이 조금 더 튼튼(CROWD_K)
@@ -5182,7 +5182,7 @@ const SHEETS = {
   ally_sword_slash:  { n: 24, ax: 0.326, ay: 0.9897, body: 0.868 },   // Build 199: GIF 24칸
   grunt_walk:        { n: 12, ax: 0.5058, ay: 0.9774, body: 0.9057, seq: [0, 1, 2, 3, 4, 6, 7, 8, 9, 10, 11] },   // Build 239: 졸개 걷기 12칸 (제미나이, 칼 없는 6번째 칸은 뺌) · 옛 4칸은 Build 191
   grunt_atk:         { n: 12, ax: 0.4506, ay: 0.9767, body: 0.9147, play: [1, 2, 3, 5, 6, 7, 8] },   // Build 240: 졸개 칼 내려베기 12칸 (제미나이, 뒤로 돌아간 5번째·칼 없는 10번째 칸은 뺌)
-  runner_walk:       { n: 4, ax: 0.6754, ay: 0.9891, body: 0.96, seq: [0, 1, 2, 3] },   // Build 192: 달리기 졸개 달리기 4칸 (body = 1번 칸 키)
+  runner_walk:       { n: 12, ax: 0.5675, ay: 0.9766, body: 0.9336, seq: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11] },   // Build 258: 달리기 졸개 달리기 12칸 (제미나이, 칸마다 다리 자세 지정) · 옛 4칸은 Build 192
   runner_atk:        { n: 4, ax: 0.5633, ay: 0.9892, body: 0.9747 },   // 달리기 졸개 공격 4칸
   tank_walk:         { n: 4, ax: 0.6526, ay: 0.9873, body: 0.9746, seq: [0, 1, 2, 3] },   // Build 193: 탱크 쿵쿵 걷기 4칸
   tank_atk:          { n: 4, ax: 0.5908, ay: 0.9869, body: 0.9716 },   // 탱크 방패 치기 4칸
