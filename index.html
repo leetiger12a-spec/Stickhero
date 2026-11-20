@@ -372,7 +372,7 @@ h2 .hb{-webkit-text-stroke:0;text-shadow:none;letter-spacing:0;font-family:"Jua"
 
 <script>
 'use strict';
-const BUILD = 259;
+const BUILD = 260;
 const BOSS_INTERVAL = 180;      // 보스 등장 간격(초)
 const WAVE_INTERVAL = 60;       // 대규모 몰이 이벤트 간격(초)
 const MAX_ENEMIES = 110;   // Build 202: 220 → 110 (화면이 너무 정신없어서) — 대신 마을 적이 조금 더 튼튼(CROWD_K)
@@ -5184,7 +5184,7 @@ const SHEETS = {
   grunt_atk:         { n: 12, ax: 0.4506, ay: 0.9767, body: 0.9147, play: [1, 2, 3, 5, 6, 7, 8] },   // Build 240: 졸개 칼 내려베기 12칸 (제미나이, 뒤로 돌아간 5번째·칼 없는 10번째 칸은 뺌)
   runner_walk:       { n: 12, ax: 0.5675, ay: 0.9766, body: 0.9336, seq: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11] },   // Build 258: 달리기 졸개 달리기 12칸 (제미나이, 칸마다 다리 자세 지정) · 옛 4칸은 Build 192
   runner_atk:        { n: 12, ax: 0.5252, ay: 0.9766, body: 0.8906, play: [1, 2, 3, 5, 6, 7, 8] },   // Build 259: 달리기 졸개 X자 베기 12칸 (제미나이, 달리는 자세로 나온 5번째 칸·준비 자세 칸은 빼고 7칸)
-  tank_walk:         { n: 4, ax: 0.6526, ay: 0.9873, body: 0.9746, seq: [0, 1, 2, 3] },   // Build 193: 탱크 쿵쿵 걷기 4칸
+  tank_walk:         { n: 12, ax: 0.3548, ay: 0.9789, body: 0.8877, seq: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11] },   // Build 260: 탱크 쿵쿵 걷기 12칸 (제미나이, 칸마다 다리 자세 지정) · 옛 4칸은 Build 193
   tank_atk:          { n: 4, ax: 0.5908, ay: 0.9869, body: 0.9716 },   // 탱크 방패 치기 4칸
   e_slime_walk:      { n: 4, ax: 0.6459, ay: 0.9748, body: 0.6597, seq: [0, 1, 2, 3] },   // Build 194: 새 그림체 슬라임 통통 4칸 (body = 1번 칸 = 서 있는 그림)
   e_slime_atk:       { n: 4, ax: 0.6684, ay: 0.9736, body: 0.7753 },   // 슬라임 몸통 박치기 4칸
