@@ -372,7 +372,7 @@ h2 .hb{-webkit-text-stroke:0;text-shadow:none;letter-spacing:0;font-family:"Jua"
 
 <script>
 'use strict';
-const BUILD = 255;
+const BUILD = 256;
 const BOSS_INTERVAL = 180;      // 보스 등장 간격(초)
 const WAVE_INTERVAL = 60;       // 대규모 몰이 이벤트 간격(초)
 const MAX_ENEMIES = 110;   // Build 202: 220 → 110 (화면이 너무 정신없어서) — 대신 마을 적이 조금 더 튼튼(CROWD_K)
@@ -2440,10 +2440,27 @@ function updIntro(dt) {
   }
   if (I.t >= I.dur) endIntro();
 }
+// 💡 보스 팁 (Build 256): 보스마다 처음 3번 만날 때 아래 카드로 이기는 법을 알려 줘요
+const BOSS_TIP = {
+  jump: '바닥에 그림자가 생기면 옆으로! 내려앉을 때 💨 구르기',
+  punch: '날아오는 주먹 줄에서 옆으로 비켜서요',
+  fire: '불길 위에 서 있지 말고 계속 움직여요',
+  ice: '파란 숨결 앞을 피해요 · 느려지면 💨 구르기',
+  web: '보라 거미줄 원은 밟지 말고, 새끼 거미부터 잡아요',
+  skull: '해골 병사는 동료에게 맡기고 보스를 계속 때려요',
+  quake: '쾅! 하기 전에 멀리 떨어져요 · 작은 골렘 조심',
+  root: '초록 원은 피해요 · 회복하니까 쉬지 말고 공격!',
+};
+function bossTip(I) {
+  const b = G.boss; if (!b) return; ST.btip = ST.btip || {}; const n = ST.btip[b.name] || 0; if (n >= 3) return;
+  ST.btip[b.name] = n + 1; stDirty = true; const k = bossKind(b);
+  const el = $('tipCard'); el.innerHTML = `💡 <b>${I.name} 이기는 법</b><br>${BOSS_TIP[k] || BOSS_TIP.jump}<br><small>🎯 과녁이 보일 때 때리면 1.5배!</small>`; el.classList.add('show'); el.dataset.id = 'boss';
+  clearTimeout(tipT); tipT = setTimeout(() => el.classList.remove('show'), 5000);
+}
 function endIntro() {
   const I = G.intro; if (!I) return;
   G.intro = null;
-  banner('⚠ 보스 등장! ⚠', I.name, '#ff3b3b', 2);
+  banner('⚠ 보스 등장! ⚠', I.name, '#ff3b3b', 2); bossTip(I);
 }
 function drawIntro() {
   const I = G.intro, t = I.t;
