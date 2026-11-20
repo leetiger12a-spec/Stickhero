@@ -421,3 +421,71 @@ GRID RULES (strict):
 BACKGROUND: plain pure white (#FFFFFF) everywhere, no grid lines, no frame borders, no ground line, no shadows, no glow halo, no sticker border, no effects, no flying arrows, no motion trails, no speed lines, no dust, no text, no letters, no numbers, no watermark.
 QUALITY: ultra high resolution, QHD (2560x1440) or higher, crisp clean lines
 ```
+
+## ⑭ 자폭병 달리기 — 첨부 2장: `art/ref/bomber_new_pose.png` + `art/ref/bomber_walk4_ref.png`
+```
+TASK: one 2D game ANIMATION SPRITE SHEET of the attached character: exactly 12 frames arranged in a grid of 4 columns x 3 rows, read left to right, top row first.
+
+ATTACHMENTS:
+- Image 1 = the character design. Keep EXACTLY this design, colors, thick black outlines, cel shading, proportions and art style.
+- Image 2 = 4 KEY POSES of his run (left to right). Copy these leg positions EXACTLY; they are the most important part.
+
+CHARACTER: an orange goblin bomber with big pointed ears, brass goggles with blue lenses on his forehead, a wide toothy grin, leather straps and belt, a ragged brown skirt, brown gloves and boots, and a big black round bomb strapped to his back with a short lit fuse. The bomb and the small spark on the fuse tip are in EVERY frame, the spark always touching the fuse.
+
+ANIMATION: an eager RUN CYCLE in place, facing right, leaning forward, built from the 4 key poses of Image 2 with smooth in-between frames:
+- Frame 1 = key pose 1 of Image 2 (front boot far forward, back boot far behind).
+- Frames 2-3 = in-betweens: the back boot lifting and swinging forward under the body.
+- Frame 4 = key pose 2 of Image 2.
+- Frames 5-6 = in-betweens: both feet off the ground, the knee driving forward.
+- Frame 7 = key pose 3 of Image 2 (the OTHER boot now forward).
+- Frames 8-9 = in-betweens: the back boot lifting and swinging forward.
+- Frame 10 = key pose 4 of Image 2.
+- Frames 11-12 = in-betweens flowing back into frame 1.
+THE LEGS AND BOOTS MUST VISIBLY MOVE: the distance between the two boots changes a lot from frame to frame. Do NOT draw the same leg pose twice in a row. The fists pump opposite to the legs; the bomb bounces slightly on his back.
+
+GRID RULES (strict):
+- Every frame: the SAME character at the SAME size (the same head and goggles size in all 3 rows), facing right, full body, 3/4 top-down game view, same as Image 2.
+- Same ground line in every frame; the character stays in the center of its cell.
+- The character (with the fuse spark) fills about 70% of its cell height.
+- VERY WIDE empty white gaps between all cells and between the rows; no spark, ear, fist, boot or body part may touch or come near another cell.
+- Only the 12 frames. No extra poses, no labels.
+
+BACKGROUND: plain pure white (#FFFFFF) everywhere, no grid lines, no frame borders, no ground line, no shadows, no glow halo, no sticker border, no smoke, no extra sparks, no dust, no speed lines, no text, no letters, no numbers, no watermark.
+QUALITY: ultra high resolution, QHD (2560x1440) or higher, crisp clean lines
+```
+
+## ⑮ 자폭병 공격 (덮치기) — 첨부 2장: `art/ref/bomber_new_pose.png` + `art/ref/bomber_atk4_ref.png`
+```
+TASK: one 2D game ANIMATION SPRITE SHEET of the attached character: exactly 12 frames arranged in a grid of 4 columns x 3 rows, read left to right, top row first.
+
+ATTACHMENTS:
+- Image 1 = the character design. Keep EXACTLY this design, colors, thick black outlines, cel shading, proportions and art style.
+- Image 2 = 4 KEY POSES of his pounce (left to right). Copy these body, arm and leg positions EXACTLY.
+
+CHARACTER: an orange goblin bomber with big pointed ears, brass goggles with blue lenses on his forehead, a wide toothy grin, leather straps and belt, a ragged brown skirt, brown gloves and boots, and a big black round bomb strapped to his back with a short lit fuse. The bomb and the small spark on the fuse tip are in EVERY frame, the spark always touching the fuse.
+
+ANIMATION: a wild POUNCE in place, facing right, built from the 4 key poses of Image 2 with smooth in-between frames:
+- Frame 1 = key pose 1 of Image 2 (fists up, wide ready stance).
+- Frame 2 = bending the knees, leaning forward.
+- Frame 3 = key pose 2 of Image 2 (crouched very low, gloves near the ground, ready to spring).
+- Frame 4 = even lower crouch, grinning, about to jump.
+- Frame 5 = pushing off the ground, legs straightening, arms swinging forward.
+- Frame 6 = key pose 3 of Image 2 (leaping, arms spread wide, fingers open, knees tucked).
+- Frame 7 = top of the leap, arms reaching far forward to grab.
+- Frame 8 = coming down, arms slamming forward and down.
+- Frame 9 = key pose 4 of Image 2 (landing low, slamming forward, head down, one glove on the ground).
+- Frame 10 = still low after the landing, shaking his head.
+- Frame 11 = standing up, raising the fists.
+- Frame 12 = back to the ready stance like frame 1.
+Every frame MUST show a DIFFERENT pose; do NOT draw the same pose twice in a row. Draw the leap frames with the boots only a little above the others (keep him inside his cell).
+
+GRID RULES (strict):
+- Every frame: the SAME character at the SAME size (the same head and goggles size in all 3 rows), facing right, full body, 3/4 top-down game view, same as Image 2.
+- Same ground line in every frame; the character stays in the center of its cell.
+- The character (with the fuse spark) fills about 65% of its cell height.
+- VERY WIDE empty white gaps between all cells and between the rows; no spark, ear, hand, boot or body part may touch or come near another cell.
+- Only the 12 frames. No extra poses, no labels.
+
+BACKGROUND: plain pure white (#FFFFFF) everywhere, no grid lines, no frame borders, no ground line, no shadows, no glow halo, no sticker border, no explosion, no smoke, no extra sparks, no dust, no impact marks, no speed lines, no text, no letters, no numbers, no watermark.
+QUALITY: ultra high resolution, QHD (2560x1440) or higher, crisp clean lines
+```
