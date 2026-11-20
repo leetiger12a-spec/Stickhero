@@ -1,4 +1,4 @@
-// 탱크 걷기 (Build 261: 다리가 안 움직이던 12칸 대신 옛 4칸으로 되돌림)
+// 탱크 걷기 12칸 시트 중 8칸 (Build 262)
 const { chromium } = require('/opt/node22/lib/node_modules/playwright');
 (async () => {
   const b = await chromium.launch(); const errors = []; const check = (c, m) => { if (!c) errors.push(m); };
@@ -7,7 +7,7 @@ const { chromium } = require('/opt/node22/lib/node_modules/playwright');
   const page = await ctx.newPage(); const OUT = process.env.OUT || 'shots';
   page.on('pageerror', e => errors.push(e.message)); page.on('console', m => { if (m.type() === 'error') errors.push(m.text()); });
   await page.goto('http://localhost:8765/index.html'); await page.waitForTimeout(900); await page.click('#bStart'); await page.waitForTimeout(400);
-  check(await page.evaluate(() => SPR_SRC.tank_walk && SPR_SRC.tank_walk.naturalWidth === 1120), 'sheet loaded');
+  check(await page.evaluate(() => SPR_SRC.tank_walk && SPR_SRC.tank_walk.naturalWidth === 2916), 'sheet loaded');
   const frames = await page.evaluate(async () => {
     const G = SH.G; G.nextBoss = 999; G.nextWave = 999; G.spawnAcc = -1e9; G.enemies = []; G.p.hp = G.p.maxHp = 1e6;
     const e = makeEnemy('tank', G.p.x + 150, G.p.y - 80); e.dmg = 0; e.hp = e.maxHp = 1e9; G.enemies.push(e);
@@ -17,6 +17,6 @@ const { chromium } = require('/opt/node22/lib/node_modules/playwright');
   });
   console.log('frames seen', frames); check(frames >= 3, 'walk frames ' + frames);
   await page.evaluate(() => { const G = SH.G, e = G.enemies[0]; e.x = G.p.x + 70; e.y = G.p.y - 60; e.spd = 0; G.cam.x = G.p.x; G.cam.y = G.p.y; }); await page.waitForTimeout(800);
-  await page.screenshot({ path: `${OUT}/b261_tank.png`, clip: { x: 95, y: 300, width: 200, height: 200 } });
+  await page.screenshot({ path: `${OUT}/b262_tank.png`, clip: { x: 95, y: 300, width: 200, height: 200 } });
   await b.close(); console.log('ERRORS:', errors.length); errors.forEach(e => console.log(e)); process.exit(errors.length ? 1 : 0);
 })();
