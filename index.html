@@ -372,7 +372,7 @@ h2 .hb{-webkit-text-stroke:0;text-shadow:none;letter-spacing:0;font-family:"Jua"
 
 <script>
 'use strict';
-const BUILD = 254;
+const BUILD = 255;
 const BOSS_INTERVAL = 180;      // 보스 등장 간격(초)
 const WAVE_INTERVAL = 60;       // 대규모 몰이 이벤트 간격(초)
 const MAX_ENEMIES = 110;   // Build 202: 220 → 110 (화면이 너무 정신없어서) — 대신 마을 적이 조금 더 튼튼(CROWD_K)
@@ -793,6 +793,10 @@ const ACH = [
   { id: 'goldB3',  icon: '💛', name: '황금 왕관',       desc: '황금 보스 3종 쓰러뜨리기',     title: '황금 왕',    bank: 700,  p: () => [ST.goldB.length, 3] },
   { id: 'swap10',  icon: '🔄', name: '든든한 교대',     desc: '동료 10번 교대하기',           title: '작전 대장',  bank: 150,  p: () => [ST.swaps || 0, 10] },
   { id: 'duel25',  icon: '⚔', name: '대결 왕국 정복', desc: '모험 지도 25칸 모두 깨기 (보스 대결 왕국)', title: '대결의 왕', bank: 1500, p: () => [bestStage(), 25] },   // Build 250
+  // Build 255: 상인·구르기·탑 대결 층 업적
+  { id: 'merch5',  icon: '🛒', name: '단골 손님',      desc: '떠돌이 상인에게 5번 사기',     title: '시장 친구',   bank: 200, p: () => [ST.merchBuys || 0, 5] },
+  { id: 'dash100', icon: '💨', name: '데굴데굴',       desc: '구르기 100번',                 title: '날쌘돌이',    bank: 200, p: () => [ST.dashes || 0, 100] },
+  { id: 'tduel3',  icon: '🗼', name: '탑의 결투사',    desc: '무한 탑 대결 층 3번 깨기',     title: '탑 결투사',   bank: 600, p: () => [ST.towerDuels || 0, 3] },
 ];
 function checkAch() { // 1초마다: 기록 저장 + 새 업적
   const m = readJSON(META_KEY) || {}; m.ach = m.ach || {};
@@ -2523,7 +2527,7 @@ function updMerchant(dt, night) {
   if (!near) { m.hold = 0; m.told = false; return; }
   if (G.gold < m.price) { if (!m.told) { m.told = true; floatText(p.x, p.y - 60, `금화가 모자라요 (🪙${m.price})`, '#ff9f9f', 14, 1); } return; }
   if (!o.ok()) { if (!m.told) { m.told = true; floatText(p.x, p.y - 60, '지금은 필요 없어요', '#dee2e6', 14, 1); } return; }
-  if ((m.hold += dt) >= 1.2) { G.gold -= m.price; o.buy(); stAdd('merchBuys'); sfx('rewardEvo'); floatText(p.x, p.y - 70, `🛒 ${o.txt}!`, '#ffd23f', 17, 1.4); G.merchant = null; }
+  if ((m.hold += dt) >= 1.2) { G.gold -= m.price; o.buy(); stAdd('merchBuys'); questEvent('merch'); sfx('rewardEvo'); floatText(p.x, p.y - 70, `🛒 ${o.txt}!`, '#ffd23f', 17, 1.4); G.merchant = null; }
 }
 function drawMerchant() {
   const m = G.merchant; if (!m || !SPR.market) return; const o = MERCH.find(x => x.k === m.k);
@@ -2967,6 +2971,9 @@ const QUESTS = [ // id, 글, 목표(날짜 d), 나올 수 있는지
   { id: 'golden',  txt: () => '✨ 황금 몬스터 1마리 잡기',       goal: () => 1 },
   { id: 'chest',   txt: n => `🎁 보물 상자 ${n}개 모으기`,       goal: d => 3 + Math.min(4, Math.floor(d / 2)) },
   { id: 'swap',    txt: () => '🔄 쉬는 동료와 교대 1번',          goal: () => 1, ok: () => (G.bench || []).length > 0 },
+  // Build 255
+  { id: 'dash',    txt: n => `💨 구르기 ${n}번`,                  goal: d => 15 + 5 * Math.min(4, d) },
+  { id: 'merch',   txt: () => '🛒 떠돌이 상인에게 1번 사기',      goal: () => 1 },
 ];
 function newQuests() {
   const d = G.day || 1, pool = QUESTS.filter(q => !q.ok || q.ok()), out = [];
@@ -3030,7 +3037,7 @@ function doDash() {
   const p = G.p; if ((G.dashCd || 0) > 0) return;
   let ax = p.ax, ay = p.ay; if (!ax && !ay) { ax = p.face || 1; ay = 0; }
   const l = Math.hypot(ax, ay) || 1; p.dvx = ax / l * 640; p.dvy = ay / l * 640; p.dashT = 0.22; p.inv = Math.max(p.inv || 0, 0.4); G.dashCd = DASH_CD;
-  burst(p.x, p.y - 10, '#c8f7dc', 10, 120, 4, 0.3); sfx('woosh'); G.dashes = (G.dashes || 0) + 1;
+  burst(p.x, p.y - 10, '#c8f7dc', 10, 120, 4, 0.3); sfx('woosh'); G.dashes = (G.dashes || 0) + 1; stAdd('dashes'); questEvent('dash');
 }
 $('bDash').addEventListener('pointerdown', e => { e.preventDefault(); e.stopPropagation(); doDash(); });
 let dashShown = '';
@@ -3860,6 +3867,7 @@ function bossDie(e) {
   if (G.mode === 'stage' && G.st && G.st.def.boss2 !== undefined && !G.st.duel2) { // ⚔ 보스 대결 왕국: 두 번째 보스가 나와요 (Build 250)
     G.st.duel2 = true; G.st.def = Object.assign({}, G.st.def, { boss: G.st.def.boss2 }); G.st.bossOn = false; G.p.hp = Math.min(G.p.maxHp, G.p.hp + G.p.maxHp * 0.3);
     banner('⚔ 두 번째 보스가 온다!', `${BOSSES[G.st.def.boss2].name} · 체력 30% 회복`, '#ff6b6b', 2.6); sfx('warn'); return; }
+  if (G.mode === 'stage' && G.st && G.st.duel2 && G.st.tower) stAdd('towerDuels');   // Build 255: 탑 대결 층 깬 횟수
   if (G.mode === 'stage') stageClear(e.x, e.y + 60);
   sfx('bigBoom');
 }
