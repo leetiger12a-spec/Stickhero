@@ -561,3 +561,71 @@ GRID RULES (strict):
 BACKGROUND: plain pure white (#FFFFFF) everywhere, no grid lines, no frame borders, no ground line, no shadows, no glow halo, no sticker border, no effects, no wind lines, no motion lines, no speed lines, no text, no letters, no numbers, no watermark.
 QUALITY: ultra high resolution, QHD (2560x1440) or higher, crisp clean lines
 ```
+
+## ⑱ 돌격병 걷기 — 첨부 2장: `art/ref/charger_new_pose.png` + `art/ref/charger_walk4_ref.png`
+```
+TASK: one 2D game ANIMATION SPRITE SHEET of the attached character: exactly 12 frames arranged in a grid of 4 columns x 3 rows, read left to right, top row first.
+
+ATTACHMENTS:
+- Image 1 = the character design. Keep EXACTLY this design, colors, thick black outlines, cel shading, proportions and art style.
+- Image 2 = 4 KEY POSES of his walk (left to right). Copy these leg positions EXACTLY; they are the most important part.
+
+CHARACTER: a stocky yellow boar warrior with a pink pig snout, two white tusks, angry eyes, a dark steel horned viking helmet with rivets, one spiked steel shoulder plate, crossed leather straps with a gold belt buckle, studded leather wrist bands, a ragged dark fur skirt and brown boots with steel toes.
+
+ANIMATION: a heavy, determined WALK CYCLE in place, facing right, built from the 4 key poses of Image 2 with smooth in-between frames:
+- Frame 1 = key pose 1 of Image 2 (wide stance, boots apart).
+- Frames 2-3 = in-betweens: one boot lifting and swinging forward.
+- Frame 4 = key pose 2 of Image 2 (front boot stepping forward, back heel lifted).
+- Frames 5-6 = in-betweens: the back boot lifting and swinging forward under the body.
+- Frame 7 = key pose 3 of Image 2.
+- Frames 8-9 = in-betweens: the OTHER boot lifting and swinging forward.
+- Frame 10 = key pose 4 of Image 2 (one knee raised, boot lifted).
+- Frames 11-12 = in-betweens flowing back into frame 1.
+THE LEGS AND BOOTS MUST VISIBLY MOVE: the distance between the two boots changes a lot from frame to frame, and in about half of the frames one boot is clearly lifted off the ground. Do NOT draw the same leg pose twice in a row. The fists swing opposite to the legs; the head bobs down on each step.
+
+GRID RULES (strict):
+- Every frame: the SAME character at the SAME size (the same helmet size in all 3 rows), facing right, full body, 3/4 top-down game view, same as Image 2.
+- Same ground line in every frame; the character stays in the center of its cell.
+- The character fills about 70% of its cell height.
+- VERY WIDE empty white gaps between all cells and between the rows; no horn, tusk, fist, boot or body part may touch or come near another cell.
+- Only the 12 frames. No extra poses, no labels.
+
+BACKGROUND: plain pure white (#FFFFFF) everywhere, no grid lines, no frame borders, no ground line, no shadows, no glow halo, no sticker border, no effects, no dust, no speed lines, no text, no letters, no numbers, no watermark.
+QUALITY: ultra high resolution, QHD (2560x1440) or higher, crisp clean lines
+```
+
+## ⑲ 돌격병 공격 (머리 들이받기 돌진) — 첨부 2장: `art/ref/charger_new_pose.png` + `art/ref/charger_atk4_ref.png`
+```
+TASK: one 2D game ANIMATION SPRITE SHEET of the attached character: exactly 12 frames arranged in a grid of 4 columns x 3 rows, read left to right, top row first.
+
+ATTACHMENTS:
+- Image 1 = the character design. Keep EXACTLY this design, colors, thick black outlines, cel shading, proportions and art style.
+- Image 2 = 4 KEY POSES of his head-down charge (left to right). Copy these body, head and leg positions EXACTLY.
+
+CHARACTER: a stocky yellow boar warrior with a pink pig snout, two white tusks, angry eyes, a dark steel horned viking helmet with rivets, one spiked steel shoulder plate, crossed leather straps with a gold belt buckle, studded leather wrist bands, a ragged dark fur skirt and brown boots with steel toes.
+
+ANIMATION: a HEAD-DOWN CHARGE in place, facing right, built from the 4 key poses of Image 2 with smooth in-between frames:
+- Frame 1 = standing ready like Image 1.
+- Frame 2 = lowering the head, shoulders hunching forward.
+- Frame 3 = key pose 1 of Image 2 (crouched low, head down with the horns pointing forward, fists near the ground, ready to charge).
+- Frame 4 = pawing the ground with the front boot, snorting.
+- Frame 5 = pushing off hard with the back leg.
+- Frame 6 = key pose 2 of Image 2 (running forward head-first, big stride).
+- Frame 7 = the other stride, helmet horns thrust forward.
+- Frame 8 = key pose 3 of Image 2 (body almost flat, launching head-first, the hit).
+- Frame 9 = still launching, back leg stretched out behind.
+- Frame 10 = skidding to a stop, front boot planted, body coming up.
+- Frame 11 = straightening up, shaking the head.
+- Frame 12 = key pose 4 of Image 2 (fists up, wide stance), flowing back into frame 1.
+Every frame MUST show a DIFFERENT pose; do NOT draw the same pose twice in a row. The boots stay near the same ground line (keep him inside his cell).
+
+GRID RULES (strict):
+- Every frame: the SAME character at the SAME size (the same helmet size in all 3 rows), facing right, full body, 3/4 top-down game view, same as Image 2.
+- Same ground line in every frame; the character stays in the center of its cell.
+- The character fills about 65% of its cell height.
+- VERY WIDE empty white gaps between all cells and between the rows; no horn, tusk, fist, boot or body part may touch or come near another cell.
+- Only the 12 frames. No extra poses, no labels.
+
+BACKGROUND: plain pure white (#FFFFFF) everywhere, no grid lines, no frame borders, no ground line, no shadows, no glow halo, no sticker border, no effects, no dust clouds, no impact marks, no speed lines, no text, no letters, no numbers, no watermark.
+QUALITY: ultra high resolution, QHD (2560x1440) or higher, crisp clean lines
+```
