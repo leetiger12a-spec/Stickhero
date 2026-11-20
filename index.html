@@ -69,7 +69,7 @@ canvas{display:block;position:fixed;inset:0;width:100%;height:100%}
 #dexList{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;width:min(94vw,420px);max-height:62vh;overflow-y:auto;padding:2px 2px 6px;box-sizing:border-box}
 #dexCard{position:fixed;inset:0;z-index:30;display:none;align-items:center;justify-content:center;background:rgba(10,10,25,.72)}#dexCard.show{display:flex}
 #dexCard .card{display:block;width:min(86vw,340px);background:linear-gradient(#fffdf7,#ffe9c2);color:#2b2d42;border:4px solid #2b2d42;border-radius:18px;padding:12px 14px;text-align:center;box-shadow:0 8px 0 rgba(0,0,0,.35)}#dexCard .card.boss{background:linear-gradient(#fff6f9,#ffd0de)}#dexCard .card.ally{background:linear-gradient(#f4fff6,#cdf3d7)}
-#dexCard img{max-width:100%;max-height:min(42vh,260px);object-fit:contain;filter:drop-shadow(0 6px 4px rgba(0,0,0,.25))}#dexCard h3{margin:4px 0 2px;font-size:22px}#dexCard .st{color:#ffb703;font-size:20px;-webkit-text-stroke:1px #2b2d42}#dexCard .st i{color:#ccc;font-style:normal}#dexCard p{margin:4px 0;font-size:14px}#dexCard .stats{display:flex;justify-content:center;gap:10px;margin:6px 0;font-size:14px;font-weight:800}#dexCard .tap{opacity:.6;font-size:12px}
+#dexCard img{max-width:100%;max-height:min(42vh,260px);object-fit:contain;filter:drop-shadow(0 6px 4px rgba(0,0,0,.25))}#dexCard h3{margin:4px 0 2px;font-size:22px}#dexCard .st{color:#ffb703;font-size:20px;-webkit-text-stroke:1px #2b2d42}#dexCard .st i{color:#ccc;font-style:normal}#dexCard p{margin:4px 0;font-size:14px}#dexCard .stats{display:flex;justify-content:center;gap:10px;margin:6px 0;font-size:14px;font-weight:800}#dexCard .tap{opacity:.6;font-size:12px}#dexCard .card{position:relative}#dexCard .card.gold{background:linear-gradient(#fff8d6,#ffd84d);border-color:#b8860b;box-shadow:0 0 0 4px #ffe066,0 0 24px 6px rgba(255,215,0,.75),0 8px 0 rgba(0,0,0,.35)}#dexCard .gtag{position:absolute;top:-14px;left:50%;transform:translateX(-50%);background:#ffd23f;border:3px solid #2b2d42;border-radius:12px;padding:1px 10px;font-weight:800;font-size:14px}#dexCard .dexFight{margin-top:4px}
 .dexH{grid-column:1/-1;text-align:left;color:#ffd23f;font-size:14px;margin:4px 2px 0}
 .dexFight.hard{background:linear-gradient(#ffb199,#ff6b3d 55%,#e63946);color:#fff;text-shadow:0 1px 0 #7a1a00}
 .dexFight{font:inherit;font-size:13px;min-height:44px;margin-top:4px;padding:0 10px;border-radius:12px;border:3px solid #3a1a00;background:linear-gradient(#ffe680,#ffc21a 55%,#ff9a00);color:#3a1a00;box-shadow:0 3px 0 #3a1a00;cursor:pointer}
@@ -371,7 +371,7 @@ h2 .hb{-webkit-text-stroke:0;text-shadow:none;letter-spacing:0;font-family:"Jua"
 
 <script>
 'use strict';
-const BUILD = 240;
+const BUILD = 241;
 const BOSS_INTERVAL = 180;      // 보스 등장 간격(초)
 const WAVE_INTERVAL = 60;       // 대규모 몰이 이벤트 간격(초)
 const MAX_ENEMIES = 110;   // Build 202: 220 → 110 (화면이 너무 정신없어서) — 대신 마을 적이 조금 더 튼튼(CROWD_K)
@@ -1256,17 +1256,19 @@ function renderDex() {
 }
 // 🔍 도감 크게 보기 (Build 233): 새 그림체를 크게 + 능력치
 function showDexCard(k, ally) {
-  let img, name, desc, sub, stats = [], st = 0, cls = '';
+  let img, name, desc, sub, stats = [], st = 0, cls = '', gold = false, extra = '';
   if (ally) { const T = ALLY_TYPES[k], l = ST.alv[k] || 0; img = 'ally_' + k; name = T.name; desc = T.desc; st = [1, 3, 5].filter(x => l >= x).length; sub = `최고 Lv${l}`; cls = 'ally'; }
   else {
     const d = DEX.find(x => x.k === k); if (!d) return; const n = dexCount(d); img = k; name = d.name; desc = d.desc; st = dexStars(d); cls = d.boss ? 'boss' : '';
-    sub = `${n.toLocaleString()}${d.boss ? '번 잡음' : '마리 잡음'}`;
+    sub = `${n.toLocaleString()}${d.boss ? '번 잡음' : '마리 잡음'}`; gold = d.boss ? ST.goldB.includes(d.boss) : ST.goldT.includes(d.k);   // ✨ Build 241: 황금을 잡았으면 금색 카드
+    if (d.boss) { const fast = (ST.bfast || {})[d.boss], pb = pbest(d.boss); if (fast) extra += `<p>🏆 가장 빨리 ${fast}초</p>`; if (pb) extra += `<p>⏱ 연습 최고 ${pb}초</p>`; if (canPractice()) extra += `<button class="dexFight" data-k="${k}">⚔ 다시 싸우기</button>`; }
     if (d.boss) { const bi = k === 'boss_final' ? -1 : +k.slice(4), hp = bi < 0 ? BOSS_FINAL.hp : BOSS_HP[bi], dm = bi < 0 ? BOSS_FINAL.dmg : BOSS_DMG[bi]; stats = [['❤', hp.toLocaleString()], ['⚔', dm]]; }
     else { const T = ETYPES[k]; if (T) stats = [['❤', T.hp], ['⚔', T.dmg], ['👟', T.spd]]; }
   }
-  $('dexCard').innerHTML = `<div class="card ${cls}"><img src="img/${img}.webp?b=${BUILD}" alt=""><h3>${name}</h3><div class="st">${'★'.repeat(st)}<i>${'★'.repeat(3 - st)}</i></div><p>${desc}</p>` +
-    (stats.length ? `<div class="stats">${stats.map(([a, b]) => `<span>${a} ${b}</span>`).join('')}</div>` : '') + `<p><b>${sub}</b></p><div class="tap">눌러서 닫기</div></div>`;
+  $('dexCard').innerHTML = `<div class="card ${cls}${gold ? ' gold' : ''}">${gold ? '<div class="gtag">✨ 황금</div>' : ''}<img src="img/${img}.webp?b=${BUILD}" alt=""><h3>${name}</h3><div class="st">${'★'.repeat(st)}<i>${'★'.repeat(3 - st)}</i></div><p>${desc}</p>` +
+    (stats.length ? `<div class="stats">${stats.map(([a, b]) => `<span>${a} ${b}</span>`).join('')}</div>` : '') + `<p><b>${sub}</b></p>${extra}<div class="tap">눌러서 닫기</div></div>`;
   $('dexCard').classList.add('show'); sfx('pick');
+  const fb = $('dexCard').querySelector('.dexFight'); if (fb) fb.onclick = ev => { ev.stopPropagation(); $('dexCard').classList.remove('show'); startPractice(fb.dataset.k, false); };
 }
 $('dexCard').onclick = () => $('dexCard').classList.remove('show');
 $('bDexA').onclick = () => { sfx('pick'); openDex(); };
@@ -1450,7 +1452,7 @@ const GOLD_GOLEM = 10, GOLD_GOLEM_P = 0.1, GOLD_GOLEM_FLEE = 40;   // 황금 골
 // 몬스터 도감 목록 (SPECIALS·BOSSES 다음에 있어야 함)
 const SP_NAME = { e_slime: '분열 슬라임', e_archer: '궁수', e_bomber: '자폭병', e_bat: '박쥐병', e_charger: '돌격병', e_shaman: '주술사' };
 const DEX = [
-  { k: 'grunt', name: '빨간 졸개', desc: '휘어진 칼로 달려들어요', where: '처음부터' },
+  { k: 'grunt', name: '빨간 졸개', desc: '칼을 들고 달려들어요', where: '처음부터' },
   { k: 'runner', name: '분홍 날쌘이', desc: '단검 두 자루 · 아주 빨라요', where: '처음부터' },
   { k: 'tank', name: '파란 거한', desc: '헬멧과 큰 총 · 아주 튼튼해요', where: '처음부터' },
   ...SPECIALS.map(sp => ({ k: sp[0], name: SP_NAME[sp[0]], desc: sp[4], where: `마을 ${sp[1] / 60}분 뒤 · 모험 ${sp[2] + 1}칸부터` })),
