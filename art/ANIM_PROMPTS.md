@@ -281,3 +281,39 @@ GRID RULES (strict):
 BACKGROUND: plain pure white (#FFFFFF) everywhere, no grid lines, no frame borders, no ground line, no shadows, no glow halo, no sticker border, no effects, no impact sparks, no debris, no speed lines, no dust, no text, no letters, no numbers, no watermark.
 QUALITY: ultra high resolution, QHD (2560x1440) or higher, crisp clean lines
 ```
+
+## ⑩ 슬라임 걷기 (통통 튀기) — 첨부 2장: `art/ref/slime_new_pose.png` + `art/ref/slime_walk4_ref.png`
+```
+TASK: one 2D game ANIMATION SPRITE SHEET of the attached character: exactly 12 frames arranged in a grid of 4 columns x 3 rows, read left to right, top row first.
+
+ATTACHMENTS:
+- Image 1 = the character design. Keep EXACTLY this design, colors, thick dark outline, glossy highlights, angry eyes, small sharp teeth and art style.
+- Image 2 = 4 KEY POSES of its bouncing move (left to right). Copy these body shapes EXACTLY; they are the most important part.
+
+CHARACTER: a glossy lime-green slime blob with angry eyes and a toothy grin, wavy drippy bottom edge.
+
+ANIMATION: a bouncy SQUASH-AND-STRETCH hop cycle in place, facing right, built from the 4 key poses of Image 2 with smooth in-between frames. The slime's BOTTOM EDGE STAYS ON THE SAME GROUND LINE in every frame (it does not fly up; the hop is shown only by its shape):
+- Frame 1 = key pose 1 of Image 2: squashed flat and wide, bottom spread out.
+- Frame 2 = squashing even flatter and wider, gathering power.
+- Frame 3 = starting to stretch up, getting narrower.
+- Frame 4 = key pose 2 of Image 2: tall and narrow, stretched up, leaning forward to the right.
+- Frame 5 = stretched tallest and thinnest, drips trailing at the bottom.
+- Frame 6 = key pose 3 of Image 2 shape: tall, round top, drips hanging down.
+- Frame 7 = starting to shrink down, top wobbling.
+- Frame 8 = medium height, body bulging out to the sides.
+- Frame 9 = key pose 4 of Image 2: round and wide, landing.
+- Frame 10 = squashed flat with a wobble, bottom splashing out wider.
+- Frame 11 = bouncing back to a rounder shape, jiggling.
+- Frame 12 = almost like frame 1, flowing back into frame 1.
+Every frame MUST show a DIFFERENT shape; do NOT draw the same shape twice in a row. The face keeps the same angry look and stays the same size.
+
+GRID RULES (strict):
+- Every frame: the SAME slime with the SAME face size, facing right, 3/4 top-down game view, same as Image 2.
+- Same ground line in every frame; the slime stays in the center of its cell.
+- The tallest frame fills about 70% of its cell height.
+- VERY WIDE empty white gaps between all cells and between the rows; no drip or body part may touch or come near another cell.
+- Only the 12 frames. No extra poses, no labels.
+
+BACKGROUND: plain pure white (#FFFFFF) everywhere, no grid lines, no frame borders, no ground line, no shadows, no puddles, no glow halo, no sticker border, no sparkles, no effects, no motion lines, no splashes, no text, no letters, no numbers, no watermark.
+QUALITY: ultra high resolution, QHD (2560x1440) or higher, crisp clean lines
+```
