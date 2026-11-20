@@ -489,3 +489,75 @@ GRID RULES (strict):
 BACKGROUND: plain pure white (#FFFFFF) everywhere, no grid lines, no frame borders, no ground line, no shadows, no glow halo, no sticker border, no explosion, no smoke, no extra sparks, no dust, no impact marks, no speed lines, no text, no letters, no numbers, no watermark.
 QUALITY: ultra high resolution, QHD (2560x1440) or higher, crisp clean lines
 ```
+
+## ⑯ 박쥐병 날갯짓 — 첨부 2장: `art/ref/bat_new_pose.png` + `art/ref/bat_walk4_ref.png`
+```
+TASK: one 2D game ANIMATION SPRITE SHEET of the attached character: exactly 12 frames arranged in a grid of 4 columns x 3 rows, read left to right, top row first.
+
+ATTACHMENTS:
+- Image 1 = the character design. Keep EXACTLY this design, colors, thick black outlines, cel shading, proportions and art style.
+- Image 2 = 4 KEY POSES of his flying (left to right). Copy these wing positions EXACTLY; they are the most important part.
+
+CHARACTER: a small purple bat-goblin with a round glossy head, big pointed pink-lined ears, an angry grin with small fangs, two big purple bat wings with bone claws on top, a brown leather strap and ragged brown loincloth, purple fists, and a short spear with a steel tip in his RIGHT hand. The spear is held in EVERY frame.
+
+ANIMATION: a FLAPPING FLY CYCLE in place (hovering), facing right, built from the 4 key poses of Image 2 with smooth in-between frames:
+- Frame 1 = key pose 1 of Image 2 (wings raised high and spread).
+- Frame 2 = wings starting to come down.
+- Frame 3 = wings level, straight out to the sides.
+- Frame 4 = wings pushing down.
+- Frame 5 = key pose 3 of Image 2 (wings swept far DOWN, tips below the body, body lifted slightly).
+- Frame 6 = wings fully down and folded a little.
+- Frame 7 = wings starting to rise again, body dipping slightly.
+- Frame 8 = wings level again, going up.
+- Frame 9 = wings rising high.
+- Frame 10 = key pose 4 of Image 2 (wings high, spread wide).
+- Frame 11 = wings at the very top, tips curling.
+- Frame 12 = flowing back into frame 1.
+THE WINGS MUST VISIBLY MOVE up and down: their angle changes a lot from frame to frame, and in frames 5-6 they point clearly DOWN. Do NOT draw the same wing pose twice in a row. The legs dangle and sway slightly; the body bobs up when the wings push down.
+
+GRID RULES (strict):
+- Every frame: the SAME character at the SAME size (the same head size in all 3 rows), facing right, 3/4 top-down game view, same as Image 2.
+- The body stays in the center of its cell at the same height in every frame (only the wings and a small bob move).
+- With wings raised, the character fills about 70% of its cell height.
+- VERY WIDE empty white gaps between all cells and between the rows; no wing tip, spear, ear or body part may touch or come near another cell.
+- Only the 12 frames. No extra poses, no labels.
+
+BACKGROUND: plain pure white (#FFFFFF) everywhere, no grid lines, no frame borders, no ground line, no shadows, no glow halo, no sticker border, no effects, no wind lines, no motion lines, no text, no letters, no numbers, no watermark.
+QUALITY: ultra high resolution, QHD (2560x1440) or higher, crisp clean lines
+```
+
+## ⑰ 박쥐병 공격 (창 내리꽂기) — 첨부 2장: `art/ref/bat_new_pose.png` + `art/ref/bat_atk4_ref.png`
+```
+TASK: one 2D game ANIMATION SPRITE SHEET of the attached character: exactly 12 frames arranged in a grid of 4 columns x 3 rows, read left to right, top row first.
+
+ATTACHMENTS:
+- Image 1 = the character design. Keep EXACTLY this design, colors, thick black outlines, cel shading, proportions and art style.
+- Image 2 = 4 KEY POSES of his diving spear attack (left to right). Copy these body, wing, arm and spear positions EXACTLY.
+
+CHARACTER: a small purple bat-goblin with a round glossy head, big pointed pink-lined ears, an angry grin with small fangs, two big purple bat wings with bone claws on top, a brown leather strap and ragged brown loincloth, purple fists, and a short spear with a steel tip in his RIGHT hand. The spear is held in EVERY frame.
+
+ANIMATION: a DIVING SPEAR STAB in place, facing right, built from the 4 key poses of Image 2 with smooth in-between frames:
+- Frame 1 = hovering like Image 1, wings up.
+- Frame 2 = raising the spear up behind the head, wings spreading.
+- Frame 3 = key pose 1 of Image 2 (spear raised high over the shoulder, mouth open shouting, wings high).
+- Frame 4 = leaning forward, wings pulling back.
+- Frame 5 = starting to dive, spear tip turning forward and down.
+- Frame 6 = key pose 2 of Image 2 (diving down-forward, wings swept back, spear pointing down-forward).
+- Frame 7 = diving further, spear thrusting down.
+- Frame 8 = key pose 3 of Image 2 (body stretched flat forward, arm and spear fully extended straight forward, the stab).
+- Frame 9 = holding the stab, wings swept back.
+- Frame 10 = pulling the spear back, wings opening.
+- Frame 11 = flapping back up, body rising.
+- Frame 12 = key pose 4 of Image 2 (back to hovering), flowing into frame 1.
+Every frame MUST show a DIFFERENT pose; do NOT draw the same pose twice in a row.
+
+GRID RULES (strict):
+- Every frame: the SAME character at the SAME size (the same head size in all 3 rows), facing right, 3/4 top-down game view, same as Image 2.
+- The body stays near the center of its cell in every frame.
+- The character fills about 65% of its cell height.
+- VERY WIDE empty white gaps between all cells and between the rows; no wing tip, spear, ear or body part may touch or come near another cell.
+- Only the 12 frames. No extra poses, no labels.
+
+BACKGROUND: plain pure white (#FFFFFF) everywhere, no grid lines, no frame borders, no ground line, no shadows, no glow halo, no sticker border, no effects, no wind lines, no motion lines, no speed lines, no text, no letters, no numbers, no watermark.
+QUALITY: ultra high resolution, QHD (2560x1440) or higher, crisp clean lines
+```
