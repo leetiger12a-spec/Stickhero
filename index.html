@@ -371,7 +371,7 @@ h2 .hb{-webkit-text-stroke:0;text-shadow:none;letter-spacing:0;font-family:"Jua"
 
 <script>
 'use strict';
-const BUILD = 244;
+const BUILD = 245;
 const BOSS_INTERVAL = 180;      // 보스 등장 간격(초)
 const WAVE_INTERVAL = 60;       // 대규모 몰이 이벤트 간격(초)
 const MAX_ENEMIES = 110;   // Build 202: 220 → 110 (화면이 너무 정신없어서) — 대신 마을 적이 조금 더 튼튼(CROWD_K)
@@ -1843,7 +1843,7 @@ function swapAlly(on, i) { // ✅ 함께 → 💤 쉬기 / 💤 → ✅ (자리�
   G.bench = G.bench || []; const p = G.p;
   if (on) { const [a] = G.allies.splice(i, 1); if (a) G.bench.push(a); }
   else { const [a] = G.bench.splice(i, 1); if (!a) return; if (G.allies.length >= ALLY_ACTIVE) G.bench.push(G.allies.pop()); a.dead = false; a.hp = a.maxHp; a.x = p.x + rand(-30, 30); a.y = p.y + 30; G.allies.push(a); }
-  if (!on) stAdd('swaps');   // Build 242: 교대 업적
+  if (!on) { stAdd('swaps'); questEvent('swap'); }   // Build 242: 교대 업적 · Build 245: 퀘스트
   G.allies.forEach((a, k) => a.slot = k); sfx('pick'); saveGame(); renderPauseStats();
 }
 document.addEventListener('click', ev => { const b = ev.target.closest && ev.target.closest('.anm'); if (!b || !G) return; const a = G.allies[+b.dataset.i]; if (!a) return; a.name = pickAllyName(a.type, a.name); sfx('pick'); renderPauseStats(); });
@@ -2040,6 +2040,7 @@ function flushChests() { // 스테이지 바뀔 때 남은 상자는 가방으�
 }
 // 🎁 보물 가방 (Build 201): 상자를 주우면 바로 열지 않고 가방에 모았다가, 🎁 버튼(PC: B)으로 한꺼번에 열기
 function bagPut(c, quiet) {
+  questEvent('chest');   // Build 245
   G.bag = G.bag || []; G.bag.push({ small: !!c.small, gold: !!c.gold, jack: !!c.jack });
   if (!quiet) { floatText(G.p.x, G.p.y - 60, `🎁 가방에 쏙! (${G.bag.length})`, c.jack ? '#ff6bd6' : '#ffd23f', 16, 1); sfx('coin'); if (!G.bagTold) { G.bagTold = true; banner('🎁 보물 가방!', '상자를 모았다가 오른쪽 🎁 버튼으로 한꺼번에 열어요', '#ffd23f', 2.4); } }
 }
@@ -2253,7 +2254,7 @@ function makeGolden(e) {
   e.golden = true; e.hp *= 3; e.maxHp *= 3; e.gold = e.gold * 10 + 5; e.xp *= 3;
   if (G && state === 'play' && G.t - goldAnnT > 30 && !(G.mode === 'stage' && G.st && G.st.rule === 'gold')) { goldAnnT = G.t; bannerSoft('✨ 황금 몬스터!', '잡으면 금화가 와르르 · 도감에 황금 칸', '#ffd23f', 2.2); sfx('reward'); }   // 황금 층에선 알림 안 띄움
 }
-function goldDie(e) { burst(e.x, e.y - 12, '#ffd23f', 30, 260, 5, 0.7); burst(e.x, e.y - 12, '#fff7c2', 14, 180, 4, 0.5); floatText(e.x, e.y - 40, '✨ 황금!', '#ffd23f', 18, 1); sfx('rewardEvo'); }
+function goldDie(e) { questEvent('golden'); burst(e.x, e.y - 12, '#ffd23f', 30, 260, 5, 0.7); burst(e.x, e.y - 12, '#fff7c2', 14, 180, 4, 0.5); floatText(e.x, e.y - 40, '✨ 황금!', '#ffd23f', 18, 1); sfx('rewardEvo'); }
 function makeEnemy(type, x, y) {
   announceType(type);
   const ls = lvlScale(), ts = towerScale(), T = ETYPES[type], hm = DF().ehp * ls.hp * ts.hp;   // Build 67: 같은 적은 세기 고정 · Build 166: 영웅 레벨·탑 층 맞춤
@@ -2288,7 +2289,7 @@ function updElite(e, dt, p) {
 }
 // Build 200: 정예 상자는 4마리에 1번꼴 (예전엔 매번 → 상자가 너무 많이 깔림), 나머지는 금화 5개
 const ELITE_CHEST_P = 0.25;
-function eliteDie(e) { stAdd('elites'); G.elitesN = (G.elitesN || 0) + 1;
+function eliteDie(e) { stAdd('elites'); questEvent('elite'); G.elitesN = (G.elitesN || 0) + 1;
   if (Math.random() < (window.__eliteChestP !== undefined ? window.__eliteChestP : ELITE_CHEST_P)) dropChest(G.mode === 'stage' ? clamp(e.x, -STAGE_HW + 30, STAGE_HW - 30) : e.x, e.y + 16, true);
   else for (let i = 0; i < 5; i++) dropCoin(e.x + rand(-14, 14), e.y + rand(-10, 10));
   if (e.elite === 'split') { eliteBlock = true; for (let i = 0; i < 3; i++) { const c = makeEnemy(e.type, e.x + rand(-30, 30), e.y + rand(-20, 20)); c.hp *= 0.5; c.maxHp *= 0.5; c.scale = 0.8; c.awake = true; G.enemies.push(c); } eliteBlock = false; burst(e.x, e.y - 20, '#ff4d6d', 20, 220, 4, 0.5); }
@@ -2903,6 +2904,11 @@ const QUESTS = [ // id, 글, 목표(날짜 d), 나올 수 있는지
   { id: 'ult',     txt: n => `⚡ 동료 필살기 ${n}번`,            goal: () => 3, ok: () => G.allies.some(a => (a.lvl || 1) >= 4) },
   { id: 'combo',   txt: n => `🔥 한 번에 ${n} 콤보`,             goal: d => 30 + 10 * Math.min(5, d) },
   { id: 'winter',  txt: n => `⛄ 눈사람·쿠키맨 ${n}마리 잡기`,   goal: () => 10, ok: () => winterSeason() || bestStage() >= 12 },
+  // Build 245: 새 퀘스트 4종
+  { id: 'elite',   txt: n => `⚔ 정예 몬스터 ${n}마리 잡기`,     goal: d => 2 + Math.min(3, Math.floor(d / 3)), ok: () => eliteOk() },
+  { id: 'golden',  txt: () => '✨ 황금 몬스터 1마리 잡기',       goal: () => 1 },
+  { id: 'chest',   txt: n => `🎁 보물 상자 ${n}개 모으기`,       goal: d => 3 + Math.min(4, Math.floor(d / 2)) },
+  { id: 'swap',    txt: () => '🔄 쉬는 동료와 교대 1번',          goal: () => 1, ok: () => (G.bench || []).length > 0 },
 ];
 function newQuests() {
   const d = G.day || 1, pool = QUESTS.filter(q => !q.ok || q.ok()), out = [];
