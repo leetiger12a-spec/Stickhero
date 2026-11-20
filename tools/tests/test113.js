@@ -7,8 +7,8 @@ const { chromium } = require('/opt/node22/lib/node_modules/playwright');
   const page = await ctx.newPage(); const OUT = process.env.OUT || 'shots';
   page.on('pageerror', e => errors.push(e.message)); page.on('console', m => { if (m.type() === 'error') errors.push(m.text()); });
   await page.goto('http://localhost:8765/index.html'); await page.waitForTimeout(900); await page.click('#bStart'); await page.waitForTimeout(400);
-  const info = await page.evaluate(() => ({ n: STAGES.length, row: STAGES.slice(15).map(d => d.name + ':' + THEMES[d.th].tex + ':' + BOSSES[d.boss].name), spr: [11, 12, 13, 14, 15].filter(i => SPR['boss' + i]).length }));
-  console.log(JSON.stringify(info)); check(info.n === 20 && info.spr === 5, 'stages/sprites');
+  const info = await page.evaluate(() => ({ n: STAGES.length, row: STAGES.slice(15, 20).map(d => d.name + ':' + THEMES[d.th].tex + ':' + BOSSES[d.boss].name), spr: [11, 12, 13, 14, 15].filter(i => SPR['boss' + i]).length }));
+  console.log(JSON.stringify(info)); check(info.n === 25 && info.spr === 5, 'stages/sprites');   // Build 250: 보스 대결 왕국 5칸 추가
   const want = [['dungeon', '번개'], ['volcano', '용암'], ['ice', '얼음'], ['grass', '숲'], ['castle', '황금']];
   check(info.row.every((r, i) => r.includes(':' + want[i][0] + ':') && r.includes(want[i][1] + ' 해골 왕')), 'concept/theme mismatch');
   // 칸마다 보스가 맞게 나옴
@@ -16,7 +16,7 @@ const { chromium } = require('/opt/node22/lib/node_modules/playwright');
   for (let i = 15; i < 20; i++) names.push(await page.evaluate(i => { const G = SH.G; G.p.hp = G.p.maxHp = 1e9; G.stageN = 20; enterStage(i); G.intro = null; G.enemies = []; SH.spawnBoss(); G.intro = null; const n = G.boss.name, sp = G.boss.spr; returnBase(false); if (SH.state === 'result') SH.ok(); state = 'play'; showOv(null); return n + '/' + sp; }, i));
   console.log(names.join(' · ')); check(names.every((n, k) => n.startsWith(['번개', '용암', '얼음', '숲', '황금'][k]) && n.endsWith('boss' + (11 + k))), 'stage boss wrong');
   // 지도 20칸
-  const mp = await page.evaluate(() => { SH.G.stageN = 16; openMap(); return document.querySelectorAll('.mnode').length; }); check(mp === 20, 'map not 20');
+  const mp = await page.evaluate(() => { SH.G.stageN = 16; openMap(); return document.querySelectorAll('.mnode').length; }); check(mp === 25, 'map not 25');
   await page.evaluate(() => { const n = document.querySelector('.mnode[data-i="17"]'); n && n.scrollIntoView({ block: 'center' }); }); await page.waitForTimeout(150); await page.screenshot({ path: `${OUT}/b159_map.png` });
   await page.evaluate(() => closeMap());
   // 보스 사진 (용암 해골 왕)

@@ -372,7 +372,7 @@ h2 .hb{-webkit-text-stroke:0;text-shadow:none;letter-spacing:0;font-family:"Jua"
 
 <script>
 'use strict';
-const BUILD = 249;
+const BUILD = 250;
 const BOSS_INTERVAL = 180;      // 보스 등장 간격(초)
 const WAVE_INTERVAL = 60;       // 대규모 몰이 이벤트 간격(초)
 const MAX_ENEMIES = 110;   // Build 202: 220 → 110 (화면이 너무 정신없어서) — 대신 마을 적이 조금 더 튼튼(CROWD_K)
@@ -482,6 +482,12 @@ const STAGES = [
   { name: '얼음 해골 무덤',  th: 5, goal: 'rescue', boss: 13 },
   { name: '이끼 숲 해골 성', th: 0, goal: 'boss', boss: 14 },
   { name: '황금 해골 보물창고', th: 4, goal: 'boss', boss: 15 },
+  // Build 250: ⚔ 보스 대결 왕국 (아들 선택) — 칸마다 보스 2마리가 연달아
+  { name: '번개 대결장',      th: 2, goal: 'boss', boss: 6, boss2: 11 },
+  { name: '용암 대결장',      th: 3, goal: 'boss', boss: 7, boss2: 12 },
+  { name: '얼음 대결장',      th: 5, goal: 'boss', boss: 8, boss2: 13 },
+  { name: '숲 대결장',        th: 0, goal: 'boss', boss: 9, boss2: 14 },
+  { name: '왕들의 대결',      th: 4, goal: 'boss', boss: 11, boss2: 15 },
 ];
 const FINAL_IDX = STAGES.findIndex(d => d.goal === 'final');
 const GOAL_TXT = { boss: '👑 끝까지 가서 보스를 물리쳐라', rescue: '🐱 갇힌 고양이 3마리를 구하고 보스를 물리쳐라', survive: '⏱ 몰려오는 적을 버텨라', final: '🏰 왕관 괴물 대왕을 쓰러뜨려라!' };
@@ -778,6 +784,7 @@ const ACH = [
   { id: 'bstar3',  icon: '🌟', name: '단골 손님',       desc: '보스 하나를 별 3개로 (20번 잡기)', title: '보스 단골', bank: 400, p: () => [DEX.some(d => d.boss && dexStars(d) >= 3) ? 1 : 0, 1] },
   { id: 'goldB3',  icon: '💛', name: '황금 왕관',       desc: '황금 보스 3종 쓰러뜨리기',     title: '황금 왕',    bank: 700,  p: () => [ST.goldB.length, 3] },
   { id: 'swap10',  icon: '🔄', name: '든든한 교대',     desc: '동료 10번 교대하기',           title: '작전 대장',  bank: 150,  p: () => [ST.swaps || 0, 10] },
+  { id: 'duel25',  icon: '⚔', name: '대결 왕국 정복', desc: '모험 지도 25칸 모두 깨기 (보스 대결 왕국)', title: '대결의 왕', bank: 1500, p: () => [bestStage(), 25] },   // Build 250
 ];
 function checkAch() { // 1초마다: 기록 저장 + 새 업적
   const m = readJSON(META_KEY) || {}; m.ach = m.ach || {};
@@ -1642,8 +1649,9 @@ const isGrown = () => grownC === null ? (grownC = !!((readJSON(META_KEY) || {}).
 const grownMul = () => isGrown() ? 1.2 : 1;
 function setGrown() { const m = readJSON(META_KEY) || {}; if (m.grown) return; m.grown = 1; writeJSON(META_KEY, m); grownC = true; stAdd('grown'); if (G) recalcStats(); }
 function growBanner() { if (G) { banner('🧑 영웅이 성장했다!', '영웅·동료 공격·체력 +20% · 동료와 몬스터 모습이 바뀌어요', '#ffd23f', 3.4); sfx('cheer'); burst(G.p.x, G.p.y - 20, '#ffd23f', 50, 320, 6, 1); } }
+const GROW_STAGE = 20;   // Build 250: 성장은 해골 왕국(20칸) 끝 그대로 — 새 왕국을 넣어도 성장 시점은 바뀌지 않음 (성장 시점 결정은 보류 중)
 function growCheck() { // 이미 20칸을 깬 사람: 다음 판 시작할 때 한 번 보여 줌
-  if (isGrown() || bestStage() < STAGES.length) return;
+  if (isGrown() || bestStage() < GROW_STAGE) return;
   setTimeout(() => { if (state !== 'play' || isGrown()) return; setGrown(); playStory(() => { state = 'play'; showOv(null); growBanner(); }, GROW); }, 900);
 }
 const ENDING = [
@@ -3155,7 +3163,7 @@ function renderMap() {
   box.querySelectorAll('.mnode').forEach(b => b.onclick = () => { const i = +b.dataset.i; if (i > G.stageN) { sfx('hurt'); return; } mapSel = i; sfx('pick'); renderMap(); });
   // 아래 카드
   const d = STAGES[mapSel], st = G.stars[mapSel] || 0, first = mapSel >= G.stageN;
-  const goal = d.goal === 'survive' ? `⏱ ${d.time}초 동안 몰려오는 적을 버텨라` : GOAL_TXT[d.goal];
+  const goal = d.goal === 'survive' ? `⏱ ${d.time}초 동안 몰려오는 적을 버텨라` : d.boss2 !== undefined ? `⚔ ${BOSSES[d.boss].name} → ${BOSSES[d.boss2].name} 연달아 물리쳐라` : GOAL_TXT[d.goal];
   $('mapCard').innerHTML = `<div class="t">${mapSel + 1}. ${d.name} <span style="font-size:13px;color:#fff;opacity:.7">· ${THEMES[d.th].name}</span></div>
     <div class="g">${goal}</div>
     <div class="r">${'⭐'.repeat(st)}${'☆'.repeat(3 - st)} · ⭐1 클리어 ⭐2 체력 절반 이상 ⭐3 ${d.goal === 'survive' ? '거의 안 맞기' : '빨리 깨기'}</div>
@@ -3314,7 +3322,7 @@ function enterStage(idx, tower, practice, hard, cave) {   // cave: 🌟 비밀 �
     if (R) { banner(`${R.ico} ${tower}층 · ${R.name}!`, `${R.desc} · 보상 x${R.mul}`, R.col, 3); G.banner.keep = true; }
     else banner(`🗼 ${tower}층`, def.goal === 'tboss' ? '👑 보스 층! 보스를 물리쳐라' : `⏱ ${def.time}초 버텨라!`, tower % 5 === 0 ? '#ff6b6b' : '#9fd8ff', 2.4);
     G.banner.tw = tower; G.towerRise = 0.8; }
-  else banner(`${n + 1}. ${def.name}`, def.goal === 'survive' ? `⏱ ${def.time}초 버텨라!` : GOAL_TXT[def.goal], '#ffd23f', 2.6);
+  else banner(`${n + 1}. ${def.name}`, def.goal === 'survive' ? `⏱ ${def.time}초 버텨라!` : def.boss2 !== undefined ? '⚔ 보스 2마리를 연달아 물리쳐라!' : GOAL_TXT[def.goal], '#ffd23f', 2.6);
   sfx('wave');
 }
 // 목표 달성 → 별 계산하고 포털 열기
@@ -3385,8 +3393,8 @@ function returnBase(win) {
 }
 function showClear(st, prize, first, old) {
   state = 'result'; joy = null;
-  const all = first && st.def.goal === 'final', iceAll = first && G.stageN === 15, skullAll = first && G.stageN >= STAGES.length;   // 엔딩은 왕관 괴물의 성 · 얼음 나라 끝은 따로
-  $('clrTitle').textContent = all ? '🏆 왕관 괴물 대왕 격파! 🏆' : skullAll ? '💀 해골 왕국 정복! 💀' : iceAll ? '❄️ 얼음 나라 정복! ❄️' : `${st.n + 1}. ${st.def.name} 클리어!`;
+  const all = first && st.def.goal === 'final', iceAll = first && G.stageN === 15, skullAll = first && G.stageN === GROW_STAGE, duelAll = first && G.stageN >= STAGES.length;   // 엔딩은 왕관 괴물의 성 · 얼음 나라 끝은 따로
+  $('clrTitle').textContent = all ? '🏆 왕관 괴물 대왕 격파! 🏆' : duelAll ? '⚔ 보스 대결 왕국 정복! ⚔' : skullAll ? '💀 해골 왕국 정복! 💀' : iceAll ? '❄️ 얼음 나라 정복! ❄️' : `${st.n + 1}. ${st.def.name} 클리어!`;
   $('clrStars').innerHTML = [0, 1, 2].map(k => `<span class="${k < st.stars ? '' : 'off'}" style="animation-delay:${0.2 + k * 0.25}s">⭐</span>`).join('');
   [0, 1, 2].forEach(k => { if (k < st.stars) setTimeout(() => { tone(880 + k * 220, 0.15, 'square', 0.06, 200); vib(25); }, 200 + k * 250); });
   // ⭐ Build 144: 별마다 이유 (✔/✖) + 모은 별
@@ -3394,7 +3402,7 @@ function showClear(st, prize, first, old) {
   $('clrWhy').innerHTML = why.map((t, k) => `<span class="${k < st.stars ? '' : 'no'}">${k < st.stars ? '✔' : '✖'} ${t}</span>`).join(' · ') + (st.totStars !== undefined ? `<br>⭐ 모은 별 <b>${st.totStars}</b>개${st.gotStars ? ` (+${st.gotStars})` : ''}` : '');
   const tm = fmtTime(st.t);
   $('clrInfo').innerHTML = `⏱ 걸린 시간 <b>${tm}</b><br>🪙 보상 <b>+${prize}</b>${first ? ' (첫 클리어)' : ''}${st.stars > old && old > 0 ? '<br>✨ 별 기록 갱신!' : ''}` +
-    (all ? '<br><br>왕관 괴물 대왕을 물리쳤다!<br>마을에 평화가 찾아왔어요 🎉<br><br>❄️ 북쪽에 새 땅 <b>얼음 나라</b>가 열렸어요!' : skullAll ? '<br><br>해골 왕 5마리를 모두 물리쳤다!<br>골렘과 해골 왕, 다섯 왕국의 진짜 영웅 👑' : iceAll ? '<br><br>황금 골렘까지 물리쳤다!<br><br>💀 더 먼 곳에 <b>해골 왕국</b>이 열렸어요!' : first && G.stageN < STAGES.length ? `<br>🔓 다음 스테이지 <b>${STAGES[G.stageN].name}</b> 열림!` : '') +
+    (all ? '<br><br>왕관 괴물 대왕을 물리쳤다!<br>마을에 평화가 찾아왔어요 🎉<br><br>❄️ 북쪽에 새 땅 <b>얼음 나라</b>가 열렸어요!' : duelAll ? '<br><br>보스 10마리와의 대결을 모두 이겼다!<br>진짜 대결의 왕 👑' : skullAll ? '<br><br>해골 왕 5마리를 모두 물리쳤다!<br>골렘과 해골 왕, 다섯 왕국의 진짜 영웅 👑' : iceAll ? '<br><br>황금 골렘까지 물리쳤다!<br><br>💀 더 먼 곳에 <b>해골 왕국</b>이 열렸어요!' : first && G.stageN < STAGES.length ? `<br>🔓 다음 스테이지 <b>${STAGES[G.stageN].name}</b> 열림!` : '') +
     (st.newUnlock ? `<div class="unlock">🎁 새로 열림! <b>${st.newUnlock.name}</b><br><small>${st.newUnlock.desc}</small></div>` : '') +
     (st.newBand ? `<div class="unlock">🎨 새 머리띠! <b>${st.newBand.name}</b><br><small>시작 화면 '꾸미기'에서 바꿀 수 있어요</small></div>` : '') +
     (st.newPet ? `<div class="unlock">🐾 새 펫! <b>${mIco('pet_' + st.newPet.id, '')} ${st.newPet.name}</b><br><small>${st.newPet.desc} · 시작 화면 '꾸미기'에서 데려가요</small></div>` : '') +
@@ -3805,6 +3813,9 @@ function bossDie(e) {
   G.shake = 25; G.slow = 1.3; vib([80, 40, 80, 40, 160], true); cheerAll();
   G.ebullets.length = 0; G.fists = []; G.hazards = [];
   banner('보스 처치!', e.name + ' 쓰러뜨렸다!', '#ffd23f', 3);
+  if (G.mode === 'stage' && G.st && G.st.def.boss2 !== undefined && !G.st.duel2) { // ⚔ 보스 대결 왕국: 두 번째 보스가 나와요 (Build 250)
+    G.st.duel2 = true; G.st.def = Object.assign({}, G.st.def, { boss: G.st.def.boss2 }); G.st.bossOn = false; G.p.hp = Math.min(G.p.maxHp, G.p.hp + G.p.maxHp * 0.3);
+    banner('⚔ 두 번째 보스가 온다!', `${BOSSES[G.st.def.boss2].name} · 체력 30% 회복`, '#ff6b6b', 2.6); sfx('warn'); return; }
   if (G.mode === 'stage') stageClear(e.x, e.y + 60);
   sfx('bigBoom');
 }
