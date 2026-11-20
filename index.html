@@ -357,7 +357,7 @@ h2 .hb{-webkit-text-stroke:0;text-shadow:none;letter-spacing:0;font-family:"Jua"
   <button class="btn blue" id="bShopP">💪 영웅 강화</button>
   <button class="btn" id="bAchP">🏅 업적</button>
   <button class="btn" id="bReborn" style="display:none;background:linear-gradient(#c77dff,#7b2cbf);color:#fff">🌀 환생하기</button>
-  <div class="mrow" style="margin:6px 0 10px"><button class="hb" id="bMusicP" style="width:auto;padding:0 14px;font-weight:800">🎵 음악</button><button class="hb" id="bVolP" style="width:auto;padding:0 14px;font-weight:800">🔈 소리 크기</button><button class="hb" id="bVibP" style="width:auto;padding:0 14px;font-weight:800">📳 진동</button><button class="hb" id="bNumP" style="width:auto;padding:0 14px;font-weight:800">🔢 숫자</button><button class="hb" id="bShakeP" style="width:auto;padding:0 14px;font-weight:800">🎚 흔들림</button><button class="hb" id="bEvoP" style="width:auto;padding:0 14px;font-weight:800">✨ 진화 도감</button><button class="hb" id="bDexP" style="width:auto;padding:0 14px;font-weight:800">📖 몬스터 도감</button></div>
+  <div class="mrow" style="margin:6px 0 10px"><button class="hb" id="bMusicP" style="width:auto;padding:0 14px;font-weight:800">🎵 음악</button><button class="hb" id="bVolP" style="width:auto;padding:0 14px;font-weight:800">🔈 소리 크기</button><button class="hb" id="bVibP" style="width:auto;padding:0 14px;font-weight:800">📳 진동</button><button class="hb" id="bNumP" style="width:auto;padding:0 14px;font-weight:800">🔢 숫자</button><button class="hb" id="bViewP" style="width:auto;padding:0 14px;font-weight:800">🔭 보통</button><button class="hb" id="bShakeP" style="width:auto;padding:0 14px;font-weight:800">🎚 흔들림</button><button class="hb" id="bEvoP" style="width:auto;padding:0 14px;font-weight:800">✨ 진화 도감</button><button class="hb" id="bDexP" style="width:auto;padding:0 14px;font-weight:800">📖 몬스터 도감</button></div>
   <button class="btn gray" id="bQuit">처음으로</button>
 </div>
 
@@ -371,7 +371,7 @@ h2 .hb{-webkit-text-stroke:0;text-shadow:none;letter-spacing:0;font-family:"Jua"
 
 <script>
 'use strict';
-const BUILD = 242;
+const BUILD = 243;
 const BOSS_INTERVAL = 180;      // 보스 등장 간격(초)
 const WAVE_INTERVAL = 60;       // 대규모 몰이 이벤트 간격(초)
 const MAX_ENEMIES = 110;   // Build 202: 220 → 110 (화면이 너무 정신없어서) — 대신 마을 적이 조금 더 튼튼(CROWD_K)
@@ -492,11 +492,14 @@ let W = 0, H = 0, DPR = 1, SCALE = 1, VW = 0, VH = 0;
 let dprCap = 3;
 if (document.fonts) { document.fonts.load('20px Jua'); document.fonts.load('20px BHS'); }   // 캔버스 글자용 글꼴 미리 불러오기
 try { const v = +localStorage.getItem('stickhero_dpr'); if (v >= 1 && v <= 3) dprCap = v; } catch (e) {}
+// 🔭 Build 243: 화면 넓이 고르기 (가까이 520 / 보통 620 / 멀리 720)
+const VIEWS = [['🔍 가까이', 520], ['🔭 보통', 620], ['🌍 멀리', 720]];
+let viewI = 1; try { const v = +localStorage.getItem('stickhero_view'); if (v >= 0 && v <= 2 && localStorage.getItem('stickhero_view') !== null) viewI = v; } catch (e) {}
 function resize() {
   DPR = Math.min(window.devicePixelRatio || 1, dprCap);
   W = window.innerWidth; H = window.innerHeight;
   cv.width = Math.round(W * DPR); cv.height = Math.round(H * DPR);
-  SCALE = Math.max(0.6, Math.min(1.6, Math.min(W, H) / 620));   // Build 219·220: 화면을 넓게 (420 → 540 → 620)
+  SCALE = Math.max(0.5, Math.min(1.6, Math.min(W, H) / VIEWS[viewI][1]));   // Build 219·220: 화면을 넓게 (420 → 540 → 620) · Build 243: ⏸에서 고르기
   VW = W / SCALE; VH = H / SCALE;
 }
 window.addEventListener('resize', resize); resize();
@@ -1873,11 +1876,13 @@ function refreshSettings() {
   for (const id of ['bMusicT', 'bMusicP']) { $(id).textContent = musicOn ? '🎵 음악 켬' : '🎵 음악 끔'; $(id).style.opacity = musicOn ? 1 : 0.55; }
   $('bVibP').textContent = vibOn ? '📳 진동 켬' : '📳 진동 끔'; $('bVibP').style.opacity = vibOn ? 1 : 0.55;
   $('bNumP').textContent = numOn ? '🔢 피해 숫자 켬' : '🔢 피해 숫자 끔'; $('bNumP').style.opacity = numOn ? 1 : 0.55;
+  $('bViewP').textContent = VIEWS[viewI][0];
   $('bShakeP').textContent = shakeOn ? '🎚 화면 흔들림 켬' : '🎚 화면 흔들림 끔'; $('bShakeP').style.opacity = shakeOn ? 1 : 0.55;
 }
 const toggleMusic = () => { audioInit(); musicOn = !musicOn; try { localStorage.setItem('stickhero_music', musicOn ? '1' : '0'); } catch (e) {} if (!musicOn && bgmCur) { const k = bgmCur.key; playBgm('__none'); bgmWant = k; } refreshSettings(); };
 $('bMusicT').onclick = toggleMusic; $('bMusicP').onclick = toggleMusic;
 $('bShakeP').onclick = () => { shakeOn = !shakeOn; try { localStorage.setItem('stickhero_shake', shakeOn ? '1' : '0'); } catch (e) {} sfx('pick'); refreshSettings(); };
+$('bViewP').onclick = () => { viewI = (viewI + 1) % VIEWS.length; try { localStorage.setItem('stickhero_view', '' + viewI); } catch (e) {} resize(); sfx('pick'); refreshSettings(); };
 $('bNumP').onclick = () => { numOn = !numOn; try { localStorage.setItem('stickhero_num', numOn ? '1' : '0'); } catch (e) {} sfx('pick'); refreshSettings(); };
 $('bVibP').onclick = () => { vibOn = !vibOn; try { localStorage.setItem('stickhero_vib', vibOn ? '1' : '0'); } catch (e) {} if (vibOn) vib(40, true); refreshSettings(); };
 let volBack = null, volPingT = 0;
