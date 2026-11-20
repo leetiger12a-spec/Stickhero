@@ -1,5 +1,5 @@
 # 격자 시트(예: 제미나이 4×3 = 12칸) → 게임 동작 시트 (Build 232)
-# 사용: python3 tools/grid2sheet.py 시트.png 출력이름 칸높이 [cols=4] [rows=3] [holes=면적] [anchor=mass] [holesy=0~1] [bigholes=면적]
+# 사용: python3 tools/grid2sheet.py 시트.png 출력이름 칸높이 [cols=4] [rows=3] [holes=면적] [anchor=mass] [holesy=0~1] [bigholes=면적] [blobs=1]
 # - 칸마다 흰 배경 제거(가장자리와 이어진 흰색만), 가장 큰 덩어리 둘레 조각만 남김
 # - 칸마다 위치가 조금씩 달라도 발(맨 아래) 가운데를 기준으로 맞춰 떨림을 줄임 (그림 내용은 그대로)
 import sys, json, numpy as np
@@ -9,9 +9,15 @@ src, name, cellH = sys.argv[1], sys.argv[2], int(sys.argv[3])
 opts = dict(a.split('=', 1) for a in sys.argv[4:]); C, R = int(opts.get('cols', 4)), int(opts.get('rows', 3))
 A = np.asarray(Image.open(src).convert('RGB')).astype(np.int16); H, W = A.shape[:2]
 frames = []
-for r in range(R):
-    for c in range(C):
-        a = A[r * H // R:(r + 1) * H // R, c * W // C:(c + 1) * W // C]
+cells = [(r * H // R, (r + 1) * H // R, c * W // C, (c + 1) * W // C) for r in range(R) for c in range(C)]
+if opts.get('blobs'):   # blobs=1: 캐릭터가 칸 경계를 넘을 만큼 클 때 — 덩어리를 찾아 각자의 범위로 자름
+    bg0 = (A.min(-1) > 225) & (A.max(-1) - A.min(-1) < 30); lb, nk = ndimage.label(~bg0); sz0 = ndimage.sum(~bg0, lb, range(1, nk + 1))
+    top = sorted(np.argsort(-sz0)[:R * C]); ob0 = ndimage.find_objects(lb)
+    bx = [ob0[i] for i in top]; bx.sort(key=lambda o: ((o[0].start + o[0].stop) // 2 * R // H, o[1].start))
+    cells = [(max(0, o[0].start - 12), min(H, o[0].stop + 12), max(0, o[1].start - 12), min(W, o[1].stop + 12)) for o in bx]
+for (y0, y1, x0, x1) in cells:
+    if True:
+        a = A[y0:y1, x0:x1]
         bgish = (a.min(-1) > 225) & (a.max(-1) - a.min(-1) < 30); bl, _ = ndimage.label(bgish)
         edge = set(np.unique(np.concatenate([bl[0], bl[-1], bl[:, 0], bl[:, -1]]))) - {0}
         fg = ~np.isin(bl, list(edge))
