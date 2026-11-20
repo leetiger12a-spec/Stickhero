@@ -371,7 +371,7 @@ h2 .hb{-webkit-text-stroke:0;text-shadow:none;letter-spacing:0;font-family:"Jua"
 
 <script>
 'use strict';
-const BUILD = 243;
+const BUILD = 244;
 const BOSS_INTERVAL = 180;      // 보스 등장 간격(초)
 const WAVE_INTERVAL = 60;       // 대규모 몰이 이벤트 간격(초)
 const MAX_ENEMIES = 110;   // Build 202: 220 → 110 (화면이 너무 정신없어서) — 대신 마을 적이 조금 더 튼튼(CROWD_K)
@@ -2263,6 +2263,8 @@ function makeEnemy(type, x, y) {
   else if (G && G.mode === 'stage' && G.st && G.st.rule === 'gold' && Math.random() < 0.3) makeGolden(e);   // 💰 황금 층
   else if (!window.__noGold && Math.random() < GOLD_P) makeGolden(e);   // __noGold: 정확한 기록을 보는 시험용
   if (!e.golden && eliteOk() && Math.random() < (window.__eliteP !== undefined ? window.__eliteP : ELITE_P + (G.lvl >= LVL_FREE ? 0.02 : 0))) makeElite(e);
+  if (G && G.mode === 'stage' && G.st && G.st.rule === 'giant' && !T.boss) { e.hp *= 2; e.maxHp *= 2; e.r *= 1.4; e.scale = 1.45; e.spd *= 0.7; }   // 🐘 거인 층 (Build 244)
+  if (G && G.mode === 'stage' && G.st && G.st.rule === 'vamp') e.dmg *= 1.3;   // 🩸 흡혈 층: 적 공격 1.3배
   return e;
 }
 // ⚔ 정예 몬스터 (Build 168): 빨간 기운 · 이름표 · 체력 4배 · 공격 1.5배 · 특기 하나 (🛡 방패 / ✂ 분열 / 🌀 순간이동) · 잡으면 작은 상자
@@ -3141,6 +3143,8 @@ const TOWER_RULES = {
   gold: { ico: '💰', name: '황금 층', desc: '황금 몬스터가 잔뜩 나와요!', mul: 2, col: '#ffd23f' },
   dark: { ico: '🌑', name: '어둠 층', desc: '내 주변만 보여요 · 조심조심!', mul: 1.5, col: '#c77dff' },
   wind: { ico: '💨', name: '바람 층', desc: '영웅도 적도 모두 빨라져요!', mul: 1.3, col: '#9fd8ff' },
+  giant: { ico: '🐘', name: '거인 층', desc: '몬스터가 크고 튼튼해요 · 대신 느려요', mul: 1.6, col: '#a3d977' },   // Build 244
+  vamp: { ico: '🩸', name: '흡혈 층', desc: '잡을 때마다 체력 회복 · 대신 적이 더 아파요', mul: 1.5, col: '#ff6b81' },   // Build 244
 };
 const towerCp = () => Math.floor(((readJSON(META_KEY) || {}).bestFloor || 0) / 10) * 10 + 1;   // 🚀 체크포인트 (Build 162): 10층마다
 const towerPrize = f => 15 + f * 6 + (f % 5 === 0 ? 60 + f * 4 : 0);
@@ -3266,7 +3270,7 @@ function enterStage(idx, tower, practice, hard, cave) {   // cave: 🌟 비밀 �
     st.ice = []; for (let i = 0; i < L / 170; i++) { const y = rand(-L - 300, -120); st.ice.push({ x: rand(-STAGE_HW + 50, STAGE_HW - 50), y, r: rand(55, 85) }); }
     st.blizT = rand(10, 16); st.blizOn = 0;
   }
-  if (tower && tower % 5 && tower >= 6) { const k = window.__towerRule !== undefined ? window.__towerRule : Math.random() < 0.35 ? Object.keys(TOWER_RULES)[Math.floor(Math.random() * 4)] : null;
+  if (tower && tower % 5 && tower >= 6) { const k = window.__towerRule !== undefined ? window.__towerRule : Math.random() < 0.35 ? Object.keys(TOWER_RULES)[Math.floor(Math.random() * Object.keys(TOWER_RULES).length)] : null;
     if (k) { st.rule = k; def.name += ' ' + TOWER_RULES[k].ico; if (k === 'bolt') { st.bolts = []; st.boltT = 2.5; } } }
   G.st = st; G.mode = 'stage';
   p.x = 0; p.y = surv ? -L / 2 : -40; G.cam.x = 0; G.cam.y = p.y - 12; joy = null;
@@ -3670,6 +3674,7 @@ function addCombo() { G.combo = (G.comboT > 0 ? G.combo || 0 : 0) + 1; G.comboT 
   const gift = COMBO_GIFT[G.combo]; if (gift) { G.gold += gift; floatText(G.p.x, G.p.y - 74, `🔥 ${G.combo} 콤보! +🪙${gift}`, '#ff9f1c', 20, 1.4); sfx('coin'); if (G.combo >= 100) heroSay('combo', true); } }
 function updCombo(dt) { if (G.comboT > 0) { G.comboT -= dt; if (G.comboT <= 0) G.combo = 0; } if (G.comboPop > 0) G.comboPop -= dt; }
 function killEnemy(e) {
+  if (G.mode === 'stage' && G.st && G.st.rule === 'vamp' && !e.camp && !G.p.dead) { const p = G.p, h = Math.max(1, Math.round(p.maxHp * (e.boss ? 0.2 : 0.03))); p.hp = Math.min(p.maxHp, p.hp + h); }   // 🩸 흡혈 층: 잡으면 체력 3% (보스 20%) 회복
   e.dead = true; G.kills++; if (!e.boss && !e.camp) { addCombo(); petGain(); } ultGain(e.boss ? 30 : e.elite ? 8 : e.camp ? 10 : 2); if (e.lastSrc === 'poison') questEvent('poison'); else if (e.lastSrc === 'star') questEvent('meteor');
   if (e.lastSrc && WEAP[e.lastSrc]) { ST.wk = ST.wk || {}; ST.wk[e.lastSrc] = (ST.wk[e.lastSrc] || 0) + 1; stDirty = true; }   // 무기별 처치 수
   if (G.allies.length) allyGainXp(e.x, e.y, e.boss ? 40 : e.camp ? 20 : e.xp);
