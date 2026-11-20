@@ -371,7 +371,7 @@ h2 .hb{-webkit-text-stroke:0;text-shadow:none;letter-spacing:0;font-family:"Jua"
 
 <script>
 'use strict';
-const BUILD = 241;
+const BUILD = 242;
 const BOSS_INTERVAL = 180;      // 보스 등장 간격(초)
 const WAVE_INTERVAL = 60;       // 대규모 몰이 이벤트 간격(초)
 const MAX_ENEMIES = 110;   // Build 202: 220 → 110 (화면이 너무 정신없어서) — 대신 마을 적이 조금 더 튼튼(CROWD_K)
@@ -767,6 +767,13 @@ const ACH = [
   { id: 'winter50', icon: '⛄', name: '눈싸움 왕',    desc: '눈사람·쿠키맨 50마리 잡기',    title: '겨울 용사',  bank: 150, p: () => [(ST.kc.e_snowman || 0) + (ST.kc.e_ginger || 0), 50] },
   { id: 'rage10',  icon: '😡', name: '화 다스리기',   desc: '화난 보스 10마리 물리치기',    title: '진정한 영웅', bank: 300, p: () => [ST.rageKills || 0, 10] },
   { id: 'newevo',  icon: '🌠', name: '독과 별',       desc: '독 늪 가마솥·유성우 지팡이 진화', title: '별빛 연금술사', bank: 300, p: () => [['poison', 'star'].filter(x => ST.evoT.includes(x)).length, 2] },
+  // Build 242: 새 업적 6개 (보스·도감·동료)
+  { id: 'skull5',  icon: '☠', name: '해골 왕 사냥',   desc: '해골 왕 5종 모두 잡기',        title: '해골 사냥꾼', bank: 600,  p: () => [SKULLS.filter(n => ST.bossT.includes(n)).length, 5] },
+  { id: 'bossAll', icon: '👑', name: '모든 왕을 쓰러뜨려라', desc: '보스 17종 모두 잡기',   title: '보스 정복자', bank: 1500, p: () => [DEX.filter(d => d.boss && dexCount(d) > 0).length, DEX.filter(d => d.boss).length] },
+  { id: 'fast30',  icon: '⏱', name: '번개 사냥',       desc: '보스를 30초 안에 잡기',        title: '번개 영웅',  bank: 300,  p: () => [Object.values(ST.bfast || {}).some(v => v <= 30) ? 1 : 0, 1] },
+  { id: 'bstar3',  icon: '🌟', name: '단골 손님',       desc: '보스 하나를 별 3개로 (20번 잡기)', title: '보스 단골', bank: 400, p: () => [DEX.some(d => d.boss && dexStars(d) >= 3) ? 1 : 0, 1] },
+  { id: 'goldB3',  icon: '💛', name: '황금 왕관',       desc: '황금 보스 3종 쓰러뜨리기',     title: '황금 왕',    bank: 700,  p: () => [ST.goldB.length, 3] },
+  { id: 'swap10',  icon: '🔄', name: '든든한 교대',     desc: '동료 10번 교대하기',           title: '작전 대장',  bank: 150,  p: () => [ST.swaps || 0, 10] },
 ];
 function checkAch() { // 1초마다: 기록 저장 + 새 업적
   const m = readJSON(META_KEY) || {}; m.ach = m.ach || {};
@@ -1833,6 +1840,7 @@ function swapAlly(on, i) { // ✅ 함께 → 💤 쉬기 / 💤 → ✅ (자리�
   G.bench = G.bench || []; const p = G.p;
   if (on) { const [a] = G.allies.splice(i, 1); if (a) G.bench.push(a); }
   else { const [a] = G.bench.splice(i, 1); if (!a) return; if (G.allies.length >= ALLY_ACTIVE) G.bench.push(G.allies.pop()); a.dead = false; a.hp = a.maxHp; a.x = p.x + rand(-30, 30); a.y = p.y + 30; G.allies.push(a); }
+  if (!on) stAdd('swaps');   // Build 242: 교대 업적
   G.allies.forEach((a, k) => a.slot = k); sfx('pick'); saveGame(); renderPauseStats();
 }
 document.addEventListener('click', ev => { const b = ev.target.closest && ev.target.closest('.anm'); if (!b || !G) return; const a = G.allies[+b.dataset.i]; if (!a) return; a.name = pickAllyName(a.type, a.name); sfx('pick'); renderPauseStats(); });
