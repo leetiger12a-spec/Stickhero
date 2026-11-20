@@ -116,3 +116,8 @@ BACKGROUND: plain pure white (#FFFFFF) everywhere, no grid lines, no frame borde
 QUALITY: ultra high resolution, QHD (2560x1440) or higher, crisp clean lines
 ```
 
+
+---
+
+# 🎞 처음 몬스터 8종 12칸 (Build 239~, 한 장씩)
+첨부: `art/ref/이름_new_pose.png` (새 그림체 4칸 시트 첫 칸을 자른 것) 1장만. 걷기·공격 각 1장.
