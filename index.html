@@ -372,7 +372,7 @@ h2 .hb{-webkit-text-stroke:0;text-shadow:none;letter-spacing:0;font-family:"Jua"
 
 <script>
 'use strict';
-const BUILD = 256;
+const BUILD = 257;
 const BOSS_INTERVAL = 180;      // 보스 등장 간격(초)
 const WAVE_INTERVAL = 60;       // 대규모 몰이 이벤트 간격(초)
 const MAX_ENEMIES = 110;   // Build 202: 220 → 110 (화면이 너무 정신없어서) — 대신 마을 적이 조금 더 튼튼(CROWD_K)
@@ -1340,28 +1340,30 @@ function recalcStats() {
   const p = G.p, ps = G.passives;
   const oldMax = p.maxHp;
   const U = upLv;   // 영구 강화
-  p.maxHp = Math.round((100 + 25 * (ps.hp || 0)) * (1 + 0.1 * U('hp')));
+  p.maxHp = Math.round((100 + 25 * (ps.hp || 0)) * (1 + upPct('hp') / 100));
   if (p.maxHp > oldMax) p.hp += p.maxHp - oldMax;
   p.hp = Math.min(p.hp, p.maxHp);
-  p.speed = 150 * (1 + 0.1 * (ps.speed || 0)) * (1 + 0.04 * U('spd')) * (WK('swift') ? 1.15 : 1);   // 🍬 사탕 빠르기는 이동 때 곱함
-  p.magnet = 70 * (1 + 0.4 * (ps.magnet || 0)) * (1 + 0.12 * U('mag'));
-  p.dmgMul = (1 + 0.15 * (ps.power || 0)) * (1 + 0.1 * (G.forge || 0)) * (1 + 0.06 * U('atk')) * rebornMul() * grownMul();
+  p.speed = 150 * (1 + 0.1 * (ps.speed || 0)) * (1 + upPct('spd') / 100) * (WK('swift') ? 1.15 : 1);   // 🍬 사탕 빠르기는 이동 때 곱함
+  p.magnet = 70 * (1 + 0.4 * (ps.magnet || 0)) * (1 + upPct('mag') / 100);
+  p.dmgMul = (1 + 0.15 * (ps.power || 0)) * (1 + 0.1 * (G.forge || 0)) * (1 + upPct('atk') / 100) * rebornMul() * grownMul();
   p.maxHp = Math.round(p.maxHp * rebornMul() * grownMul() * (WK('glass') ? 0.5 : 1)); p.hp = Math.min(p.hp, p.maxHp);   // 🌀 환생 보너스 · 🗡 유리 대포 주간: 체력 절반
   if (WK('glass')) p.dmgMul *= 1.5;   // Build 246
   p.cdMul = Math.max(0.5, 1 - 0.1 * (ps.haste || 0));
   p.cap = 12 + 6 * (ps.bag || 0);
 }
 // ---------- 영구 강화 (게임오버 뒤에도 유지) ----------
+// ⭐ Build 257: 별 강화 — 옛 최대(top)를 넘으면 ★ 단계 (금화 쓸 곳). ★ 한 칸은 효과 작고(st) 값은 1.08배씩 가파르게
 const UPGRADES = [
-  { id: 'hp',   icon: '❤️', name: '강철 체력',   max: 10, base: 40, desc: l => `최대 체력 +${l * 10}%` },
-  { id: 'atk',  icon: '⚔️', name: '전설의 힘',   max: 10, base: 50, desc: l => `모든 공격력 +${l * 6}%` },
-  { id: 'spd',  icon: '👟', name: '바람 발걸음', max: 8,  base: 35, desc: l => `이동 속도 +${l * 4}%` },
-  { id: 'mag',  icon: '🧲', name: '금빛 자석',   max: 6,  base: 30, desc: l => `줍는 범위 +${l * 12}%` },
-  { id: 'luck', icon: '🍀', name: '행운',        max: 8,  base: 45, desc: l => `금화가 더 나올 확률 +${l * 8}%` },
-  { id: 'start',icon: '💰', name: '든든한 시작', max: 5,  base: 60, desc: l => `새 판 시작 금화 +${l * 25}` },
+  { id: 'hp',   icon: '❤️', name: '강철 체력',   max: 30, top: 10, per: 10, st: 3, base: 40, desc: l => `최대 체력 +${upPct('hp', l)}%` },
+  { id: 'atk',  icon: '⚔️', name: '전설의 힘',   max: 30, top: 10, per: 6,  st: 2, base: 50, desc: l => `모든 공격력 +${upPct('atk', l)}%` },
+  { id: 'spd',  icon: '👟', name: '바람 발걸음', max: 8,  top: 8,  per: 4,  st: 0, base: 35, desc: l => `이동 속도 +${upPct('spd', l)}%` },
+  { id: 'mag',  icon: '🧲', name: '금빛 자석',   max: 10, top: 6,  per: 12, st: 6, base: 30, desc: l => `줍는 범위 +${upPct('mag', l)}%` },
+  { id: 'luck', icon: '🍀', name: '행운',        max: 16, top: 8,  per: 8,  st: 4, base: 45, desc: l => `금화가 더 나올 확률 +${upPct('luck', l)}%` },
+  { id: 'start',icon: '💰', name: '든든한 시작', max: 20, top: 5,  per: 25, st: 25, base: 60, desc: l => `새 판 시작 금화 +${upPct('start', l)}` },
 ];
 function upLv(id) { const m = readJSON('stickhero_meta') || {}; return (m.up && m.up[id]) || 0; }
-const upCost = (u, l) => Math.round(u.base * Math.pow(l + 1, 1.45));
+function upPct(id, l) { const u = UPGRADES.find(x => x.id === id); if (l === undefined) l = upLv(id); return Math.min(l, u.top) * u.per + Math.max(0, l - u.top) * u.st; }
+const upCost = (u, l) => Math.round(u.base * Math.pow(l + 1, 1.45) * (l >= u.top ? 1.5 * Math.pow(1.08, l - u.top) : 1));
 function bankGold() { return (readJSON('stickhero_meta') || {}).bank || 0; }
 let shopBack = null;
 function openShop() {
@@ -1374,7 +1376,7 @@ function renderShop() {
   UPGRADES.forEach(u => {
     const l = upLv(u.id), max = l >= u.max, cost = upCost(u, l), can = !max && wallet >= cost;
     const row = document.createElement('div'); row.className = 'srow';
-    row.innerHTML = `<div class="ic">${u.icon}</div><div class="tx"><b>${u.name}</b> <span class="lv">Lv ${l}/${u.max}</span><br><small>${u.desc(l)}${max ? '' : ' → ' + u.desc(l + 1).replace(/^[^+]*/, '')}</small></div>`;
+    row.innerHTML = `<div class="ic">${u.icon}</div><div class="tx"><b>${u.name}</b> <span class="lv">${l >= u.top && u.max > u.top ? `⭐ ★${l - u.top}/${u.max - u.top}` : `Lv ${l}/${u.top}`}</span><br><small>${u.desc(l)}${max ? '' : ' → ' + u.desc(l + 1).replace(/^[^+]*/, '')}</small></div>`;
     const bt = document.createElement('button'); bt.className = 'sbuy' + (can ? '' : ' off'); bt.textContent = max ? 'MAX' : `🪙${cost}`;
     bt.onclick = () => {
       if (!can) { sfx('hurt'); return; }
@@ -1622,13 +1624,13 @@ function inputDir() {
 const DIFFS = [
   { name: '어린이', ehp: 0.5,  edmg: 0.35, rate: 0.6,  boss: 0.5,  grow: 0.4,  desc: '🐣 적이 약하고 천천히 와요. 처음 하는 친구에게!' },
   { name: '쉬움',   ehp: 0.75, edmg: 0.65, rate: 0.8,  boss: 0.75, grow: 0.7, desc: '🙂 조금 여유롭게 마을을 키울 수 있어요' },
-  { name: '보통',   ehp: 1,    edmg: 1,    rate: 1,    boss: 1,    grow: 1, desc: '😠 레전드 히어로의 기본 난이도' },
-  { name: '어려움', ehp: 1.35, edmg: 1.35, rate: 1.2,  boss: 1.4,  grow: 1.3, desc: '🔥 진짜 레전드만 버틸 수 있어요!' },
-  { name: '레전드', ehp: 2,    edmg: 1.8,  rate: 1.4,  boss: 2.2,  grow: 1.6, desc: '👹 지옥 난이도! 대신 금화 1.5배 · 전용 업적 2개' },   // Build 166
+  { name: '보통',   ehp: 1.3,  edmg: 1.25, rate: 1.1,  boss: 1.3,    grow: 1, desc: '😠 레전드 히어로의 기본 난이도' },
+  { name: '어려움', ehp: 1.75, edmg: 1.7,  rate: 1.3,  boss: 1.8,  grow: 1.3, desc: '🔥 진짜 레전드만 버틸 수 있어요!' },
+  { name: '레전드', ehp: 2.6,  edmg: 2.25, rate: 1.5,  boss: 2.8,  grow: 1.6, desc: '👹 지옥 난이도! 대신 금화 1.5배 · 전용 업적 2개' },   // Build 166
 ];
 // 💪 레벨 맞춤 세기 (Build 166): 영웅 Lv 30부터 적·보스가 레벨마다 강해짐 (Build 204: Lv 94 → 체력 x2.6→x3.56 · 공격 x1.77→x2.28)
 const LEGEND = 4, legendOn = () => G && G.diff === LEGEND;   // 👹 레전드 난이도 번호
-const LVL_FREE = 30, LVL_HP = 0.04, LVL_DMG = 0.02;
+const LVL_FREE = 15, LVL_HP = 0.04, LVL_DMG = 0.02;
 function lvlScale() { const ex = Math.max(0, ((G && G.lvl) || 1) + 10 * (rebornMul() - 1) * 10 - LVL_FREE); return { hp: 1 + LVL_HP * ex, dmg: 1 + LVL_DMG * ex }; }
 // 🗼 탑 21층부터 층마다 더 강해짐 (예전엔 21층 위로 그대로였음): 체력 +6% · 공격 +2.5% / 층
 function towerScale() { const f = G && G.mode === 'stage' && G.st && G.st.tower || 0, ex = Math.max(0, f - 20); return { hp: 1 + 0.06 * ex, dmg: 1 + 0.025 * ex }; }
@@ -1796,7 +1798,7 @@ function startGame() {
   audioInit(); clearSave(); newGame(); if (totalStars() >= PETS[1].need && petSel === 0) setTimeout(() => showTip('pet'), 3500); state = 'play'; joy = null; showOv(null);
   $('hudBtns').classList.add('show');
   const meta = readJSON(META_KEY);
-  G.gold += 25 * upLv('start');
+  G.gold += upPct('start');
   { const m = readJSON(META_KEY) || {}; if (m.startBonus) { G.gold += m.startBonus; setTimeout(() => G && floatText(G.p.x, G.p.y - 70, `🎰 룰렛 보너스 +🪙${m.startBonus}`, '#ffd23f', 18, 1.6), 600); m.startBonus = 0; writeJSON(META_KEY, m); } }
   if (meta && meta.forge > 0) { G.forge = meta.forge; recalcStats(); banner('마을을 지켜라!', `⚒ 무기 강화 Lv ${G.forge} 그대로 유지!`, '#ffd23f', 3); }
   else banner('마을을 지켜라!', '나무를 베어 망루를 짓자', '#ffd23f', 3);
@@ -3810,7 +3812,7 @@ function killEnemy(e) {
   if (Math.random() < 0.13) floatText(e.x, e.y - 18, DEATH_WORDS[Math.floor(Math.random() * DEATH_WORDS.length)], e.color, 17, 0.9);
   sfx('pop');
   dropGem(e.x, e.y, e.xp);
-  if (Math.random() < 0.08 * upLv('luck')) dropCoin(e.x, e.y);   // 행운 강화: 금화 하나 더
+  if (Math.random() < upPct('luck') / 100) dropCoin(e.x, e.y);   // 행운 강화: 금화 하나 더
   for (let i = 0; i < e.gold; i++) if (i > 0 || Math.random() < 0.7) dropCoin(e.x + rand(-8, 8), e.y + rand(-8, 8));
   if (Math.random() < 0.012) G.hearts.push({ x: e.x, y: e.y, bob: 0 });
   rollItem(e.x, e.y);
