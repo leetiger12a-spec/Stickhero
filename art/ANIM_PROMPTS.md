@@ -353,3 +353,71 @@ GRID RULES (strict):
 BACKGROUND: plain pure white (#FFFFFF) everywhere, no grid lines, no frame borders, no ground line, no shadows, no puddles, no glow halo, no sticker border, no sparkles, no effects, no motion lines, no splashes, no text, no letters, no numbers, no watermark.
 QUALITY: ultra high resolution, QHD (2560x1440) or higher, crisp clean lines
 ```
+
+## ⑫ 궁수 걷기 — 첨부 2장: `art/ref/archer_new_pose.png` + `art/ref/archer_walk4_ref.png`
+```
+TASK: one 2D game ANIMATION SPRITE SHEET of the attached character: exactly 12 frames arranged in a grid of 4 columns x 3 rows, read left to right, top row first.
+
+ATTACHMENTS:
+- Image 1 = the character design. Keep EXACTLY this design, colors, thick black outlines, cel shading, proportions and art style.
+- Image 2 = 4 KEY POSES of his walk (left to right). Copy these leg positions EXACTLY; they are the most important part.
+
+CHARACTER: a small green goblin archer with big pointed ears, a brown hood and scarf, a quiver of arrows on his back, a leather belt, a ragged brown skirt, brown boots and a wooden bow in his LEFT hand. The bow is held in EVERY frame; NO arrow on the bow while walking.
+
+ANIMATION: a sneaky WALK CYCLE in place, facing right, built from the 4 key poses of Image 2 with smooth in-between frames:
+- Frame 1 = key pose 1 of Image 2 (front boot stepping forward, back boot behind).
+- Frames 2-3 = in-betweens: the back boot lifting and swinging forward under the body.
+- Frame 4 = key pose 2 of Image 2.
+- Frames 5-6 = in-betweens: the lifted boot reaching forward.
+- Frame 7 = key pose 3 of Image 2 (the OTHER boot now stepping forward).
+- Frames 8-9 = in-betweens: the back boot lifting and swinging forward.
+- Frame 10 = key pose 4 of Image 2.
+- Frames 11-12 = in-betweens flowing back into frame 1.
+THE LEGS AND BOOTS MUST VISIBLY MOVE: the distance between the two boots changes a lot from frame to frame, and in about half of the frames one boot is clearly lifted off the ground. Do NOT draw the same leg pose twice in a row. The free fist swings opposite to the legs; the head bobs slightly.
+
+GRID RULES (strict):
+- Every frame: the SAME character at the SAME size (the same head and hood size in all 3 rows), facing right, full body, 3/4 top-down game view, same as Image 2.
+- Same ground line in every frame; the character stays in the center of its cell.
+- The character fills about 70% of its cell height.
+- VERY WIDE empty white gaps between all cells and between the rows; no bow, arrow, ear, boot or body part may touch or come near another cell.
+- Only the 12 frames. No extra poses, no labels.
+
+BACKGROUND: plain pure white (#FFFFFF) everywhere, no grid lines, no frame borders, no ground line, no shadows, no glow halo, no sticker border, no effects, no dust, no speed lines, no text, no letters, no numbers, no watermark.
+QUALITY: ultra high resolution, QHD (2560x1440) or higher, crisp clean lines
+```
+
+## ⑬ 궁수 공격 (활 쏘기) — 첨부 2장: `art/ref/archer_new_pose.png` + `art/ref/archer_atk4_ref.png`
+```
+TASK: one 2D game ANIMATION SPRITE SHEET of the attached character: exactly 12 frames arranged in a grid of 4 columns x 3 rows, read left to right, top row first.
+
+ATTACHMENTS:
+- Image 1 = the character design. Keep EXACTLY this design, colors, thick black outlines, cel shading, proportions and art style.
+- Image 2 = 4 KEY POSES of his bow shot (left to right). Copy these arm, bow and body positions EXACTLY. Do NOT draw the flying arrow or the motion trail from the last pose of Image 2.
+
+CHARACTER: a small green goblin archer with big pointed ears, a brown hood and scarf, a quiver of arrows on his back, a leather belt, a ragged brown skirt, brown boots and a wooden bow in his LEFT hand.
+
+ANIMATION: a BOW SHOT in place, facing right, built from the 4 key poses of Image 2 with smooth in-between frames. The feet stay planted in the same place in every frame:
+- Frame 1 = key pose 1 of Image 2 (standing ready, bow held up in front, no arrow).
+- Frame 2 = right hand reaching back over the shoulder to the quiver.
+- Frame 3 = pulling one arrow out of the quiver.
+- Frame 4 = placing the arrow on the bow string.
+- Frame 5 = key pose 2 of Image 2 (bow raised, arrow on the string, starting to draw).
+- Frame 6 = drawing the string back halfway.
+- Frame 7 = key pose 3 of Image 2 (string FULLY drawn back to the cheek, aiming right, eyes squinting).
+- Frame 8 = same full draw, holding the aim, body leaning slightly forward.
+- Frame 9 = key pose 4 of Image 2 WITHOUT the arrow: the string just released and snapped forward, the arrow is GONE (no flying arrow anywhere in the picture), right hand open behind.
+- Frame 10 = follow-through, right hand still open, bow vibrating slightly.
+- Frame 11 = lowering the bow a little.
+- Frame 12 = back to the ready stance like frame 1.
+Every frame MUST show a DIFFERENT pose; do NOT draw the same pose twice in a row.
+
+GRID RULES (strict):
+- Every frame: the SAME character at the SAME size (the same head and hood size in all 3 rows), facing right, full body, 3/4 top-down game view, same as Image 2.
+- Same ground line in every frame; the character stays in the center of its cell.
+- The character fills about 70% of its cell height.
+- VERY WIDE empty white gaps between all cells and between the rows; no bow, arrow, ear, boot or body part may touch or come near another cell.
+- Only the 12 frames. No extra poses, no labels.
+
+BACKGROUND: plain pure white (#FFFFFF) everywhere, no grid lines, no frame borders, no ground line, no shadows, no glow halo, no sticker border, no effects, no flying arrows, no motion trails, no speed lines, no dust, no text, no letters, no numbers, no watermark.
+QUALITY: ultra high resolution, QHD (2560x1440) or higher, crisp clean lines
+```
