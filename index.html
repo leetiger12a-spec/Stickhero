@@ -372,7 +372,7 @@ h2 .hb{-webkit-text-stroke:0;text-shadow:none;letter-spacing:0;font-family:"Jua"
 
 <script>
 'use strict';
-const BUILD = 251;
+const BUILD = 252;
 const BOSS_INTERVAL = 180;      // 보스 등장 간격(초)
 const WAVE_INTERVAL = 60;       // 대규모 몰이 이벤트 간격(초)
 const MAX_ENEMIES = 110;   // Build 202: 220 → 110 (화면이 너무 정신없어서) — 대신 마을 적이 조금 더 튼튼(CROWD_K)
@@ -2402,6 +2402,7 @@ function spawnBoss(bx, by) {
   let n = inStage ? (G.st.tower ? (G.st.tower / 5 <= 9 ? G.st.tower / 5 : G.st.tower === 50 ? GOLD_GOLEM : top()) : G.st.def.boss !== undefined ? G.st.def.boss : STAGE_BOSS[Math.min(8, si)]) : Math.max(G.bossCount < 6 ? G.bossCount : top(), BOSS_MIN_TIER[Math.min(3, Math.floor(tierNow()))]);
   if (!inStage && n >= 3 && pr === undefined && !window.__noGold && Math.random() < GOLD_GOLEM_P) n = GOLD_GOLEM;   // 황금 골렘은 마을에서만 아주 드물게 (__noGold: 정확한 기록을 보는 시험용)
   if (pr !== undefined && pr !== 'final') n = pr;
+  if (inStage && G.st.duel2 && G.st.def.boss !== undefined) n = G.st.def.boss;   // ⚔ 두 번째 보스 (모험 대결 왕국·탑 대결 층)
   if (window.__bossN !== undefined) n = window.__bossN;   // 시험용
   if (!inStage) G.bossCount++;
   const B = final ? { name: '왕관 괴물 대왕', color: '#b5179e' } : BOSSES[n];
@@ -3200,7 +3201,7 @@ function mapView(tower) {
 }
 function towerCard() {
   const best = (readJSON(META_KEY) || {}).bestFloor || 0, f = towerSel, bn = towerBossOf(f), th = THEMES[Math.floor((f - 1) / 5) % THEMES.length];
-  const what = bn === null ? `⏱ ${Math.min(40, 22 + Math.floor(f / 3))}초 버티기` : bn < 0 ? '👑 보스 층 · ❓ 센 보스 중 하나' : `👑 보스 층 · ${BOSSES[bn].name}`;
+  const b2 = towerBoss2(f), what = bn === null ? `⏱ ${Math.min(40, 22 + Math.floor(f / 3))}초 버티기` : (bn < 0 ? '👑 보스 층 · ❓ 센 보스 중 하나' : `👑 보스 층 · ${BOSSES[bn].name}`) + (b2 !== null ? ` → ⚔ ${BOSSES[b2].name}` : '');
   $('mapCard').innerHTML = `<div class="t">🗼 ${f}층 <span style="font-size:13px;color:#fff;opacity:.7">· ${THEME_ICO[Math.floor((f - 1) / 5) % 6]} ${th.name}</span></div><div class="g">${what} · 보상 🪙${towerPrize(f)}${f % 10 === 0 ? ' + 🌟 대박 상자' + (f > best ? ` + 🏦${10 * f}` : '') : ''}${f <= best ? ' · ✅ 가 봤어요' : ''}</div>
     <div class="r">🏆 최고 기록 <b>${best}층</b> · 층을 깨면 🗼 다음 층 / 🏠 마을로 중에 골라요</div>
     <div class="r">🎲 6층부터 가끔 특별 층: ⚡번개 · 💰황금 · 🌑어둠 · 💨바람 (보상 더 많이!)</div>
@@ -3292,6 +3293,7 @@ function startRush() { if (!rushOpen() || G.rushDay === G.day) return; const poo
   showOv(null); state = 'play'; G.rushDay = G.day; G.rushes = (G.rushes || 0) + 1; enterStage(0, 0, list[0]); G.st.rush = { list, i: 0, won: 0 }; banner('👑 보스 러시 1/5', '보스 5마리를 연달아 물리쳐라!', '#ff9f1c', 2.6); }
 $('bMapClose').onclick = () => { sfx('pick'); closeMap(); };
 
+const towerBoss2 = f => f && f % 10 === 0 && f >= 20 && f !== 50 ? [11, 12, 13, 14, 15][(f / 10) % 5] : null;   // 두 번째 보스: 해골 왕 5종 중 하나
 function enterStage(idx, tower, practice, hard, cave) {   // cave: 🌟 비밀 보물 동굴 (Build 131)   // practice: 보스 연습 (보스 번호 또는 'final')
   if (idx === undefined) idx = Math.min(G.stageN, STAGES.length - 1);
   flushChests();
@@ -3302,6 +3304,7 @@ function enterStage(idx, tower, practice, hard, cave) {   // cave: 🌟 비밀 �
   G.enemies = []; G.coins = []; G.gems = []; G.hearts = []; G.bullets = []; G.ebullets = []; G.booms = []; G.bombs = []; G.meteors = []; G.items = []; G.corpses = []; G.flyers = []; G.plane = null; G.fists = []; G.hazards = []; G.boss = null; G.intro = null;
   const surv = def.goal === 'survive' || def.goal === 'tboss', L = surv ? 600 : def.goal === 'final' ? 2600 : 1700 + 120 * n;
   const st = { tower: tower || 0, practice, hard: !!hard, cave: !!cave, n, def, th, L, groups: [], deco: [], rocks: [], cages: [], bossOn: false, portal: null, clear: false, t: 0, hits: 0, acc: 0, timer: def.time || 0 };
+  const TB2 = towerBoss2(tower); if (TB2 !== null) def.boss2 = TB2;   // ⚔ Build 252: 탑 20층부터 10층마다 보스 2마리
   if (!surv) for (let y = -380; y > -L + 520; y -= rand(240, 320)) st.groups.push({ y, done: false });
   if (def.goal === 'rescue') for (let k = 0; k < 3; k++) st.cages.push({ x: rand(-STAGE_HW + 60, STAGE_HW - 60), y: -L * (0.22 + k * 0.25), hold: 0, freed: false, cat: ['ally_sword', 'ally_archer', 'ally_bomber'][k], shake: 0 });
   // 길 가장자리(폰 화면 안쪽에 보이게)와 길 안쪽 군데군데에 테마 장식
@@ -3325,7 +3328,7 @@ function enterStage(idx, tower, practice, hard, cave) {   // cave: 🌟 비밀 �
   else if (tower) { const R = st.rule && TOWER_RULES[st.rule];
     G.banner = null; G.bannerQ = null;
     if (R) { banner(`${R.ico} ${tower}층 · ${R.name}!`, `${R.desc} · 보상 x${R.mul}`, R.col, 3); G.banner.keep = true; }
-    else banner(`🗼 ${tower}층`, def.goal === 'tboss' ? '👑 보스 층! 보스를 물리쳐라' : `⏱ ${def.time}초 버텨라!`, tower % 5 === 0 ? '#ff6b6b' : '#9fd8ff', 2.4);
+    else banner(`🗼 ${tower}층`, def.goal === 'tboss' ? (def.boss2 !== undefined ? '⚔ 대결 층! 보스 2마리를 연달아 물리쳐라' : '👑 보스 층! 보스를 물리쳐라') : `⏱ ${def.time}초 버텨라!`, tower % 5 === 0 ? '#ff6b6b' : '#9fd8ff', 2.4);
     G.banner.tw = tower; G.towerRise = 0.8; }
   else banner(`${n + 1}. ${def.name}`, def.goal === 'survive' ? `⏱ ${def.time}초 버텨라!` : def.boss2 !== undefined ? '⚔ 보스 2마리를 연달아 물리쳐라!' : GOAL_TXT[def.goal], '#ffd23f', 2.6);
   sfx('wave');
