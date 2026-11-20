@@ -249,3 +249,35 @@ GRID RULES (strict):
 BACKGROUND: plain pure white (#FFFFFF) everywhere, no grid lines, no frame borders, no ground line, no shadows, no glow halo, no sticker border, no effects, no dust, no impact marks, no speed lines, no text, no letters, no numbers, no watermark.
 QUALITY: ultra high resolution, QHD (2560x1440) or higher, crisp clean lines
 ```
+
+## ⑨-2 탱크 공격 (자세 기준 첨부판, Build 262) — 첨부 2장: `art/ref/tank_new_pose.png` + `art/ref/tank_atk4_ref.png`
+```
+TASK: one 2D game ANIMATION SPRITE SHEET of the attached character: exactly 12 frames arranged in a grid of 4 columns x 3 rows, read left to right, top row first.
+
+ATTACHMENTS:
+- Image 1 = the character design. Keep EXACTLY this design, colors, thick black outlines, cel shading, proportions and art style.
+- Image 2 = 4 KEY POSES of his shield bash (left to right). Copy these body, arm and shield positions EXACTLY. Ignore the sparks and debris in Image 2; draw NO effects.
+
+CHARACTER: a big, heavy blue brute in a steel helmet, spiked steel shoulder plates, leather straps with a gold belt buckle, steel boots, a bare blue right fist and a wooden spiked shield on the left arm. The shield is held in EVERY frame. Steel boots are the same grey steel color in EVERY frame.
+
+ANIMATION: a powerful SHIELD BASH in place, facing right, built from the 4 key poses of Image 2 with smooth in-between frames:
+- Frame 1 = key pose 1 of Image 2 (ready stance).
+- Frames 2-3 = in-betweens: crouching and pulling the shield in toward the body.
+- Frame 4 = key pose 2 of Image 2 (shield held tight in front of the face, shoulder hunched, wind-up).
+- Frames 5-6 = in-betweens: lunging forward, front foot stepping out, shield pushing forward.
+- Frame 7 = key pose 3 of Image 2 (shield arm fully extended, the hit), but WITHOUT sparks or debris.
+- Frame 8 = holding the hit, front knee bent deep.
+- Frames 9-11 = in-betweens: pulling back to the ready stance.
+- Frame 12 = key pose 4 of Image 2, flowing back into frame 1.
+Each frame MUST show a DIFFERENT pose; do NOT draw the same pose twice in a row.
+
+GRID RULES (strict):
+- Every frame: the SAME character at the SAME size (the same head and helmet size in all 3 rows), facing right, full body, 3/4 top-down game view, same as Image 2.
+- Same ground line in every frame; the character stays in the center of its cell.
+- The character fills about 65% of its cell height (leave room for the extended shield).
+- VERY WIDE empty white gaps between all cells and between the rows; no shield, spike, fist, boot or body part may touch or come near another cell.
+- Only the 12 frames. No extra poses, no labels.
+
+BACKGROUND: plain pure white (#FFFFFF) everywhere, no grid lines, no frame borders, no ground line, no shadows, no glow halo, no sticker border, no effects, no impact sparks, no debris, no speed lines, no dust, no text, no letters, no numbers, no watermark.
+QUALITY: ultra high resolution, QHD (2560x1440) or higher, crisp clean lines
+```
