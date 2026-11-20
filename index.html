@@ -358,7 +358,7 @@ h2 .hb{-webkit-text-stroke:0;text-shadow:none;letter-spacing:0;font-family:"Jua"
   <button class="btn blue" id="bShopP">💪 영웅 강화</button>
   <button class="btn" id="bAchP">🏅 업적</button>
   <button class="btn" id="bReborn" style="display:none;background:linear-gradient(#c77dff,#7b2cbf);color:#fff">🌀 환생하기</button>
-  <div class="mrow" style="margin:6px 0 10px"><button class="hb" id="bMusicP" style="width:auto;padding:0 14px;font-weight:800">🎵 음악</button><button class="hb" id="bVolP" style="width:auto;padding:0 14px;font-weight:800">🔈 소리 크기</button><button class="hb" id="bVibP" style="width:auto;padding:0 14px;font-weight:800">📳 진동</button><button class="hb" id="bNumP" style="width:auto;padding:0 14px;font-weight:800">🔢 숫자</button><button class="hb" id="bViewP" style="width:auto;padding:0 14px;font-weight:800">🔭 보통</button><button class="hb" id="bShakeP" style="width:auto;padding:0 14px;font-weight:800">🎚 흔들림</button><button class="hb" id="bEvoP" style="width:auto;padding:0 14px;font-weight:800">✨ 진화 도감</button><button class="hb" id="bDexP" style="width:auto;padding:0 14px;font-weight:800">📖 몬스터 도감</button></div>
+  <div class="mrow" style="margin:6px 0 10px"><button class="hb" id="bMusicP" style="width:auto;padding:0 14px;font-weight:800">🎵 음악</button><button class="hb" id="bVolP" style="width:auto;padding:0 14px;font-weight:800">🔈 소리 크기</button><button class="hb" id="bVibP" style="width:auto;padding:0 14px;font-weight:800">📳 진동</button><button class="hb" id="bNumP" style="width:auto;padding:0 14px;font-weight:800">🔢 숫자</button><button class="hb" id="bViewP" style="width:auto;padding:0 14px;font-weight:800">🔭 보통</button><button class="hb" id="bAllyP" style="width:auto;padding:0 14px;font-weight:800">🐱 작전: 보통</button><button class="hb" id="bShakeP" style="width:auto;padding:0 14px;font-weight:800">🎚 흔들림</button><button class="hb" id="bEvoP" style="width:auto;padding:0 14px;font-weight:800">✨ 진화 도감</button><button class="hb" id="bDexP" style="width:auto;padding:0 14px;font-weight:800">📖 몬스터 도감</button></div>
   <button class="btn gray" id="bQuit">처음으로</button>
 </div>
 
@@ -372,7 +372,7 @@ h2 .hb{-webkit-text-stroke:0;text-shadow:none;letter-spacing:0;font-family:"Jua"
 
 <script>
 'use strict';
-const BUILD = 252;
+const BUILD = 253;
 const BOSS_INTERVAL = 180;      // 보스 등장 간격(초)
 const WAVE_INTERVAL = 60;       // 대규모 몰이 이벤트 간격(초)
 const MAX_ENEMIES = 110;   // Build 202: 220 → 110 (화면이 너무 정신없어서) — 대신 마을 적이 조금 더 튼튼(CROWD_K)
@@ -502,6 +502,9 @@ try { const v = +localStorage.getItem('stickhero_dpr'); if (v >= 1 && v <= 3) dp
 // 🔭 Build 243: 화면 넓이 고르기 (가까이 520 / 보통 620 / 멀리 720)
 const VIEWS = [['🔍 가까이', 520], ['🔭 보통', 620], ['🌍 멀리', 720]];
 let viewI = 1; try { const v = +localStorage.getItem('stickhero_view'); if (v >= 0 && v <= 2 && localStorage.getItem('stickhero_view') !== null) viewI = v; } catch (e) {}
+// 🐱 동료 작전 (Build 253): ⏸에서 고르기 — 보통 / 🗡 돌격(멀리까지 쫓아감) / 🛡 지키기(영웅 곁만)
+const ALLY_MODES = [['🐱 작전: 보통', 230, 160, 110], ['🗡 작전: 돌격', 380, 380, 260], ['🛡 작전: 지키기', 130, 90, 70]];
+let allyMode = 0; try { const v = +localStorage.getItem('stickhero_allymode'); if (v >= 0 && v <= 2) allyMode = v; } catch (e) {}
 function resize() {
   DPR = Math.min(window.devicePixelRatio || 1, dprCap);
   W = window.innerWidth; H = window.innerHeight;
@@ -1894,12 +1897,13 @@ function refreshSettings() {
   for (const id of ['bMusicT', 'bMusicP']) { $(id).textContent = musicOn ? '🎵 음악 켬' : '🎵 음악 끔'; $(id).style.opacity = musicOn ? 1 : 0.55; }
   $('bVibP').textContent = vibOn ? '📳 진동 켬' : '📳 진동 끔'; $('bVibP').style.opacity = vibOn ? 1 : 0.55;
   $('bNumP').textContent = numOn ? '🔢 피해 숫자 켬' : '🔢 피해 숫자 끔'; $('bNumP').style.opacity = numOn ? 1 : 0.55;
-  $('bViewP').textContent = VIEWS[viewI][0];
+  $('bViewP').textContent = VIEWS[viewI][0]; $('bAllyP').textContent = ALLY_MODES[allyMode][0];
   $('bShakeP').textContent = shakeOn ? '🎚 화면 흔들림 켬' : '🎚 화면 흔들림 끔'; $('bShakeP').style.opacity = shakeOn ? 1 : 0.55;
 }
 const toggleMusic = () => { audioInit(); musicOn = !musicOn; try { localStorage.setItem('stickhero_music', musicOn ? '1' : '0'); } catch (e) {} if (!musicOn && bgmCur) { const k = bgmCur.key; playBgm('__none'); bgmWant = k; } refreshSettings(); };
 $('bMusicT').onclick = toggleMusic; $('bMusicP').onclick = toggleMusic;
 $('bShakeP').onclick = () => { shakeOn = !shakeOn; try { localStorage.setItem('stickhero_shake', shakeOn ? '1' : '0'); } catch (e) {} sfx('pick'); refreshSettings(); };
+$('bAllyP').onclick = () => { allyMode = (allyMode + 1) % ALLY_MODES.length; try { localStorage.setItem('stickhero_allymode', '' + allyMode); } catch (e) {} sfx('pick'); refreshSettings(); };
 $('bViewP').onclick = () => { viewI = (viewI + 1) % VIEWS.length; try { localStorage.setItem('stickhero_view', '' + viewI); } catch (e) {} resize(); sfx('pick'); refreshSettings(); };
 $('bNumP').onclick = () => { numOn = !numOn; try { localStorage.setItem('stickhero_num', numOn ? '1' : '0'); } catch (e) {} sfx('pick'); refreshSettings(); };
 $('bVibP').onclick = () => { vibOn = !vibOn; try { localStorage.setItem('stickhero_vib', vibOn ? '1' : '0'); } catch (e) {} if (vibOn) vib(40, true); refreshSettings(); };
@@ -2790,7 +2794,7 @@ function allyUlt(a, fm) {
   floatText(a.x, a.y - 70, ULT[a.type] + '!', '#ffd23f', 17, 1.1); a.ults = (a.ults || 0) + 1; G.ults = (G.ults || 0) + 1; stAdd('ults'); questEvent('ult'); return true;
 }
 function updAllies(dt) {
-  const p = G.p, fm0 = 1 + 0.1 * G.forge;
+  const p = G.p, fm0 = 1 + 0.1 * G.forge, [, LEASH, SWORD_R, TANK_R] = ALLY_MODES[allyMode];
   for (const a of G.allies) {
     const fm = fm0 * allyMul(a), sk = (a.lvl || 1) >= 3;
     a.cd -= dt; a.inv -= dt; a.swing -= dt;
@@ -2807,10 +2811,10 @@ function updAllies(dt) {
     let tx = hx + Math.cos(an) * 36, ty = hy + Math.sin(an) * 30;
     // 가까운 적 찾기 (영웅 곁을 너무 벗어나지 않게)
     let foe = null, fd = 1e12;
-    for (const e of G.enemies) { const d = (e.x - a.x) ** 2 + (e.y - a.y) ** 2; if (d < fd && (e.x - hx) ** 2 + (e.y - hy) ** 2 < 230 * 230) { fd = d; foe = e; } }
+    for (const e of G.enemies) { const d = (e.x - a.x) ** 2 + (e.y - a.y) ** 2; if (d < fd && (e.x - hx) ** 2 + (e.y - hy) ** 2 < LEASH * LEASH) { fd = d; foe = e; } }
     fd = Math.sqrt(fd);
-    if ((a.type === 'shield' || a.type === 'golem') && foe && fd < 110) { tx = foe.x - Math.sign(foe.x - a.x || 1) * (foe.r + 10); ty = foe.y; }
-    if (a.type === 'sword' && foe && fd < 160) { tx = foe.x - Math.sign(foe.x - a.x || 1) * (foe.r + 8); ty = foe.y; }
+    if ((a.type === 'shield' || a.type === 'golem') && foe && fd < TANK_R) { tx = foe.x - Math.sign(foe.x - a.x || 1) * (foe.r + 10); ty = foe.y; }
+    if (a.type === 'sword' && foe && fd < SWORD_R) { tx = foe.x - Math.sign(foe.x - a.x || 1) * (foe.r + 8); ty = foe.y; }
     const dx = tx - a.x, dy = ty - a.y, d = Math.hypot(dx, dy);
     a.moving = d > 4 && !(a.act && a.act !== 'cheer');
     if (a.moving) { const sp = Math.min(d * 6, a.type === 'golem' ? 115 : 165); /* 골렘은 느림 */ a.x += dx / d * sp * dt; a.y += dy / d * sp * dt; a.wob += dt * 10; if (Math.abs(dx) > 2) a.face = dx > 0 ? 1 : -1; }
