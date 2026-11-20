@@ -372,7 +372,7 @@ h2 .hb{-webkit-text-stroke:0;text-shadow:none;letter-spacing:0;font-family:"Jua"
 
 <script>
 'use strict';
-const BUILD = 250;
+const BUILD = 251;
 const BOSS_INTERVAL = 180;      // 보스 등장 간격(초)
 const WAVE_INTERVAL = 60;       // 대규모 몰이 이벤트 간격(초)
 const MAX_ENEMIES = 110;   // Build 202: 220 → 110 (화면이 너무 정신없어서) — 대신 마을 적이 조금 더 튼튼(CROWD_K)
@@ -538,6 +538,11 @@ const HEADBANDS = [
   { name: '검정', col: [45, 45, 55], need: 16 },
   { name: '하늘', col: [80, 210, 255], need: 20 },
   { name: '황금', col: [255, 200, 40], need: 25, shine: true },
+  // Build 251: 보스 대결 왕국까지 별이 75개라 새 머리띠 4개
+  { name: '주황', col: [255, 140, 30], need: 32 },
+  { name: '민트', col: [60, 220, 170], need: 40 },
+  { name: '은빛', col: [205, 215, 230], need: 52, shine: true },
+  { name: '다이아', col: [90, 235, 255], need: 66, shine: true },
 ];
 const HERO_SPR = ['hero', 'hero_walk', 'hero_slash'];
 // Build 97: 모자 8개 (모은 별 수로 열림). w = 머리 폭 대비 그림 폭, by = 머리 꼭대기에서 모자 아래끝까지 (머리 폭 배수)
