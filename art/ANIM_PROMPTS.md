@@ -185,3 +185,35 @@ GRID RULES (strict):
 BACKGROUND: plain pure white (#FFFFFF) everywhere, no grid lines, no frame borders, no ground line, no shadows, no glow halo, no sticker border, no effects, no dust, no impact marks, no speed lines, no text, no letters, no numbers, no watermark.
 QUALITY: ultra high resolution, QHD (2560x1440) or higher, crisp clean lines
 ```
+
+## ⑨ 탱크 공격 (방패 밀치기) — 첨부 `art/ref/tank_new_pose.png`
+```
+TASK: one 2D game ANIMATION SPRITE SHEET of the attached character: exactly 12 frames arranged in a grid of 4 columns x 3 rows, read left to right, top row first.
+
+CHARACTER: the attached character (a big, heavy blue brute in a steel helmet, spiked steel shoulder plates, leather straps with a gold belt buckle, steel boots, a bare blue right fist and a wooden spiked round-top shield on the left arm). Keep EXACTLY the same design, colors, thick black outlines, cel shading, proportions and art style in every frame. The shield is held in EVERY frame.
+
+ANIMATION: a powerful SHIELD BASH in place, facing right. Each frame MUST show a DIFFERENT pose, exactly like this:
+- Frame 1: standing ready, wide stance, shield in front at chest height.
+- Frame 2: crouching lower, pulling the shield back toward the chest, shoulders hunched.
+- Frame 3: leaning back, shield pulled far back to the body, fist clenched behind (wind-up).
+- Frame 4: same as frame 3 but lower and tighter, gritting teeth, ready to charge.
+- Frame 5: stepping forward with the front foot, shield starting to push forward.
+- Frame 6: the whole body lunging forward, shield arm half extended.
+- Frame 7: shield arm FULLY extended forward, shield face pointing right, body leaning far forward (the hit).
+- Frame 8: holding the hit, front knee bent deep, back leg straight.
+- Frame 9: shield coming back toward the body, standing up a little.
+- Frame 10: stepping back with the front foot, shield at chest height.
+- Frame 11: standing ready, wide stance, breathing out, shoulders relaxing.
+- Frame 12: same as frame 1, flowing back into frame 1.
+The character's back foot stays roughly in the same place (no sliding across the cell).
+
+GRID RULES (strict):
+- Every frame: the SAME character at the SAME size, facing right, full body, 3/4 top-down game view.
+- Same ground line in every frame; the character stays in the center of its cell.
+- The character fills about 65% of its cell height (leave room for the extended shield).
+- VERY WIDE empty white gaps between all cells and between the rows; no shield, spike, fist, boot or body part may touch or come near another cell.
+- Only the 12 frames. No extra poses, no labels.
+
+BACKGROUND: plain pure white (#FFFFFF) everywhere, no grid lines, no frame borders, no ground line, no shadows, no glow halo, no sticker border, no effects, no impact sparks, no debris, no speed lines, no dust, no text, no letters, no numbers, no watermark.
+QUALITY: ultra high resolution, QHD (2560x1440) or higher, crisp clean lines
+```
