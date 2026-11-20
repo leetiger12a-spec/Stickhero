@@ -191,6 +191,7 @@ h2{margin:0 0 14px;font:400 clamp(30px,9vw,46px) "BHS","Jua",system-ui,-apple-sy
 #bBag{position:fixed;right:8px;bottom:278px;z-index:4;width:54px;height:54px;border-radius:50%;border:4px solid #222;padding:0;cursor:pointer;display:none;background:radial-gradient(#ffe066,#e09f1f);box-shadow:0 4px 0 #111;font-family:inherit;touch-action:none}
 #bBag.show{display:block;animation:sosPulse 1.2s infinite}#bBag .ic{font-size:24px;line-height:46px}#bBag .n{position:absolute;right:-6px;top:-6px;min-width:24px;height:24px;border-radius:12px;background:#e63946;color:#fff;font-size:14px;font-weight:900;line-height:24px;border:2px solid #222}
 #chestItems.many{max-height:52vh;overflow-y:auto;gap:6px}#chestItems.many .ci{width:76px;padding:5px 2px;font-size:11px}#chestItems.many .ci .nm{font-size:11px}
+#bDash{position:fixed;right:70px;bottom:150px;z-index:4;width:54px;height:54px;border-radius:50%;border:4px solid #222;padding:0;cursor:pointer;display:none;background:conic-gradient(#7bed9f var(--k,100%),#555 0);box-shadow:0 4px 0 rgba(0,0,0,.35);touch-action:none}#bDash.show{display:block}#bDash .in{position:absolute;inset:5px;border-radius:50%;background:#14532d;display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1.05;color:#fff}#bDash .ic{font-size:19px}#bDash .tx{font-size:10px}#bDash.ready .in{background:#22a35a}
 #bSos.show{display:block}#bSos .in{position:absolute;inset:5px;border-radius:50%;background:#16324f;display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1.05}
 #bSos .ic{font-size:19px}#bSos .tx{font-size:10px}#bSos.ready{animation:sosPulse 1s infinite}#bSos.ready .in{background:#1d5c94}
 @keyframes sosPulse{50%{transform:scale(1.07)}}
@@ -203,7 +204,7 @@ h2 .hb{-webkit-text-stroke:0;text-shadow:none;letter-spacing:0;font-family:"Jua"
 <canvas id="cv"></canvas>
 
 <div id="questBox"></div>
-<button id="bBag" aria-label="보물 가방"><span class="ic">🎁</span><span class="n" id="bagN">0</span></button><button id="bUlt" aria-label="필살기"><div class="in"><span class="ic">💥</span><span class="tx" id="ultTx">0%</span></div></button><button id="bSos" aria-label="SKYFANG 지원 요청"><div class="in"><span class="ic">📻</span><span class="tx" id="sosTx">지원</span></div></button>
+<button id="bBag" aria-label="보물 가방"><span class="ic">🎁</span><span class="n" id="bagN">0</span></button><button id="bDash" aria-label="구르기"><div class="in"><span class="ic">💨</span><span class="tx" id="dashTx">구르기</span></div></button><button id="bUlt" aria-label="필살기"><div class="in"><span class="ic">💥</span><span class="tx" id="ultTx">0%</span></div></button><button id="bSos" aria-label="SKYFANG 지원 요청"><div class="in"><span class="ic">📻</span><span class="tx" id="sosTx">지원</span></div></button>
 <div id="hudBtns"><button class="hb" id="bPause" aria-label="일시정지">⏸</button><button class="hb" id="bSound" aria-label="소리">🔊</button></div>
 
 <div class="ov show" id="ovTitle">
@@ -226,7 +227,7 @@ h2 .hb{-webkit-text-stroke:0;text-shadow:none;letter-spacing:0;font-family:"Jua"
   </div>
   <div class="best" id="bestTitle"></div>
   <div class="mrow"><button class="hb" id="bHelp">❓ 조작법</button><button class="hb" id="bStory" style="display:none">📖 이야기</button><button class="hb" id="bMusicT">🎵 음악</button><button class="hb" id="bVolT">🔈 소리 크기</button><button class="hb" id="bWard">🎨 꾸미기</button><button class="hb" id="bShopT">💪 강화</button><button class="hb" id="bAchT">🏅 업적</button><button class="hb" id="bDaily">📅 출석</button><button class="hb" id="bStats">📊 기록</button></div>
-  <div class="hint" id="helpBox" style="display:none">📱 화면을 끌어서 이동 · 공격은 자동<br>🌳 나무 옆에 서면 통나무를 모아요 → 🪵 동그라미 위에 서면 건설!<br>⚔ 출격 문으로 모험 → 보스를 잡고 금화를 가져와요<br>📻 위험할 땐 지원 버튼! SKYFANG 비행기가 폭격 (60초마다)<br>💻 WASD / 방향키 이동 · E 지원 요청 · P 일시정지</div>
+  <div class="hint" id="helpBox" style="display:none">📱 화면을 끌어서 이동 · 공격은 자동<br>🌳 나무 옆에 서면 통나무를 모아요 → 🪵 동그라미 위에 서면 건설!<br>⚔ 출격 문으로 모험 → 보스를 잡고 금화를 가져와요<br>📻 위험할 땐 지원 버튼! SKYFANG 비행기가 폭격 (60초마다)<br>💨 구르기 버튼: 휙 굴러서 잠깐 안 맞아요 (3.5초마다)<br>💻 WASD / 방향키 이동 · Shift 구르기 · E 지원 요청 · P 일시정지</div>
  </div>
 </div>
 
@@ -371,7 +372,7 @@ h2 .hb{-webkit-text-stroke:0;text-shadow:none;letter-spacing:0;font-family:"Jua"
 
 <script>
 'use strict';
-const BUILD = 248;
+const BUILD = 249;
 const BOSS_INTERVAL = 180;      // 보스 등장 간격(초)
 const WAVE_INTERVAL = 60;       // 대규모 몰이 이벤트 간격(초)
 const MAX_ENEMIES = 110;   // Build 202: 220 → 110 (화면이 너무 정신없어서) — 대신 마을 적이 조금 더 튼튼(CROWD_K)
@@ -1556,6 +1557,7 @@ window.addEventListener('keydown', e => {
   if (state === 'levelup' && ['1', '2', '3'].includes(e.key)) chooseCard(+e.key - 1);
   if (state === 'chest' && (e.key === 'Enter' || e.key === ' ')) { if (chestAnim) $('ovChest').onclick({ target: {} }); else closeChest(); }
   if ((e.key === 'e' || e.key === 'E') && state === 'play') callSos();   // PC: E키로 지원 요청
+  if (e.key === 'Shift' && state === 'play') { e.preventDefault(); doDash(); }   // PC: Shift 구르기 (Build 249, 스페이스는 필살기)
   if ((e.key === 'b' || e.key === 'B') && state === 'play') openBag();   // PC: B로 가방 열기
   if ((e.key === 'q' || e.key === 'Q' || (e.key === ' ' && !(G && G.intro))) && state === 'play') castUlt();   // PC: Q·스페이스로 필살기
   if (state === 'allypick' && ['1', '2', '3', '4'].includes(e.key)) chooseAlly(+e.key - 1);
@@ -2971,6 +2973,23 @@ $('questBox').addEventListener('pointerdown', e => { e.preventDefault(); e.stopP
   const sb = e.target.closest && e.target.closest('.qsw'); if (sb) { swapQuest(+sb.dataset.i); return; }
   questOpen = !questOpen; try { localStorage.setItem('stickhero_questfold', questOpen ? '0' : '1'); } catch (err) {} sfx('pick'); updQuestBox(); });
 
+// 💨 구르기 (Build 249): 가는 방향으로 휙 — 0.22초 동안 빠르게 + 0.4초 무적 · 3.5초마다
+const DASH_CD = 3.5;
+function doDash() {
+  if (state !== 'play' || !G || G.intro || G.p.dead || G.deadT > 0) return;
+  const p = G.p; if ((G.dashCd || 0) > 0) return;
+  let ax = p.ax, ay = p.ay; if (!ax && !ay) { ax = p.face || 1; ay = 0; }
+  const l = Math.hypot(ax, ay) || 1; p.dvx = ax / l * 640; p.dvy = ay / l * 640; p.dashT = 0.22; p.inv = Math.max(p.inv || 0, 0.4); G.dashCd = DASH_CD;
+  burst(p.x, p.y - 10, '#c8f7dc', 10, 120, 4, 0.3); sfx('woosh'); G.dashes = (G.dashes || 0) + 1;
+}
+$('bDash').addEventListener('pointerdown', e => { e.preventDefault(); e.stopPropagation(); doDash(); });
+let dashShown = '';
+function updDashBtn() {
+  const b = $('bDash'), on = G && $('hudBtns').classList.contains('show') && state !== 'title';
+  b.classList.toggle('show', !!on); if (!on) return;
+  const cd = Math.max(0, G.dashCd || 0), key = cd.toFixed(1); if (key === dashShown) return; dashShown = key;
+  b.style.setProperty('--k', Math.round((1 - cd / DASH_CD) * 100) + '%'); b.classList.toggle('ready', cd <= 0); $('dashTx').textContent = cd > 0 ? Math.ceil(cd) + '초' : '구르기';
+}
 // 📻 지원 요청 버튼: 원할 때 SKYFANG을 부름 (60초마다)
 const SOS_CD = 60;
 function callSos() {
@@ -3000,6 +3019,7 @@ function castUlt() {
 $('bUlt').addEventListener('pointerdown', e => { e.preventDefault(); e.stopPropagation(); castUlt(); });
 let ultShown = '';
 function updUltBtn() {
+  updDashBtn();
   const b = $('bUlt'), on = G && $('hudBtns').classList.contains('show') && state !== 'title';
   b.classList.toggle('show', !!on); if (!on) return;
   const u = Math.floor(G.ult || 0), key = '' + u; if (key === ultShown) return; ultShown = key;
@@ -3985,7 +4005,14 @@ function update(dt) {
         p.x = clamp(p.x, -STAGE_HW + 12, STAGE_HW - 12); p.y = clamp(p.y, -G.st.L - 380, 100);
       }
     }
+    if (p.dashT > 0) { // 💨 구르기 중 (Build 249)
+      p.dashT -= dt; p.x += p.dvx * dt; p.y += p.dvy * dt;
+      if (Math.random() < 0.8) G.parts.push({ x: p.x + rand(-8, 8), y: p.y - rand(0, 30), vx: -p.dvx * 0.1, vy: -p.dvy * 0.1, life: 0.3, max: 0.3, color: '#e9fff1', size: 6 });
+      if (G.mode === 'base') { const pr = Math.hypot(p.x, p.y), lim = WORLD_R - 15; if (pr > lim) { p.x *= lim / pr; p.y *= lim / pr; } }
+      else { p.x = clamp(p.x, -STAGE_HW + 12, STAGE_HW - 12); p.y = clamp(p.y, -G.st.L - 380, 100); }
+    }
   }
+  if (G.dashCd > 0) G.dashCd -= dt;
   G.base.hitT -= dt; if (p.slowT > 0) p.slowT -= dt;
 
   p.chop = Math.max(0, p.chop - dt); p.fullMsg -= dt;
