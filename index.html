@@ -382,7 +382,7 @@ h2 .hb{-webkit-text-stroke:0;text-shadow:none;letter-spacing:0;font-family:"Jua"
 
 <script>
 'use strict';
-const BUILD = 332;
+const BUILD = 333;
 const BOSS_INTERVAL = 180;      // 보스 등장 간격(초)
 const WAVE_INTERVAL = 60;       // 대규모 몰이 이벤트 간격(초)
 const MAX_ENEMIES = 110;   // Build 202: 220 → 110 (화면이 너무 정신없어서) — 대신 마을 적이 조금 더 튼튼(CROWD_K)
@@ -1891,7 +1891,7 @@ const MAIL_GIFT = 100;
 // 📰 Build 290: 새 기능 안내 — 선물을 받으면 지난번 뒤로 새로 생긴 것을 카드로 보여 줌 (최근 것부터 8개)
 const NEWS = [[256, '💡 보스를 처음 만나면 이기는 법 카드'], [257, '⭐ 별 강화 · 몬스터가 더 세졌어요'], [258, '🩷 달리기 졸개 새 동작'], [263, '🔵 탱크 새 동작'], [264, '🟢 슬라임 새 동작'], [265, '🏹 궁수 새 동작'], [266, '💣 자폭병 새 동작'], [267, '🦇 박쥐병 새 동작'], [268, '🐗 돌격병 새 동작'],
   [269, '🎞 도감 몬스터가 움직여요'], [270, '🏟 투기장! 끝없는 웨이브'], [271, '👑 투기장 10웨이브마다 보스'], [272, '🚪 투기장 귀환 포털'], [273, '🎰 꾸미기 뽑기'], [274, '🍖 펫 간식'], [275, '🔥❄ 새 정예 2종'], [276, '🩸 핏빛 달 밤'], [277, '📅 정예 주간 · 보스 주간'], [278, '💡 도감 보스 팁'], [279, '🎞 도감 동작 고르기'], [280, '🏆 기록실 넓히기'],
-  [281, '🏅 새 업적 4개'], [282, '🎲 투기장 특별 웨이브'], [283, '⚡💣 새 정예 2종'], [284, '📜 새 퀘스트 5종'], [285, '🎟 투기장 하루 첫 입장 무료'], [286, '🏆 투기장 TOP 5'], [287, '🧭 미니맵에 정예·상인'], [288, '🩸 핏빛 대장'], [289, '🎰 뽑기 연출'], [290, '📰 새 기능 안내'], [291, '✨ 막대·버튼 멋있게'], [292, '🖼 그림 아이콘'], [293, '✨ 일시정지·기록실 새 디자인'], [294, '🖼 버튼 아이콘 16개'], [295, '🎁 상자 화면 빛줄기'], [296, '📅 오늘의 보스'], [297, '📅 오늘의 보스 알림'], [298, '🏅 새 업적 3개'], [299, '✨ 황금 주간 · ❤ 하트 주간'], [300, '🎉 300번째 업데이트!'], [301, '🎁 투기장 웨이브 상자'], [302, '⏱ 보스 러시 기록'], [303, '🛒 상인 새 물건 2개'], [304, '📜 새 퀘스트 3종'], [305, '✨ 레벨업 카드 새 디자인'], [306, '🏆 기록실 새 칸 3개'], [307, '📅 오늘의 보스 특기 2개 더'], [308, '🎲 투기장 정예·황금 웨이브'], [309, '💪 투기장 기세'], [310, '🏅 새 업적 3개'], [311, '🔥 오늘의 보스 연속 승리'], [312, '🔥 강화 상점 오늘의 할인'], [313, '🍀 행운의 레벨업 (카드 4장)'], [314, '🧲 자석 정예'], [315, '🏆 투기장 새 기록 보너스'], [316, '📊 기록실: 연속 승리'], [317, '🩸 핏빛 대장 호위대'], [318, '🔥 하드 보스 러시'], [319, '🔥 상인 반값 세일'], [320, '🏅 새 업적 3개'], [321, '🚀 질주 주간 · 💎 구슬 주간'], [322, '🐾 펫 최고 Lv 7'], [323, '✨ 투기장 황금 보스'], [324, '📅 도감에 오늘의 보스'], [325, '📜 새 퀘스트 2종'], [326, '📊 기록실 새 칸 3개'], [331, '⛲ 소원 분수 (지도 위 버튼)'], [332, '👻 새 정예: 유령']];
+  [281, '🏅 새 업적 4개'], [282, '🎲 투기장 특별 웨이브'], [283, '⚡💣 새 정예 2종'], [284, '📜 새 퀘스트 5종'], [285, '🎟 투기장 하루 첫 입장 무료'], [286, '🏆 투기장 TOP 5'], [287, '🧭 미니맵에 정예·상인'], [288, '🩸 핏빛 대장'], [289, '🎰 뽑기 연출'], [290, '📰 새 기능 안내'], [291, '✨ 막대·버튼 멋있게'], [292, '🖼 그림 아이콘'], [293, '✨ 일시정지·기록실 새 디자인'], [294, '🖼 버튼 아이콘 16개'], [295, '🎁 상자 화면 빛줄기'], [296, '📅 오늘의 보스'], [297, '📅 오늘의 보스 알림'], [298, '🏅 새 업적 3개'], [299, '✨ 황금 주간 · ❤ 하트 주간'], [300, '🎉 300번째 업데이트!'], [301, '🎁 투기장 웨이브 상자'], [302, '⏱ 보스 러시 기록'], [303, '🛒 상인 새 물건 2개'], [304, '📜 새 퀘스트 3종'], [305, '✨ 레벨업 카드 새 디자인'], [306, '🏆 기록실 새 칸 3개'], [307, '📅 오늘의 보스 특기 2개 더'], [308, '🎲 투기장 정예·황금 웨이브'], [309, '💪 투기장 기세'], [310, '🏅 새 업적 3개'], [311, '🔥 오늘의 보스 연속 승리'], [312, '🔥 강화 상점 오늘의 할인'], [313, '🍀 행운의 레벨업 (카드 4장)'], [314, '🧲 자석 정예'], [315, '🏆 투기장 새 기록 보너스'], [316, '📊 기록실: 연속 승리'], [317, '🩸 핏빛 대장 호위대'], [318, '🔥 하드 보스 러시'], [319, '🔥 상인 반값 세일'], [320, '🏅 새 업적 3개'], [321, '🚀 질주 주간 · 💎 구슬 주간'], [322, '🐾 펫 최고 Lv 7'], [323, '✨ 투기장 황금 보스'], [324, '📅 도감에 오늘의 보스'], [325, '📜 새 퀘스트 2종'], [326, '📊 기록실 새 칸 3개'], [331, '⛲ 소원 분수 (지도 위 버튼)'], [332, '👻 새 정예: 유령'], [333, '💥 투기장 폭발 웨이브']];
 function showNews(from) { const L = NEWS.filter(n => n[0] > from && n[0] <= BUILD).reverse().slice(0, 8); if (!L.length) return;
   $('dexCard').innerHTML = `<div class="card news"><h3><img class="ui" src="img/ui_news.webp" alt="">새로 생긴 것</h3><p><small>Build ${from} → ${BUILD}</small></p><div class="newsL">${L.map(n => `<div>${n[1]} <small>B${n[0]}</small></div>`).join('')}</div>${NEWS.filter(n => n[0] > from).length > 8 ? '<p><small>…그 밖에도 더 있어요!</small></p>' : ''}<div class="tap">눌러서 닫기</div></div>`;
   $('dexCard').classList.add('show'); }
@@ -2411,7 +2411,7 @@ function makeEnemy(type, x, y) {
   if (!e.golden && eliteOk() && Math.random() < (window.__eliteP !== undefined ? window.__eliteP : (ELITE_P + (G.lvl >= LVL_FREE ? 0.02 : 0)) * (WK('elite') ? 4 : 1) + (G.blood && G.mode === 'base' ? 0.12 : 0))) makeElite(e);
   if (G && G.mode === 'stage' && G.st && G.st.rule === 'giant' && !T.boss) { e.hp *= 2; e.maxHp *= 2; e.r *= 1.4; e.scale = 1.45; e.spd *= 0.7; }   // 🐘 거인 층 (Build 244)
   if (G && G.mode === 'stage' && G.st && G.st.rule === 'vamp') e.dmg *= 1.3;
-  if (G && G.mode === 'stage' && G.st && G.st.arena && !T.boss) { const w = G.st.arena - 1; e.hp *= 1 + 0.18 * w; e.maxHp *= 1 + 0.18 * w; e.dmg *= 1 + 0.07 * w; if (G.st.arena % 5 === 0 && !e.elite && !e.golden && Math.random() < 0.3) makeElite(e); const R = G.st.arenaRule; if (R === 'giant') { e.hp *= 2; e.maxHp *= 2; e.r *= 1.4; e.scale = (e.scale || 1) * 1.45; e.spd *= 0.7; } else if (R === 'swift') e.spd *= 1.4; else if (R === 'swarm') { e.hp *= 0.5; e.maxHp *= 0.5; } else if (R === 'elitew' && !e.elite && !e.golden && Math.random() < 0.4) makeElite(e); else if (R === 'goldw' && !e.elite && !e.golden && Math.random() < 0.25) makeGolden(e); }   // 🏟 투기장 웨이브 세기   // 🩸 흡혈 층: 적 공격 1.3배
+  if (G && G.mode === 'stage' && G.st && G.st.arena && !T.boss) { const w = G.st.arena - 1; e.hp *= 1 + 0.18 * w; e.maxHp *= 1 + 0.18 * w; e.dmg *= 1 + 0.07 * w; if (G.st.arena % 5 === 0 && !e.elite && !e.golden && Math.random() < 0.3) makeElite(e); const R = G.st.arenaRule; if (R === 'giant') { e.hp *= 2; e.maxHp *= 2; e.r *= 1.4; e.scale = (e.scale || 1) * 1.45; e.spd *= 0.7; } else if (R === 'swift') e.spd *= 1.4; else if (R === 'swarm') { e.hp *= 0.5; e.maxHp *= 0.5; } else if (R === 'elitew' && !e.elite && !e.golden && Math.random() < 0.4) makeElite(e); else if (R === 'goldw' && !e.elite && !e.golden && Math.random() < 0.25) makeGolden(e); else if (R === 'boomw') { e.boomw = true; e.gold = Math.ceil((e.gold || 1) * 1.5); } }   // 🏟 투기장 웨이브 세기   // 🩸 흡혈 층: 적 공격 1.3배
   return e;
 }
 // ⚔ 정예 몬스터 (Build 168): 빨간 기운 · 이름표 · 체력 4배 · 공격 1.5배 · 특기 하나 (🛡 방패 / ✂ 분열 / 🌀 순간이동) · 잡으면 작은 상자
@@ -3519,7 +3519,7 @@ const arenaMom = () => G && G.mode === 'stage' && G.st && G.st.arena ? Math.min(
 const ARENA_COST = 100, ARENA_T = 20, arenaOpen = () => G.stageN >= 3;
 const ARENA_BOSS = [2, 5, 7, 11, 12, 13, 14, 15];   // 👑 Build 271: 10웨이브마다 나오는 보스 차례 (불꽃 대마왕 → 해골 왕 → 용암 골렘 → 해골 왕 4종…)
 // 🎲 Build 282: 3웨이브마다(5·10 배수 빼고) 특별 웨이브
-const ARENA_RULES = { giant: ['🐘', '거인 웨이브', '적이 크고 튼튼해요 (체력 2배·느림)'], swift: ['💨', '질주 웨이브', '적이 1.4배 빨라요'], swarm: ['🐜', '떼 웨이브', '적이 1.8배 많이 · 체력은 절반'], elitew: ['⚔', '정예 웨이브', '적의 40%가 정예!'], goldw: ['✨', '황금 웨이브', '황금 몬스터가 잔뜩 · 금화 와르르'] };   // Build 308: 2개 더
+const ARENA_RULES = { giant: ['🐘', '거인 웨이브', '적이 크고 튼튼해요 (체력 2배·느림)'], swift: ['💨', '질주 웨이브', '적이 1.4배 빨라요'], swarm: ['🐜', '떼 웨이브', '적이 1.8배 많이 · 체력은 절반'], elitew: ['⚔', '정예 웨이브', '적의 40%가 정예!'], goldw: ['✨', '황금 웨이브', '황금 몬스터가 잔뜩 · 금화 와르르'], boomw: ['💥', '폭발 웨이브', '쓰러진 적이 잠깐 뒤 펑! · 빨간 원을 피해요 · 금화 1.5배'] };   // Build 333: 폭발 웨이브   // Build 308: 2개 더
 const arenaRuleFor = w => w % 3 === 0 && w % 5 && w % 10 ? (window.__arenaRule || Object.keys(ARENA_RULES)[Math.floor(Math.random() * Object.keys(ARENA_RULES).length)]) : null;
 const arenaPrize = w => 40 + 15 * w + (w % 5 === 0 ? 100 + 20 * w : 0);
 $('bArena').onclick = () => {
@@ -4006,6 +4006,7 @@ function killEnemy(e) {
   if (e.lastSrc && WEAP[e.lastSrc]) { ST.wk = ST.wk || {}; ST.wk[e.lastSrc] = (ST.wk[e.lastSrc] || 0) + 1; stDirty = true; }   // 무기별 처치 수
   if (G.allies.length) allyGainXp(e.x, e.y, e.boss ? 40 : e.camp ? 20 : e.xp);
   if (!e.boss && !e.camp) { questEvent('kill'); stAdd('kills'); ST.kc[e.type] = (ST.kc[e.type] || 0) + 1; if (e.golden) { stSet('goldT', e.type); goldDie(e); } if (e.type.startsWith('e_')) { questEvent('special'); if (SPECIALS.some(q => q[0] === e.type)) stSet('specT', e.type); } }
+  if (e.boomw && !e.boss) G.hazards.push({ x: e.x, y: e.y, r: 56, warn: 0.9, life: 0.3, max: 0.3, tick: 0, slam: true, dmg: e.dmg * 1.3, boomw: true });   // 💥 Build 333: 폭발 웨이브 — 0.9초 뒤 펑
   if (e.boss) { bossDie(e); return; }
   if (e.camp) { campDie(e); return; }
   if (e.elite) eliteDie(e);
