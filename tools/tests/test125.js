@@ -18,7 +18,7 @@ const { chromium } = require('/opt/node22/lib/node_modules/playwright');
   check(a.every(Boolean), 'new ach ' + a);
   await page.evaluate(() => { showOv(null); state = 'title'; openStats(); }); await page.waitForTimeout(300);
   const rows = await page.evaluate(() => [...document.querySelectorAll('#statList .st')].map(e => e.textContent));
-  check(rows.length === 65 && rows.some(t => t.includes('특별 층') && t.includes('10번')) && rows.some(t => t.includes('환생') && t.includes('1번')), 'stats rows');
+  check(rows.length === 70 && rows.some(t => t.includes('특별 층') && t.includes('10번')) && rows.some(t => t.includes('환생') && t.includes('1번')), 'stats rows');
   await page.evaluate(() => { const l = document.getElementById('statList'); l.scrollTop = l.scrollHeight; }); await page.waitForTimeout(200);
   await page.screenshot({ path: `${OUT}/b172_stats.png` });
   await b.close(); console.log('ERRORS:', errors.length); errors.forEach(e => console.log(e)); process.exit(errors.length ? 1 : 0);

@@ -11,6 +11,6 @@ const { chromium } = require('/opt/node22/lib/node_modules/playwright');
   console.log(JSON.stringify(r)); check(r.n === 83 && r.e.every(x => !x) && r.got.every(x => x), 'achievements');
   await page.click('#bStats'); await page.waitForTimeout(300);
   const t = await page.evaluate(() => [...document.querySelectorAll('.st')].map(e => e.textContent)); const has = (a, b) => t.some(x => x.includes(a) && x.includes(b));
-  console.log(t.length); check(t.length === 65 && has('보물 지도', '5번') && has('치유 정예', '10마리') && has('황금 현상금', '1마리') && has('금고 저금', '1,234'), 'stat rows');
+  console.log(t.length); check(t.length === 70 && has('보물 지도', '5번') && has('치유 정예', '10마리') && has('황금 현상금', '1마리') && has('금고 저금', '1,234'), 'stat rows');
   await b.close(); console.log('ERRORS:', errors.length); errors.forEach(e => console.log(e)); process.exit(errors.length ? 1 : 0);
 })();
