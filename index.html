@@ -381,7 +381,7 @@ h2 .hb{-webkit-text-stroke:0;text-shadow:none;letter-spacing:0;font-family:"Jua"
 
 <script>
 'use strict';
-const BUILD = 322;
+const BUILD = 323;
 const BOSS_INTERVAL = 180;      // 보스 등장 간격(초)
 const WAVE_INTERVAL = 60;       // 대규모 몰이 이벤트 간격(초)
 const MAX_ENEMIES = 110;   // Build 202: 220 → 110 (화면이 너무 정신없어서) — 대신 마을 적이 조금 더 튼튼(CROWD_K)
@@ -2548,12 +2548,12 @@ function spawnBoss(bx, by) {
   if (final) { b.r = 76; b.final = true; }
   b.bornT = G.t;
   if (inStage && G.st.dboss !== undefined) { const m = G.st.dboss; b.dboss = true; if (m === 1) b.spd *= 1.4; else if (m === 2) { b.hp *= 1.5; b.maxHp *= 1.5; } else if (m === 3) { b.rage = true; b.spd *= 1.25; } else if (m === 4) b.dice = true; else if (m === 5) { for (let i = 0; i < 6; i++) { const a = i * 1.05, e = makeEnemy(tierType(tierNow(), [0.5, 0.4, 0.1]), bx + Math.cos(a) * 90, by + Math.sin(a) * 90); e.awake = true; G.enemies.push(e); } } else b.dfire = true; }   // 📅 오늘의 보스 특기
-  if (inStage && G.st.arena) { const k = 1 + 0.1 * G.st.arena; b.hp *= k; b.maxHp *= k; }   // 🏟 웨이브가 높을수록 보스도 튼튼
+  if (inStage && G.st.arena) { const k = 1 + 0.1 * G.st.arena; b.hp *= k; b.maxHp *= k; if (G.st.arena % 20 === 0) { b.golden = true; b.hp *= 2; b.maxHp *= 2; } }   // ✨ Build 323: 20웨이브마다 황금 보스   // 🏟 웨이브가 높을수록 보스도 튼튼
   if (pr !== undefined && G.st.hard) { b.hard = true; b.hp *= 2; b.maxHp *= 2; b.dmg *= 1.5; }   // 🔥 도전: 체력 2배 · 공격 1.5배   // 보스 연습 기록용 (등장 장면 동안은 G.t가 멈춤)
   G.enemies.push(b); G.boss = b; G.saidBoss = b; heroSay('boss', true);
   // 등장 컷신: 어두워짐 → 하늘에서 쿵! → 쿵쿵 발 구르기 → 이름표 쾅! (화면을 누르면 넘김)
   if (n === GOLD_GOLEM) { b.goldG = true; b.fleeT = inStage && G.st.def.boss === GOLD_GOLEM ? 1e9 : GOLD_GOLEM_FLEE; }   // 15칸 황금 얼음 궁전에서는 도망 안 감
-  else if (pr === undefined && !window.__noGold && Math.random() < GOLD_BOSS_P) { b.golden = true; b.hp *= 2; b.maxHp *= 2; }   // 황금 보스 (Build 66)
+  else if (pr === undefined && !b.golden && !window.__noGold && Math.random() < GOLD_BOSS_P) { b.golden = true; b.hp *= 2; b.maxHp *= 2; }   // 황금 보스 (Build 66)
   G.intro = { t: 0, dur: 2.6, spr: b.spr, name: (b.golden ? '✨황금 ' : '') + B.name, color: b.golden ? '#ffd23f' : B.color, hits: 0 };
   joy = null; G.banner = null; sfx('warn');
 }
