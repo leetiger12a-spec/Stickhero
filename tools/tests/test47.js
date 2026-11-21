@@ -17,6 +17,6 @@ const { chromium } = require('/opt/node22/lib/node_modules/playwright');
   const exact = [0, 1, 1, 2, 3, 4, 4, 4, 5, null], atLeast = [0, 1, 1, 2, 3, 4, 4, 4, 5, 4];
   r.out.forEach((x, i) => { const k = r.idx[x[2]], ok = k === 10 ? i >= 3 : exact[i] !== null && i < 9 ? k === exact[i] : k >= atLeast[i];
     check(ok, `bt ${x[0]} #${x[1]}: ${x[2]} (#${k}) wrong`); });
-  check(r.out.every(x => Math.round(r.hp[x[2]] * 1.3) === Math.round(x[3])), 'boss hp changed (must stay fixed per boss)');
+  check(r.out.every(x => Math.round(r.hp[x[2]] * 1.3 * 1.6) === Math.round(x[3])), 'boss hp changed (must stay fixed per boss)');
   console.log(errors.length ? 'ERRORS:\n' + errors.join('\n') : 'OK'); await b.close(); process.exit(errors.length ? 1 : 0);
 })();
