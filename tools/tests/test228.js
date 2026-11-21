@@ -9,6 +9,6 @@ const { chromium } = require('/opt/node22/lib/node_modules/playwright');
   await page.evaluate(() => { const G = SH.G; G.stageN = 6; G.p.hp = G.p.maxHp = 1e9; startRush(); });
   for (let i = 0; i < 5; i++) { await page.evaluate(async () => { const G = SH.G; G.st.t = 99; for (let k = 0; k < 30 && !G.boss; k++) await new Promise(q => setTimeout(q, 100)); if (G.intro) endIntro(); hurtEnemy(G.boss, 1e12, 0, 1, 0); }); await page.waitForTimeout(400); }
   const r = await page.evaluate(() => ({ best: ST.rushBest, ban: SH.G.banner && SH.G.banner.text, row: statRows().find(x => x[0].includes('러시 최고')) }));
-  console.log(JSON.stringify(r)); check(r.best > 0 && /신기록/.test(r.ban) && r.row[1] !== '-', 'rush best recorded');
+  console.log(JSON.stringify(r)); check(r.best > 0 && /신기록|업적/.test(r.ban) && r.row[1] !== '-', 'rush best recorded');   /* 번개 러시 업적 배너가 덮을 수 있음 */
   await b.close(); console.log('ERRORS:', errors.length); errors.forEach(e => console.log(e)); process.exit(errors.length ? 1 : 0);
 })();
