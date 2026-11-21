@@ -9,7 +9,7 @@ const { chromium } = require('/opt/node22/lib/node_modules/playwright');
   const r = await page.evaluate(async () => { const G = SH.G; G.stageN = 6; G.dbossDay = 0; G.p.hp = G.p.maxHp = 1e9; window.__dboss = { n: 2, mod: 6 }; startDBoss(); G.st.t = 99;
     for (let k = 0; k < 30 && !G.boss; k++) await new Promise(q => setTimeout(q, 100)); if (G.intro) endIntro(); const B = G.boss; B.mode = 'walk'; B.st = 9; B.blinkCd = 0.05; B.x = G.p.x; B.y = G.p.y - 400;
     await new Promise(q => setTimeout(q, 300)); return { blink: !!B.blink, n: G.blinks || 0, d: Math.hypot(B.x - G.p.x, B.y - G.p.y), mods: DBOSS_MOD.length, card: dbossHtml().includes('순간이동') }; });
-  console.log(JSON.stringify(r)); check(r.blink && r.n >= 1 && r.d < 260 && r.mods === 7 && r.card, 'dboss blink');
+  console.log(JSON.stringify(r)); check(r.blink && r.n >= 1 && r.d < 260 && r.mods === 8 && r.card, 'dboss blink');
   await page.screenshot({ path: `${OUT}/b334_blink.png` });
   await b.close(); console.log('ERRORS:', errors.length); errors.forEach(e => console.log(e)); process.exit(errors.length ? 1 : 0);
 })();

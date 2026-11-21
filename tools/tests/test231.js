@@ -8,6 +8,6 @@ const { chromium } = require('/opt/node22/lib/node_modules/playwright');
   await page.goto('http://localhost:8765/index.html'); await page.waitForTimeout(900); await page.click('#bStart'); await page.waitForTimeout(400);
   const go = mod => page.evaluate(async mod => { const G = SH.G; if (G.mode === 'stage') SH.returnBase(true); G.stageN = 6; G.dbossDay = 0; G.p.hp = G.p.maxHp = 1e9; window.__dboss = { n: 2, mod }; startDBoss(); G.st.t = 99; for (let k = 0; k < 30 && !G.boss; k++) await new Promise(q => setTimeout(q, 100)); if (G.intro) endIntro(); return { boss: !!G.boss, ice: !!G.boss.dice, n: G.enemies.filter(e => !e.boss).length }; }, mod);
   const a = await go(4), c = await go(5); console.log(JSON.stringify(a), JSON.stringify(c));
-  check(a.ice && c.n >= 6 && await page.evaluate(() => DBOSS_MOD.length === 7), 'new mods');
+  check(a.ice && c.n >= 6 && await page.evaluate(() => DBOSS_MOD.length === 8), 'new mods');
   await b.close(); console.log('ERRORS:', errors.length); errors.forEach(e => console.log(e)); process.exit(errors.length ? 1 : 0);
 })();
