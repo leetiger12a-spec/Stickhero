@@ -166,7 +166,7 @@ i.cfx{position:fixed;top:-40px;z-index:99;font-style:normal;pointer-events:none;
 #pauseStats{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;width:min(92vw,380px);margin:4px 0 10px}#pauseStats .ps{background:linear-gradient(#2e3b66,#18203d);color:#cfd8ff;border:2px solid #e9b949;border-radius:10px;padding:4px 2px;font-size:11px;font-weight:800;text-align:center;box-shadow:inset 0 1px 0 rgba(255,255,255,.25),0 2px 0 #0b0f1f}#pauseStats .ps b{display:block;font-size:15px;color:#ffd23f;text-shadow:0 1px 0 #000}#pauseStats .anm{font:inherit;font-size:12px;font-weight:800;border:2px solid #222;border-radius:10px;background:#fff3c4;padding:4px 8px;margin:3px 2px;min-height:32px;cursor:pointer}#pauseStats .pw{grid-column:1/-1;font-size:12px;line-height:1.6}
 #overStats .runSum{display:grid;grid-template-columns:1fr 1fr;gap:2px 12px;margin-top:8px;padding-top:8px;border-top:2px dashed rgba(255,255,255,.35);font-size:13px;text-align:left}#overStats .runW{grid-column:1/-1;text-align:center;margin-top:4px}
 #cardTools{display:flex;gap:10px;margin-top:12px}#cardTools button{font:inherit;font-size:14px;font-weight:800;border:3px solid #222;border-radius:14px;background:#fffaf0;color:#222;padding:8px 14px;min-height:44px;cursor:pointer}#cardTools button:disabled{opacity:.4}#cardTools button.on{background:#ffd6d6;outline:3px solid #ff4d6d}#cards .card.banable{outline:4px dashed #ff4d6d}
-.card{display:flex;align-items:center;gap:14px;text-align:left;font:inherit;color:#2b2d42;background:linear-gradient(#fffdf7,#fff1d6);border:3px solid #c8901c;outline:2px solid #2b2d42;outline-offset:0;border-radius:18px;padding:12px 14px;cursor:pointer;box-shadow:inset 0 2px 0 #fff,inset 0 0 0 2px rgba(255,214,102,.55),0 5px 0 #2b2d42,0 10px 18px rgba(0,0,0,.3);animation:pop .25s ease-out backwards}
+.card{display:flex;align-items:center;gap:14px;text-align:left;font:inherit;color:#fff3d6;background:radial-gradient(circle at 12% 50%,#3b4f8f,#1d2647 45%,#141a33);border:3px solid #e9b949;outline:2px solid #0b0f1f;outline-offset:0;border-radius:18px;padding:12px 14px;cursor:pointer;box-shadow:inset 0 1px 0 rgba(255,255,255,.3),inset 0 0 0 2px rgba(255,214,102,.25),0 5px 0 #0b0f1f,0 10px 18px rgba(0,0,0,.3);animation:pop .25s ease-out backwards}
 .card:nth-child(2){animation-delay:.07s}.card:nth-child(3){animation-delay:.14s}
 .card:active{transform:translateY(3px);box-shadow:0 2px 0 #2b2d42}
 .card .ic{font-size:40px;width:52px;text-align:center;flex:none}
@@ -174,11 +174,11 @@ i.cfx{position:fixed;top:-40px;z-index:99;font-style:normal;pointer-events:none;
 .card .nm{font-size:21px}
 .card .lv{font-size:13px;color:#fff;vertical-align:2px;background:#e63946;border-radius:8px;padding:1px 7px;margin-left:6px}
 .card .lv.new{background:#2a9d8f}
-.card .lv.evo{background:linear-gradient(90deg,#ff9f1c,#ffd23f);color:#222}.card .hint{color:#b5179e;font-size:12px}
+.card .lv.evo{background:linear-gradient(90deg,#ff9f1c,#ffd23f);color:#222}.card .hint{color:#ff9ff3;font-size:12px}
 .card.evo{border-color:#ffb703;background:linear-gradient(#fff8d6,#ffe9a0);box-shadow:0 5px 0 #b8860b,0 0 18px rgba(255,210,63,.8);animation:pop .25s ease-out backwards,evoGlow 1s ease-in-out infinite}
 @keyframes evoGlow{50%{box-shadow:0 5px 0 #b8860b,0 0 30px rgba(255,210,63,1)}}
-.card .ds{font-size:15px;color:#6b5b4b;margin-top:3px}
-.card .key{margin-left:auto;font-size:13px;color:#999;flex:none}
+.card .ds{font-size:15px;color:#b9c4ee;margin-top:3px}.card .ic img{filter:drop-shadow(0 0 6px rgba(255,214,102,.5))}
+.card .key{margin-left:auto;font-size:13px;color:#8a94b8;flex:none}
 @keyframes pop{from{transform:scale(.6);opacity:0}to{transform:scale(1);opacity:1}}
 .stats{font-size:19px;line-height:1.7;margin-bottom:10px}
 .stats b{color:#ffd23f}
@@ -379,7 +379,7 @@ h2 .hb{-webkit-text-stroke:0;text-shadow:none;letter-spacing:0;font-family:"Jua"
 
 <script>
 'use strict';
-const BUILD = 304;
+const BUILD = 305;
 const BOSS_INTERVAL = 180;      // 보스 등장 간격(초)
 const WAVE_INTERVAL = 60;       // 대규모 몰이 이벤트 간격(초)
 const MAX_ENEMIES = 110;   // Build 202: 220 → 110 (화면이 너무 정신없어서) — 대신 마을 적이 조금 더 튼튼(CROWD_K)
