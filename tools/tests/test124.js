@@ -23,7 +23,7 @@ const { chromium } = require('/opt/node22/lib/node_modules/playwright');
   check(Math.abs(r.dmg - 1.1) < 0.001 && r.hp === 110 && r.hpNow === 110, 'bonus +10%');
   // 적 세기: 환생 1번 = 레벨 +10 (Lv 25 + 10 = 35 → 5 넘음)
   const k = await page.evaluate(() => { SH.G.lvl = 25; return lvlScale().hp; });
-  check(Math.abs(k - 1.2) < 0.001, 'enemy scale with reborn ' + k);
+  check(Math.abs(k - 1.8) < 0.001, 'enemy scale with reborn ' + k);
   await page.evaluate(() => { SH.G.lvl = 1; }); await page.waitForTimeout(1200);
   await page.screenshot({ path: `${OUT}/b171_hero.png` });
   await b.close(); console.log('ERRORS:', errors.length); errors.forEach(e => console.log(e)); process.exit(errors.length ? 1 : 0);

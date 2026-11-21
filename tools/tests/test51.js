@@ -41,7 +41,7 @@ const { chromium } = require('/opt/node22/lib/node_modules/playwright');
   const hb = await page.evaluate(() => [...document.querySelectorAll('.dexFight.hard')].map(b => b.dataset.k)); console.log('hard buttons', hb.join()); check(hb.join() === 'boss6', 'hard button only after normal win');
   await page.evaluate(() => document.querySelector('.dexFight.hard[data-k="boss6"]').click()); await page.waitForTimeout(2300);
   const hd = await page.evaluate(() => { const e = SH.G.boss; return { hard: !!(e && e.hard), hp: e && Math.round(e.maxHp), dmg: e && Math.round(e.dmg) }; });
-  console.log('hard', JSON.stringify(hd)); check(hd.hard && hd.hp === 100000 && hd.dmg >= 82, 'hard practice stats wrong');
+  console.log('hard', JSON.stringify(hd)); check(hd.hard && hd.hp === 130000 && hd.dmg >= 102, 'hard practice stats wrong');
   await page.evaluate(async () => { SH.skipIntro(); hurtEnemy(SH.G.boss, 1e9, 0, 1, 0); await new Promise(r => setTimeout(r, 300)); returnBase(true); }); await page.waitForTimeout(200);
   const pb2 = await page.evaluate(() => JSON.parse(localStorage.getItem('stickhero_meta')).pbest); console.log('pbest', JSON.stringify(pb2));
   check(pb2['바위 골렘 왕'] >= 1 && pb2['바위 골렘 왕 🔥'] >= 1, 'hard record not separate');

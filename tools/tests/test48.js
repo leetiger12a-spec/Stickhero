@@ -9,7 +9,7 @@ const { chromium } = require('/opt/node22/lib/node_modules/playwright');
   await page.goto('http://localhost:8765/index.html'); await page.waitForTimeout(900); await page.click('#bStart'); await page.waitForTimeout(400);
   const spawn = n => page.evaluate(n => { const G = SH.G; window.__bossN = n; G.enemies = []; G.hazards = []; G.ebullets = []; G.weapons = {}; G.p.hp = G.p.maxHp = 1e6; G.p.x = 0; G.p.y = 300; G.nextBoss = 999; G.nextWave = 999; G.spawnAcc = -1e9;
     SH.spawnBoss(0, 150); SH.skipIntro(); delete window.__bossN; const e = G.boss; return { name: e.name, hp: Math.round(e.maxHp), dmg: Math.round(e.dmg), spr: e.spr, img: !!SPR[e.spr], gold: !!e.goldG }; }, n);
-  const want = { 6: ['바위 골렘 왕', 50000], 7: ['용암 골렘', 50000], 8: ['얼음 골렘', 50000], 9: ['숲 골렘', 50000], 10: ['황금 골렘', 40000] };
+  const want = { 6: ['바위 골렘 왕', 65000], 7: ['용암 골렘', 65000], 8: ['얼음 골렘', 65000], 9: ['숲 골렘', 65000], 10: ['황금 골렘', 52000] };
   for (const n of [6, 7, 8, 9, 10]) { const r = await spawn(n); console.log(n, JSON.stringify(r)); check(r.name === want[n][0] && r.hp === want[n][1] && r.img, `boss ${n} wrong: ${JSON.stringify(r)}`); }
   // 바위 골렘 왕: 충격파 → 바위 조각 10개, 반쯤 다치면 작은 골렘 3
   await spawn(6);
@@ -46,7 +46,7 @@ const { chromium } = require('/opt/node22/lib/node_modules/playwright');
   check(await page.evaluate(() => (SH.G.chests || []).some(c => c.gold)), 'gold golem no golden chest');
   // Build 85: 골렘 업적 (황금 골렘을 잡았으니 첫 골렘·황금을 잡아라)
   const ach = await page.evaluate(() => { checkAch(); const m = JSON.parse(localStorage.getItem('stickhero_meta')); return { g1: !!m.ach.golem1, gG: !!m.ach.golemG, g5: !!m.ach.golem5, n: ACH.length }; });
-  console.log('golem ach', JSON.stringify(ach)); check(ach.g1 && ach.gG && !ach.g5 && ach.n === 60, 'golem achievements wrong');   // Build 94: 업적 31개
+  console.log('golem ach', JSON.stringify(ach)); check(ach.g1 && ach.gG && !ach.g5 && ach.n === 61, 'golem achievements wrong');   // Build 94: 업적 31개
   // 도감: 보스 12종
   const dx = await page.evaluate(() => DEX.filter(d => d.boss).length); console.log('dex bosses', dx); check(dx === 17, 'dex bosses not 17');   /* Build 159: 해골 왕 5 */
   // 무한 탑 30~45층 = 골렘 4종

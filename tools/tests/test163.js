@@ -13,12 +13,12 @@ const { chromium } = require('/opt/node22/lib/node_modules/playwright');
   const c1 = await page.evaluate(() => ({ on: document.getElementById('dexCard').classList.contains('show'), t: document.getElementById('dexCard').textContent }));
   console.log(JSON.stringify(c1)); check(c1.on && c1.t.includes('800') && c1.t.includes('3번'), 'boss card');
   await page.screenshot({ path: `${OUT}/b233_card.png` });
-  await page.click('#dexCard'); await page.waitForTimeout(100);
+  await page.click('#dexCard .tap'); await page.waitForTimeout(100);
   check(await page.evaluate(() => !document.getElementById('dexCard').classList.contains('show')), 'card closes');
   await page.click('.dex[data-k="grunt"]'); await page.waitForTimeout(100);
-  check(await page.evaluate(() => document.getElementById('dexCard').textContent.includes('50마리')), 'mob card'); await page.click('#dexCard');
+  check(await page.evaluate(() => document.getElementById('dexCard').textContent.includes('50마리')), 'mob card'); await page.click('#dexCard .tap');
   await page.click('.dex.ally[data-k="sword"]'); await page.waitForTimeout(100);
-  check(await page.evaluate(() => document.getElementById('dexCard').textContent.includes('Lv3')), 'ally card'); await page.click('#dexCard');
+  check(await page.evaluate(() => document.getElementById('dexCard').textContent.includes('Lv3')), 'ally card'); await page.click('#dexCard .tap');
   const off = await page.$('.dex.off'); if (off) { await off.click(); await page.waitForTimeout(100); check(await page.evaluate(() => !document.getElementById('dexCard').classList.contains('show')), 'locked stays closed'); }
   await b.close(); console.log('ERRORS:', errors.length); errors.forEach(e => console.log(e)); process.exit(errors.length ? 1 : 0);
 })();

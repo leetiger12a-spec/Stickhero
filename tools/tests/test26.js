@@ -9,7 +9,7 @@ const { chromium } = require('/opt/node22/lib/node_modules/playwright');
   await page.goto('http://localhost:8765/index.html');
   // 시작 화면에서 열기
   await page.click('#bAchT'); await page.waitForTimeout(200);
-  const sub0 = await page.evaluate(() => document.getElementById('achSub').textContent); console.log(sub0); check(sub0.includes('0/50'), 'ach count wrong');   // Build 85: 골렘 업적 3개, Build 94: 얼음 나라 정복
+  const sub0 = await page.evaluate(() => document.getElementById('achSub').textContent); console.log(sub0); check(sub0.includes('0/' + 61), 'ach count wrong');   // Build 85: 골렘 업적 3개, Build 94: 얼음 나라 정복
   await page.click('#bAchOk'); await page.click('#bStart'); await page.waitForTimeout(300);
   // 첫 망루 · 적 잡기 · 보스 · 특수 적
   await page.evaluate(() => { const G = SH.G; G.nextBoss = 999; G.nextWave = 999; G.spawnAcc = -1e9;
@@ -18,7 +18,7 @@ const { chromium } = require('/opt/node22/lib/node_modules/playwright');
     G.bossCount = 3; spawnBoss(400, 400); SH.skipIntro(); hurtEnemy(G.boss, 1e12, 0, 1, 0); });
   await page.waitForTimeout(1500);
   const m1 = await page.evaluate(() => { const m = JSON.parse(localStorage.getItem('stickhero_meta')); return { ach: Object.keys(m.ach || {}).sort().join(), bank: m.bank || 0, st: m.st }; });
-  console.log('meta', JSON.stringify(m1)); check(m1.ach === 'boss1,tower1' && m1.bank === 150 && m1.st.kills >= 3 && m1.st.bossT.includes('얼음 용') && m1.st.specT.length === 2, 'ach/stats wrong');
+  console.log('meta', JSON.stringify(m1)); check(m1.ach === 'boss1,fast30,tower1' && m1.bank === 450 && m1.st.kills >= 3 && m1.st.bossT.includes('얼음 용') && m1.st.specT.length === 2, 'ach/stats wrong');
   // 게임오버 뒤에도 기록 유지 + 7일째(ST.day) 
   await page.evaluate(() => { SH.G.day = 6; SH.killBase(); }); await page.waitForTimeout(2800);
   await page.click('#bRetry'); await page.waitForTimeout(1500);

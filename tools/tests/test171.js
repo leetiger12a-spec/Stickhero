@@ -12,7 +12,7 @@ const { chromium } = require('/opt/node22/lib/node_modules/playwright');
   await page.click('.dex[data-k="grunt"]'); await page.waitForTimeout(150);
   check(await page.evaluate(() => !!document.querySelector('#dexCard .card.gold .gtag')), 'gold card');
   await page.screenshot({ path: `${OUT}/b241_gold.png` });
-  await page.click('#dexCard'); await page.waitForTimeout(100);
+  await page.click('#dexCard .tap'); await page.waitForTimeout(100);
   await page.click('.dex[data-k="boss0"]'); await page.waitForTimeout(150);
   check(await page.evaluate(() => !document.querySelector('#dexCard .card.gold')), 'not gold boss');
   await page.click('#dexCard .dexFight'); await page.waitForTimeout(500);
