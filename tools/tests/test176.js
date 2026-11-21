@@ -18,6 +18,6 @@ const { chromium } = require('/opt/node22/lib/node_modules/playwright');
   console.log(JSON.stringify(r));
   check(r.glass.wk === 'glass' && r.glass.hp === Math.round(r.giant.hp / 2) && Math.abs(r.glass.dmg / r.giant.dmg - 1.5) < 0.01, 'glass cannon');
   check(r.treasure.wk === 'treasure' && r.chests === r.chests0 + 1, 'treasure boss chest');
-  check(await page.evaluate(() => WEEKLY.length === 10), 'ten weeklies');
+  check(await page.evaluate(() => WEEKLY.length === 12), 'twelve weeklies');
   await b.close(); console.log('ERRORS:', errors.length); errors.forEach(e => console.log(e)); process.exit(errors.length ? 1 : 0);
 })();
