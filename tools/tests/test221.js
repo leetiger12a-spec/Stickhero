@@ -9,7 +9,7 @@ const { chromium } = require('/opt/node22/lib/node_modules/playwright');
   await page.goto('http://localhost:8765/index.html'); await page.waitForTimeout(800); await page.click('#bStart'); await page.waitForTimeout(400);
   await page.evaluate(async () => { const G = SH.G; G.nextBoss = 999; G.nextWave = 999; G.enemies = []; G.p.hp = G.p.maxHp = 1e9; G.nights = 2; G.nightOn = false; G.bt = NIGHT_START + NIGHT_CYCLE * 3 + 5; G.ghostDone = true; await new Promise(q => setTimeout(q, 300)); G.bloodLeaderT = 0.1; await new Promise(q => setTimeout(q, 400)); });
   const r = await page.evaluate(() => { const L = SH.G.enemies.find(e => e.bloodBoss); return L ? { hp: L.maxHp, elite: L.elite, scale: L.scale } : null; });
-  console.log(JSON.stringify(r)); check(r && r.elite && r.scale > 1.5, 'leader spawned');
+  console.log(JSON.stringify(r)); check(r && r.elite && r.scale > 1.5, 'leader spawned'); check(await page.evaluate(() => SH.G.enemies.filter(e => e.elite && !e.bloodBoss).length >= 3), 'guards');
   await page.evaluate(() => { const G = SH.G, L = G.enemies.find(e => e.bloodBoss); G.p.x = L.x - 60; G.p.y = L.y; G.cam.x = G.p.x; G.cam.y = G.p.y; L.spd = 0; }); await page.waitForTimeout(400);
   await page.screenshot({ path: `${OUT}/b288_leader.png` });
   const c = await page.evaluate(() => { const G = SH.G, c0 = (G.chests || []).filter(c => !c.small).length, L = G.enemies.find(e => e.bloodBoss); hurtEnemy(L, 1e12, 0, 1, 0); return { big: (G.chests || []).filter(c => !c.small).length - c0, n: ST.bloodLeaders }; });

@@ -381,7 +381,7 @@ h2 .hb{-webkit-text-stroke:0;text-shadow:none;letter-spacing:0;font-family:"Jua"
 
 <script>
 'use strict';
-const BUILD = 316;
+const BUILD = 317;
 const BOSS_INTERVAL = 180;      // 보스 등장 간격(초)
 const WAVE_INTERVAL = 60;       // 대규모 몰이 이벤트 간격(초)
 const MAX_ENEMIES = 110;   // Build 202: 220 → 110 (화면이 너무 정신없어서) — 대신 마을 적이 조금 더 튼튼(CROWD_K)
@@ -2631,7 +2631,8 @@ function nightK() { // 0(낮) ~ 1(한밤), 4초 동안 서서히
 function spawnBloodLeader() {
   const a = Math.random() * 7, R = MAP_R - 80, e = makeEnemy(tierType(tierNow(), [0.3, 0.4, 0.3]), Math.cos(a) * R, Math.sin(a) * R);
   if (!e.elite) makeElite(e); e.hp *= 8; e.maxHp *= 8; e.dmg *= 1.3; e.r *= 1.3; e.scale = (e.scale || 1) * 1.5; e.gold += 20; e.bloodBoss = true; e.awake = true; G.enemies.push(e);
-  banner('🩸 핏빛 대장 등장!', '빨간 기운의 큰 정예 · 잡으면 큰 보물 상자!', '#ff4d6d', 2.6); sfx('warn');
+  for (let i = 0; i < 3; i++) { const k = i * 2.1, m = makeEnemy(tierType(tierNow(), [0.4, 0.4, 0.2]), e.x + Math.cos(k) * 70, e.y + Math.sin(k) * 70); if (!m.elite) makeElite(m); m.awake = true; G.enemies.push(m); }   // 🩸 Build 317: 호위 정예 3마리
+  banner('🩸 핏빛 대장 등장!', '호위 정예 3마리와 함께 · 잡으면 큰 보물 상자!', '#ff4d6d', 2.6); sfx('warn');
 }
 function updNight(dt) {
   const ph = nightPh(), on = ph >= 0 && ph < NIGHT_LEN, p = G.p;
