@@ -379,7 +379,7 @@ h2 .hb{-webkit-text-stroke:0;text-shadow:none;letter-spacing:0;font-family:"Jua"
 
 <script>
 'use strict';
-const BUILD = 308;
+const BUILD = 309;
 const BOSS_INTERVAL = 180;      // 보스 등장 간격(초)
 const WAVE_INTERVAL = 60;       // 대규모 몰이 이벤트 간격(초)
 const MAX_ENEMIES = 110;   // Build 202: 220 → 110 (화면이 너무 정신없어서) — 대신 마을 적이 조금 더 튼튼(CROWD_K)
@@ -1430,7 +1430,8 @@ function recalcStats() {
   p.magnet = 70 * (1 + 0.4 * (ps.magnet || 0)) * (1 + upPct('mag') / 100);
   p.dmgMul = (1 + 0.15 * (ps.power || 0)) * (1 + 0.1 * (G.forge || 0)) * (1 + upPct('atk') / 100) * rebornMul() * grownMul();
   p.maxHp = Math.round(p.maxHp * rebornMul() * grownMul() * (WK('glass') ? 0.5 : 1)); p.hp = Math.min(p.hp, p.maxHp);   // 🌀 환생 보너스 · 🗡 유리 대포 주간: 체력 절반
-  if (WK('glass')) p.dmgMul *= 1.5;   // Build 246
+  if (WK('glass')) p.dmgMul *= 1.5;
+  p.dmgMul *= 1 + arenaMom();   // 🏟 Build 309: 투기장 기세   // Build 246
   p.cdMul = Math.max(0.5, 1 - 0.1 * (ps.haste || 0));
   p.cap = 12 + 6 * (ps.bag || 0);
 }
@@ -3477,6 +3478,7 @@ $('bCave').onclick = () => {
   sfx('pick');
 };
 // 🏟 Build 270: 투기장 — 금화 100을 내고 들어가 끝없는 웨이브(20초씩)를 버텨요. 웨이브마다 적이 세지고 금화 보상, 5웨이브마다 정예 무리
+const arenaMom = () => G && G.mode === 'stage' && G.st && G.st.arena ? Math.min(0.6, 0.03 * (G.st.arena - 1)) : 0;   // 웨이브마다 공격 +3% (최대 +60%)
 const ARENA_COST = 100, ARENA_T = 20, arenaOpen = () => G.stageN >= 3;
 const ARENA_BOSS = [2, 5, 7, 11, 12, 13, 14, 15];   // 👑 Build 271: 10웨이브마다 나오는 보스 차례 (불꽃 대마왕 → 해골 왕 → 용암 골렘 → 해골 왕 4종…)
 // 🎲 Build 282: 3웨이브마다(5·10 배수 빼고) 특별 웨이브
@@ -3583,7 +3585,7 @@ function returnBase(win) {
   G.mode = 'base'; G.st = null; G.stash = null; G.gateT = 0;
   p.x = GATE.x; p.y = GATE.y - 40; G.cam.x = p.x; G.cam.y = p.y - 12;
   placeAllies();
-  if (st && st.arena) { const w = st.arena - 1; if (win) questEvent('arenaOut');
+  if (st && st.arena) { const w = st.arena - 1; recalcStats(); if (win) questEvent('arenaOut');
     if (w > (ST.arenaBest || 0)) ST.arenaBest = w;
     if (w > 0) { const d = new Date(); ST.arenaTop = (ST.arenaTop || []).concat({ w, g: Math.max(0, G.gold - (G.arenaGold0 || 0)), d: `${d.getMonth() + 1}/${d.getDate()}`, out: !!win }).sort((a, b) => b.w - a.w || b.g - a.g).slice(0, 5); stDirty = true; }   /* 🏆 Build 286: 투기장 TOP 5 */ banner(win ? '🏟 투기장에서 귀환!' : '🏟 투기장 끝!', `웨이브 ${w}까지 버팀 · 🏆 최고 ${ST.arenaBest || 0} · 번 금화 🪙${Math.max(0, G.gold - (G.arenaGold0 || 0))}`, '#ff6b6b', 3); saveGame(); return; }
   if (st && st.cave) { banner(win ? '🌟 동굴에서 귀환!' : '동굴에서 쓰러졌다', `얻은 금화 🪙${G.gold - (G.caveGold0 || 0)} (쓰러져도 금화는 그대로)`, '#ffd23f', 2.8); saveGame(); return; }
@@ -3678,7 +3680,7 @@ function updStage(dt) {
       const w = st.arena, g = arenaPrize(w); questEvent('arenaw'); if (st.arenaRule) questEvent('arenarule'); for (const e of G.enemies) if (!e.dead) killEnemy(e);
       G.gold += g; p.hp = Math.min(p.maxHp, p.hp + p.maxHp * 0.15); G.shake = 10; sfx('bigBoom');
       if (w > (ST.arenaBest || 0)) { ST.arenaBest = w; stDirty = true; }
-      st.arena++; st.n = 4 + st.arena; st.timer = ARENA_T; st.acc = -3; st.arenaRule = arenaRuleFor(st.arena);
+      st.arena++; st.n = 4 + st.arena; st.timer = ARENA_T; st.acc = -3; st.arenaRule = arenaRuleFor(st.arena); recalcStats();
       if (w % 5 === 0) dropChest(clamp(p.x + rand(-60, 60), -STAGE_HW + 30, STAGE_HW - 30), p.y - 70, w % 10 !== 0);   // 🎁 Build 301: 5웨이브마다 상자 (10웨이브마다 큰 상자)
       if (w % 5 === 0) { st.portal = { x: clamp(p.x + (p.x > 0 ? -130 : 130), -STAGE_HW + 40, STAGE_HW - 40), y: p.y, t: 0, hold: 0, on: false, life: 10 }; floatText(p.x, p.y - 120, '🚪 10초 동안 귀환 포털! 더 버틸까, 나갈까?', '#9fd8ff', 16, 2.5); }   // 🚪 Build 272
       if (st.arena % 10 === 0) { spawnBoss(0, p.y - 260); return; }   // 👑 10웨이브마다 보스
@@ -6016,7 +6018,7 @@ function drawHUD() {
     const k = sv ? clamp(1 - st.timer / st.def.time, 0, 1) : clamp(-p.y / st.L, 0, 1);
     roundRect(bx, by, bw, 14, 7); ctx.fillStyle = '#222'; ctx.fill();
     roundRect(bx + 2, by + 2, (bw - 4) * k, 10, 5); ctx.fillStyle = sv ? '#7bed9f' : '#ffd23f'; ctx.fill();
-    const extra = sv ? `${st.arena ? ` · 🏟 웨이브 ${st.arena}${st.arenaRule ? ' ' + ARENA_RULES[st.arenaRule][0] : ''}` : ''} · ⏱ ${Math.max(0, Math.ceil(st.timer))}초` : st.cages.length ? ` · 🐱 ${st.cages.filter(c => c.freed).length}/${st.cages.length}` : '';
+    const extra = sv ? `${st.arena ? ` · 🏟 웨이브 ${st.arena}${st.arenaRule ? ' ' + ARENA_RULES[st.arenaRule][0] : ''}${arenaMom() ? ` · 💪+${Math.round(arenaMom() * 100)}%` : ''}` : ''} · ⏱ ${Math.max(0, Math.ceil(st.timer))}초` : st.cages.length ? ` · 🐱 ${st.cages.filter(c => c.freed).length}/${st.cages.length}` : '';
     hudText(st.tower || st.arena || st.cave ? `${st.tower ? '🗼 ' : ''}${st.def.name}${extra}` : `🚩 ${st.n + 1}. ${st.def.name}${extra}`, W / 2, by + 26, 13, '#fff', 'center');
     hudText(sv ? '🌀' : GOAL_ICON[st.def.goal === 'rescue' ? 'boss' : st.def.goal], bx + bw + 14, by + 7, 16, '#fff', 'center');
   }
