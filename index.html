@@ -375,7 +375,7 @@ h2 .hb{-webkit-text-stroke:0;text-shadow:none;letter-spacing:0;font-family:"Jua"
 
 <script>
 'use strict';
-const BUILD = 275;
+const BUILD = 276;
 const BOSS_INTERVAL = 180;      // 보스 등장 간격(초)
 const WAVE_INTERVAL = 60;       // 대규모 몰이 이벤트 간격(초)
 const MAX_ENEMIES = 110;   // Build 202: 220 → 110 (화면이 너무 정신없어서) — 대신 마을 적이 조금 더 튼튼(CROWD_K)
@@ -2345,7 +2345,7 @@ function makeEnemy(type, x, y) {
   if (G && G.mode === 'stage' && G.st && G.st.cave) { makeGolden(e); e.hp /= 3; e.maxHp /= 3; }   // 동굴: 모두 황금 (체력은 보통)
   else if (G && G.mode === 'stage' && G.st && G.st.rule === 'gold' && Math.random() < 0.3) makeGolden(e);   // 💰 황금 층
   else if (!window.__noGold && Math.random() < GOLD_P) makeGolden(e);   // __noGold: 정확한 기록을 보는 시험용
-  if (!e.golden && eliteOk() && Math.random() < (window.__eliteP !== undefined ? window.__eliteP : ELITE_P + (G.lvl >= LVL_FREE ? 0.02 : 0))) makeElite(e);
+  if (!e.golden && eliteOk() && Math.random() < (window.__eliteP !== undefined ? window.__eliteP : ELITE_P + (G.lvl >= LVL_FREE ? 0.02 : 0) + (G.blood && G.mode === 'base' ? 0.12 : 0))) makeElite(e);
   if (G && G.mode === 'stage' && G.st && G.st.rule === 'giant' && !T.boss) { e.hp *= 2; e.maxHp *= 2; e.r *= 1.4; e.scale = 1.45; e.spd *= 0.7; }   // 🐘 거인 층 (Build 244)
   if (G && G.mode === 'stage' && G.st && G.st.rule === 'vamp') e.dmg *= 1.3;
   if (G && G.mode === 'stage' && G.st && G.st.arena && !T.boss) { const w = G.st.arena - 1; e.hp *= 1 + 0.18 * w; e.maxHp *= 1 + 0.18 * w; e.dmg *= 1 + 0.07 * w; if (G.st.arena % 5 === 0 && !e.elite && !e.golden && Math.random() < 0.3) makeElite(e); }   // 🏟 투기장 웨이브 세기   // 🩸 흡혈 층: 적 공격 1.3배
@@ -2569,9 +2569,9 @@ function nightK() { // 0(낮) ~ 1(한밤), 4초 동안 서서히
 }
 function updNight(dt) {
   const ph = nightPh(), on = ph >= 0 && ph < NIGHT_LEN, p = G.p;
-  if (on && !G.nightOn) { G.nightOn = true; G.moon = ((G.nights || 0) + 1) % 5 === 0; heroSay('night', true); if (G.moon) banner('🌕 보름달 밤!', '적이 2배! 대신 아침 보너스도 2배!', '#ffe9a8', 2.8); else banner('🌙 밤이 됐다!', '적이 더 많이 몰려와요 · 아침까지 버텨라!', '#9fb4ff', 2.6); sfx('wave'); }   // 🌕 Build 143: 5번째 밤마다 보름달
+  if (on && !G.nightOn) { G.nightOn = true; G.moon = ((G.nights || 0) + 1) % 5 === 0; G.blood = !G.moon && G.diff >= 2 && (G.nights || 0) >= 2 && (window.__blood !== undefined ? window.__blood : Math.random() < 0.2); heroSay('night', true); if (G.blood) banner('🩸 핏빛 달 밤!', '적 2배 · 정예가 많아요! 버티면 아침에 보물 상자', '#ff4d6d', 3); else if (G.moon) banner('🌕 보름달 밤!', '적이 2배! 대신 아침 보너스도 2배!', '#ffe9a8', 2.8); else banner('🌙 밤이 됐다!', '적이 더 많이 몰려와요 · 아침까지 버텨라!', '#9fb4ff', 2.6); sfx('wave'); }   // 🌕 Build 143: 5번째 밤마다 보름달
   if (!on && G.nightOn) {
-    G.nightOn = false; G.nights = (G.nights || 0) + 1; questEvent('night'); stAdd('nightsAll'); const bonus = (40 + 20 * G.nights) * (G.moon ? 2 : 1); G.gold += bonus; if (G.moon) stAdd('moons'); G.moon = false;
+    G.nightOn = false; G.nights = (G.nights || 0) + 1; questEvent('night'); stAdd('nightsAll'); const bonus = (40 + 20 * G.nights) * (G.moon || G.blood ? 2 : 1); G.gold += bonus; if (G.moon) stAdd('moons'); if (G.blood) { stAdd('bloods'); dropChest(p.x + 40, p.y + 20); banner('🩸 핏빛 달을 버텼다!', '보물 상자 + 아침 보너스 2배', '#ff4d6d', 2.4); } G.moon = false; G.blood = false;
     heroSay('morning', true); banner('☀️ 아침이다!', `밤을 버텼다! 🪙${bonus}`, '#ffd23f', 2.6); sfx('cheer'); cheerAll(); floatText(p.x, p.y - 60, `+🪙${bonus}`, '#ffd23f', 20, 1.4);
   }
   updGhostChest(dt, on, ph); updMerchant(dt, on); updRain(dt, on); updRainbow(dt); updWish(dt, on && ph > 2);
@@ -2700,8 +2700,9 @@ function drawNight() { // 화면 위에 어둠을 덮고, 빛나는 곳(영웅·
   hole(0, -10, 150);   // 마을 회관 등불
   for (const t of G.towers) if (t.lvl > 0) hole(t.x, t.y - 30, 70);
   ctx.drawImage(nightCv, 0, 0, W, H);
-  if (G.moon) { const mx = W * 0.64, my = 160, r = 24; ctx.save(); ctx.globalAlpha = k; const g = ctx.createRadialGradient(mx, my, r * 0.6, mx, my, r * 2.4); g.addColorStop(0, 'rgba(255,240,180,.5)'); g.addColorStop(1, 'rgba(255,240,180,0)'); ctx.fillStyle = g; ctx.beginPath(); ctx.arc(mx, my, r * 2.4, 0, 7); ctx.fill();   // 🌕 큰 보름달
-    ctx.fillStyle = '#fff4c2'; ctx.beginPath(); ctx.arc(mx, my, r, 0, 7); ctx.fill(); ctx.fillStyle = 'rgba(220,200,140,.6)'; for (const [dx, dy, rr] of [[-8, -6, 5], [7, 4, 4], [-3, 10, 3]]) { ctx.beginPath(); ctx.arc(mx + dx, my + dy, rr, 0, 7); ctx.fill(); } ctx.restore(); }
+  if (G.blood) { ctx.save(); ctx.globalAlpha = 0.16 * k; ctx.fillStyle = '#b00020'; ctx.fillRect(0, 0, W, H); ctx.restore(); }   // 🩸 붉은 밤
+  if (G.moon || G.blood) { const mx = W * 0.64, my = 160, r = 24, BL = G.blood; ctx.save(); ctx.globalAlpha = k; const g = ctx.createRadialGradient(mx, my, r * 0.6, mx, my, r * 2.4); g.addColorStop(0, BL ? 'rgba(255,60,80,.55)' : 'rgba(255,240,180,.5)'); g.addColorStop(1, BL ? 'rgba(255,60,80,0)' : 'rgba(255,240,180,0)'); ctx.fillStyle = g; ctx.beginPath(); ctx.arc(mx, my, r * 2.4, 0, 7); ctx.fill();   // 🌕 큰 보름달
+    ctx.fillStyle = BL ? '#ff5a6e' : '#fff4c2'; ctx.beginPath(); ctx.arc(mx, my, r, 0, 7); ctx.fill(); ctx.fillStyle = BL ? 'rgba(150,0,30,.5)' : 'rgba(220,200,140,.6)'; for (const [dx, dy, rr] of [[-8, -6, 5], [7, 4, 4], [-3, 10, 3]]) { ctx.beginPath(); ctx.arc(mx + dx, my + dy, rr, 0, 7); ctx.fill(); } ctx.restore(); }
   ctx.save(); ctx.globalCompositeOperation = 'lighter';   // 반딧불이 (어둠 위에서 반짝)
   for (const f of G.flies) { const x = (f.x - G.cam.x) * SCALE + W / 2, y = (f.y - G.cam.y) * SCALE * K + H / 2, a = k * Math.min(1, f.life) * (0.5 + 0.5 * Math.sin(G.t * 6 + f.ph));
     ctx.fillStyle = `rgba(200,255,120,${0.35 * a})`; ctx.beginPath(); ctx.arc(x, y, 6, 0, 7); ctx.fill(); ctx.fillStyle = `rgba(240,255,190,${a})`; ctx.beginPath(); ctx.arc(x, y, 2, 0, 7); ctx.fill(); }
@@ -2868,7 +2869,7 @@ function updBase(dt) {
   let rate = Math.min(RATE_CAP, (G.bt < 10 ? 0.35 : 0.5) + G.bt * 0.016) * DF().rate;   // Build 202: 시간이 지나도 끝없이 늘지 않게
   if (G.boss) rate *= 0.35;
   rate *= 1 - 0.15 * campsDown();   // 부순 진지 하나마다 -15%
-  rate *= 1 + (G.moon ? 1 : 0.5) * nightK();   // 밤에는 적 +50%, 보름달은 +100%
+  rate *= 1 + (G.moon || G.blood ? 1 : 0.5) * nightK();   // 밤에는 적 +50%, 보름달은 +100%
   if (WK('swarm')) rate *= 1.6;
   G.spawnAcc += rate * dt;
   while (G.spawnAcc >= 1) { G.spawnAcc--; spawnEnemy(winterSwap(pickType())); }
