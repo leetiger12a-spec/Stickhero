@@ -381,7 +381,7 @@ h2 .hb{-webkit-text-stroke:0;text-shadow:none;letter-spacing:0;font-family:"Jua"
 
 <script>
 'use strict';
-const BUILD = 318;
+const BUILD = 319;
 const BOSS_INTERVAL = 180;      // 보스 등장 간격(초)
 const WAVE_INTERVAL = 60;       // 대규모 몰이 이벤트 간격(초)
 const MAX_ENEMIES = 110;   // Build 202: 220 → 110 (화면이 너무 정신없어서) — 대신 마을 적이 조금 더 튼튼(CROWD_K)
@@ -2666,8 +2666,9 @@ function updMerchant(dt, night) {
     G.merchT = (G.merchT ?? 90) - dt;
     if (G.merchT <= 0 && !night && !G.boss && !G.raid && !p.dead) {
       G.merchT = rand(150, 210); const a = Math.random() * 7, rr = rand(170, 240), o = MERCH[Math.floor(Math.random() * MERCH.length)];
-      G.merchant = { x: Math.cos(a) * rr, y: Math.sin(a) * rr, t: 40, k: o.k, price: o.price(G.lvl || 1), hold: 0 };
-      bannerSoft('🛒 떠돌이 상인이 왔어요!', `${o.txt} · 🪙${G.merchant.price} · 옆에 서면 사요`, '#ffd23f', 2.2); sfx('coin'); }
+      const sale = window.__msale ?? Math.random() < 0.2;   // 🔥 Build 319: 가끔 반값
+      G.merchant = { x: Math.cos(a) * rr, y: Math.sin(a) * rr, t: 40, k: o.k, price: Math.round(o.price(G.lvl || 1) * (sale ? 0.5 : 1)), hold: 0, sale };
+      bannerSoft(sale ? '🔥 떠돌이 상인 반값 세일!' : '🛒 떠돌이 상인이 왔어요!', `${o.txt} · 🪙${G.merchant.price}${sale ? ' (반값!)' : ''} · 옆에 서면 사요`, sale ? '#ff9f1c' : '#ffd23f', 2.4); sfx('coin'); }
     return;
   }
   const m = G.merchant, o = MERCH.find(x => x.k === m.k); m.t -= dt;
@@ -2682,7 +2683,7 @@ function drawMerchant() {
   const m = G.merchant; if (!m || !SPR.market) return; const o = MERCH.find(x => x.k === m.k);
   ctx.save(); ctx.translate(m.x, m.y); ctx.scale(1, IK); ctx.globalAlpha = m.t < 3 ? m.t / 3 : 1; spr('market', 64);
   if (m.hold > 0) { ctx.strokeStyle = '#ffd23f'; ctx.lineWidth = 4; ctx.beginPath(); ctx.arc(0, 4, 26, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * Math.min(1, m.hold / 1.2)); ctx.stroke(); }
-  const t = `${o.txt} 🪙${m.price}`; ctx.font = 'bold 11px Jua,system-ui,sans-serif'; ctx.textAlign = 'center'; const tw = ctx.measureText(t).width + 12;
+  const t = `${m.sale ? "🔥" : ""}${o.txt} 🪙${m.price}${m.sale ? " 반값!" : ""}`; ctx.font = 'bold 11px Jua,system-ui,sans-serif'; ctx.textAlign = 'center'; const tw = ctx.measureText(t).width + 12;
   ctx.fillStyle = 'rgba(0,0,0,.55)'; ctx.beginPath(); ctx.roundRect(-tw / 2, -84, tw, 18, 9); ctx.fill(); ctx.fillStyle = '#ffd23f'; ctx.fillText(t, 0, -71);
   ctx.restore();
 }
