@@ -88,3 +88,38 @@ GRID RULES (strict):
 BACKGROUND: plain pure white (#FFFFFF) everywhere, no grid lines, no frame borders, no ground line, no shadows, no glow halo, no sticker border, no effects, no dust clouds, no impact marks, no speed lines, no text, no letters, no numbers, no watermark.
 QUALITY: ultra high resolution, QHD (2560x1440) or higher, crisp clean lines
 ```
+
+## B1-② 강철 거인 공격 (로켓 펀치 준비 → 내지르기) — 첨부 `art/boss1_src.png` · 픽스버스용(LAYOUT 포함)
+```
+TASK: one 2D game ANIMATION SPRITE SHEET of the attached boss character: exactly 12 frames arranged in a grid of 4 columns x 3 rows, read left to right, top row first.
+
+LAYOUT (very important): the whole 4x3 grid must sit in the LOWER-LEFT part of the image. Leave a big EMPTY pure white margin along the TOP edge (the top 15% of the image height) and along the RIGHT edge (the right 15% of the image width). The TOP-RIGHT CORNER of the image (the right 30% of the width x the top 20% of the height) must be COMPLETELY EMPTY white, with no part of any frame in it. Also leave a thin empty white margin along the left and bottom edges.
+
+CHARACTER: the attached Steel Giant boss (a huge blue armored brute with a round blue head, yellow angry eyes, a wide toothy grin, dark curved horns, a small gold crown with a red gem, big grey steel shoulder plates with gold studs, a brown leather chest strap and belt with a gold buckle, grey spiked steel gauntlets with big blue fists, grey armored knees and big grey steel boots). Keep EXACTLY the same design, colors, thick black outlines, cel shading, proportions and art style in every frame. The crown, horns, shoulder plates, strap, belt, gauntlets and boots are in EVERY frame. Both fists stay attached to the arms in every frame.
+
+ANIMATION: a big ROCKET PUNCH wind-up and straight punch in place, facing right. Each frame MUST show a DIFFERENT pose, exactly like this (the "punching arm" is the arm on the right side of the picture):
+- Frame 1: fighting stance like the attached image, both fists up.
+- Frame 2: the body twists back to the left, the punching arm starts pulling back.
+- Frame 3: the punching arm pulled FAR back behind the body, the fist clenched tight, the other fist forward as a guard; knees bent low.
+- Frame 4: same wound-up pose, but the body leans further back and the face shows teeth clenched, eyes narrowed (charging power).
+- Frame 5: still wound up, the back foot digs in, the shoulder plate rises (maximum charge).
+- Frame 6: the body starts to turn forward, the punching arm swinging forward at waist height.
+- Frame 7: the punching arm shooting forward, halfway straight, the body leaning right.
+- Frame 8: FULL PUNCH: the punching arm completely straight to the right at chest height, the big fist far out in front, the body leaning far forward, the front foot stepped forward, mouth wide open shouting.
+- Frame 9: the punch held fully extended, the other arm pulled back to the hip.
+- Frame 10: the punching arm starts pulling back, the body straightening.
+- Frame 11: both arms coming back to the front, the knees straightening.
+- Frame 12: back to the fighting stance, almost like frame 1, flowing back into frame 1.
+
+SIZE RULES (strict): the crown, horns and head are EXACTLY THE SAME SIZE in all 12 frames. Only the arms, legs and body lean change; the boss never gets bigger or closer to the camera.
+
+GRID RULES (strict):
+- Every frame: the SAME boss, facing right, 3/4 top-down game view, same as the attached image.
+- Same ground line in every frame; the boss stays in the center of its cell.
+- The boss fills about 65% of its cell height (leave room for the long straight punch on the right).
+- VERY WIDE empty white gaps between all cells and between the rows; no horn, crown, fist, boot or spike may touch or come near another cell.
+- Only the 12 frames. No extra poses, no labels.
+
+BACKGROUND: plain pure white (#FFFFFF) everywhere, no grid lines, no frame borders, no ground line, no shadows, no glow halo, no sticker border, no effects, no fire, no smoke, no speed lines, no impact marks, no text, no letters, no numbers, no watermark.
+QUALITY: ultra high resolution, QHD (2560x1440) or higher, crisp clean lines
+```
