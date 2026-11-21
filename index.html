@@ -379,7 +379,7 @@ h2 .hb{-webkit-text-stroke:0;text-shadow:none;letter-spacing:0;font-family:"Jua"
 
 <script>
 'use strict';
-const BUILD = 306;
+const BUILD = 307;
 const BOSS_INTERVAL = 180;      // 보스 등장 간격(초)
 const WAVE_INTERVAL = 60;       // 대규모 몰이 이벤트 간격(초)
 const MAX_ENEMIES = 110;   // Build 202: 220 → 110 (화면이 너무 정신없어서) — 대신 마을 적이 조금 더 튼튼(CROWD_K)
@@ -2529,7 +2529,7 @@ function spawnBoss(bx, by) {
   const b = { id: ++eid, type: 'boss', boss: true, name: B.name, x: bx, y: by, inside: false, atk: 0, lunge: 0, r: 58, hp, maxHp: hp, spd: final ? BOSS_FINAL.spd : n <= 5 ? 50 + n * 6 : n === GOLD_GOLEM ? 75 : 58, dmg: (final ? BOSS_FINAL.dmg : BOSS_DMG[n]) * DF().edmg * ls.dmg * ts.dmg, color: B.color, xp: 0, flash: 0, hitT: 0, kx: 0, ky: 0, swordCd: 0, wob: 0, mode: 'walk', st: 3, rings: 0, ax: 0, ay: 0, lvl: Math.min(5, n), spr: final ? (SPR.boss_final ? 'boss_final' : 'boss0') : 'boss' + BOSSES.indexOf(B) };
   if (final) { b.r = 76; b.final = true; }
   b.bornT = G.t;
-  if (inStage && G.st.dboss !== undefined) { const m = G.st.dboss; b.dboss = true; if (m === 1) b.spd *= 1.4; else if (m === 2) { b.hp *= 1.5; b.maxHp *= 1.5; } else if (m === 3) { b.rage = true; b.spd *= 1.25; } else b.dfire = true; }   // 📅 오늘의 보스 특기
+  if (inStage && G.st.dboss !== undefined) { const m = G.st.dboss; b.dboss = true; if (m === 1) b.spd *= 1.4; else if (m === 2) { b.hp *= 1.5; b.maxHp *= 1.5; } else if (m === 3) { b.rage = true; b.spd *= 1.25; } else if (m === 4) b.dice = true; else if (m === 5) { for (let i = 0; i < 6; i++) { const a = i * 1.05, e = makeEnemy(tierType(tierNow(), [0.5, 0.4, 0.1]), bx + Math.cos(a) * 90, by + Math.sin(a) * 90); e.awake = true; G.enemies.push(e); } } else b.dfire = true; }   // 📅 오늘의 보스 특기
   if (inStage && G.st.arena) { const k = 1 + 0.1 * G.st.arena; b.hp *= k; b.maxHp *= k; }   // 🏟 웨이브가 높을수록 보스도 튼튼
   if (pr !== undefined && G.st.hard) { b.hard = true; b.hp *= 2; b.maxHp *= 2; b.dmg *= 1.5; }   // 🔥 도전: 체력 2배 · 공격 1.5배   // 보스 연습 기록용 (등장 장면 동안은 G.t가 멈춤)
   G.enemies.push(b); G.boss = b; G.saidBoss = b; heroSay('boss', true);
@@ -3494,8 +3494,8 @@ const rushOpen = () => G.stageN >= 5;
 function rushHtml() { if (!rushOpen()) return '<div class="r" style="margin-top:8px">👑 보스 러시: 🔒 모험 지도 5칸을 깨면 열려요</div>';
   const used = G.rushDay === G.day; return `<div class="r" style="margin-top:8px">👑 <b>보스 러시</b>: 보스 5마리와 연달아 싸워요 (사이에 체력 25% 회복) · 완주하면 금고 🪙300 · 하루 1번${G.stageN >= 15 ? ' · 💀 해골 왕도 나와요' : ''}</div>` + (ST.rushBest ? `<div class="r">⏱ 최고 기록 ${fmtTime(ST.rushBest)}</div>` : '') + (used ? '<div class="r">오늘은 이미 도전했어요 · 내일 또!</div>' : '<button class="btn big" id="bGoRush" style="margin-top:6px;background:#ff9f1c">👑 보스 러시 도전!</button>'); }
 // 📅 Build 296: 오늘의 보스 — 날(게임 날짜)마다 정해진 보스 1마리 + 오늘의 특기, 하루 1번, 이기면 금고 🏦400 + 보물 상자
-const DBOSS_MOD = [['🔥', '불꽃 몸', '닿으면 불길이 남아요'], ['💨', '날쌘 발', '1.4배 빨라요'], ['🛡', '두꺼운 갑옷', '체력 1.5배'], ['😡', '처음부터 화남', '시작부터 화난 상태']];
-const dbossToday = () => { const pool = rushPool(), d = G.day || 1; return { n: pool[(d * 7 + 3) % pool.length], mod: (d * 5 + 1) % DBOSS_MOD.length }; };
+const DBOSS_MOD = [['🔥', '불꽃 몸', '닿으면 불길이 남아요'], ['💨', '날쌘 발', '1.4배 빨라요'], ['🛡', '두꺼운 갑옷', '체력 1.5배'], ['😡', '처음부터 화남', '시작부터 화난 상태'], ['❄', '얼음 몸', '닿으면 느려져요'], ['👥', '부하 거느림', '졸개 6마리와 함께 와요']];   // Build 307: 특기 2개 더
+const dbossToday = () => { if (window.__dboss) return window.__dboss; const pool = rushPool(), d = G.day || 1; return { n: pool[(d * 7 + 3) % pool.length], mod: (d * 5 + 1) % DBOSS_MOD.length }; };
 function dbossHtml() { if (!rushOpen()) return ''; const T = dbossToday(), M = DBOSS_MOD[T.mod], used = G.dbossDay === G.day;
   return `<div class="r" style="margin-top:8px">📅 <b>오늘의 보스</b>: ${BOSSES[T.n].name} · ${M[0]} ${M[1]} (${M[2]}) · 이기면 금고 🏦400 + 보물 상자 · 하루 1번</div>` + (used ? '<div class="r">오늘의 보스는 이미 도전했어요 · 내일 또!</div>' : '<button class="btn big" id="bGoDBoss" style="margin-top:6px;background:linear-gradient(#ff6b6b,#c1121f);color:#fff">📅 오늘의 보스 도전!</button>'); }
 function startDBoss() { if (!rushOpen() || G.dbossDay === G.day) return; const T = dbossToday(); showOv(null); state = 'play'; G.dbossDay = G.day; enterStage(0, 0, T.n); G.st.dboss = T.mod; const M = DBOSS_MOD[T.mod]; banner(`📅 오늘의 보스: ${BOSSES[T.n].name}`, `${M[0]} ${M[1]} · ${M[2]}`, '#ff6b6b', 2.6); }
@@ -4455,7 +4455,7 @@ function update(dt) {
     }
     e.x += e.kx * dt; e.y += e.ky * dt;
     const decay = Math.exp(-9 * dt); e.kx *= decay; e.ky *= decay;
-    if (!p.dead && pd < e.r + p.r + 2 && !(e.z > 30) && !(e.hideT > 0)) { hurtPlayer(e.dmg); if (e.type === 'e_ghost' || e.elite === 'ice') slowHero(1.2); }   // ❄ 얼음 정예도 느리게   // 공중에 뜬 보스·숨은 암살자는 안 닿음, 유령 기사 쇠사슬은 느리게
+    if (!p.dead && pd < e.r + p.r + 2 && !(e.z > 30) && !(e.hideT > 0)) { hurtPlayer(e.dmg); if (e.type === 'e_ghost' || e.elite === 'ice' || e.dice) slowHero(1.2); }   // ❄ 얼음 정예도 느리게   // 공중에 뜬 보스·숨은 암살자는 안 닿음, 유령 기사 쇠사슬은 느리게
   }
   // 겹침 방지
   const es = G.enemies;
