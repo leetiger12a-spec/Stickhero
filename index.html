@@ -381,7 +381,7 @@ h2 .hb{-webkit-text-stroke:0;text-shadow:none;letter-spacing:0;font-family:"Jua"
 
 <script>
 'use strict';
-const BUILD = 328;
+const BUILD = 329;
 const BOSS_INTERVAL = 180;      // 보스 등장 간격(초)
 const WAVE_INTERVAL = 60;       // 대규모 몰이 이벤트 간격(초)
 const MAX_ENEMIES = 110;   // Build 202: 220 → 110 (화면이 너무 정신없어서) — 대신 마을 적이 조금 더 튼튼(CROWD_K)
@@ -3440,15 +3440,17 @@ function renderTower() {
   const fy = f => Hh - botPad - (f - 0.5) * rowH, x0 = Wd * 0.30, x1 = Wd * 0.70, tw = x1 - x0, gy = Hh - botPad;
   let rs = 7; const rnd = () => (rs = (rs * 16807) % 2147483647) / 2147483647;
   let s = `<svg width="${Wd}" height="${Hh}" style="position:absolute;left:0;top:0"><defs>
-    <linearGradient id="tSky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#05021a"/><stop offset=".3" stop-color="#24106b"/><stop offset=".62" stop-color="#3a5bd9"/><stop offset=".9" stop-color="#8ecae6"/><stop offset="1" stop-color="#d8f3ff"/></linearGradient><radialGradient id="wGlow"><stop offset="0" stop-color="#fff6c2" stop-opacity=".95"/><stop offset="1" stop-color="#ffb703" stop-opacity="0"/></radialGradient></defs>
+    <linearGradient id="tSky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#05021a"/><stop offset=".35" stop-color="#24106b"/><stop offset=".75" stop-color="#1a1f5a"/><stop offset="1" stop-color="#0a1936"/></linearGradient><radialGradient id="wGlow"><stop offset="0" stop-color="#fff6c2" stop-opacity=".95"/><stop offset="1" stop-color="#ffb703" stop-opacity="0"/></radialGradient></defs>
     <rect width="${Wd}" height="${Hh}" fill="url(#tSky)"/>`;
   for (let i = 0; i < 90; i++) { const y = rnd() * Hh * 0.5, x = rnd() * Wd, r = 0.6 + rnd() * 1.6; s += `<circle class="tstar" style="animation-delay:${(rnd() * 2.4).toFixed(2)}s" cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${r.toFixed(1)}" fill="#fff"/>`; }
   for (let i = 0; i < 4; i++) s += `<line class="tshoot" style="animation-delay:${(i * 1.3 + rnd()).toFixed(2)}s;animation-duration:${(4 + rnd() * 3).toFixed(1)}s" x1="${(Wd * (0.6 + rnd() * 0.5)).toFixed(0)}" y1="${(40 + i * Hh * 0.08 + rnd() * 60).toFixed(0)}" x2="${(Wd * (0.6 + rnd() * 0.5) + 40).toFixed(0)}" y2="${(20 + i * Hh * 0.08 + rnd() * 60).toFixed(0)}" stroke="#fff" stroke-width="2.5" stroke-linecap="round" opacity="0"/>`;   // 별똥별
-  s += `<circle cx="${Wd * 0.84}" cy="70" r="26" fill="#fff4c2"/><circle cx="${Wd * 0.84 + 10}" cy="62" r="24" fill="#120a3a" opacity=".9"/>`;   // 초승달
+  s += `<image href="img/sky_moon.webp" x="${(Wd * 0.7).toFixed(1)}" y="28" width="${(Wd * 0.22).toFixed(1)}" height="${(Wd * 0.22).toFixed(1)}" opacity=".95"/>`;   // 🌕 Build 329: 그림 보름달
   const cloud = (x, y, k, op) => `<g class="tcloud" style="animation-duration:${(6 + rnd() * 6).toFixed(1)}s" opacity="${op}"><ellipse cx="${x}" cy="${y}" rx="${34 * k}" ry="${14 * k}" fill="#fff"/><ellipse cx="${x - 22 * k}" cy="${y + 4 * k}" rx="${22 * k}" ry="${11 * k}" fill="#fff"/><ellipse cx="${x + 16 * k}" cy="${y - 8 * k}" rx="${22 * k}" ry="${14 * k}" fill="#fff"/></g>`;
-  for (let y = Hh * 0.45; y < gy - 60; y += 210) s += cloud(rnd() < 0.5 ? Wd * (0.08 + rnd() * 0.18) : Wd * (0.78 + rnd() * 0.16), y, 0.8 + rnd() * 0.6, 0.55 + rnd() * 0.3);
+  { const SKY = [['cloud', 0.26, 0.9], ['island', 0.22, 1], ['pinkcloud', 0.3, 0.85], ['birds', 0.16, 1], ['crystal', 0.17, 1], ['magic', 0.2, 0.9], ['cloud', 0.22, 0.8], ['dragon', 0.2, 1]]; let k = 0;   // ☁ Build 329: 하늘 장식 그림 (탑 옆 양쪽)
+    for (let y = 150; y < gy - 260; y += 190 + rnd() * 80, k++) { const [n, w, op] = SKY[k % SKY.length], ww = Wd * w, left = k % 2 === 0, x = left ? Wd * (0.01 + rnd() * 0.08) : Wd * (0.99 - w - rnd() * 0.08);
+      s += `<g class="tcloud" style="animation-duration:${(6 + rnd() * 6).toFixed(1)}s" opacity="${op}"><image href="img/sky_${n}.webp" x="${x.toFixed(1)}" y="${y.toFixed(1)}" width="${ww.toFixed(1)}" height="${ww.toFixed(1)}" preserveAspectRatio="xMidYMid meet"/></g>`; } }
   // 땅: 언덕 + 풀
-  s += `<path d="M0 ${gy + 10} Q${Wd * 0.25} ${gy - 30} ${Wd * 0.5} ${gy + 4} T${Wd} ${gy - 10} V${Hh} H0Z" fill="#3a7d2c"/><path d="M0 ${gy + 40} Q${Wd * 0.3} ${gy + 14} ${Wd * 0.6} ${gy + 36} T${Wd} ${gy + 30} V${Hh} H0Z" fill="#5fae46"/>`;
+  { const ih = Wd * 944 / 720; s += `<image href="img/tower_bg.webp" x="0" y="${(gy - ih * 0.72).toFixed(1)}" width="${Wd}" height="${ih.toFixed(1)}" preserveAspectRatio="none"/>`; }   // 🌄 Build 329: 탑 아래 풍경 그림 (언덕 꼭대기 = 탑 바닥)
   // 탑 몸통: 그림 조각 + 5층마다 테마 색 살짝 (SVG 필터로 그림 픽셀에만 색을 겹침)
   s += '<defs>' + THEMES.map((th, i) => [0, 1].map(d => `<filter id="tT${i}${d}" color-interpolation-filters="sRGB"><feFlood flood-color="${th.map}" flood-opacity="${d ? 0.55 : 0.4}"/><feComposite in2="SourceGraphic" operator="in"/><feBlend in2="SourceGraphic" mode="multiply"/>${d ? '<feComponentTransfer><feFuncR type="linear" slope=".55"/><feFuncG type="linear" slope=".55"/><feFuncB type="linear" slope=".6"/></feComponentTransfer>' : ''}</filter>`).join('')).join('') + '</defs>';
   const img = (n, x, y, w, h, flt) => `<image href="img/tw_${n}.webp" x="${x.toFixed(1)}" y="${y.toFixed(1)}" width="${w.toFixed(1)}" height="${h.toFixed(1)}" preserveAspectRatio="none"${flt ? ` filter="url(#${flt})"` : ''}/>`;
@@ -3462,7 +3464,7 @@ function renderTower() {
   s += img('base', Wd / 2 - 483 * sk / 2, gy - 6, 483 * sk, 241 * sk);
   const yT = gy - F * rowH, rw = 359 * sk * 1.12, rh = 385 * sk * 1.12;
   s += img('roof', Wd / 2 - rw / 2, yT - rh + 10 * sk, rw, rh);
-  for (let y = gy - rowH * 3; y > yT; y -= 330) s += cloud(Wd * (0.5 + (rnd() - 0.5) * 0.6), y, 0.7 + rnd() * 0.4, 0.35);   // 탑 앞을 지나가는 옅은 구름
+  for (let y = gy - rowH * 3; y > yT; y -= 330) { const ww = Wd * (0.2 + rnd() * 0.1), x = Wd * (0.5 + (rnd() - 0.5) * 0.6) - ww / 2; s += `<g class="tcloud" style="animation-duration:${(6 + rnd() * 6).toFixed(1)}s" opacity=".55"><image href="img/sky_cloud.webp" x="${x.toFixed(1)}" y="${(y - ww * 0.3).toFixed(1)}" width="${ww.toFixed(1)}" height="${(ww * 0.6).toFixed(1)}"/></g>`; }   // 탑 앞을 지나가는 옅은 구름 (Build 329: 그림 구름)
   s += '</svg>';
   let h = s;
   for (let sct = 0; sct < F / 5; sct++) h += `<div class="tsec" style="top:${gy - sct * 5 * rowH - 30}px">${THEME_ICO[sct % 6]} ${THEMES[sct % THEMES.length].name} ${sct * 5 + 1}~${sct * 5 + 5}층</div>`;
