@@ -69,7 +69,7 @@ canvas{display:block;position:fixed;inset:0;width:100%;height:100%}
 #dexList{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;width:min(94vw,420px);max-height:62vh;overflow-y:auto;padding:2px 2px 6px;box-sizing:border-box}
 #dexCard{position:fixed;inset:0;z-index:30;display:none;align-items:center;justify-content:center;background:rgba(10,10,25,.72)}#dexCard.show{display:flex}
 #dexCard .card{display:block;width:min(86vw,340px);background:linear-gradient(#fffdf7,#ffe9c2);color:#2b2d42;border:4px solid #2b2d42;border-radius:18px;padding:12px 14px;text-align:center;box-shadow:0 8px 0 rgba(0,0,0,.35)}#dexCard .card.boss{background:linear-gradient(#fff6f9,#ffd0de)}#dexCard .card.ally{background:linear-gradient(#f4fff6,#cdf3d7)}
-#dexCard img{max-width:100%;max-height:min(42vh,260px);object-fit:contain;filter:drop-shadow(0 6px 4px rgba(0,0,0,.25))}#dexCard h3{margin:4px 0 2px;font-size:22px}#dexCard .st{color:#ffb703;font-size:20px;-webkit-text-stroke:1px #2b2d42}#dexCard .st i{color:#ccc;font-style:normal}#dexCard p{margin:4px 0;font-size:14px}#dexCard .stats{display:flex;justify-content:center;gap:10px;margin:6px 0;font-size:14px;font-weight:800}#dexCard .tap{opacity:.6;font-size:12px}#dexCard .card{position:relative}#dexCard .card.gold{background:linear-gradient(#fff8d6,#ffd84d);border-color:#b8860b;box-shadow:0 0 0 4px #ffe066,0 0 24px 6px rgba(255,215,0,.75),0 8px 0 rgba(0,0,0,.35)}#dexCard .gtag{position:absolute;top:-14px;left:50%;transform:translateX(-50%);background:#ffd23f;border:3px solid #2b2d42;border-radius:12px;padding:1px 10px;font-weight:800;font-size:14px}#dexCard .dexFight{margin-top:4px}
+#dexCard .dexAnim{display:block;position:static;inset:auto;margin:0 auto;width:min(100%,320px);height:auto;max-height:min(30vh,200px);aspect-ratio:320/200;object-fit:contain}#dexCard .dexAnimLab{font-size:12px;opacity:.7;margin-top:-4px}#dexCard img{max-width:100%;max-height:min(42vh,260px);object-fit:contain;filter:drop-shadow(0 6px 4px rgba(0,0,0,.25))}#dexCard h3{margin:4px 0 2px;font-size:22px}#dexCard .st{color:#ffb703;font-size:20px;-webkit-text-stroke:1px #2b2d42}#dexCard .st i{color:#ccc;font-style:normal}#dexCard p{margin:4px 0;font-size:14px}#dexCard .stats{display:flex;justify-content:center;gap:10px;margin:6px 0;font-size:14px;font-weight:800}#dexCard .tap{opacity:.6;font-size:12px}#dexCard .card{position:relative}#dexCard .card.gold{background:linear-gradient(#fff8d6,#ffd84d);border-color:#b8860b;box-shadow:0 0 0 4px #ffe066,0 0 24px 6px rgba(255,215,0,.75),0 8px 0 rgba(0,0,0,.35)}#dexCard .gtag{position:absolute;top:-14px;left:50%;transform:translateX(-50%);background:#ffd23f;border:3px solid #2b2d42;border-radius:12px;padding:1px 10px;font-weight:800;font-size:14px}#dexCard .dexFight{margin-top:4px}
 .dexH{grid-column:1/-1;text-align:left;color:#ffd23f;font-size:14px;margin:4px 2px 0}
 .dexFight.hard{background:linear-gradient(#ffb199,#ff6b3d 55%,#e63946);color:#fff;text-shadow:0 1px 0 #7a1a00}
 .dexFight{font:inherit;font-size:13px;min-height:44px;margin-top:4px;padding:0 10px;border-radius:12px;border:3px solid #3a1a00;background:linear-gradient(#ffe680,#ffc21a 55%,#ff9a00);color:#3a1a00;box-shadow:0 3px 0 #3a1a00;cursor:pointer}
@@ -372,7 +372,7 @@ h2 .hb{-webkit-text-stroke:0;text-shadow:none;letter-spacing:0;font-family:"Jua"
 
 <script>
 'use strict';
-const BUILD = 268;
+const BUILD = 269;
 const BOSS_INTERVAL = 180;      // 보스 등장 간격(초)
 const WAVE_INTERVAL = 60;       // 대규모 몰이 이벤트 간격(초)
 const MAX_ENEMIES = 110;   // Build 202: 220 → 110 (화면이 너무 정신없어서) — 대신 마을 적이 조금 더 튼튼(CROWD_K)
@@ -1297,8 +1297,32 @@ function showDexCard(k, ally) {
   }
   $('dexCard').innerHTML = `<div class="card ${cls}${gold ? ' gold' : ''}">${gold ? '<div class="gtag">✨ 황금</div>' : ''}<img src="img/${img}.webp?b=${BUILD}" alt=""><h3>${name}</h3><div class="st">${'★'.repeat(st)}<i>${'★'.repeat(3 - st)}</i></div><p>${desc}</p>` +
     (stats.length ? `<div class="stats">${stats.map(([a, b]) => `<span>${a} ${b}</span>`).join('')}</div>` : '') + `<p><b>${sub}</b></p>${extra}<div class="tap">눌러서 닫기</div></div>`;
-  $('dexCard').classList.add('show'); sfx('pick');
+  $('dexCard').classList.add('show'); sfx('pick'); dexAnim(img);
   const fb = $('dexCard').querySelector('.dexFight'); if (fb) fb.onclick = ev => { ev.stopPropagation(); $('dexCard').classList.remove('show'); startPractice(fb.dataset.k, false); };
+}
+// 🎞 Build 269: 도감 카드에서 걷기 → 공격 움직임을 번갈아 보여 줌 (12칸 동작 그림이 있는 몬스터·동료)
+let dexAnimId = 0;
+function dexAnim(k) {
+  const id = ++dexAnimId, wn = WALK_SHEET[k], an = ACT_SHEET[k] && Object.values(ACT_SHEET[k])[0];
+  if (!wn || !SPR[wn] || !SHEETS[wn]) return;
+  const im = $('dexCard').querySelector('img'); if (!im) return;
+  const cv = document.createElement('canvas'); cv.className = 'dexAnim'; cv.width = 320; cv.height = 200; im.replaceWith(cv);
+  const lab = document.createElement('div'); lab.className = 'dexAnimLab'; cv.after(lab);
+  const c = cv.getContext('2d'), list = [];
+  const W = SHEETS[wn], wf = W.seq || [...Array(W.n).keys()]; for (let r = 0; r < 2; r++) wf.forEach(f => list.push([wn, f, 1 / 12, '🚶 걷기']));
+  if (an && SPR[an] && SHEETS[an]) { const A = SHEETS[an], af = A.play || [...Array(A.n).keys()]; af.forEach((f, i) => list.push([an, f, i === af.length - 1 ? 0.5 : 1 / 14, '⚔ 공격'])); }
+  const fit = n => { const S = SHEETS[n], img = SPR[n], cwI = img.width / S.n, r = cwI / img.height; return Math.min(185 * S.body, 316 / r * S.body / Math.max(S.ax, 1 - S.ax) / 2); };
+  const bodyPx = Math.min(...[...new Set(list.map(x => x[0]))].map(fit));
+  let i = 0, t = 0, last = performance.now();
+  (function loop(now) {
+    if (id !== dexAnimId || !cv.isConnected || !$('dexCard').classList.contains('show')) return;
+    t += Math.min(0.1, (now - last) / 1000); last = now;
+    while (t >= list[i][2]) { t -= list[i][2]; i = (i + 1) % list.length; }
+    const [n, f, , tx] = list[i], S = SHEETS[n], img = SPR[n], cwI = img.width / S.n, ch = bodyPx / S.body, cw = ch * cwI / img.height;
+    c.clearRect(0, 0, cv.width, cv.height); c.fillStyle = 'rgba(0,0,0,.18)'; c.beginPath(); c.ellipse(160, 190, 60, 9, 0, 0, 7); c.fill();
+    c.drawImage(img, f * cwI, 0, cwI, img.height, 160 - cw * S.ax, 190 - ch * S.ay, cw, ch); lab.textContent = tx;
+    requestAnimationFrame(loop);
+  })(last);
 }
 $('dexCard').onclick = () => $('dexCard').classList.remove('show');
 $('bDexA').onclick = () => { sfx('pick'); openDex(); };
