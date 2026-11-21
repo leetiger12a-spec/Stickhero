@@ -29,7 +29,7 @@ canvas{display:block;position:fixed;inset:0;width:100%;height:100%}
 @keyframes shine{0%,55%{left:-60%}100%{left:130%}}
 .mrow{display:flex;gap:8px;margin-top:6px}
 #bDaily{position:relative}#bDaily.new::after{content:'';position:absolute;top:-4px;right:-4px;width:12px;height:12px;border-radius:50%;background:#ff3b3b;border:2px solid #fff}
-#statList{width:min(92vw,360px);margin:10px 0;display:grid;grid-template-columns:1fr 1fr;gap:8px;max-height:62vh;overflow-y:auto;padding:2px}#statList .st{background:#fffaf0;color:#222;border:3px solid #222;border-radius:12px;padding:7px 8px;font-size:12px;font-weight:800}#statList .st b{display:block;font-size:19px;color:#d35400}#statList .stH{grid-column:1/-1;color:#ffd23f;font-weight:800;font-size:15px;margin-top:6px;text-align:left}
+#statList{width:min(92vw,360px);margin:10px 0;display:grid;grid-template-columns:1fr 1fr;gap:8px;max-height:62vh;overflow-y:auto;padding:2px}#statList .st{background:linear-gradient(#2e3b66,#18203d);color:#cfd8ff;border:2px solid #e9b949;border-radius:12px;padding:7px 8px;font-size:12px;font-weight:800;box-shadow:inset 0 1px 0 rgba(255,255,255,.25),0 2px 0 #0b0f1f}#statList .st b{display:block;font-size:19px;color:#ffd23f;text-shadow:0 1px 0 #000}#statList .stH{grid-column:1/-1;color:#ffd23f;font-weight:800;font-size:15px;margin-top:6px;text-align:left}
 #spinBox{position:relative;width:170px;height:170px;margin:4px auto 6px}#spinWheel{width:170px;height:170px;border-radius:50%;border:4px solid #222;transition:transform 2.6s cubic-bezier(.15,.9,.2,1);position:relative;overflow:hidden}#spinWheel span{position:absolute;left:50%;top:50%;width:0;height:0;font-size:12px;font-weight:800;color:#222}#spinWheel span i{position:absolute;transform:translate(-50%,-50%);white-space:nowrap;font-style:normal}#spinPin{position:absolute;left:50%;top:-14px;transform:translateX(-50%);font-size:24px;color:#ff3b3b;text-shadow:0 2px 0 #222}#spinRes{min-height:18px;color:#ffd23f}
 #dailyGrid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;width:min(92vw,360px);margin:10px 0}
 #dailyGrid .dd{border:3px solid #222;border-radius:12px;background:#fffaf0;color:#222;padding:6px 2px;font-weight:800;font-size:12px;display:flex;flex-direction:column;align-items:center;gap:2px}
@@ -161,7 +161,7 @@ h2{margin:0 0 14px;font:400 clamp(30px,9vw,46px) "BHS","Jua",system-ui,-apple-sy
 .hint{margin-top:14px;font-size:13px;opacity:.65;line-height:1.5}
 #cards{display:flex;flex-direction:column;gap:12px;width:min(92vw,420px)}
 .apk{font:inherit;font-size:12px;font-weight:800;margin:3px 2px;padding:4px 8px;border-radius:10px;border:2px solid #888;background:#eee;color:#666;cursor:pointer}.apk.on{border-color:#2a9d8f;background:#d8f3dc;color:#1b4332}
-#pauseStats{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;width:min(92vw,380px);margin:4px 0 10px}#pauseStats .ps{background:rgba(255,250,240,.95);color:#222;border:2px solid #222;border-radius:10px;padding:4px 2px;font-size:11px;font-weight:800;text-align:center}#pauseStats .ps b{display:block;font-size:15px;color:#d35400}#pauseStats .anm{font:inherit;font-size:12px;font-weight:800;border:2px solid #222;border-radius:10px;background:#fff3c4;padding:4px 8px;margin:3px 2px;min-height:32px;cursor:pointer}#pauseStats .pw{grid-column:1/-1;font-size:12px;line-height:1.6}
+#pauseStats{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;width:min(92vw,380px);margin:4px 0 10px}#pauseStats .ps{background:linear-gradient(#2e3b66,#18203d);color:#cfd8ff;border:2px solid #e9b949;border-radius:10px;padding:4px 2px;font-size:11px;font-weight:800;text-align:center;box-shadow:inset 0 1px 0 rgba(255,255,255,.25),0 2px 0 #0b0f1f}#pauseStats .ps b{display:block;font-size:15px;color:#ffd23f;text-shadow:0 1px 0 #000}#pauseStats .anm{font:inherit;font-size:12px;font-weight:800;border:2px solid #222;border-radius:10px;background:#fff3c4;padding:4px 8px;margin:3px 2px;min-height:32px;cursor:pointer}#pauseStats .pw{grid-column:1/-1;font-size:12px;line-height:1.6}
 #overStats .runSum{display:grid;grid-template-columns:1fr 1fr;gap:2px 12px;margin-top:8px;padding-top:8px;border-top:2px dashed rgba(255,255,255,.35);font-size:13px;text-align:left}#overStats .runW{grid-column:1/-1;text-align:center;margin-top:4px}
 #cardTools{display:flex;gap:10px;margin-top:12px}#cardTools button{font:inherit;font-size:14px;font-weight:800;border:3px solid #222;border-radius:14px;background:#fffaf0;color:#222;padding:8px 14px;min-height:44px;cursor:pointer}#cardTools button:disabled{opacity:.4}#cardTools button.on{background:#ffd6d6;outline:3px solid #ff4d6d}#cards .card.banable{outline:4px dashed #ff4d6d}
 .card{display:flex;align-items:center;gap:14px;text-align:left;font:inherit;color:#2b2d42;background:linear-gradient(#fffdf7,#fff1d6);border:3px solid #c8901c;outline:2px solid #2b2d42;outline-offset:0;border-radius:18px;padding:12px 14px;cursor:pointer;box-shadow:inset 0 2px 0 #fff,inset 0 0 0 2px rgba(255,214,102,.55),0 5px 0 #2b2d42,0 10px 18px rgba(0,0,0,.3);animation:pop .25s ease-out backwards}
@@ -334,7 +334,7 @@ h2 .hb{-webkit-text-stroke:0;text-shadow:none;letter-spacing:0;font-family:"Jua"
 </div>
 
 <div class="ov" id="ovMap">
-  <div id="mapHead"><h2 style="margin:0">🗺 모험 지도</h2><button class="hb" id="bMapBack" style="display:none;width:auto;padding:0 10px;font-weight:800;background:#2a9d8f;color:#fff">🗺 지도</button><button class="hb" id="bTower" style="width:auto;padding:0 10px;font-weight:800;background:#b5179e;color:#fff">🗼 무한 탑</button><button class="hb" id="bCave" style="width:auto;padding:0 10px;font-weight:800;background:#ffd23f;color:#222">🌟 동굴</button><button class="hb" id="bArena" style="width:auto;padding:0 10px;font-weight:800;background:#e63946;color:#fff">🏟 투기장</button><button class="hb" id="bMapClose" style="width:auto;padding:0 12px;font-weight:800">✖ 닫기</button></div>
+  <div id="mapHead"><h2 style="margin:0"><img class="ui" src="img/ui_map.webp" alt="">모험 지도</h2><button class="hb" id="bMapBack" style="display:none;width:auto;padding:0 10px;font-weight:800;background:#2a9d8f;color:#fff"><img class="ui" src="img/ui_map.webp" alt="">지도</button><button class="hb" id="bTower" style="width:auto;padding:0 10px;font-weight:800;background:#b5179e;color:#fff">🗼 무한 탑</button><button class="hb" id="bCave" style="width:auto;padding:0 10px;font-weight:800;background:#ffd23f;color:#222">🌟 동굴</button><button class="hb" id="bArena" style="width:auto;padding:0 10px;font-weight:800;background:#e63946;color:#fff">🏟 투기장</button><button class="hb" id="bMapClose" style="width:auto;padding:0 12px;font-weight:800">✖ 닫기</button></div>
   <div id="mapScroll"><div id="mapInner"></div></div>
   <div id="mapCard"></div>
 </div>
@@ -377,7 +377,7 @@ h2 .hb{-webkit-text-stroke:0;text-shadow:none;letter-spacing:0;font-family:"Jua"
 
 <script>
 'use strict';
-const BUILD = 292;
+const BUILD = 293;
 const BOSS_INTERVAL = 180;      // 보스 등장 간격(초)
 const WAVE_INTERVAL = 60;       // 대규모 몰이 이벤트 간격(초)
 const MAX_ENEMIES = 110;   // Build 202: 220 → 110 (화면이 너무 정신없어서) — 대신 마을 적이 조금 더 튼튼(CROWD_K)
@@ -1448,7 +1448,7 @@ function openShop() {
 }
 function renderShop() {
   const inGame = shopBack !== 'title' && G, wallet = inGame ? G.gold : bankGold();
-  $('shopWallet').innerHTML = inGame ? `🪙 지금 가진 금화 <b>${wallet}</b>` : `🏦 금고 <b>${wallet}</b> <small style="opacity:.75">(게임오버 때 남은 금화의 절반이 모여요)</small>`;
+  $('shopWallet').innerHTML = inGame ? `🪙 지금 가진 금화 <b>${wallet}</b>` : `<img class="ui" src="img/ui_vault.webp" alt="">금고 <b>${wallet}</b> <small style="opacity:.75">(게임오버 때 남은 금화의 절반이 모여요)</small>`;
   const box = $('shopList'); box.innerHTML = '';
   UPGRADES.forEach(u => {
     const l = upLv(u.id), max = l >= u.max, cost = upCost(u, l), can = !max && wallet >= cost;
