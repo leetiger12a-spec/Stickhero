@@ -382,7 +382,7 @@ h2 .hb{-webkit-text-stroke:0;text-shadow:none;letter-spacing:0;font-family:"Jua"
 
 <script>
 'use strict';
-const BUILD = 341;
+const BUILD = 342;
 const BOSS_INTERVAL = 180;      // 보스 등장 간격(초)
 const WAVE_INTERVAL = 60;       // 대규모 몰이 이벤트 간격(초)
 const MAX_ENEMIES = 110;   // Build 202: 220 → 110 (화면이 너무 정신없어서) — 대신 마을 적이 조금 더 튼튼(CROWD_K)
@@ -1897,7 +1897,7 @@ const MAIL_GIFT = 100;
 // 📰 Build 290: 새 기능 안내 — 선물을 받으면 지난번 뒤로 새로 생긴 것을 카드로 보여 줌 (최근 것부터 8개)
 const NEWS = [[256, '💡 보스를 처음 만나면 이기는 법 카드'], [257, '⭐ 별 강화 · 몬스터가 더 세졌어요'], [258, '🩷 달리기 졸개 새 동작'], [263, '🔵 탱크 새 동작'], [264, '🟢 슬라임 새 동작'], [265, '🏹 궁수 새 동작'], [266, '💣 자폭병 새 동작'], [267, '🦇 박쥐병 새 동작'], [268, '🐗 돌격병 새 동작'],
   [269, '🎞 도감 몬스터가 움직여요'], [270, '🏟 투기장! 끝없는 웨이브'], [271, '👑 투기장 10웨이브마다 보스'], [272, '🚪 투기장 귀환 포털'], [273, '🎰 꾸미기 뽑기'], [274, '🍖 펫 간식'], [275, '🔥❄ 새 정예 2종'], [276, '🩸 핏빛 달 밤'], [277, '📅 정예 주간 · 보스 주간'], [278, '💡 도감 보스 팁'], [279, '🎞 도감 동작 고르기'], [280, '🏆 기록실 넓히기'],
-  [281, '🏅 새 업적 4개'], [282, '🎲 투기장 특별 웨이브'], [283, '⚡💣 새 정예 2종'], [284, '📜 새 퀘스트 5종'], [285, '🎟 투기장 하루 첫 입장 무료'], [286, '🏆 투기장 TOP 5'], [287, '🧭 미니맵에 정예·상인'], [288, '🩸 핏빛 대장'], [289, '🎰 뽑기 연출'], [290, '📰 새 기능 안내'], [291, '✨ 막대·버튼 멋있게'], [292, '🖼 그림 아이콘'], [293, '✨ 일시정지·기록실 새 디자인'], [294, '🖼 버튼 아이콘 16개'], [295, '🎁 상자 화면 빛줄기'], [296, '📅 오늘의 보스'], [297, '📅 오늘의 보스 알림'], [298, '🏅 새 업적 3개'], [299, '✨ 황금 주간 · ❤ 하트 주간'], [300, '🎉 300번째 업데이트!'], [301, '🎁 투기장 웨이브 상자'], [302, '⏱ 보스 러시 기록'], [303, '🛒 상인 새 물건 2개'], [304, '📜 새 퀘스트 3종'], [305, '✨ 레벨업 카드 새 디자인'], [306, '🏆 기록실 새 칸 3개'], [307, '📅 오늘의 보스 특기 2개 더'], [308, '🎲 투기장 정예·황금 웨이브'], [309, '💪 투기장 기세'], [310, '🏅 새 업적 3개'], [311, '🔥 오늘의 보스 연속 승리'], [312, '🔥 강화 상점 오늘의 할인'], [313, '🍀 행운의 레벨업 (카드 4장)'], [314, '🧲 자석 정예'], [315, '🏆 투기장 새 기록 보너스'], [316, '📊 기록실: 연속 승리'], [317, '🩸 핏빛 대장 호위대'], [318, '🔥 하드 보스 러시'], [319, '🔥 상인 반값 세일'], [320, '🏅 새 업적 3개'], [321, '🚀 질주 주간 · 💎 구슬 주간'], [322, '🐾 펫 최고 Lv 7'], [323, '✨ 투기장 황금 보스'], [324, '📅 도감에 오늘의 보스'], [325, '📜 새 퀘스트 2종'], [326, '📊 기록실 새 칸 3개'], [331, '⛲ 소원 분수 (지도 위 버튼)'], [332, '👻 새 정예: 유령'], [333, '💥 투기장 폭발 웨이브'], [334, '🌀 오늘의 보스 특기: 순간이동'], [335, '🛒 상인 새 물건: 🧲 자석 · 🧪 행운 물약'], [336, '💰 현상금 몬스터'], [337, '📜 새 퀘스트 3종'], [338, '💰 현상금 주간 · ⛲ 행운 주간'], [339, '🏅 새 업적 3개'], [340, '📊 기록실 새 칸 3개'], [341, '🗺 보물 지도 (❌ 자리 파기)']];
+  [281, '🏅 새 업적 4개'], [282, '🎲 투기장 특별 웨이브'], [283, '⚡💣 새 정예 2종'], [284, '📜 새 퀘스트 5종'], [285, '🎟 투기장 하루 첫 입장 무료'], [286, '🏆 투기장 TOP 5'], [287, '🧭 미니맵에 정예·상인'], [288, '🩸 핏빛 대장'], [289, '🎰 뽑기 연출'], [290, '📰 새 기능 안내'], [291, '✨ 막대·버튼 멋있게'], [292, '🖼 그림 아이콘'], [293, '✨ 일시정지·기록실 새 디자인'], [294, '🖼 버튼 아이콘 16개'], [295, '🎁 상자 화면 빛줄기'], [296, '📅 오늘의 보스'], [297, '📅 오늘의 보스 알림'], [298, '🏅 새 업적 3개'], [299, '✨ 황금 주간 · ❤ 하트 주간'], [300, '🎉 300번째 업데이트!'], [301, '🎁 투기장 웨이브 상자'], [302, '⏱ 보스 러시 기록'], [303, '🛒 상인 새 물건 2개'], [304, '📜 새 퀘스트 3종'], [305, '✨ 레벨업 카드 새 디자인'], [306, '🏆 기록실 새 칸 3개'], [307, '📅 오늘의 보스 특기 2개 더'], [308, '🎲 투기장 정예·황금 웨이브'], [309, '💪 투기장 기세'], [310, '🏅 새 업적 3개'], [311, '🔥 오늘의 보스 연속 승리'], [312, '🔥 강화 상점 오늘의 할인'], [313, '🍀 행운의 레벨업 (카드 4장)'], [314, '🧲 자석 정예'], [315, '🏆 투기장 새 기록 보너스'], [316, '📊 기록실: 연속 승리'], [317, '🩸 핏빛 대장 호위대'], [318, '🔥 하드 보스 러시'], [319, '🔥 상인 반값 세일'], [320, '🏅 새 업적 3개'], [321, '🚀 질주 주간 · 💎 구슬 주간'], [322, '🐾 펫 최고 Lv 7'], [323, '✨ 투기장 황금 보스'], [324, '📅 도감에 오늘의 보스'], [325, '📜 새 퀘스트 2종'], [326, '📊 기록실 새 칸 3개'], [331, '⛲ 소원 분수 (지도 위 버튼)'], [332, '👻 새 정예: 유령'], [333, '💥 투기장 폭발 웨이브'], [334, '🌀 오늘의 보스 특기: 순간이동'], [335, '🛒 상인 새 물건: 🧲 자석 · 🧪 행운 물약'], [336, '💰 현상금 몬스터'], [337, '📜 새 퀘스트 3종'], [338, '💰 현상금 주간 · ⛲ 행운 주간'], [339, '🏅 새 업적 3개'], [340, '📊 기록실 새 칸 3개'], [341, '🗺 보물 지도 (❌ 자리 파기)'], [342, '💚 새 정예: 치유']];
 function showNews(from) { const L = NEWS.filter(n => n[0] > from && n[0] <= BUILD).reverse().slice(0, 8); if (!L.length) return;
   $('dexCard').innerHTML = `<div class="card news"><h3><img class="ui" src="img/ui_news.webp" alt="">새로 생긴 것</h3><p><small>Build ${from} → ${BUILD}</small></p><div class="newsL">${L.map(n => `<div>${n[1]} <small>B${n[0]}</small></div>`).join('')}</div>${NEWS.filter(n => n[0] > from).length > 8 ? '<p><small>…그 밖에도 더 있어요!</small></p>' : ''}<div class="tap">눌러서 닫기</div></div>`;
   $('dexCard').classList.add('show'); }
@@ -2421,7 +2421,7 @@ function makeEnemy(type, x, y) {
   return e;
 }
 // ⚔ 정예 몬스터 (Build 168): 빨간 기운 · 이름표 · 체력 4배 · 공격 1.5배 · 특기 하나 (🛡 방패 / ✂ 분열 / 🌀 순간이동) · 잡으면 작은 상자
-const ELITE_P = 0.03, ELITE_K = { shield: ['🛡', '방패'], split: ['✂', '분열'], blink: ['🌀', '순간이동'], regen: ['🩹', '재생'], haste: ['💨', '질주'], fire: ['🔥', '불꽃'], ice: ['❄', '얼음'], bolt: ['⚡', '번개'], bomb: ['💣', '폭발'], magnet: ['🧲', '자석'], ghost: ['👻', '유령'] };   // Build 332: 유령(4초마다 1.2초 동안 투명 — 공격이 통과하고 닿아도 안 아픔)   // Build 314: 자석(가까우면 영웅을 끌어당김)   // Build 283: 번개(4초마다 영웅 자리에 번개 표시 → 쾅)·폭발(쓰러지면 0.8초 뒤 펑)   // Build 275: 불꽃(쓰러지면 불길)·얼음(맞으면 느려짐)   // Build 247: 재생·질주
+const ELITE_P = 0.03, ELITE_K = { shield: ['🛡', '방패'], split: ['✂', '분열'], blink: ['🌀', '순간이동'], regen: ['🩹', '재생'], haste: ['💨', '질주'], fire: ['🔥', '불꽃'], ice: ['❄', '얼음'], bolt: ['⚡', '번개'], bomb: ['💣', '폭발'], magnet: ['🧲', '자석'], ghost: ['👻', '유령'], heal: ['💚', '치유'] };   // Build 342: 치유(3초마다 주변 적 체력 회복 — 먼저 잡아요)   // Build 332: 유령(4초마다 1.2초 동안 투명 — 공격이 통과하고 닿아도 안 아픔)   // Build 314: 자석(가까우면 영웅을 끌어당김)   // Build 283: 번개(4초마다 영웅 자리에 번개 표시 → 쾅)·폭발(쓰러지면 0.8초 뒤 펑)   // Build 275: 불꽃(쓰러지면 불길)·얼음(맞으면 느려짐)   // Build 247: 재생·질주
 let eliteBlock = false;
 function eliteOk() { if (!G || eliteBlock || (window.__noGold && window.__eliteP === undefined)) return false;
   if (G.mode === 'stage') return G.st && !G.st.cave && (G.st.tower ? G.st.tower >= 6 : G.st.n >= 3);
@@ -2440,6 +2440,8 @@ function updElite(e, dt, p) {
     const a = Math.random() * 7; e.x = p.x + Math.cos(a) * 90; e.y = p.y + Math.sin(a) * 70; if (G.mode === 'stage') e.x = clamp(e.x, -STAGE_HW + 20, STAGE_HW - 20);
     burst(e.x, e.y - 20, '#c77dff', 14, 160, 3, 0.4); sfx('woosh'); }
   else if (e.elite === 'ghost') { e.phaseT = 1.2; e.eT = rand(3.6, 4.6); burst(e.x, e.y - 20, '#e0e7ff', 14, 140, 3, 0.4); }   // 👻
+  else if (e.elite === 'heal') { e.eT = 3; let n = 0; for (const o of G.enemies) if (o !== e && !o.dead && !o.boss && !o.camp && o.hp < o.maxHp && (o.x - e.x) ** 2 + (o.y - e.y) ** 2 < 170 * 170) { o.hp = Math.min(o.maxHp, o.hp + o.maxHp * 0.15); n++; burst(o.x, o.y - 20, '#7bed9f', 5, 80, 3, 0.4); }   // 💚
+    if (n) { G.rings.push({ x: e.x, y: e.y, r: 170, life: 0.5, max: 0.5, color: '#2ecc71' }); floatText(e.x, e.y - 60, `💚 치유 ×${n}`, '#7bed9f', 13, 0.8); G.healPulses = (G.healPulses || 0) + n; } }
   else if (e.elite === 'regen') { e.eT = 1; if (G.t - (e.hurtAt ?? -9) > 1.5 && e.hp < e.maxHp) { e.hp = Math.min(e.maxHp, e.hp + e.maxHp * 0.04); burst(e.x, e.y - 24, '#7bed9f', 8, 90, 3, 0.4); } }   // 🩹 1.5초 안 맞으면 1초마다 4% 회복
   else if (e.elite === 'magnet' && Math.hypot(p.x - e.x, p.y - e.y) < 320 && Math.hypot(p.x - e.x, p.y - e.y) > 60) { e.eT = rand(3.5, 4.5); if (!(p.inv > 0)) { p.x += (e.x - p.x) * 0.35; p.y += (e.y - p.y) * 0.35; floatText(p.x, p.y - 50, '🧲 끌려간다!', '#ff8fa3', 14, 0.8); } burst(e.x, e.y - 20, '#ff8fa3', 12, 160, 3, 0.4); sfx('woosh'); }   // 🧲
   else if (e.elite === 'bolt' && Math.hypot(p.x - e.x, p.y - e.y) < 420) { e.eT = rand(3.5, 4.5); G.hazards.push({ x: p.x, y: p.y, r: 40, warn: 0.9, life: 0.3, max: 0.3, tick: 0, slam: true, bolt: true, dmg: e.dmg * 1.2 }); burst(e.x, e.y - 30, '#ffe066', 10, 120, 3, 0.4); }   // ⚡
@@ -2455,7 +2457,8 @@ function eliteDie(e) { if (e.bounty > 0) { const g = bountyPrize(); G.gold += g;
   else for (let i = 0; i < (WK('elite') ? 10 : 5); i++) dropCoin(e.x + rand(-14, 14), e.y + rand(-10, 10));
   if (['fire', 'ice', 'bolt', 'bomb'].includes(e.elite)) questEvent('newelite');
   if (e.elite === 'magnet') { stAdd('magnets'); questEvent('magnet'); }
-  if (e.elite === 'ghost') { stAdd('ghostElites'); questEvent('ghostel'); }   // (유령 상자 'ghosts'와 따로 셈)
+  if (e.elite === 'ghost') { stAdd('ghostElites'); questEvent('ghostel'); }
+  if (e.elite === 'heal') { stAdd('healElites'); questEvent('healel'); }   // (유령 상자 'ghosts'와 따로 셈)
   if (e.elite === 'bomb') { G.hazards.push({ x: e.x, y: e.y, r: 78, warn: 0.8, life: 0.3, max: 0.3, tick: 0, slam: true, dmg: e.dmg * 2 }); floatText(e.x, e.y - 40, '💣 펑!까지 도망!', '#ff9f1c', 14, 0.9); }   // 💣
   if (e.elite === 'fire') { for (let i = 0; i < 4; i++) { const a = i * 1.57 + Math.random(), rr = i ? 46 : 0; G.hazards.push({ x: e.x + Math.cos(a) * rr, y: e.y + Math.sin(a) * rr, r: 34, warn: 0.5, life: 3.5, max: 3.5, tick: 0, dmg: 7 * DF().edmg }); } burst(e.x, e.y - 12, '#ff9f1c', 26, 230, 5, 0.6); sfx('flame'); }   // 🔥 쓰러지면 불길 (0.5초 경고 뒤 3.5초)
   if (e.elite === 'split') { eliteBlock = true; for (let i = 0; i < 3; i++) { const c = makeEnemy(e.type, e.x + rand(-30, 30), e.y + rand(-20, 20)); c.hp *= 0.5; c.maxHp *= 0.5; c.scale = 0.8; c.awake = true; G.enemies.push(c); } eliteBlock = false; burst(e.x, e.y - 20, '#ff4d6d', 20, 220, 4, 0.5); }

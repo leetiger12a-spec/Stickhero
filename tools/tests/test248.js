@@ -10,7 +10,7 @@ const { chromium } = require('/opt/node22/lib/node_modules/playwright');
     await new Promise(q => setTimeout(q, 150)); const ph = e.phaseT > 0, hp0 = e.hp; hurtEnemy(e, 50, 0, 1, 0); const immune = e.hp === hp0;
     const php = G.p.hp; e.x = G.p.x; e.y = G.p.y; await new Promise(q => setTimeout(q, 100)); const noTouch = G.p.hp === php; e.x = G.p.x + 120;
     e.phaseT = 0; e.eT = 9; hurtEnemy(e, 50, 0, 1, 0); const hit = e.hp < hp0; hurtEnemy(e, 1e9, 0, 1, 0); return { ph, immune, noTouch, hit, ghosts: ST.ghostElites, kinds: Object.keys(ELITE_K).length }; });
-  console.log(JSON.stringify(r)); check(r.ph && r.immune && r.noTouch && r.hit && r.ghosts >= 1 && r.kinds === 11, 'ghost elite');
+  console.log(JSON.stringify(r)); check(r.ph && r.immune && r.noTouch && r.hit && r.ghosts >= 1 && r.kinds === 12, 'ghost elite');
   await page.evaluate(() => { const G = SH.G; const e = makeEnemy('grunt', G.p.x + 90, G.p.y - 20); makeElite(e, 'ghost'); e.phaseT = 5; e.eT = 9; G.enemies.push(e); }); await page.waitForTimeout(200);
   await page.screenshot({ path: `${OUT}/b332_ghost.png` });
   await b.close(); console.log('ERRORS:', errors.length); errors.forEach(e => console.log(e)); process.exit(errors.length ? 1 : 0);
