@@ -150,6 +150,7 @@ canvas{display:block;position:fixed;inset:0;width:100%;height:100%}
 h1{margin:0 0 4px;font:400 clamp(40px,12vw,72px) "BHS","Jua",system-ui,-apple-system,"Apple SD Gothic Neo","Malgun Gothic",sans-serif;letter-spacing:2px;color:#ffd23f;-webkit-text-stroke:6px #3a1a00;paint-order:stroke fill;text-shadow:0 5px 0 #3a1a00,0 10px 18px rgba(0,0,0,.55)}
 h2{margin:0 0 14px;font:400 clamp(30px,9vw,46px) "BHS","Jua",system-ui,-apple-system,"Apple SD Gothic Neo","Malgun Gothic",sans-serif;letter-spacing:1px;color:#ffd23f;-webkit-text-stroke:5px #3a1a00;paint-order:stroke fill;text-shadow:0 4px 0 #3a1a00,0 8px 16px rgba(0,0,0,.5)}
 .sub{opacity:.9;margin-bottom:18px;font-size:17px}
+#ovWard{justify-content:flex-start;overflow-y:auto;-webkit-overflow-scrolling:touch}#ovWard>*{flex-shrink:0}
 .btn{font:inherit;font-size:23px;padding:12px 38px;border-radius:18px;border:3px solid #3a1a00;background:linear-gradient(#ffe680,#ffc21a 55%,#ff9a00);color:#3a1a00;text-shadow:0 1px 0 rgba(255,255,255,.55);box-shadow:inset 0 3px 0 rgba(255,255,255,.6),inset 0 -4px 0 rgba(150,60,0,.25),0 5px 0 #3a1a00,0 9px 14px rgba(0,0,0,.35);cursor:pointer;margin:8px;min-width:200px}
 .btn:active{transform:translateY(4px);box-shadow:inset 0 3px 0 rgba(255,255,255,.6),inset 0 -2px 0 rgba(150,60,0,.25),0 1px 0 #3a1a00,0 3px 6px rgba(0,0,0,.35)}
 .btn.blue{background:linear-gradient(#a8ecff,#45b4f7 55%,#1f86d9);color:#fff;text-shadow:0 2px 0 #0f4c81;border-color:#0d3358;box-shadow:inset 0 3px 0 rgba(255,255,255,.55),inset 0 -4px 0 rgba(0,40,90,.25),0 5px 0 #0d3358,0 9px 14px rgba(0,0,0,.35)}
@@ -317,6 +318,7 @@ h2 .hb{-webkit-text-stroke:0;text-shadow:none;letter-spacing:0;font-family:"Jua"
   <h2 style="margin-bottom:4px">🎨 영웅 꾸미기</h2>
   <div class="sub" id="wardSub" style="margin-bottom:8px"></div>
   <canvas id="wardPrev" width="240" height="240" style="width:150px;height:150px"></canvas>
+  <div><button class="btn" id="bGacha" style="width:auto;padding:6px 14px;font-size:15px;margin:4px 0">🎰 꾸미기 뽑기</button><div class="sub" id="gachaMsg" style="font-size:12px"></div></div>
   <div class="wardH">머리띠 색</div>
   <div id="wardGrid"></div>
   <div class="wardH">🎩 모자</div>
@@ -372,7 +374,7 @@ h2 .hb{-webkit-text-stroke:0;text-shadow:none;letter-spacing:0;font-family:"Jua"
 
 <script>
 'use strict';
-const BUILD = 272;
+const BUILD = 273;
 const BOSS_INTERVAL = 180;      // 보스 등장 간격(초)
 const WAVE_INTERVAL = 60;       // 대규모 몰이 이벤트 간격(초)
 const MAX_ENEMIES = 110;   // Build 202: 220 → 110 (화면이 너무 정신없어서) — 대신 마을 적이 조금 더 튼튼(CROWD_K)
@@ -627,12 +629,26 @@ function openWard() {
   const back = state; state = 'ward'; showOv('ovWard'); renderWard();
   $('bWardOk').onclick = () => { sfx('pick'); if (back === 'title' || !G) { state = 'title'; refreshTitle(); showOv('ovTitle'); } else { state = back; showOv(back === 'paused' ? 'ovPause' : null); } };
 }
+// 🎰 Build 273: 꾸미기 뽑기 — 금고 금화로 아직 잠긴 머리띠·모자·펫 중 하나를 바로 열어요 (꽝 없음, 힘은 안 세짐)
+const GACHA_COST = 500;
+const wardGot = () => (readJSON('stickhero_meta') || {}).ward || [];
+const wardOpen = (kind, i, need) => totalStars() >= need || wardGot().includes(kind + i);
+function gachaPool() { const P = []; HEADBANDS.forEach((h, i) => { if (!wardOpen('b', i, h.need)) P.push(['b', i, '머리띠 ' + h.name]); }); HATS.forEach((h, i) => { if (h.id && !wardOpen('h', i, h.need)) P.push(['h', i, '모자 ' + h.name]); }); PETS.forEach((h, i) => { if (h.id && !wardOpen('p', i, h.need)) P.push(['p', i, '펫 ' + h.name]); }); return P; }
+function doGacha() {
+  const pool = gachaPool(), m = readJSON('stickhero_meta') || {}, bank = m.bank || 0;
+  if (!pool.length) { $('gachaMsg').textContent = '모두 열었어요! 🎉'; sfx('hurt'); return; }
+  if (bank < GACHA_COST) { $('gachaMsg').textContent = `금고 금화가 모자라요 (🏦 ${bank} / ${GACHA_COST})`; sfx('hurt'); return; }
+  const k = pool[Math.floor(Math.random() * pool.length)]; m.bank = bank - GACHA_COST; m.ward = (m.ward || []).concat(k[0] + k[1]); writeJSON('stickhero_meta', m);
+  ST.gachas = (ST.gachas || 0) + 1; stDirty = true; sfx('unlock'); vib(40);
+  renderWard(); $('gachaMsg').innerHTML = `🎉 <b>${k[2]}</b> 열렸다! (남은 금고 🏦 ${m.bank})`;
+}
 function renderWard() {
   const have = totalStars();
+  { const n = gachaPool().length, bank = (readJSON('stickhero_meta') || {}).bank || 0; $('bGacha').textContent = n ? `🎰 꾸미기 뽑기 🏦${GACHA_COST} (남은 ${n}개)` : '🎰 모두 열었어요!'; $('bGacha').onclick = doGacha; if (!$('gachaMsg').dataset.t) $('gachaMsg').textContent = `금고 🏦 ${bank} · 잠긴 머리띠·모자·펫 중 하나가 바로 열려요`; }
   $('wardSub').textContent = `모은 별 ⭐ ${have}개 · 별을 모으면 새 색·모자가 열려요`;
   const g = $('wardGrid'); g.innerHTML = '';
   HEADBANDS.forEach((h, i) => {
-    const lock = have < h.need, b = document.createElement('button');
+    const lock = !wardOpen('b', i, h.need), b = document.createElement('button');
     const css = h.col ? `rgb(${h.col.join(',')})` : '#d62828';
     b.className = 'sw' + (i === bandSel ? ' on' : '') + (lock ? ' lock' : '');
     b.innerHTML = `<i style="background:${css}${h.shine ? ';box-shadow:0 0 8px #ffd23f' : ''}"></i>${lock ? '🔒⭐' + h.need : h.name}`;
@@ -641,7 +657,7 @@ function renderWard() {
   });
   const hg = $('hatGrid'); hg.innerHTML = '';
   HATS.forEach((h, i) => {
-    const lock = have < h.need, b = document.createElement('button');
+    const lock = !wardOpen('h', i, h.need), b = document.createElement('button');
     b.className = 'sw' + (i === hatSel ? ' on' : '') + (lock ? ' lock' : ''); b.dataset.i = i;
     b.innerHTML = (h.id ? `<img src="img/hat_${h.id}.webp?b=${BUILD}" alt="">` : '<b>🚫</b>') + (lock ? '🔒⭐' + h.need : h.name);
     b.onclick = () => { if (lock) { sfx('hurt'); return; } hatSel = i; try { localStorage.setItem('stickhero_hat', i); } catch (e) {} sfx('pick'); renderWard(); };
@@ -649,7 +665,7 @@ function renderWard() {
   });
   const pg = $('petGrid'); pg.innerHTML = '';
   PETS.forEach((h, i) => {
-    const lock = have < h.need, b = document.createElement('button');
+    const lock = !wardOpen('p', i, h.need), b = document.createElement('button');
     b.className = 'sw' + (i === petSel ? ' on' : '') + (lock ? ' lock' : ''); b.dataset.i = i; b.title = h.desc || '';
     b.innerHTML = (h.id ? `<img src="img/pet_${h.id}.webp?b=${BUILD}" alt="">` : '<b>🚫</b>') + (lock ? '🔒⭐' + h.need : h.name + (h.id ? ` <small>Lv${petLv(h.id)}</small>` : ''));
     b.onclick = () => { if (lock) { sfx('hurt'); return; } petSel = i; try { localStorage.setItem('stickhero_pet', i); } catch (e) {} sfx('pick'); if (G) G.pet = null; renderWard(); if (h.desc) { const L = petLv(h.id), nx = PET_XP[L]; $('wardSub').textContent = `🐾 ${h.name} Lv${L}: ${h.desc}` + (nx ? ` · 다음 레벨까지 적 ${nx - ((ST.petXp || {})[h.id] || 0)}마리` : ' · 최고 레벨!'); } };
@@ -658,9 +674,9 @@ function renderWard() {
   const p2 = $('pet2Grid'); p2.innerHTML = ''; const open2 = have >= PET2_NEED;
   $('pet2H').textContent = open2 ? '🐾 두 번째 펫 (같이 따라다녀요)' : `🐾 두 번째 펫 🔒⭐${PET2_NEED}`;
   PETS.forEach((h, i) => {
-    const lock = !open2 || have < h.need || (i && i === petSel), b = document.createElement('button');
+    const lock = !open2 || !wardOpen('p', i, h.need) || (i && i === petSel), b = document.createElement('button');
     b.className = 'sw' + (i === pet2Sel ? ' on' : '') + (lock ? ' lock' : ''); b.dataset.i = i;
-    b.innerHTML = (h.id ? `<img src="img/pet_${h.id}.webp?b=${BUILD}" alt="">` : '<b>🚫</b>') + (!open2 ? '🔒' : i && i === petSel ? '첫 펫' : have < h.need ? '🔒⭐' + h.need : h.name);
+    b.innerHTML = (h.id ? `<img src="img/pet_${h.id}.webp?b=${BUILD}" alt="">` : '<b>🚫</b>') + (!open2 ? '🔒' : i && i === petSel ? '첫 펫' : !wardOpen('p', i, h.need) ? '🔒⭐' + h.need : h.name);
     b.onclick = () => { if (lock) { sfx('hurt'); return; } pet2Sel = i; try { localStorage.setItem('stickhero_pet2', i); } catch (e) {} sfx('pick'); if (G) G.pet2 = null; renderWard(); };
     p2.appendChild(b);
   });

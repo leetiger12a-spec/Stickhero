@@ -8,11 +8,11 @@ const { chromium } = require('/opt/node22/lib/node_modules/playwright');
   page.on('pageerror', e => errors.push(e.message)); page.on('console', m => { if (m.type() === 'error') errors.push(m.text()); });
   await page.goto('http://localhost:8765/index.html'); await page.waitForTimeout(600);
   await page.click('#bWard'); await page.waitForTimeout(300);
-  check(await page.evaluate(() => document.querySelectorAll('#wardGrid .sw.lock').length === 7), 'should be 7 locked');
+  check(await page.evaluate(() => document.querySelectorAll('#wardGrid .sw.lock').length === 11), 'should be 11 locked');
   await page.click('#wardGrid .sw >> nth=1'); check(await page.evaluate(() => bandSel === 0), 'locked selectable');
   // 별 12개 모은 상태
   await page.evaluate(() => { localStorage.setItem('stickhero_meta', JSON.stringify({ bestStars: 12 })); renderWard(); });
-  check(await page.evaluate(() => document.querySelectorAll('#wardGrid .sw.lock').length === 3), 'unlock by stars wrong');
+  check(await page.evaluate(() => document.querySelectorAll('#wardGrid .sw.lock').length === 7), 'unlock by stars wrong');
   await page.click('#wardGrid .sw >> nth=1'); await page.waitForTimeout(300);
   await page.screenshot({ path: `${OUT}/b33_ward.png` });
   // 머리띠 픽셀이 파랑으로 바뀌었는지
