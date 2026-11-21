@@ -382,7 +382,7 @@ h2 .hb{-webkit-text-stroke:0;text-shadow:none;letter-spacing:0;font-family:"Jua"
 
 <script>
 'use strict';
-const BUILD = 337;
+const BUILD = 338;
 const BOSS_INTERVAL = 180;      // 보스 등장 간격(초)
 const WAVE_INTERVAL = 60;       // 대규모 몰이 이벤트 간격(초)
 const MAX_ENEMIES = 110;   // Build 202: 220 → 110 (화면이 너무 정신없어서) — 대신 마을 적이 조금 더 튼튼(CROWD_K)
@@ -1881,6 +1881,8 @@ const WEEKLY = [
   { id: 'heartw', name: '❤ 하트 주간', desc: '하트가 3배 자주 · 대신 적 공격 1.2배' },   // Build 299
   { id: 'dashw', name: '🚀 질주 주간', desc: '영웅 25% 빨라요 · 대신 적 체력 1.15배' },   // Build 321
   { id: 'gemw', name: '💎 구슬 주간', desc: '경험치 구슬 1.5배 · 대신 적 공격 1.15배' },   // Build 321
+  { id: 'bountyw', name: '💰 현상금 주간', desc: '현상금 몬스터가 2배 자주 · 현상금 1.5배 · 대신 적 체력 1.1배' },   // Build 338
+  { id: 'luckw', name: '⛲ 행운 주간', desc: '소원 분수 반값 · 행운 시간 2배 · 대신 적 공격 1.15배' },   // Build 338
 ];
 const weekNo = (t = Date.now()) => Math.floor((t / 86400000 + 3) / 7);
 let WEEKLY_FORCE = null;   // 시험용: 규칙 고정
@@ -1891,7 +1893,7 @@ const MAIL_GIFT = 100;
 // 📰 Build 290: 새 기능 안내 — 선물을 받으면 지난번 뒤로 새로 생긴 것을 카드로 보여 줌 (최근 것부터 8개)
 const NEWS = [[256, '💡 보스를 처음 만나면 이기는 법 카드'], [257, '⭐ 별 강화 · 몬스터가 더 세졌어요'], [258, '🩷 달리기 졸개 새 동작'], [263, '🔵 탱크 새 동작'], [264, '🟢 슬라임 새 동작'], [265, '🏹 궁수 새 동작'], [266, '💣 자폭병 새 동작'], [267, '🦇 박쥐병 새 동작'], [268, '🐗 돌격병 새 동작'],
   [269, '🎞 도감 몬스터가 움직여요'], [270, '🏟 투기장! 끝없는 웨이브'], [271, '👑 투기장 10웨이브마다 보스'], [272, '🚪 투기장 귀환 포털'], [273, '🎰 꾸미기 뽑기'], [274, '🍖 펫 간식'], [275, '🔥❄ 새 정예 2종'], [276, '🩸 핏빛 달 밤'], [277, '📅 정예 주간 · 보스 주간'], [278, '💡 도감 보스 팁'], [279, '🎞 도감 동작 고르기'], [280, '🏆 기록실 넓히기'],
-  [281, '🏅 새 업적 4개'], [282, '🎲 투기장 특별 웨이브'], [283, '⚡💣 새 정예 2종'], [284, '📜 새 퀘스트 5종'], [285, '🎟 투기장 하루 첫 입장 무료'], [286, '🏆 투기장 TOP 5'], [287, '🧭 미니맵에 정예·상인'], [288, '🩸 핏빛 대장'], [289, '🎰 뽑기 연출'], [290, '📰 새 기능 안내'], [291, '✨ 막대·버튼 멋있게'], [292, '🖼 그림 아이콘'], [293, '✨ 일시정지·기록실 새 디자인'], [294, '🖼 버튼 아이콘 16개'], [295, '🎁 상자 화면 빛줄기'], [296, '📅 오늘의 보스'], [297, '📅 오늘의 보스 알림'], [298, '🏅 새 업적 3개'], [299, '✨ 황금 주간 · ❤ 하트 주간'], [300, '🎉 300번째 업데이트!'], [301, '🎁 투기장 웨이브 상자'], [302, '⏱ 보스 러시 기록'], [303, '🛒 상인 새 물건 2개'], [304, '📜 새 퀘스트 3종'], [305, '✨ 레벨업 카드 새 디자인'], [306, '🏆 기록실 새 칸 3개'], [307, '📅 오늘의 보스 특기 2개 더'], [308, '🎲 투기장 정예·황금 웨이브'], [309, '💪 투기장 기세'], [310, '🏅 새 업적 3개'], [311, '🔥 오늘의 보스 연속 승리'], [312, '🔥 강화 상점 오늘의 할인'], [313, '🍀 행운의 레벨업 (카드 4장)'], [314, '🧲 자석 정예'], [315, '🏆 투기장 새 기록 보너스'], [316, '📊 기록실: 연속 승리'], [317, '🩸 핏빛 대장 호위대'], [318, '🔥 하드 보스 러시'], [319, '🔥 상인 반값 세일'], [320, '🏅 새 업적 3개'], [321, '🚀 질주 주간 · 💎 구슬 주간'], [322, '🐾 펫 최고 Lv 7'], [323, '✨ 투기장 황금 보스'], [324, '📅 도감에 오늘의 보스'], [325, '📜 새 퀘스트 2종'], [326, '📊 기록실 새 칸 3개'], [331, '⛲ 소원 분수 (지도 위 버튼)'], [332, '👻 새 정예: 유령'], [333, '💥 투기장 폭발 웨이브'], [334, '🌀 오늘의 보스 특기: 순간이동'], [335, '🛒 상인 새 물건: 🧲 자석 · 🧪 행운 물약'], [336, '💰 현상금 몬스터'], [337, '📜 새 퀘스트 3종']];
+  [281, '🏅 새 업적 4개'], [282, '🎲 투기장 특별 웨이브'], [283, '⚡💣 새 정예 2종'], [284, '📜 새 퀘스트 5종'], [285, '🎟 투기장 하루 첫 입장 무료'], [286, '🏆 투기장 TOP 5'], [287, '🧭 미니맵에 정예·상인'], [288, '🩸 핏빛 대장'], [289, '🎰 뽑기 연출'], [290, '📰 새 기능 안내'], [291, '✨ 막대·버튼 멋있게'], [292, '🖼 그림 아이콘'], [293, '✨ 일시정지·기록실 새 디자인'], [294, '🖼 버튼 아이콘 16개'], [295, '🎁 상자 화면 빛줄기'], [296, '📅 오늘의 보스'], [297, '📅 오늘의 보스 알림'], [298, '🏅 새 업적 3개'], [299, '✨ 황금 주간 · ❤ 하트 주간'], [300, '🎉 300번째 업데이트!'], [301, '🎁 투기장 웨이브 상자'], [302, '⏱ 보스 러시 기록'], [303, '🛒 상인 새 물건 2개'], [304, '📜 새 퀘스트 3종'], [305, '✨ 레벨업 카드 새 디자인'], [306, '🏆 기록실 새 칸 3개'], [307, '📅 오늘의 보스 특기 2개 더'], [308, '🎲 투기장 정예·황금 웨이브'], [309, '💪 투기장 기세'], [310, '🏅 새 업적 3개'], [311, '🔥 오늘의 보스 연속 승리'], [312, '🔥 강화 상점 오늘의 할인'], [313, '🍀 행운의 레벨업 (카드 4장)'], [314, '🧲 자석 정예'], [315, '🏆 투기장 새 기록 보너스'], [316, '📊 기록실: 연속 승리'], [317, '🩸 핏빛 대장 호위대'], [318, '🔥 하드 보스 러시'], [319, '🔥 상인 반값 세일'], [320, '🏅 새 업적 3개'], [321, '🚀 질주 주간 · 💎 구슬 주간'], [322, '🐾 펫 최고 Lv 7'], [323, '✨ 투기장 황금 보스'], [324, '📅 도감에 오늘의 보스'], [325, '📜 새 퀘스트 2종'], [326, '📊 기록실 새 칸 3개'], [331, '⛲ 소원 분수 (지도 위 버튼)'], [332, '👻 새 정예: 유령'], [333, '💥 투기장 폭발 웨이브'], [334, '🌀 오늘의 보스 특기: 순간이동'], [335, '🛒 상인 새 물건: 🧲 자석 · 🧪 행운 물약'], [336, '💰 현상금 몬스터'], [337, '📜 새 퀘스트 3종'], [338, '💰 현상금 주간 · ⛲ 행운 주간']];
 function showNews(from) { const L = NEWS.filter(n => n[0] > from && n[0] <= BUILD).reverse().slice(0, 8); if (!L.length) return;
   $('dexCard').innerHTML = `<div class="card news"><h3><img class="ui" src="img/ui_news.webp" alt="">새로 생긴 것</h3><p><small>Build ${from} → ${BUILD}</small></p><div class="newsL">${L.map(n => `<div>${n[1]} <small>B${n[0]}</small></div>`).join('')}</div>${NEWS.filter(n => n[0] > from).length > 8 ? '<p><small>…그 밖에도 더 있어요!</small></p>' : ''}<div class="tap">눌러서 닫기</div></div>`;
   $('dexCard').classList.add('show'); }
@@ -2404,7 +2406,7 @@ function makeEnemy(type, x, y) {
   announceType(type);
   const ls = lvlScale(), ts = towerScale(), T = ETYPES[type], hm = DF().ehp * ls.hp * ts.hp;   // Build 67: 같은 적은 세기 고정 · Build 166: 영웅 레벨·탑 층 맞춤
   const e = { id: ++eid, type, x, y, r: T.r, hp: T.hp * hm, maxHp: T.hp * hm, spd: T.spd * rand(0.9, 1.1), dmg: T.dmg * DF().edmg * ls.dmg * ts.dmg, color: T.color, xp: T.xp, gold: T.gold, flash: 0, hitT: 0, kx: 0, ky: 0, swordCd: 0, wob: Math.random() * 6, inside: Math.hypot(x, y) < WALL_R, atk: 0.5, lunge: 0, face: 1 };
-  if (G && G.weekly) { if (WK('giant')) { e.hp *= 1.6; e.maxHp *= 1.6; e.gold *= 2; } else if (WK('swift')) e.spd *= 1.25; else if (WK('heartw')) e.dmg *= 1.2; else if (WK('dashw')) { e.hp *= 1.15; e.maxHp *= 1.15; } else if (WK('gemw')) e.dmg *= 1.15; else if (WK('swarm')) { e.hp *= 0.6; e.maxHp *= 0.6; } }   // 이번 주 도전
+  if (G && G.weekly) { if (WK('giant')) { e.hp *= 1.6; e.maxHp *= 1.6; e.gold *= 2; } else if (WK('swift')) e.spd *= 1.25; else if (WK('heartw')) e.dmg *= 1.2; else if (WK('dashw')) { e.hp *= 1.15; e.maxHp *= 1.15; } else if (WK('gemw')) e.dmg *= 1.15; else if (WK('swarm')) { e.hp *= 0.6; e.maxHp *= 0.6; } else if (WK('bountyw')) { e.hp *= 1.1; e.maxHp *= 1.1; } else if (WK('luckw')) e.dmg *= 1.15; }   // 이번 주 도전
   if (G && G.mode === 'stage' && G.st && G.st.cave) { makeGolden(e); e.hp /= 3; e.maxHp /= 3; }   // 동굴: 모두 황금 (체력은 보통)
   else if (G && G.mode === 'stage' && G.st && G.st.rule === 'gold' && Math.random() < 0.3) makeGolden(e);   // 💰 황금 층
   else if (!window.__noGold && Math.random() < GOLD_P * (WK('goldw') ? 5 : 1)) makeGolden(e);   // __noGold: 정확한 기록을 보는 시험용
@@ -2678,12 +2680,12 @@ const MERCH = [
   { k: 'luck',  txt: '🧪 행운 물약 (1분)', price: l => 90 + 4 * l, ok: () => !(G.fntT > 0), buy: () => { const ks = Object.keys(FNT), k = window.__fnt || ks[Math.floor(Math.random() * ks.length)]; G.fntK = k; G.fntT = 60; recalcStats(); floatText(G.p.x, G.p.y - 92, `${FNT[k][0]} ${FNT[k][1]}!`, '#90e0ef', 16, 1.6); } },
 ];
 // 💰 Build 336: 현상금 몬스터 — 마을에서 3~4분마다 정예 하나가 현상금을 달고 나타나요. 45초 안에 잡으면 금화 와르르, 못 잡으면 도망
-const BOUNTY_T = 45, bountyPrize = () => 120 + 20 * (G.lvl || 1);
+const BOUNTY_T = 45, bountyPrize = () => Math.round((120 + 20 * (G.lvl || 1)) * (WK('bountyw') ? 1.5 : 1));   // 💰 현상금 주간 1.5배
 function updBounty(dt) {
   const b = G.enemies.find(e => e.bounty > 0 && !e.dead);
   if (b) { b.bounty -= dt; if (b.bounty <= 0) { b.dead = true; burst(b.x, b.y - 20, '#adb5bd', 24, 200, 5, 0.6); floatText(b.x, b.y - 60, '💨 현상금 몬스터가 도망갔다…', '#dee2e6', 15, 1.6); } return; }
   if (G.boss || G.raid || tierNow() < 1 || G.t < 60) return;
-  G.bountyT = (G.bountyT ?? rand(90, 150)) - dt; if (G.bountyT > 0) return; G.bountyT = window.__bountyT ?? rand(190, 250);
+  G.bountyT = (G.bountyT ?? rand(90, 150)) - dt; if (G.bountyT > 0) return; G.bountyT = (window.__bountyT ?? rand(190, 250)) * (WK('bountyw') ? 0.5 : 1);
   const p = G.p, a = Math.random() * 7, x = clamp(p.x + Math.cos(a) * 380, -WORLD_R + 120, WORLD_R - 120), y = clamp(p.y + Math.sin(a) * 380, -WORLD_R + 120, WORLD_R - 120);
   let e = makeEnemy(tierType(tierNow(), [0.5, 0.4, 0.1]), x, y); for (let i = 0; i < 6 && e.golden; i++) e = makeEnemy(tierType(tierNow(), [0.5, 0.4, 0.1]), x, y); if (e.golden) return; if (!e.elite) makeElite(e); e.bounty = BOUNTY_T; e.hp *= 1.5; e.maxHp *= 1.5; G.enemies.push(e);
   bannerSoft('💰 현상금 몬스터!', `${BOUNTY_T}초 안에 잡으면 🪙${bountyPrize()} · 미니맵 금빛 별`, '#ffd23f', 2.6); sfx('warn');
@@ -3551,11 +3553,11 @@ $('bArena').onclick = () => {
 // ⛲ Build 331: 소원 분수 — 금화를 던지면 2분 동안 행운 하나 (하루 3번, 던질수록 비싸짐: 150 → 250 → 350)
 const FNT = { atk: ['⚔', '공격 +25%'], spd: ['👟', '빠르기 +20%'], gold: ['🪙', '금화 2배'], xp: ['⭐', '경험치 +40%'], hp: ['❤', '최대 체력 +30%'] }, FNT_T = 120;
 const fntK = k => !!(G && G.fntT > 0 && G.fntK === k);
-const fntUsed = () => G.fntDay === G.day ? G.fntN || 0 : 0, fntCost = () => 150 + 100 * fntUsed(), fntLeft = () => 3 - fntUsed();
+const fntUsed = () => G.fntDay === G.day ? G.fntN || 0 : 0, fntCost = () => Math.round((150 + 100 * fntUsed()) * (WK('luckw') ? 0.5 : 1)), fntDur = () => FNT_T * (WK('luckw') ? 2 : 1), fntLeft = () => 3 - fntUsed();
 function fntCard(got) { const c = fntCost(), L = fntLeft(), can = L > 0 && G.gold >= c;
-  $('mapCard').innerHTML = (got ? `<div class="t" style="color:#0096c7">✨ 소원 이뤄짐! ${FNT[got][0]} ${FNT[got][1]} · ${FNT_T / 60}분</div>` : '') + `<div class="t">⛲ 소원 분수</div><div class="g">금화를 던지면 ${FNT_T / 60}분 동안 행운 하나! (${Object.values(FNT).map(w => w[0] + ' ' + w[1]).join(' · ')})</div>${G.fntT > 0 ? `<div class="r">지금 행운: ${FNT[G.fntK][0]} ${FNT[G.fntK][1]} · ${Math.ceil(G.fntT)}초 남음 (새로 던지면 바뀌어요)</div>` : ''}<div class="r">하루(날짜) 3번 · 남은 <b>${L}</b>번 · 던질 금화 🪙${c} (지금 🪙${G.gold})</div>` + (can ? '<button class="btn big" id="bGoFnt" style="margin-top:6px">⛲ 금화 던지기!</button>' : `<div class="r" style="color:#e63946">${L > 0 ? '금화가 모자라요' : '오늘은 다 던졌어요 · 내일 또!'}</div>`);
+  $('mapCard').innerHTML = (got ? `<div class="t" style="color:#0096c7">✨ 소원 이뤄짐! ${FNT[got][0]} ${FNT[got][1]} · ${fntDur() / 60}분</div>` : '') + `<div class="t">⛲ 소원 분수</div><div class="g">금화를 던지면 ${fntDur() / 60}분 동안 행운 하나!${WK('luckw') ? ' <b>⛲ 행운 주간: 반값·2배 시간!</b>' : ''} (${Object.values(FNT).map(w => w[0] + ' ' + w[1]).join(' · ')})</div>${G.fntT > 0 ? `<div class="r">지금 행운: ${FNT[G.fntK][0]} ${FNT[G.fntK][1]} · ${Math.ceil(G.fntT)}초 남음 (새로 던지면 바뀌어요)</div>` : ''}<div class="r">하루(날짜) 3번 · 남은 <b>${L}</b>번 · 던질 금화 🪙${c} (지금 🪙${G.gold})</div>` + (can ? '<button class="btn big" id="bGoFnt" style="margin-top:6px">⛲ 금화 던지기!</button>' : `<div class="r" style="color:#e63946">${L > 0 ? '금화가 모자라요' : '오늘은 다 던졌어요 · 내일 또!'}</div>`);
   if (can) $('bGoFnt').onclick = () => { if (G.fntDay !== G.day) { G.fntDay = G.day; G.fntN = 0; } G.gold -= c; G.fntN++; const ks = Object.keys(FNT), k = window.__fnt || ks[Math.floor(Math.random() * ks.length)];
-    G.fntK = k; G.fntT = FNT_T; stAdd('fountains'); questEvent('fountain'); recalcStats(); sfx('unlock'); fntCard(k); }; }
+    G.fntK = k; G.fntT = fntDur(); stAdd('fountains'); questEvent('fountain'); recalcStats(); sfx('unlock'); fntCard(k); }; }
 $('bFnt').onclick = () => { fntCard(); sfx('pick'); };
 function updFnt(dt) { if (!(G.fntT > 0)) return; G.fntT -= dt; if (G.fntT <= 0) { G.fntT = 0; recalcStats(); floatText(G.p.x, G.p.y - 60, '⛲ 행운이 끝났어요', '#90e0ef', 15, 1.2); } }
 const rushOpen = () => G.stageN >= 5;

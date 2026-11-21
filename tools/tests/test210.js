@@ -11,6 +11,6 @@ const { chromium } = require('/opt/node22/lib/node_modules/playwright');
   const n0 = await cnt(null), n1 = await cnt('elite'); console.log(n0, n1); check(n1 > n0 * 2.5 && n1 > 300, 'elite week 4x elites');
   const t = await page.evaluate(async () => { const G = SH.G; G.enemies = []; G.weekly = 'bossw'; G.nextBoss = 100; await new Promise(q => setTimeout(q, 1000)); const a = 100 - G.nextBoss; G.weekly = null; G.nextBoss = 100; await new Promise(q => setTimeout(q, 1000)); return [a, 100 - G.nextBoss]; });
   console.log(t); check(t[0] > t[1] * 1.3, 'boss week timer faster');
-  check(await page.evaluate(() => WEEKLY.length === 12 && !!WEEKLY.find(w => w.id === 'bossw')), 'weeklies');
+  check(await page.evaluate(() => WEEKLY.length === 14 && !!WEEKLY.find(w => w.id === 'bossw')), 'weeklies');
   await b.close(); console.log('ERRORS:', errors.length); errors.forEach(e => console.log(e)); process.exit(errors.length ? 1 : 0);
 })();
