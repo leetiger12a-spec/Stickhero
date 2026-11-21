@@ -381,7 +381,7 @@ h2 .hb{-webkit-text-stroke:0;text-shadow:none;letter-spacing:0;font-family:"Jua"
 
 <script>
 'use strict';
-const BUILD = 317;
+const BUILD = 318;
 const BOSS_INTERVAL = 180;      // 보스 등장 간격(초)
 const WAVE_INTERVAL = 60;       // 대규모 몰이 이벤트 간격(초)
 const MAX_ENEMIES = 110;   // Build 202: 220 → 110 (화면이 너무 정신없어서) — 대신 마을 적이 조금 더 튼튼(CROWD_K)
@@ -1806,7 +1806,7 @@ function buildSave() {
     rocks: G.rocks.map(o => [Math.round(o.x), Math.round(o.y), o.s, Math.round(o.regrow)]),
     camps: G.camps.map(c => [Math.round(c.x), Math.round(c.y), c.lvl, Math.round(c.rebuild), c.e && !c.e.dead ? Math.round(c.e.hp / c.e.maxHp * 100) / 100 : 0]),
     nextBoss: G.boss ? 15 : G.nextBoss, nextWave: G.nextWave, raidCount: G.raidCount - (G.raid ? 1 : 0), raidPending: !!(G.raid || G.raidIn > 0),
-    day: G.day, broken: Object.keys(G.broken).filter(k => G.broken[k]), quests: G.quests, questBonus: G.questBonus, questSwap: !!G.questSwap, nights: G.nights || 0, rushDay: G.rushDay || 0, dbossDay: G.dbossDay || 0, caveDay: G.caveDay || 0, arenaDay: G.arenaDay || 0, rerolls: G.rerolls, bans: G.bans, banned: G.banned || [], weekly: G.weekly || null, weeklyB: G.weeklyB || 0,
+    day: G.day, broken: Object.keys(G.broken).filter(k => G.broken[k]), quests: G.quests, questBonus: G.questBonus, questSwap: !!G.questSwap, nights: G.nights || 0, rushDay: G.rushDay || 0, hrushDay: G.hrushDay || 0, dbossDay: G.dbossDay || 0, caveDay: G.caveDay || 0, arenaDay: G.arenaDay || 0, rerolls: G.rerolls, bans: G.bans, banned: G.banned || [], weekly: G.weekly || null, weeklyB: G.weeklyB || 0,
   };
 }
 function loadGame(d) {
@@ -1831,7 +1831,7 @@ function loadGame(d) {
   G.bag = d.bag || [];   // 🎁 가방에 모아 둔 상자 (Build 201)
   G.chests = (d.chests || []).map(([x, y, sm, gd]) => ({ x, y, bob: 0, t: 1, small: !!sm, gold: !!gd }));   // 줍기 전에 끈 마을 보물 상자
   if (d.quests && d.quests.length) { G.quests = d.quests; G.questBonus = !!d.questBonus; G.questSwap = !!d.questSwap; } else newQuests();
-  G.nights = d.nights || 0; G.rushDay = d.rushDay || 0; G.dbossDay = d.dbossDay || 0; G.caveDay = d.caveDay || 0; G.arenaDay = d.arenaDay || 0; G.rerolls = d.rerolls; G.bans = d.bans; G.banned = d.banned || []; G.weekly = d.weekly || null; G.weeklyB = d.weeklyB || 0;   // 새 날(또는 예전 저장)은 새 퀘스트
+  G.nights = d.nights || 0; G.rushDay = d.rushDay || 0; G.hrushDay = d.hrushDay || 0; G.dbossDay = d.dbossDay || 0; G.caveDay = d.caveDay || 0; G.arenaDay = d.arenaDay || 0; G.rerolls = d.rerolls; G.bans = d.bans; G.banned = d.banned || []; G.weekly = d.weekly || null; G.weeklyB = d.weeklyB || 0;   // 새 날(또는 예전 저장)은 새 퀘스트
   if (d.rocks) G.rocks = d.rocks.map(([x, y, s, rg]) => ({ x, y, s, max: 6, regrow: rg, shake: 0 }));
   if (d.camps) { G.enemies = G.enemies.filter(e => !e.camp); G.camps = d.camps.map(([x, y, lvl, rebuild, hp]) => ({ x, y, lvl, rebuild, spawnT: rand(8, 16), e: null })); G.camps.forEach((c, i) => { if (d.camps[i][4] > 0) makeCamp(c, d.camps[i][4]); }); }
   G.allies = [];
@@ -3412,7 +3412,8 @@ function towerCard() {
     <div class="r">${towerCp() > 1 ? `🚀 체크포인트: 10층마다 깬 곳 다음 층부터 바로 갈 수 있어요` : '🚀 10층을 깨면 다음부터 11층에서 바로 시작할 수 있어요'}</div>` + rushHtml() + dbossHtml();
   $('bGoTower').onclick = () => towerGo(1);
   if ($('bGoTowerCp')) $('bGoTowerCp').onclick = () => { G.cpUsed = (G.cpUsed || 0) + 1; towerGo(towerCp()); };
-  if ($('bGoRush')) $('bGoRush').onclick = startRush;
+  if ($('bGoRush')) $('bGoRush').onclick = () => startRush();
+  if ($('bGoHRush')) $('bGoHRush').onclick = () => startRush(true);
   if ($('bGoDBoss')) $('bGoDBoss').onclick = startDBoss;
 }
 function towerGo(f) { // 🚀 출발: 영웅이 탑 위로 휙 날아오르고 반짝 → 0.5초 뒤 층으로 (Build 173)
@@ -3504,7 +3505,7 @@ $('bArena').onclick = () => {
 };
 const rushOpen = () => G.stageN >= 5;
 function rushHtml() { if (!rushOpen()) return '<div class="r" style="margin-top:8px">👑 보스 러시: 🔒 모험 지도 5칸을 깨면 열려요</div>';
-  const used = G.rushDay === G.day; return `<div class="r" style="margin-top:8px">👑 <b>보스 러시</b>: 보스 5마리와 연달아 싸워요 (사이에 체력 25% 회복) · 완주하면 금고 🪙300 · 하루 1번${G.stageN >= 15 ? ' · 💀 해골 왕도 나와요' : ''}</div>` + (ST.rushBest ? `<div class="r">⏱ 최고 기록 ${fmtTime(ST.rushBest)}</div>` : '') + (used ? '<div class="r">오늘은 이미 도전했어요 · 내일 또!</div>' : '<button class="btn big" id="bGoRush" style="margin-top:6px;background:#ff9f1c">👑 보스 러시 도전!</button>'); }
+  const used = G.rushDay === G.day; return `<div class="r" style="margin-top:8px">👑 <b>보스 러시</b>: 보스 5마리와 연달아 싸워요 (사이에 체력 25% 회복) · 완주하면 금고 🪙300 · 하루 1번${G.stageN >= 15 ? ' · 💀 해골 왕도 나와요' : ''}</div>` + (ST.rushBest ? `<div class="r">⏱ 최고 기록 ${fmtTime(ST.rushBest)}</div>` : '') + (used ? '<div class="r">오늘은 이미 도전했어요 · 내일 또!</div>' : '<button class="btn big" id="bGoRush" style="margin-top:6px;background:#ff9f1c">👑 보스 러시 도전!</button>') + ((ST.rushes || 0) >= 1 ? (G.hrushDay === G.day ? '<div class="r">🔥 하드 러시도 오늘은 끝!</div>' : '<button class="btn" id="bGoHRush" style="margin-top:6px;background:linear-gradient(#ff6b6b,#9d0208);color:#fff">🔥 하드 러시 (체력 2배 · 🏦800)</button>') : '<div class="r">🔥 하드 러시: 🔒 보스 러시를 한 번 완주하면 열려요</div>'); }   /* Build 318 */
 // 📅 Build 296: 오늘의 보스 — 날(게임 날짜)마다 정해진 보스 1마리 + 오늘의 특기, 하루 1번, 이기면 금고 🏦400 + 보물 상자
 const DBOSS_MOD = [['🔥', '불꽃 몸', '닿으면 불길이 남아요'], ['💨', '날쌘 발', '1.4배 빨라요'], ['🛡', '두꺼운 갑옷', '체력 1.5배'], ['😡', '처음부터 화남', '시작부터 화난 상태'], ['❄', '얼음 몸', '닿으면 느려져요'], ['👥', '부하 거느림', '졸개 6마리와 함께 와요']];   // Build 307: 특기 2개 더
 const dbossToday = () => { if (window.__dboss) return window.__dboss; const pool = rushPool(), d = G.day || 1; return { n: pool[(d * 7 + 3) % pool.length], mod: (d * 5 + 1) % DBOSS_MOD.length }; };
@@ -3514,8 +3515,8 @@ function startDBoss() { if (!rushOpen() || G.dbossDay === G.day) return; const T
 function rushPool() { // 👑 러시 보스 후보 (Build 170): 해골 왕국을 열었으면(모험 16칸) 해골 왕 5마리도 · 영웅 Lv 30부터는 센 보스(4번째부터)만
   let pool = [...Array(10).keys()]; if (G.stageN >= 15) pool.push(11, 12, 13, 14, 15);
   if (G.lvl >= LVL_FREE) pool = pool.filter(n => n >= 3); return pool; }
-function startRush() { if (!rushOpen() || G.rushDay === G.day) return; const pool = rushPool(); const list = []; while (list.length < 5) list.push(pool.splice(Math.floor(Math.random() * pool.length), 1)[0]); list.sort((a, b) => a - b);
-  showOv(null); state = 'play'; G.rushDay = G.day; G.rushes = (G.rushes || 0) + 1; enterStage(0, 0, list[0]); G.st.rush = { list, i: 0, won: 0, t0: G.t }; banner('👑 보스 러시 1/5', '보스 5마리를 연달아 물리쳐라!', '#ff9f1c', 2.6); }
+function startRush(hard) { if (!rushOpen() || (hard ? G.hrushDay : G.rushDay) === G.day) return; const pool = rushPool(); const list = []; while (list.length < 5) list.push(pool.splice(Math.floor(Math.random() * pool.length), 1)[0]); list.sort((a, b) => a - b);
+  showOv(null); state = 'play'; if (hard) G.hrushDay = G.day; else G.rushDay = G.day; G.rushes = (G.rushes || 0) + 1; enterStage(0, 0, list[0], !!hard); G.st.rush = { list, i: 0, won: 0, t0: G.t, hard: !!hard }; banner(hard ? '🔥 하드 보스 러시 1/5' : '👑 보스 러시 1/5', hard ? '보스 체력 2배 · 공격 1.5배! 완주하면 금고 🏦800' : '보스 5마리를 연달아 물리쳐라!', '#ff9f1c', 2.6); }
 $('bMapClose').onclick = () => { sfx('pick'); closeMap(); };
 
 const towerBoss2 = f => f && f % 10 === 0 && f >= 20 && f !== 50 ? [11, 12, 13, 14, 15][(f / 10) % 5] : null;   // 두 번째 보스: 해골 왕 5종 중 하나
@@ -4050,7 +4051,7 @@ function bossDie(e) {
     if (G.st.dboss !== undefined) { ST.dbStreak = ST.dbLast === G.day - 1 ? (ST.dbStreak || 0) + 1 : 1; ST.dbLast = G.day; stDirty = true; const sb = Math.min(5, ST.dbStreak - 1) * 100, m = readJSON(META_KEY) || {}; m.bank = (m.bank || 0) + 400 + sb; writeJSON(META_KEY, m); if (sb) floatText(G.p.x, G.p.y - 110, `🔥 ${ST.dbStreak}일 연속! +🏦${sb}`, '#ff9f1c', 18, 2.2);   /* Build 311: 연속 승리 보너스 */ dropChest(clamp(e.x, -STAGE_HW + 30, STAGE_HW - 30), clamp(e.y + 30, -G.st.L - 350, 80)); stAdd('dbossWins'); questEvent('dboss'); banner('📅 오늘의 보스 격파!', '금고 🏦400 + 보물 상자!', '#ffd23f', 3); sfx('unlock'); }
     const R = G.st.rush; if (R) { R.won++; // 👑 보스 러시 (Build 139): 다음 보스, 5마리 다 잡으면 금고 보상
       if (R.i < R.list.length - 1) { R.i++; G.st.practice = R.list[R.i]; G.st.bossOn = false; G.st.t = -1.5; G.p.hp = Math.min(G.p.maxHp, G.p.hp + G.p.maxHp * 0.25); banner(`👑 보스 러시 ${R.i + 1}/${R.list.length}`, '체력 25% 회복 · 다음 보스가 와요!', '#ff9f1c', 2.4); return; }
-      const v = 300, m2 = readJSON(META_KEY) || {}; m2.bank = (m2.bank || 0) + v; writeJSON(META_KEY, m2); stAdd('rushes'); const rs = Math.max(1, Math.round(G.t - (R.t0 ?? G.t))), rec = !ST.rushBest || rs < ST.rushBest; if (rec) { ST.rushBest = rs; stDirty = true; } banner(rec ? `👑 러시 완주 신기록! ${fmtTime(rs)}` : '👑 보스 러시 완주!', `보스 ${R.list.length}마리 연속 · ${fmtTime(rs)} · 금고에 🪙${v}`, '#ffd23f', 3.2);   /* ⏱ Build 302 */ sfx('unlock'); }
+      const v = R.hard ? 800 : 300, m2 = readJSON(META_KEY) || {}; if (R.hard) stAdd('hrushes'); m2.bank = (m2.bank || 0) + v; writeJSON(META_KEY, m2); stAdd('rushes'); const rs = Math.max(1, Math.round(G.t - (R.t0 ?? G.t))), rec = !ST.rushBest || rs < ST.rushBest; if (rec) { ST.rushBest = rs; stDirty = true; } banner(rec ? `👑 러시 완주 신기록! ${fmtTime(rs)}` : '👑 보스 러시 완주!', `보스 ${R.list.length}마리 연속 · ${fmtTime(rs)} · 금고에 🪙${v}`, '#ffd23f', 3.2);   /* ⏱ Build 302 */ sfx('unlock'); }
     stageClear(e.x, e.y + 60); return;
   }
   G.boss = null; G.bossKills = (G.bossKills || 0) + 1; allyCheer(); if (e.rage) stAdd('rageKills'); questEvent('boss'); weeklyBoss(); stAdd('bosses'); if (legendOn()) stAdd('legBoss'); stSet('bossT', e.name); ST.bk[e.name] = (ST.bk[e.name] || 0) + 1; bossFast(e);

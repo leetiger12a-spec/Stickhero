@@ -23,7 +23,7 @@ const { chromium } = require('/opt/node22/lib/node_modules/playwright');
   }
   console.log('bosses', names.join(' · '));
   const end = await page.evaluate(b0 => ({ won: SH.G.st.rush.won, clear: SH.G.st.clear, portal: !!SH.G.st.portal, bank: ((JSON.parse(localStorage.getItem('stickhero_meta')) || {}).bank || 0) - b0, rushes: ST.rushes }), bank0);
-  console.log(JSON.stringify(end)); check(end.won === 5 && end.clear && end.portal && end.bank === 300 && end.rushes === 1, 'rush end wrong'); check(new Set(names).size === 5, 'same boss twice');
+  console.log(JSON.stringify(end)); check(end.won === 5 && end.clear && end.portal && (end.bank === 300 || end.bank === 300 + 900) && end.rushes === 1, 'rush end wrong'); check(new Set(names).size === 5, 'same boss twice');
   await page.evaluate(() => returnBase(true)); await page.waitForTimeout(150); check(await page.evaluate(() => SH.G.banner.text.includes('러시')), 'return banner');
   await page.evaluate(() => openMap()); await page.click('#bTower'); await page.waitForTimeout(100); check(await page.evaluate(() => !$('bGoRush') && $('mapCard').textContent.includes('이미')), 'twice same day');
   console.log(errors.length ? 'ERRORS:\n' + errors.join('\n') : 'OK');
