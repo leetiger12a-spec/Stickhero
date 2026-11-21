@@ -382,7 +382,7 @@ h2 .hb{-webkit-text-stroke:0;text-shadow:none;letter-spacing:0;font-family:"Jua"
 
 <script>
 'use strict';
-const BUILD = 340;
+const BUILD = 341;
 const BOSS_INTERVAL = 180;      // 보스 등장 간격(초)
 const WAVE_INTERVAL = 60;       // 대규모 몰이 이벤트 간격(초)
 const MAX_ENEMIES = 110;   // Build 202: 220 → 110 (화면이 너무 정신없어서) — 대신 마을 적이 조금 더 튼튼(CROWD_K)
@@ -1816,7 +1816,7 @@ function buildSave() {
     rocks: G.rocks.map(o => [Math.round(o.x), Math.round(o.y), o.s, Math.round(o.regrow)]),
     camps: G.camps.map(c => [Math.round(c.x), Math.round(c.y), c.lvl, Math.round(c.rebuild), c.e && !c.e.dead ? Math.round(c.e.hp / c.e.maxHp * 100) / 100 : 0]),
     nextBoss: G.boss ? 15 : G.nextBoss, nextWave: G.nextWave, raidCount: G.raidCount - (G.raid ? 1 : 0), raidPending: !!(G.raid || G.raidIn > 0),
-    day: G.day, broken: Object.keys(G.broken).filter(k => G.broken[k]), quests: G.quests, questBonus: G.questBonus, questSwap: !!G.questSwap, nights: G.nights || 0, rushDay: G.rushDay || 0, hrushDay: G.hrushDay || 0, fntDay: G.fntDay || 0, fntN: G.fntN || 0, dbossDay: G.dbossDay || 0, caveDay: G.caveDay || 0, arenaDay: G.arenaDay || 0, rerolls: G.rerolls, bans: G.bans, banned: G.banned || [], weekly: G.weekly || null, weeklyB: G.weeklyB || 0,
+    day: G.day, broken: Object.keys(G.broken).filter(k => G.broken[k]), quests: G.quests, questBonus: G.questBonus, questSwap: !!G.questSwap, nights: G.nights || 0, rushDay: G.rushDay || 0, hrushDay: G.hrushDay || 0, tmapDay: G.tmapDay || 0, tmapN: G.tmapN || 0, fntDay: G.fntDay || 0, fntN: G.fntN || 0, dbossDay: G.dbossDay || 0, caveDay: G.caveDay || 0, arenaDay: G.arenaDay || 0, rerolls: G.rerolls, bans: G.bans, banned: G.banned || [], weekly: G.weekly || null, weeklyB: G.weeklyB || 0,
   };
 }
 function loadGame(d) {
@@ -1841,7 +1841,7 @@ function loadGame(d) {
   G.bag = d.bag || [];   // 🎁 가방에 모아 둔 상자 (Build 201)
   G.chests = (d.chests || []).map(([x, y, sm, gd]) => ({ x, y, bob: 0, t: 1, small: !!sm, gold: !!gd }));   // 줍기 전에 끈 마을 보물 상자
   if (d.quests && d.quests.length) { G.quests = d.quests; G.questBonus = !!d.questBonus; G.questSwap = !!d.questSwap; } else newQuests();
-  G.nights = d.nights || 0; G.rushDay = d.rushDay || 0; G.hrushDay = d.hrushDay || 0; G.fntDay = d.fntDay || 0; G.fntN = d.fntN || 0; G.dbossDay = d.dbossDay || 0; G.caveDay = d.caveDay || 0; G.arenaDay = d.arenaDay || 0; G.rerolls = d.rerolls; G.bans = d.bans; G.banned = d.banned || []; G.weekly = d.weekly || null; G.weeklyB = d.weeklyB || 0;   // 새 날(또는 예전 저장)은 새 퀘스트
+  G.nights = d.nights || 0; G.rushDay = d.rushDay || 0; G.hrushDay = d.hrushDay || 0; G.tmapDay = d.tmapDay || 0; G.tmapN = d.tmapN || 0; G.fntDay = d.fntDay || 0; G.fntN = d.fntN || 0; G.dbossDay = d.dbossDay || 0; G.caveDay = d.caveDay || 0; G.arenaDay = d.arenaDay || 0; G.rerolls = d.rerolls; G.bans = d.bans; G.banned = d.banned || []; G.weekly = d.weekly || null; G.weeklyB = d.weeklyB || 0;   // 새 날(또는 예전 저장)은 새 퀘스트
   if (d.rocks) G.rocks = d.rocks.map(([x, y, s, rg]) => ({ x, y, s, max: 6, regrow: rg, shake: 0 }));
   if (d.camps) { G.enemies = G.enemies.filter(e => !e.camp); G.camps = d.camps.map(([x, y, lvl, rebuild, hp]) => ({ x, y, lvl, rebuild, spawnT: rand(8, 16), e: null })); G.camps.forEach((c, i) => { if (d.camps[i][4] > 0) makeCamp(c, d.camps[i][4]); }); }
   G.allies = [];
@@ -1897,7 +1897,7 @@ const MAIL_GIFT = 100;
 // 📰 Build 290: 새 기능 안내 — 선물을 받으면 지난번 뒤로 새로 생긴 것을 카드로 보여 줌 (최근 것부터 8개)
 const NEWS = [[256, '💡 보스를 처음 만나면 이기는 법 카드'], [257, '⭐ 별 강화 · 몬스터가 더 세졌어요'], [258, '🩷 달리기 졸개 새 동작'], [263, '🔵 탱크 새 동작'], [264, '🟢 슬라임 새 동작'], [265, '🏹 궁수 새 동작'], [266, '💣 자폭병 새 동작'], [267, '🦇 박쥐병 새 동작'], [268, '🐗 돌격병 새 동작'],
   [269, '🎞 도감 몬스터가 움직여요'], [270, '🏟 투기장! 끝없는 웨이브'], [271, '👑 투기장 10웨이브마다 보스'], [272, '🚪 투기장 귀환 포털'], [273, '🎰 꾸미기 뽑기'], [274, '🍖 펫 간식'], [275, '🔥❄ 새 정예 2종'], [276, '🩸 핏빛 달 밤'], [277, '📅 정예 주간 · 보스 주간'], [278, '💡 도감 보스 팁'], [279, '🎞 도감 동작 고르기'], [280, '🏆 기록실 넓히기'],
-  [281, '🏅 새 업적 4개'], [282, '🎲 투기장 특별 웨이브'], [283, '⚡💣 새 정예 2종'], [284, '📜 새 퀘스트 5종'], [285, '🎟 투기장 하루 첫 입장 무료'], [286, '🏆 투기장 TOP 5'], [287, '🧭 미니맵에 정예·상인'], [288, '🩸 핏빛 대장'], [289, '🎰 뽑기 연출'], [290, '📰 새 기능 안내'], [291, '✨ 막대·버튼 멋있게'], [292, '🖼 그림 아이콘'], [293, '✨ 일시정지·기록실 새 디자인'], [294, '🖼 버튼 아이콘 16개'], [295, '🎁 상자 화면 빛줄기'], [296, '📅 오늘의 보스'], [297, '📅 오늘의 보스 알림'], [298, '🏅 새 업적 3개'], [299, '✨ 황금 주간 · ❤ 하트 주간'], [300, '🎉 300번째 업데이트!'], [301, '🎁 투기장 웨이브 상자'], [302, '⏱ 보스 러시 기록'], [303, '🛒 상인 새 물건 2개'], [304, '📜 새 퀘스트 3종'], [305, '✨ 레벨업 카드 새 디자인'], [306, '🏆 기록실 새 칸 3개'], [307, '📅 오늘의 보스 특기 2개 더'], [308, '🎲 투기장 정예·황금 웨이브'], [309, '💪 투기장 기세'], [310, '🏅 새 업적 3개'], [311, '🔥 오늘의 보스 연속 승리'], [312, '🔥 강화 상점 오늘의 할인'], [313, '🍀 행운의 레벨업 (카드 4장)'], [314, '🧲 자석 정예'], [315, '🏆 투기장 새 기록 보너스'], [316, '📊 기록실: 연속 승리'], [317, '🩸 핏빛 대장 호위대'], [318, '🔥 하드 보스 러시'], [319, '🔥 상인 반값 세일'], [320, '🏅 새 업적 3개'], [321, '🚀 질주 주간 · 💎 구슬 주간'], [322, '🐾 펫 최고 Lv 7'], [323, '✨ 투기장 황금 보스'], [324, '📅 도감에 오늘의 보스'], [325, '📜 새 퀘스트 2종'], [326, '📊 기록실 새 칸 3개'], [331, '⛲ 소원 분수 (지도 위 버튼)'], [332, '👻 새 정예: 유령'], [333, '💥 투기장 폭발 웨이브'], [334, '🌀 오늘의 보스 특기: 순간이동'], [335, '🛒 상인 새 물건: 🧲 자석 · 🧪 행운 물약'], [336, '💰 현상금 몬스터'], [337, '📜 새 퀘스트 3종'], [338, '💰 현상금 주간 · ⛲ 행운 주간'], [339, '🏅 새 업적 3개'], [340, '📊 기록실 새 칸 3개']];
+  [281, '🏅 새 업적 4개'], [282, '🎲 투기장 특별 웨이브'], [283, '⚡💣 새 정예 2종'], [284, '📜 새 퀘스트 5종'], [285, '🎟 투기장 하루 첫 입장 무료'], [286, '🏆 투기장 TOP 5'], [287, '🧭 미니맵에 정예·상인'], [288, '🩸 핏빛 대장'], [289, '🎰 뽑기 연출'], [290, '📰 새 기능 안내'], [291, '✨ 막대·버튼 멋있게'], [292, '🖼 그림 아이콘'], [293, '✨ 일시정지·기록실 새 디자인'], [294, '🖼 버튼 아이콘 16개'], [295, '🎁 상자 화면 빛줄기'], [296, '📅 오늘의 보스'], [297, '📅 오늘의 보스 알림'], [298, '🏅 새 업적 3개'], [299, '✨ 황금 주간 · ❤ 하트 주간'], [300, '🎉 300번째 업데이트!'], [301, '🎁 투기장 웨이브 상자'], [302, '⏱ 보스 러시 기록'], [303, '🛒 상인 새 물건 2개'], [304, '📜 새 퀘스트 3종'], [305, '✨ 레벨업 카드 새 디자인'], [306, '🏆 기록실 새 칸 3개'], [307, '📅 오늘의 보스 특기 2개 더'], [308, '🎲 투기장 정예·황금 웨이브'], [309, '💪 투기장 기세'], [310, '🏅 새 업적 3개'], [311, '🔥 오늘의 보스 연속 승리'], [312, '🔥 강화 상점 오늘의 할인'], [313, '🍀 행운의 레벨업 (카드 4장)'], [314, '🧲 자석 정예'], [315, '🏆 투기장 새 기록 보너스'], [316, '📊 기록실: 연속 승리'], [317, '🩸 핏빛 대장 호위대'], [318, '🔥 하드 보스 러시'], [319, '🔥 상인 반값 세일'], [320, '🏅 새 업적 3개'], [321, '🚀 질주 주간 · 💎 구슬 주간'], [322, '🐾 펫 최고 Lv 7'], [323, '✨ 투기장 황금 보스'], [324, '📅 도감에 오늘의 보스'], [325, '📜 새 퀘스트 2종'], [326, '📊 기록실 새 칸 3개'], [331, '⛲ 소원 분수 (지도 위 버튼)'], [332, '👻 새 정예: 유령'], [333, '💥 투기장 폭발 웨이브'], [334, '🌀 오늘의 보스 특기: 순간이동'], [335, '🛒 상인 새 물건: 🧲 자석 · 🧪 행운 물약'], [336, '💰 현상금 몬스터'], [337, '📜 새 퀘스트 3종'], [338, '💰 현상금 주간 · ⛲ 행운 주간'], [339, '🏅 새 업적 3개'], [340, '📊 기록실 새 칸 3개'], [341, '🗺 보물 지도 (❌ 자리 파기)']];
 function showNews(from) { const L = NEWS.filter(n => n[0] > from && n[0] <= BUILD).reverse().slice(0, 8); if (!L.length) return;
   $('dexCard').innerHTML = `<div class="card news"><h3><img class="ui" src="img/ui_news.webp" alt="">새로 생긴 것</h3><p><small>Build ${from} → ${BUILD}</small></p><div class="newsL">${L.map(n => `<div>${n[1]} <small>B${n[0]}</small></div>`).join('')}</div>${NEWS.filter(n => n[0] > from).length > 8 ? '<p><small>…그 밖에도 더 있어요!</small></p>' : ''}<div class="tap">눌러서 닫기</div></div>`;
   $('dexCard').classList.add('show'); }
@@ -2663,7 +2663,7 @@ function updNight(dt) {
     heroSay('morning', true); banner('☀️ 아침이다!', `밤을 버텼다! 🪙${bonus}`, '#ffd23f', 2.6); sfx('cheer'); cheerAll(); floatText(p.x, p.y - 60, `+🪙${bonus}`, '#ffd23f', 20, 1.4);
   }
   if (G.dbossTold !== G.day && G.t > 6 && rushOpen() && G.dbossDay !== G.day && !G.boss && !on) { G.dbossTold = G.day; const T = dbossToday(); bannerSoft('📅 오늘의 보스가 기다려요!', `${BOSSES[T.n].name} · 지도 → 🗼 무한 탑 아래`, '#ff6b6b', 3); }   // 📅 Build 297
-  updGhostChest(dt, on, ph); updMerchant(dt, on); updRain(dt, on); updRainbow(dt); updWish(dt, on && ph > 2); updBounty(dt);
+  updGhostChest(dt, on, ph); updMerchant(dt, on); updRain(dt, on); updRainbow(dt); updWish(dt, on && ph > 2); updBounty(dt); updTmap(dt);
   // 🦇 밤 박쥐 떼 (Build 99): 밤 동안 14초마다 한 방향에서 박쥐 떼가 날아옴 (울타리를 넘어옴, 빠르지만 약함)
   if (on && ph > 3) { G.batT = (G.batT || 0) - dt; if (G.batT <= 0) { G.batT = 14; batSwarm(6 + Math.min(6, G.nights || 0)); } } else G.batT = 0;
   const k = nightK(); G.flies = (G.flies || []).filter(f => (f.life -= dt) > 0);
@@ -2694,6 +2694,33 @@ function updBounty(dt) {
   let e = makeEnemy(tierType(tierNow(), [0.5, 0.4, 0.1]), x, y); for (let i = 0; i < 6 && e.golden; i++) e = makeEnemy(tierType(tierNow(), [0.5, 0.4, 0.1]), x, y); if (e.golden) return; if (!e.elite) makeElite(e); e.bounty = BOUNTY_T; e.hp *= 1.5; e.maxHp *= 1.5; G.enemies.push(e);
   bannerSoft('💰 현상금 몬스터!', `${BOUNTY_T}초 안에 잡으면 🪙${bountyPrize()} · 미니맵 금빛 별`, '#ffd23f', 2.6); sfx('warn');
 }
+// 🗺 Build 341: 보물 지도 — 마을에서 4~5분마다(하루 3번) 지도 조각 → ❌ 자리에 3초 서 있으면 땅을 파서 큰 상자 (2분 지나면 지도가 바래서 사라짐)
+const TMAP_DIG = 3, TMAP_LIFE = 120, tmapUsed = () => G.tmapDay === G.day ? G.tmapN || 0 : 0;
+function updTmap(dt) {
+  const p = G.p, m = G.tmap;
+  if (m) { m.t += dt; const near = !p.dead && Math.hypot(p.x - m.x, p.y - m.y) < 44; m.dig = near ? m.dig + dt : Math.max(0, m.dig - dt * 0.5);
+    if (near && Math.random() < dt * 8) burst(m.x + rand(-10, 10), m.y, '#a0522d', 3, 90, 3, 0.4);
+    if (m.dig >= TMAP_DIG) { G.tmap = null; dropChest(m.x, m.y + 8); for (let i = 0; i < 15; i++) dropCoin(m.x + rand(-26, 26), m.y + rand(-18, 18)); stAdd('tmaps'); questEvent('tmap'); banner('🗺 보물을 찾았다!', '큰 보물 상자 + 금화', '#ffd23f', 2.4); sfx('unlock'); G.shake = Math.max(G.shake, 5); }
+    else if (m.t > TMAP_LIFE) { G.tmap = null; floatText(p.x, p.y - 60, '🗺 지도가 바래서 사라졌어요…', '#dee2e6', 14, 1.4); }
+    return; }
+  if (G.boss || G.raid || G.t < 40 || tmapUsed() >= 3) return;
+  G.tmapT = (G.tmapT ?? rand(100, 160)) - dt * (WK('tmapw') ? 2 : 1); if (G.tmapT > 0) return; G.tmapT = window.__tmapT ?? rand(240, 300);
+  if (G.tmapDay !== G.day) { G.tmapDay = G.day; G.tmapN = 0; } G.tmapN++;
+  const a = Math.random() * 7, r = rand(330, MAP_R + 200);
+  G.tmap = { x: clamp(Math.cos(a) * r, -WORLD_R + 120, WORLD_R - 120), y: clamp(Math.sin(a) * r, -WORLD_R + 120, WORLD_R - 120), dig: 0, t: 0 };
+  bannerSoft('🗺 보물 지도 조각!', '미니맵 ❌ 자리에 가서 3초 서 있으면 땅을 파요', '#ffd23f', 2.8); sfx('pick');
+}
+function drawTmap() { const m = G.tmap; if (!m) return; const k = 0.6 + 0.4 * Math.sin(G.t * 5);
+  ctx.save(); ctx.translate(m.x, m.y); ctx.scale(1, IK);
+  ctx.fillStyle = 'rgba(120,70,30,.35)'; ctx.beginPath(); ctx.ellipse(0, 0, 30, 18, 0, 0, 7); ctx.fill();
+  ctx.lineCap = 'round'; ctx.strokeStyle = '#3d1f0a'; ctx.lineWidth = 9; ctx.beginPath(); ctx.moveTo(-16, -10); ctx.lineTo(16, 10); ctx.moveTo(16, -10); ctx.lineTo(-16, 10); ctx.stroke();
+  ctx.strokeStyle = `rgba(230,57,70,${k})`; ctx.lineWidth = 6; ctx.stroke();
+  if (m.dig > 0) { ctx.strokeStyle = '#ffd23f'; ctx.lineWidth = 4; ctx.beginPath(); ctx.arc(0, -50, 14, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * Math.min(1, m.dig / TMAP_DIG)); ctx.stroke(); ctx.font = 'bold 12px Jua,system-ui,sans-serif'; ctx.textAlign = 'center'; ctx.fillStyle = '#fff'; ctx.fillText('⛏', 0, -46); }
+  ctx.restore(); }
+function drawTmapHud() { const m = G.tmap; if (!m) return; const x = (m.x - G.cam.x) * SCALE + W / 2, y = (m.y - G.cam.y) * SCALE * K + H / 2;   // 화면 밖이면 가장자리에 ❌ 화살표
+  if (x > 20 && x < W - 20 && y > 240 && y < H - 180) return; const cx = W / 2, cy = H / 2, a = Math.atan2(y - cy, x - cx), ex = clamp(cx + Math.cos(a) * W, 26, W - 26), ey = clamp(cy + Math.sin(a) * H, 260, H - 200);
+  ctx.save(); ctx.translate(ex, ey); ctx.rotate(a); ctx.fillStyle = '#e63946'; ctx.strokeStyle = '#222'; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(14, 0); ctx.lineTo(-8, -9); ctx.lineTo(-8, 9); ctx.closePath(); ctx.fill(); ctx.stroke(); ctx.restore();
+  hudText('🗺', ex - Math.cos(a) * 22, ey - Math.sin(a) * 22 + 6, 16, '#fff', 'center'); }
 function updMerchant(dt, night) {
   const p = G.p;
   if (!G.merchant) {
@@ -5795,6 +5822,7 @@ function drawWorld() {
   // 💤 Build 219: 쉬는 동료는 마을 숙소 옆에서 졸고 있음 (⏸에서 바꾸기)
   for (const r of benchSpots()) list.push({ y: r.y, draw: () => drawResting(r) });
   if (G.mode === 'base' && G.merchant) list.push({ y: G.merchant.y, draw: drawMerchant });   // 🛒 Build 254
+  if (G.mode === 'base' && G.tmap) list.push({ y: G.tmap.y - 60, draw: drawTmap });   // 🗺 Build 341
   list.sort((a, b) => a.y - b.y);
   for (const e of list) { if (e.draw) e.draw(); else if (e.boss) drawBoss(e); else drawEnemy(e); }
   for (const f of G.flyers) { // 날아가는 통나무·금화
@@ -6010,6 +6038,7 @@ function drawMinimap(x, y, size) { // 작은 지도: 마을·적 진지·바위�
   for (const c of G.camps) { const up = c.e && !c.e.dead; ctx.fillStyle = up ? '#e63946' : '#777'; ctx.beginPath(); ctx.arc(cx + c.x * k, cy + c.y * k, up ? 3.5 : 2.5, 0, 7); ctx.fill(); }
   if (G.boss && G.mode === 'base') { ctx.fillStyle = Math.floor(G.t * 4) % 2 ? '#ff3b3b' : '#ffd23f'; ctx.beginPath(); ctx.arc(cx + G.boss.x * k, cy + G.boss.y * k, 4, 0, 7); ctx.fill(); }
   ctx.fillStyle = '#ffb703'; ctx.strokeStyle = '#222'; ctx.lineWidth = 1; for (const c of G.chests || []) { ctx.fillRect(cx + c.x * k - 3, cy + c.y * k - 2.5, 6, 5); ctx.strokeRect(cx + c.x * k - 3, cy + c.y * k - 2.5, 6, 5); }   // Build 106: 보물 상자
+  if (G.tmap) { const tx = cx + G.tmap.x * k, ty = cy + G.tmap.y * k; ctx.strokeStyle = Math.floor(G.t * 3) % 2 ? '#e63946' : '#ffd23f'; ctx.lineWidth = 2.5; ctx.beginPath(); ctx.moveTo(tx - 4, ty - 4); ctx.lineTo(tx + 4, ty + 4); ctx.moveTo(tx + 4, ty - 4); ctx.lineTo(tx - 4, ty + 4); ctx.stroke(); }   // 🗺 보물 지도 ❌
   if (G.ghost) { ctx.fillStyle = Math.floor(G.t * 3) % 2 ? '#b8f2ff' : '#ffffff'; ctx.beginPath(); ctx.arc(cx + G.ghost.x * k, cy + G.ghost.y * k, 4.5, 0, 7); ctx.fill(); }   // 유령 상자
   // 🧭 Build 287: 정예(분홍 마름모)·황금 몬스터(금색 점)·떠돌이 상인(초록 네모)
   ctx.lineWidth = 1; ctx.strokeStyle = '#222';
@@ -6075,7 +6104,7 @@ function drawHUD() {
   hudText('🪙 ' + G.gold, W - 12, top + 60, 18, '#ffd23f', 'right');
   if (G.mode === 'base') hudIco('log', `${p.logs}/${p.cap}`, W - 12, top + 86, 16, p.logs >= p.cap ? '#ff6b6b' : '#ffe0b3', 'right');
   if (G.mode === 'base') hudIco('stone', `${G.stone}`, W - 12, top + 108, 16, '#dee2e6', 'right');
-  if (G.mode === 'base') drawMinimap(8, top + 72, 76);
+  if (G.mode === 'base') { drawMinimap(8, top + 72, 76); drawTmapHud(); }
   if (G.fntT > 0) hudText(`⛲${FNT[G.fntK][0]} ${Math.ceil(G.fntT)}초`, W - 12, top + 130, 14, '#90e0ef', 'right');   // ⛲ Build 331
   if (G.hint && !G.radio && !fighting()) {   // Build 218: 싸울 땐 아래 안내 글 숨김
     ctx.font = '13px Jua,system-ui,sans-serif'; const tw = ctx.measureText(G.hint.text).width;   // Build 219: 15 → 13

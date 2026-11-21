@@ -9,7 +9,7 @@ const { chromium } = require('/opt/node22/lib/node_modules/playwright');
   await page.goto('http://localhost:8765/index.html'); await page.waitForTimeout(1000);
   await page.click('#bMail', { force: true }); await page.waitForTimeout(300);
   const r = await page.evaluate(() => ({ show: document.getElementById('dexCard').classList.contains('show'), rows: [...document.querySelectorAll('#dexCard .newsL div')].map(d => d.textContent), bank: bankGold() }));
-  console.log(JSON.stringify(r)); check(r.show && r.rows.length === 8 && r.rows[0].includes('B326') && r.bank >= 100, 'news card B285~B290');
+  console.log(JSON.stringify(r)); check(r.show && r.rows.length === 8 && /B3[0-9][0-9]$/.test(r.rows[0]) && +r.rows[0].slice(-3) >= Math.max(...r.rows.map(x => +x.slice(-3))) && r.bank >= 100, 'news card B285~B290');
   await page.screenshot({ path: `${OUT}/b290_news.png` });
   await page.click('#dexCard .tap'); await page.waitForTimeout(150); check(await page.evaluate(() => !document.getElementById('dexCard').classList.contains('show')), 'closes');
   await b.close(); console.log('ERRORS:', errors.length); errors.forEach(e => console.log(e)); process.exit(errors.length ? 1 : 0);
