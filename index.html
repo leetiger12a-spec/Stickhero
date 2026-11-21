@@ -54,12 +54,13 @@ canvas{display:block;position:fixed;inset:0;width:100%;height:100%}
 #ovChest.jack{background:radial-gradient(circle at 50% 35%,rgba(255,210,63,.55),rgba(20,10,40,.9) 70%) !important}#ovChest.jack #chestTitle{color:#ffd23f;text-shadow:0 0 12px #ff6bd6,0 0 22px #ffd23f}
 #chestBox{position:relative;margin:4px 0 10px;animation:chestShake .45s ease-in-out infinite}
 #chestBox::before{content:'';position:absolute;inset:-30px;background:radial-gradient(circle,rgba(255,226,120,.75),rgba(255,226,120,0) 62%);opacity:0;transition:opacity .3s}
+#chestBox::after{content:'';position:absolute;left:50%;top:50%;width:340px;height:340px;margin:-170px 0 0 -170px;background:repeating-conic-gradient(rgba(255,226,120,.32) 0 10deg,rgba(255,226,120,0) 10deg 24deg);border-radius:50%;-webkit-mask:radial-gradient(circle,#000 25%,transparent 70%);mask:radial-gradient(circle,#000 25%,transparent 70%);opacity:0;transition:opacity .4s;z-index:-1;pointer-events:none}#chestBox.open::after{opacity:1;animation:chestRays 8s linear infinite}@keyframes chestRays{to{transform:rotate(360deg)}}#chestBox{z-index:0}
 #chestBox.open{animation:none}#chestBox.open::before{opacity:1;animation:chestGlow 1.2s ease-in-out infinite}
 #chestBox svg{position:relative;display:block}#chestImg{position:relative;display:none;width:170px;height:auto;filter:drop-shadow(0 8px 10px rgba(0,0,0,.45))}#chestBox.img svg{display:none}#chestBox.img #chestImg{display:block}#chestLid{transition:transform .35s cubic-bezier(.3,1.6,.5,1);transform-origin:60px 44px}#chestBox.open #chestLid{transform:translateY(-14px) rotate(-18deg)}
 @keyframes chestShake{0%,100%{transform:rotate(0)}25%{transform:rotate(-6deg) scale(1.03)}75%{transform:rotate(6deg) scale(1.03)}}
 @keyframes chestGlow{50%{transform:scale(1.12)}}
 #chestItems{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;min-height:120px}
-.ci{width:104px;display:flex;flex-direction:column;align-items:center;gap:4px;background:linear-gradient(#fffdf7,#fff1d6);color:#2b2d42;border:3px solid #2b2d42;border-radius:16px;padding:8px 4px;box-shadow:0 4px 0 #2b2d42}
+.ci{width:104px;display:flex;flex-direction:column;align-items:center;gap:4px;background:radial-gradient(circle at 50% 30%,#3b4f8f,#18203d 75%);color:#fff3d6;border:2px solid #e9b949;border-radius:16px;padding:8px 4px;box-shadow:inset 0 1px 0 rgba(255,255,255,.3),0 0 0 2px #0b0f1f,0 4px 0 #0b0f1f,0 6px 14px rgba(0,0,0,.4)}.ci .ic img{filter:drop-shadow(0 0 6px rgba(255,214,102,.55))}
 .ci .ic{height:56px;width:56px;display:grid;place-items:center;font-size:38px}.ci .ic img{max-width:56px;max-height:56px;object-fit:contain}
 .ci .nm{font-size:15px;line-height:1.15}.ci .lv{font-size:12px;color:#fff;background:#e63946;border-radius:7px;padding:0 6px}.ci .lv.evo{background:linear-gradient(90deg,#ff9f1c,#ffd23f);color:#222}.ci .lv.new{background:#2a9d8f}.ci .lv.gold{background:#b8860b}
 .ci.spin .nm,.ci.spin .lv{visibility:hidden}.ci.done{animation:pop .3s ease-out}.ci.evo{border-color:#ffb703;background:linear-gradient(#fff8d6,#ffe9a0);box-shadow:0 4px 0 #b8860b,0 0 16px rgba(255,210,63,.9)}
@@ -377,7 +378,7 @@ h2 .hb{-webkit-text-stroke:0;text-shadow:none;letter-spacing:0;font-family:"Jua"
 
 <script>
 'use strict';
-const BUILD = 294;
+const BUILD = 295;
 const BOSS_INTERVAL = 180;      // 보스 등장 간격(초)
 const WAVE_INTERVAL = 60;       // 대규모 몰이 이벤트 간격(초)
 const MAX_ENEMIES = 110;   // Build 202: 220 → 110 (화면이 너무 정신없어서) — 대신 마을 적이 조금 더 튼튼(CROWD_K)
