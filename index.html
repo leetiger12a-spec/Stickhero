@@ -378,7 +378,7 @@ h2 .hb{-webkit-text-stroke:0;text-shadow:none;letter-spacing:0;font-family:"Jua"
 
 <script>
 'use strict';
-const BUILD = 297;
+const BUILD = 298;
 const BOSS_INTERVAL = 180;      // 보스 등장 간격(초)
 const WAVE_INTERVAL = 60;       // 대규모 몰이 이벤트 간격(초)
 const MAX_ENEMIES = 110;   // Build 202: 220 → 110 (화면이 너무 정신없어서) — 대신 마을 적이 조금 더 튼튼(CROWD_K)
@@ -844,6 +844,10 @@ const ACH = [
   { id: 'arenaB3', icon: '👑', name: '투기장 보스 사냥꾼', desc: '투기장 보스 3번 잡기',     title: '보스 사냥꾼', bank: 900, p: () => [ST.arenaBoss || 0, 3] },
   { id: 'blood3',  icon: '🩸', name: '핏빛 밤의 용사', desc: '핏빛 달 밤 3번 버티기',       title: '핏빛 용사',  bank: 600, p: () => [ST.bloods || 0, 3] },
   { id: 'gacha5',  icon: '🎰', name: '멋쟁이 수집가',  desc: '꾸미기 뽑기 5번',             title: '수집가',     bank: 300, p: () => [ST.gachas || 0, 5] },
+  // Build 298
+  { id: 'dboss5',  icon: '📅', name: '오늘의 영웅',    desc: '오늘의 보스 5번 이기기',      title: '오늘의 영웅', bank: 800, p: () => [ST.dbossWins || 0, 5] },
+  { id: 'bloodL3', icon: '🩸', name: '핏빛 대장 사냥꾼', desc: '핏빛 대장 3마리 잡기',       title: '대장 사냥꾼', bank: 700, p: () => [ST.bloodLeaders || 0, 3] },
+  { id: 'treat10', icon: '🍖', name: '펫 요리사',      desc: '펫 간식 10번 주기',           title: '펫 요리사',  bank: 400, p: () => [ST.treats || 0, 10] },
   { id: 'tduel3',  icon: '🗼', name: '탑의 결투사',    desc: '무한 탑 대결 층 3번 깨기',     title: '탑 결투사',   bank: 600, p: () => [ST.towerDuels || 0, 3] },
 ];
 function checkAch() { // 1초마다: 기록 저장 + 새 업적
