@@ -379,7 +379,7 @@ h2 .hb{-webkit-text-stroke:0;text-shadow:none;letter-spacing:0;font-family:"Jua"
 
 <script>
 'use strict';
-const BUILD = 303;
+const BUILD = 304;
 const BOSS_INTERVAL = 180;      // 보스 등장 간격(초)
 const WAVE_INTERVAL = 60;       // 대규모 몰이 이벤트 간격(초)
 const MAX_ENEMIES = 110;   // Build 202: 220 → 110 (화면이 너무 정신없어서) — 대신 마을 적이 조금 더 튼튼(CROWD_K)
@@ -3119,6 +3119,10 @@ const QUESTS = [ // id, 글, 목표(날짜 d), 나올 수 있는지
   { id: 'newelite', txt: n => `🔥❄⚡💣 새 정예 ${n}마리 잡기`,   goal: () => 2, ok: () => eliteOk() },
   { id: 'cave',    txt: () => '🌟 비밀 동굴 다녀오기',            goal: () => 1, ok: () => caveOpen() && G.caveDay !== G.day },
   { id: 'practice', txt: () => '⚔ 보스 연습에서 1번 이기기',      goal: () => 1, ok: () => canPractice() },
+  // Build 304
+  { id: 'dboss',   txt: () => '📅 오늘의 보스 이기기',            goal: () => 1, ok: () => rushOpen() && G.dbossDay !== G.day },
+  { id: 'arenarule', txt: () => '🎲 투기장 특별 웨이브 1번 깨기', goal: () => 1, ok: () => arenaOpen() },
+  { id: 'coins',   txt: n => `🪙 금화 ${n}개 줍기`,               goal: d => 200 + 50 * Math.min(6, d) },
 ];
 function newQuests() {
   const d = G.day || 1, pool = QUESTS.filter(q => !q.ok || q.ok()), out = [];
@@ -3671,7 +3675,7 @@ function updStage(dt) {
       G.enemies.push(e);
     }
     if (st.timer <= 0 && st.arena) { // 🏟 투기장: 다음 웨이브
-      const w = st.arena, g = arenaPrize(w); questEvent('arenaw'); for (const e of G.enemies) if (!e.dead) killEnemy(e);
+      const w = st.arena, g = arenaPrize(w); questEvent('arenaw'); if (st.arenaRule) questEvent('arenarule'); for (const e of G.enemies) if (!e.dead) killEnemy(e);
       G.gold += g; p.hp = Math.min(p.maxHp, p.hp + p.maxHp * 0.15); G.shake = 10; sfx('bigBoom');
       if (w > (ST.arenaBest || 0)) { ST.arenaBest = w; stDirty = true; }
       st.arena++; st.n = 4 + st.arena; st.timer = ARENA_T; st.acc = -3; st.arenaRule = arenaRuleFor(st.arena);
@@ -4031,7 +4035,7 @@ function bossDie(e) {
     questEvent('practice');
     banner(rec ? `⏱ 신기록! ${sec}초` : `⚔ 연습 승리! ${sec}초`, rec ? (old ? `${key} · 전 기록 ${old}초` : `${key} 첫 기록`) : `${key} · 최고 ${old}초`, '#ffd23f', 3);
     sfx(rec ? 'rewardEvo' : 'bigBoom');
-    if (G.st.dboss !== undefined) { const m = readJSON(META_KEY) || {}; m.bank = (m.bank || 0) + 400; writeJSON(META_KEY, m); dropChest(clamp(e.x, -STAGE_HW + 30, STAGE_HW - 30), clamp(e.y + 30, -G.st.L - 350, 80)); stAdd('dbossWins'); banner('📅 오늘의 보스 격파!', '금고 🏦400 + 보물 상자!', '#ffd23f', 3); sfx('unlock'); }
+    if (G.st.dboss !== undefined) { const m = readJSON(META_KEY) || {}; m.bank = (m.bank || 0) + 400; writeJSON(META_KEY, m); dropChest(clamp(e.x, -STAGE_HW + 30, STAGE_HW - 30), clamp(e.y + 30, -G.st.L - 350, 80)); stAdd('dbossWins'); questEvent('dboss'); banner('📅 오늘의 보스 격파!', '금고 🏦400 + 보물 상자!', '#ffd23f', 3); sfx('unlock'); }
     const R = G.st.rush; if (R) { R.won++; // 👑 보스 러시 (Build 139): 다음 보스, 5마리 다 잡으면 금고 보상
       if (R.i < R.list.length - 1) { R.i++; G.st.practice = R.list[R.i]; G.st.bossOn = false; G.st.t = -1.5; G.p.hp = Math.min(G.p.maxHp, G.p.hp + G.p.maxHp * 0.25); banner(`👑 보스 러시 ${R.i + 1}/${R.list.length}`, '체력 25% 회복 · 다음 보스가 와요!', '#ff9f1c', 2.4); return; }
       const v = 300, m2 = readJSON(META_KEY) || {}; m2.bank = (m2.bank || 0) + v; writeJSON(META_KEY, m2); stAdd('rushes'); const rs = Math.max(1, Math.round(G.t - (R.t0 ?? G.t))), rec = !ST.rushBest || rs < ST.rushBest; if (rec) { ST.rushBest = rs; stDirty = true; } banner(rec ? `👑 러시 완주 신기록! ${fmtTime(rs)}` : '👑 보스 러시 완주!', `보스 ${R.list.length}마리 연속 · ${fmtTime(rs)} · 금고에 🪙${v}`, '#ffd23f', 3.2);   /* ⏱ Build 302 */ sfx('unlock'); }
@@ -4517,7 +4521,7 @@ function update(dt) {
       c.pull = true; const sp = 300 + Math.max(0, 200 - d) * 3;
       c.x += dx / d * sp * dt; c.y += dy / d * sp * dt;
     }
-    if (d < 16) { c.dead = true; G.gold += legendOn() && Math.random() < 0.5 ? 2 : 1; coinCombo = G.t - coinComboT < 0.6 ? coinCombo + 1 : 0; coinComboT = G.t; sfx('coinCombo'); }
+    if (d < 16) { c.dead = true; questEvent("coins"); G.gold += legendOn() && Math.random() < 0.5 ? 2 : 1; coinCombo = G.t - coinComboT < 0.6 ? coinCombo + 1 : 0; coinComboT = G.t; sfx('coinCombo'); }
   }
   G.coins = G.coins.filter(c => !c.dead);
 
