@@ -153,6 +153,7 @@ h2{margin:0 0 14px;font:400 clamp(30px,9vw,46px) "BHS","Jua",system-ui,-apple-sy
 .sub{opacity:.9;margin-bottom:18px;font-size:17px}
 #bGacha.spin{animation:gshake .12s infinite alternate}@keyframes gshake{from{transform:rotate(-3deg) scale(1.04)}to{transform:rotate(3deg) scale(1.04)}}/* ✨ Build 291: 큰 버튼에 지나가는 빛 */.btn::after{content:'';position:absolute;top:0;left:-60%;width:40%;height:100%;background:linear-gradient(100deg,transparent,rgba(255,255,255,.45),transparent);transform:skewX(-20deg);animation:btnShine 3.2s ease-in-out infinite;pointer-events:none}@keyframes btnShine{0%,70%{left:-60%}100%{left:130%}}
 /* 🖼 Build 292: 그림 아이콘 */img.ui{height:1.25em;width:auto;vertical-align:-0.28em;margin-right:4px;filter:drop-shadow(0 1px 0 rgba(0,0,0,.4))}img.uib{width:30px;height:30px;object-fit:contain;display:block;margin:auto;pointer-events:none}#bSound{position:relative}#bSound.muted img{filter:grayscale(1) brightness(.7)}#bSound.muted::after{content:'✕';position:absolute;right:3px;bottom:0;color:#ff4d6d;font-size:18px;font-weight:900;text-shadow:0 0 2px #000}
+i.cfx{position:fixed;top:-40px;z-index:99;font-style:normal;pointer-events:none;animation:cfxFall 2.6s cubic-bezier(.3,.6,.6,1) forwards}@keyframes cfxFall{to{transform:translateY(110vh) rotate(540deg);opacity:.2}}
 #ovWard{justify-content:flex-start;overflow-y:auto;-webkit-overflow-scrolling:touch}#ovWard>*{flex-shrink:0}
 .btn{position:relative;overflow:hidden;font:inherit;font-size:23px;padding:12px 38px;border-radius:18px;border:3px solid #3a1a00;background:linear-gradient(#ffe680,#ffc21a 55%,#ff9a00);color:#3a1a00;text-shadow:0 1px 0 rgba(255,255,255,.55);box-shadow:inset 0 3px 0 rgba(255,255,255,.6),inset 0 -4px 0 rgba(150,60,0,.25),0 5px 0 #3a1a00,0 9px 14px rgba(0,0,0,.35);cursor:pointer;margin:8px;min-width:200px}
 .btn:active{transform:translateY(4px);box-shadow:inset 0 3px 0 rgba(255,255,255,.6),inset 0 -2px 0 rgba(150,60,0,.25),0 1px 0 #3a1a00,0 3px 6px rgba(0,0,0,.35)}
@@ -378,7 +379,7 @@ h2 .hb{-webkit-text-stroke:0;text-shadow:none;letter-spacing:0;font-family:"Jua"
 
 <script>
 'use strict';
-const BUILD = 299;
+const BUILD = 300;
 const BOSS_INTERVAL = 180;      // 보스 등장 간격(초)
 const WAVE_INTERVAL = 60;       // 대규모 몰이 이벤트 간격(초)
 const MAX_ENEMIES = 110;   // Build 202: 220 → 110 (화면이 너무 정신없어서) — 대신 마을 적이 조금 더 튼튼(CROWD_K)
@@ -1874,13 +1875,16 @@ const MAIL_GIFT = 100;
 // 📰 Build 290: 새 기능 안내 — 선물을 받으면 지난번 뒤로 새로 생긴 것을 카드로 보여 줌 (최근 것부터 8개)
 const NEWS = [[256, '💡 보스를 처음 만나면 이기는 법 카드'], [257, '⭐ 별 강화 · 몬스터가 더 세졌어요'], [258, '🩷 달리기 졸개 새 동작'], [263, '🔵 탱크 새 동작'], [264, '🟢 슬라임 새 동작'], [265, '🏹 궁수 새 동작'], [266, '💣 자폭병 새 동작'], [267, '🦇 박쥐병 새 동작'], [268, '🐗 돌격병 새 동작'],
   [269, '🎞 도감 몬스터가 움직여요'], [270, '🏟 투기장! 끝없는 웨이브'], [271, '👑 투기장 10웨이브마다 보스'], [272, '🚪 투기장 귀환 포털'], [273, '🎰 꾸미기 뽑기'], [274, '🍖 펫 간식'], [275, '🔥❄ 새 정예 2종'], [276, '🩸 핏빛 달 밤'], [277, '📅 정예 주간 · 보스 주간'], [278, '💡 도감 보스 팁'], [279, '🎞 도감 동작 고르기'], [280, '🏆 기록실 넓히기'],
-  [281, '🏅 새 업적 4개'], [282, '🎲 투기장 특별 웨이브'], [283, '⚡💣 새 정예 2종'], [284, '📜 새 퀘스트 5종'], [285, '🎟 투기장 하루 첫 입장 무료'], [286, '🏆 투기장 TOP 5'], [287, '🧭 미니맵에 정예·상인'], [288, '🩸 핏빛 대장'], [289, '🎰 뽑기 연출'], [290, '📰 새 기능 안내']];
+  [281, '🏅 새 업적 4개'], [282, '🎲 투기장 특별 웨이브'], [283, '⚡💣 새 정예 2종'], [284, '📜 새 퀘스트 5종'], [285, '🎟 투기장 하루 첫 입장 무료'], [286, '🏆 투기장 TOP 5'], [287, '🧭 미니맵에 정예·상인'], [288, '🩸 핏빛 대장'], [289, '🎰 뽑기 연출'], [290, '📰 새 기능 안내'], [291, '✨ 막대·버튼 멋있게'], [292, '🖼 그림 아이콘'], [293, '✨ 일시정지·기록실 새 디자인'], [294, '🖼 버튼 아이콘 16개'], [295, '🎁 상자 화면 빛줄기'], [296, '📅 오늘의 보스'], [297, '📅 오늘의 보스 알림'], [298, '🏅 새 업적 3개'], [299, '✨ 황금 주간 · ❤ 하트 주간'], [300, '🎉 300번째 업데이트!']];
 function showNews(from) { const L = NEWS.filter(n => n[0] > from && n[0] <= BUILD).reverse().slice(0, 8); if (!L.length) return;
   $('dexCard').innerHTML = `<div class="card news"><h3>📰 새로 생긴 것</h3><p><small>Build ${from} → ${BUILD}</small></p><div class="newsL">${L.map(n => `<div>${n[1]} <small>B${n[0]}</small></div>`).join('')}</div>${NEWS.filter(n => n[0] > from).length > 8 ? '<p><small>…그 밖에도 더 있어요!</small></p>' : ''}<div class="tap">눌러서 닫기</div></div>`;
   $('dexCard').classList.add('show'); }
 function mailState() { const m = readJSON(META_KEY) || {}; if (m.lastBuild === undefined) { m.lastBuild = BUILD; writeJSON(META_KEY, m); return null; } return m.lastBuild < BUILD ? m.lastBuild : null; }
-function refreshMail() { const from = mailState(); $('bMail').style.display = from ? '' : 'none'; if (from) $('bMail').innerHTML = `📬 새 버전 선물 도착! (Build ${from} → ${BUILD})<br><small>눌러서 금고 🪙${MAIL_GIFT} 받기</small>`; }
-$('bMail').onclick = () => { audioInit(); const m = readJSON(META_KEY) || {}; if (!(m.lastBuild < BUILD)) return; const from0 = m.lastBuild; m.lastBuild = BUILD; m.bank = (m.bank || 0) + MAIL_GIFT; writeJSON(META_KEY, m); sfx('unlock'); $('bMail').innerHTML = `🎉 금고에 🪙${MAIL_GIFT} 넣었어요! 새 기능을 즐겨요`; setTimeout(refreshMail, 1800); showNews(from0); };
+// 🎉 Build 300: 300번째 업데이트 기념 — 300을 넘어오는 선물은 🏦1000 + 색종이
+const giftAmt = from => from < 300 && BUILD >= 300 ? 1000 : MAIL_GIFT;
+function confetti() { for (let i = 0; i < 60; i++) { const c = document.createElement('i'); c.className = 'cfx'; c.textContent = ['🎉', '⭐', '✨', '🎊', '🪙'][i % 5]; c.style.left = Math.random() * 100 + 'vw'; c.style.animationDelay = Math.random() * 0.8 + 's'; c.style.fontSize = 14 + Math.random() * 18 + 'px'; document.body.appendChild(c); setTimeout(() => c.remove(), 3600); } }
+function refreshMail() { const from = mailState(); $('bMail').style.display = from ? '' : 'none'; if (from) $('bMail').innerHTML = from < 300 && BUILD >= 300 ? `🎉 300번째 업데이트 기념 선물! (Build ${from} → ${BUILD})<br><small>눌러서 금고 🏦1000 받기</small>` : `📬 새 버전 선물 도착! (Build ${from} → ${BUILD})<br><small>눌러서 금고 🪙${MAIL_GIFT} 받기</small>`; }
+$('bMail').onclick = () => { audioInit(); const m = readJSON(META_KEY) || {}; if (!(m.lastBuild < BUILD)) return; const from0 = m.lastBuild, g = giftAmt(from0); m.lastBuild = BUILD; m.bank = (m.bank || 0) + g; writeJSON(META_KEY, m); sfx('unlock'); if (g > MAIL_GIFT) confetti(); $('bMail').innerHTML = `🎉 금고에 🏦${g} 넣었어요! 새 기능을 즐겨요`; setTimeout(refreshMail, 1800); showNews(from0); };
 function refreshWeekly() { const m = readJSON(META_KEY) || {}, w = weekNow(), done = m.weeklyDone === weekNo();
   $('bWeekly').innerHTML = `🎯 이번 주 도전: <b>${w.name}</b> ${m.weeklyOn ? '✅ 켜짐' : '⬜ 꺼짐'}${done ? ' · 🏆 보상 받음' : ''}<br><small>${w.desc} · 보스 3마리 = 금고 🪙300</small>`; }
 $('bWeekly').onclick = () => { audioInit(); sfx('pick'); const m = readJSON(META_KEY) || {}; m.weeklyOn = !m.weeklyOn; writeJSON(META_KEY, m); refreshWeekly(); };
