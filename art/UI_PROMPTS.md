@@ -22,3 +22,24 @@ GRID RULES (strict):
 BACKGROUND: plain pure white (#FFFFFF) everywhere, no grid lines, no frame borders, no shadows, no glow halo, no sticker border, no text, no letters, no numbers, no watermark.
 QUALITY: ultra high resolution, QHD (2560x1440) or higher, crisp clean lines
 ```
+
+## ①-2 UI 아이콘 16개 시트 — "멋있게" 버전 (아빠 요청, Build 291) — ChatGPT, 첨부 `art/ref/STYLE_MASTER.png`
+```
+TASK: one premium 2D fantasy action game UI ICON SHEET: exactly 16 icons arranged in a grid of 4 columns x 4 rows, read left to right, top row first.
+
+STYLE (most important): EPIC and POLISHED, like the UI of a top-quality mobile RPG. Each icon is a heroic, detailed object with thick dark outlines (same outline thickness as the attached characters), rich saturated colors, strong cel shading with deep shadows and bright sharp highlights, gleaming GOLD trims and metal edges, a few small gem accents. Bold and cool, NOT cute or babyish. Every icon is a single solid object, slightly 3/4 view, very readable at small size (32 px).
+
+ICONS IN THIS EXACT ORDER:
+- Row 1: (1) a glossy crimson crystal heart with a gold rim, (2) a fortified village keep with a red banner, (3) a menacing horned skull, (4) a sturdy wooden log bound with an iron band.
+- Row 2: (5) a rugged granite ore chunk with silver specks, (6) a royal quest scroll with a red wax seal and gold rods, (7) a pause emblem: two thick gold bars on a round dark-navy shield badge with a gold rim, (8) a speaker emblem with sound waves on a round dark-navy shield badge with a gold rim.
+- Row 3: (9) a swirling teal wind gust with speed streaks (dash), (10) a blazing orange-gold burst star with sharp rays (special attack), (11) a rugged military radio with an antenna and a blue light (call for help), (12) a golden champion trophy with a red gem.
+- Row 4: (13) a steel gear with gold inlay (settings), (14) an old treasure map with a red X and a gold compass, (15) a heavy leather monster tome with iron corners and a glowing eye on the cover, (16) a gold-and-steel vault safe with a big round dial.
+
+GRID RULES (strict):
+- Every icon is centered in its cell and fills about 70% of the cell, all icons the SAME visual size.
+- VERY WIDE empty white gaps between all icons and between the rows; nothing touches or comes near another cell.
+- Only the 16 icons. No labels, no numbers, no extra items.
+
+BACKGROUND: plain pure white (#FFFFFF) everywhere, no grid lines, no frame borders, no shadows, no glow halo, no sticker border, no text, no letters, no numbers, no watermark.
+QUALITY: ultra high resolution, QHD (2560x1440) or higher, crisp clean lines
+```
