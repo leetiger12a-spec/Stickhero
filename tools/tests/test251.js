@@ -11,6 +11,6 @@ const { chromium } = require('/opt/node22/lib/node_modules/playwright');
     const o = MERCH.find(x => x.k === k); G.merchant = { x: G.p.x, y: G.p.y, t: 40, k, price: o.price(1), hold: 0 }; const d0 = G.p.dmgMul; await new Promise(q => setTimeout(q, 1600));
     return { gold: G.gold, pulled: G.gems.filter(g => g.pull).length, gems: G.gems.length, wish: G.fntK, t: G.fntT, dmg: G.p.dmgMul / d0, m: !!G.merchant, n: MERCH.length }; }, [k, prep]);
   const a = await buy('magnet', true); console.log(JSON.stringify(a)); check(a.gold < 1000 && !a.m && (a.pulled > 0 || a.gems < 8), 'magnet bought');
-  const c = await buy('luck'); console.log(JSON.stringify(c)); check(c.gold < 1000 && c.wish === 'atk' && c.t > 55 && Math.abs(c.dmg - 1.25) < 1e-6 && c.n === 7, 'luck bought');
+  const c = await buy('luck'); console.log(JSON.stringify(c)); check(c.gold < 1000 && c.wish === 'atk' && c.t > 55 && Math.abs(c.dmg - 1.25) < 1e-6 && c.n === 8, 'luck bought');
   await b.close(); console.log('ERRORS:', errors.length); errors.forEach(e => console.log(e)); process.exit(errors.length ? 1 : 0);
 })();
