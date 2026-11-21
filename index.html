@@ -29,7 +29,7 @@ canvas{display:block;position:fixed;inset:0;width:100%;height:100%}
 @keyframes shine{0%,55%{left:-60%}100%{left:130%}}
 .mrow{display:flex;gap:8px;margin-top:6px}
 #bDaily{position:relative}#bDaily.new::after{content:'';position:absolute;top:-4px;right:-4px;width:12px;height:12px;border-radius:50%;background:#ff3b3b;border:2px solid #fff}
-#statList{width:min(92vw,360px);margin:10px 0;display:grid;grid-template-columns:1fr 1fr;gap:8px;max-height:62vh;overflow-y:auto;padding:2px}#statList .st{background:#fffaf0;color:#222;border:3px solid #222;border-radius:12px;padding:7px 8px;font-size:12px;font-weight:800}#statList .st b{display:block;font-size:19px;color:#d35400}
+#statList{width:min(92vw,360px);margin:10px 0;display:grid;grid-template-columns:1fr 1fr;gap:8px;max-height:62vh;overflow-y:auto;padding:2px}#statList .st{background:#fffaf0;color:#222;border:3px solid #222;border-radius:12px;padding:7px 8px;font-size:12px;font-weight:800}#statList .st b{display:block;font-size:19px;color:#d35400}#statList .stH{grid-column:1/-1;color:#ffd23f;font-weight:800;font-size:15px;margin-top:6px;text-align:left}
 #spinBox{position:relative;width:170px;height:170px;margin:4px auto 6px}#spinWheel{width:170px;height:170px;border-radius:50%;border:4px solid #222;transition:transform 2.6s cubic-bezier(.15,.9,.2,1);position:relative;overflow:hidden}#spinWheel span{position:absolute;left:50%;top:50%;width:0;height:0;font-size:12px;font-weight:800;color:#222}#spinWheel span i{position:absolute;transform:translate(-50%,-50%);white-space:nowrap;font-style:normal}#spinPin{position:absolute;left:50%;top:-14px;transform:translateX(-50%);font-size:24px;color:#ff3b3b;text-shadow:0 2px 0 #222}#spinRes{min-height:18px;color:#ffd23f}
 #dailyGrid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;width:min(92vw,360px);margin:10px 0}
 #dailyGrid .dd{border:3px solid #222;border-radius:12px;background:#fffaf0;color:#222;padding:6px 2px;font-weight:800;font-size:12px;display:flex;flex-direction:column;align-items:center;gap:2px}
@@ -375,7 +375,7 @@ h2 .hb{-webkit-text-stroke:0;text-shadow:none;letter-spacing:0;font-family:"Jua"
 
 <script>
 'use strict';
-const BUILD = 279;
+const BUILD = 280;
 const BOSS_INTERVAL = 180;      // 보스 등장 간격(초)
 const WAVE_INTERVAL = 60;       // 대규모 몰이 이벤트 간격(초)
 const MAX_ENEMIES = 110;   // Build 202: 220 → 110 (화면이 너무 정신없어서) — 대신 마을 적이 조금 더 튼튼(CROWD_K)
@@ -743,8 +743,12 @@ function statRows() { const b = loadBest(), m = readJSON(META_KEY) || {};
     ['🔥 최고 콤보', ST.bestCombo || 0], ['🌟 동굴 탐험', `${ST.caves || 0}번`], ['🎁 대박 상자', `${ST.jacks || 0}개`],
     ['⚡ 동료 필살기', `${ST.ults || 0}번`], ['👑 보스 러시 완주', `${ST.rushes || 0}번`], ['😡 화난 보스 처치', ST.rageKills || 0], ['🌕 보름달 밤', ST.moons || 0],
     // Build 172: 탑 기록 · 새 기능
-    ['🎲 탑 특별 층 돌파', `${ST.ruleClears || 0}번`], ['🎁 탑 보물 상자', `${ST.towerJacks || 0}개`], ['⚔ 정예 처치', ST.elites || 0], ['💥 레전드 버스트', `${ST.heroUlts || 0}번`], ['🌀 환생', `${m.reborn || 0}번`]]; }
-function openStats() { state = 'stats'; showOv('ovStats'); $('statList').innerHTML = statRows().map(([k, v]) => `<div class="st">${k}<b>${v}</b></div>`).join('');
+    ['🎲 탑 특별 층 돌파', `${ST.ruleClears || 0}번`], ['🎁 탑 보물 상자', `${ST.towerJacks || 0}개`], ['⚔ 정예 처치', ST.elites || 0], ['💥 레전드 버스트', `${ST.heroUlts || 0}번`], ['🌀 환생', `${m.reborn || 0}번`],
+    // 🏆 Build 280: 새 기록 + 보스별 가장 빠른 기록
+    ['__h', '🏟 새 도전'], ['🏟 투기장 최고', `웨이브 ${ST.arenaBest || 0}`], ['🏟 투기장 도전', `${ST.arenas || 0}번`], ['👑 투기장 보스', ST.arenaBoss || 0], ['🩸 핏빛 달 밤', ST.bloods || 0],
+    ['🎰 꾸미기 뽑기', `${ST.gachas || 0}번`], ['🍖 펫 간식', `${ST.treats || 0}번`],
+    ['__h', '⏱ 보스별 가장 빠른 기록'], ...DEX.filter(d => d.boss).map(d => { const f = (ST.bfast || {})[d.boss], pb = pbest(d.boss); return [`${d.name}`, f ? `${f}초${pb && pb < f ? ` · 연습 ${pb}초` : ''}` : pb ? `연습 ${pb}초` : (ST.bk || {})[d.boss] ? '기록 없음' : '❓']; })]; }
+function openStats() { state = 'stats'; showOv('ovStats'); $('statList').innerHTML = statRows().map(([k, v]) => k === '__h' ? `<div class="stH">${v}</div>` : `<div class="st">${k}<b>${v}</b></div>`).join('');
   $('bStatsOk').onclick = () => { sfx('pick'); state = 'title'; refreshTitle(); showOv('ovTitle'); }; }
 $('bStats').onclick = () => { audioInit(); sfx('pick'); openStats(); };
 $('bShopP').onclick = () => { sfx('pick'); openShop(); };
