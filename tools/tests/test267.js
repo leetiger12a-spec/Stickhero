@@ -6,7 +6,7 @@ const { chromium } = require('/opt/node22/lib/node_modules/playwright');
   await ctx.addInitScript(() => { localStorage.setItem('stickhero_story', '1'); window.__noGold = true; window.__eliteP = 0; window.__bountyT = 999; window.__tmapT = 999; });
   const page = await ctx.newPage(); const OUT = process.env.OUT || 'shots'; page.on('pageerror', e => errors.push(e.message)); page.on('console', m => { if (m.type() === 'error') errors.push(m.text()); });
   await page.goto('http://localhost:8765/index.html'); await page.waitForTimeout(900); await page.click('#bStart'); await page.waitForTimeout(400);
-  const r0 = await page.evaluate(() => { const G = SH.G; G.gold = 2000; SH.openMap(); return { dmg: G.p.dmgMul, hp: G.p.maxHp }; });
+  const r0 = await page.evaluate(() => { const G = SH.G; G.quests = []; G.gold = 2000; SH.openMap(); return { dmg: G.p.dmgMul, hp: G.p.maxHp }; });
   await page.click('#bSpend'); await page.click('#bSp_statue'); await page.waitForTimeout(100); await page.click('#bSp_statue'); await page.waitForTimeout(100);
   await page.screenshot({ path: `${OUT}/b351_spend.png` });
   const r1 = await page.evaluate(() => { const G = SH.G; return { gold: G.gold, lv: statueLv(), meta: (readJSON(META_KEY) || {}).statue, dmg: G.p.dmgMul, hp: G.p.maxHp, spent: ST.goldSpent, btn: !!$('bSp_statue'), card: $('mapCard').textContent }; });

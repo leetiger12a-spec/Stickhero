@@ -383,7 +383,7 @@ h2 .hb{-webkit-text-stroke:0;text-shadow:none;letter-spacing:0;font-family:"Jua"
 
 <script>
 'use strict';
-const BUILD = 359;
+const BUILD = 360;
 const BOSS_INTERVAL = 180;      // 보스 등장 간격(초)
 const WAVE_INTERVAL = 60;       // 대규모 몰이 이벤트 간격(초)
 const MAX_ENEMIES = 110;   // Build 202: 220 → 110 (화면이 너무 정신없어서) — 대신 마을 적이 조금 더 튼튼(CROWD_K)
@@ -1908,7 +1908,7 @@ const MAIL_GIFT = 100;
 // 📰 Build 290: 새 기능 안내 — 선물을 받으면 지난번 뒤로 새로 생긴 것을 카드로 보여 줌 (최근 것부터 8개)
 const NEWS = [[256, '💡 보스를 처음 만나면 이기는 법 카드'], [257, '⭐ 별 강화 · 몬스터가 더 세졌어요'], [258, '🩷 달리기 졸개 새 동작'], [263, '🔵 탱크 새 동작'], [264, '🟢 슬라임 새 동작'], [265, '🏹 궁수 새 동작'], [266, '💣 자폭병 새 동작'], [267, '🦇 박쥐병 새 동작'], [268, '🐗 돌격병 새 동작'],
   [269, '🎞 도감 몬스터가 움직여요'], [270, '🏟 투기장! 끝없는 웨이브'], [271, '👑 투기장 10웨이브마다 보스'], [272, '🚪 투기장 귀환 포털'], [273, '🎰 꾸미기 뽑기'], [274, '🍖 펫 간식'], [275, '🔥❄ 새 정예 2종'], [276, '🩸 핏빛 달 밤'], [277, '📅 정예 주간 · 보스 주간'], [278, '💡 도감 보스 팁'], [279, '🎞 도감 동작 고르기'], [280, '🏆 기록실 넓히기'],
-  [281, '🏅 새 업적 4개'], [282, '🎲 투기장 특별 웨이브'], [283, '⚡💣 새 정예 2종'], [284, '📜 새 퀘스트 5종'], [285, '🎟 투기장 하루 첫 입장 무료'], [286, '🏆 투기장 TOP 5'], [287, '🧭 미니맵에 정예·상인'], [288, '🩸 핏빛 대장'], [289, '🎰 뽑기 연출'], [290, '📰 새 기능 안내'], [291, '✨ 막대·버튼 멋있게'], [292, '🖼 그림 아이콘'], [293, '✨ 일시정지·기록실 새 디자인'], [294, '🖼 버튼 아이콘 16개'], [295, '🎁 상자 화면 빛줄기'], [296, '📅 오늘의 보스'], [297, '📅 오늘의 보스 알림'], [298, '🏅 새 업적 3개'], [299, '✨ 황금 주간 · ❤ 하트 주간'], [300, '🎉 300번째 업데이트!'], [301, '🎁 투기장 웨이브 상자'], [302, '⏱ 보스 러시 기록'], [303, '🛒 상인 새 물건 2개'], [304, '📜 새 퀘스트 3종'], [305, '✨ 레벨업 카드 새 디자인'], [306, '🏆 기록실 새 칸 3개'], [307, '📅 오늘의 보스 특기 2개 더'], [308, '🎲 투기장 정예·황금 웨이브'], [309, '💪 투기장 기세'], [310, '🏅 새 업적 3개'], [311, '🔥 오늘의 보스 연속 승리'], [312, '🔥 강화 상점 오늘의 할인'], [313, '🍀 행운의 레벨업 (카드 4장)'], [314, '🧲 자석 정예'], [315, '🏆 투기장 새 기록 보너스'], [316, '📊 기록실: 연속 승리'], [317, '🩸 핏빛 대장 호위대'], [318, '🔥 하드 보스 러시'], [319, '🔥 상인 반값 세일'], [320, '🏅 새 업적 3개'], [321, '🚀 질주 주간 · 💎 구슬 주간'], [322, '🐾 펫 최고 Lv 7'], [323, '✨ 투기장 황금 보스'], [324, '📅 도감에 오늘의 보스'], [325, '📜 새 퀘스트 2종'], [326, '📊 기록실 새 칸 3개'], [331, '⛲ 소원 분수 (지도 위 버튼)'], [332, '👻 새 정예: 유령'], [333, '💥 투기장 폭발 웨이브'], [334, '🌀 오늘의 보스 특기: 순간이동'], [335, '🛒 상인 새 물건: 🧲 자석 · 🧪 행운 물약'], [336, '💰 현상금 몬스터'], [337, '📜 새 퀘스트 3종'], [338, '💰 현상금 주간 · ⛲ 행운 주간'], [339, '🏅 새 업적 3개'], [340, '📊 기록실 새 칸 3개'], [341, '🗺 보물 지도 (❌ 자리 파기)'], [342, '💚 새 정예: 치유'], [343, '🪞 오늘의 보스 특기: 분신'], [344, '🌑 투기장 일식 웨이브'], [345, '👑 황금 현상금 (3연속)'], [346, '🏦 상인 새 물건: 금고 저금'], [347, '⛲ 분수 행운 2종 더 (🧲·⚡)'], [348, '📜 새 퀘스트 3종 (지도·치유·일식)'], [349, '🗺 탐험 주간 · 🛒 큰손 주간'], [350, '🏅 업적 3개 · 📊 기록실 4칸'], [351, '🗿 영웅 동상 (🪙 금화 쓰기)'], [352, '🎟 재도전권 (동굴·보스)'], [353, '💖 금화로 바로 부활'], [354, '🐱 동료 특훈'], [355, '💰 현상금 의뢰'], [356, '🏪 상인 단골 레벨'], [357, '📜 새 퀘스트 3종 (금화 쓰기·동상·특훈)'], [358, '🏅 새 업적 3개 (동상·큰손·특훈)'], [359, '📊 기록실 새 칸 5개 (쓴 금화 등)']];
+  [281, '🏅 새 업적 4개'], [282, '🎲 투기장 특별 웨이브'], [283, '⚡💣 새 정예 2종'], [284, '📜 새 퀘스트 5종'], [285, '🎟 투기장 하루 첫 입장 무료'], [286, '🏆 투기장 TOP 5'], [287, '🧭 미니맵에 정예·상인'], [288, '🩸 핏빛 대장'], [289, '🎰 뽑기 연출'], [290, '📰 새 기능 안내'], [291, '✨ 막대·버튼 멋있게'], [292, '🖼 그림 아이콘'], [293, '✨ 일시정지·기록실 새 디자인'], [294, '🖼 버튼 아이콘 16개'], [295, '🎁 상자 화면 빛줄기'], [296, '📅 오늘의 보스'], [297, '📅 오늘의 보스 알림'], [298, '🏅 새 업적 3개'], [299, '✨ 황금 주간 · ❤ 하트 주간'], [300, '🎉 300번째 업데이트!'], [301, '🎁 투기장 웨이브 상자'], [302, '⏱ 보스 러시 기록'], [303, '🛒 상인 새 물건 2개'], [304, '📜 새 퀘스트 3종'], [305, '✨ 레벨업 카드 새 디자인'], [306, '🏆 기록실 새 칸 3개'], [307, '📅 오늘의 보스 특기 2개 더'], [308, '🎲 투기장 정예·황금 웨이브'], [309, '💪 투기장 기세'], [310, '🏅 새 업적 3개'], [311, '🔥 오늘의 보스 연속 승리'], [312, '🔥 강화 상점 오늘의 할인'], [313, '🍀 행운의 레벨업 (카드 4장)'], [314, '🧲 자석 정예'], [315, '🏆 투기장 새 기록 보너스'], [316, '📊 기록실: 연속 승리'], [317, '🩸 핏빛 대장 호위대'], [318, '🔥 하드 보스 러시'], [319, '🔥 상인 반값 세일'], [320, '🏅 새 업적 3개'], [321, '🚀 질주 주간 · 💎 구슬 주간'], [322, '🐾 펫 최고 Lv 7'], [323, '✨ 투기장 황금 보스'], [324, '📅 도감에 오늘의 보스'], [325, '📜 새 퀘스트 2종'], [326, '📊 기록실 새 칸 3개'], [331, '⛲ 소원 분수 (지도 위 버튼)'], [332, '👻 새 정예: 유령'], [333, '💥 투기장 폭발 웨이브'], [334, '🌀 오늘의 보스 특기: 순간이동'], [335, '🛒 상인 새 물건: 🧲 자석 · 🧪 행운 물약'], [336, '💰 현상금 몬스터'], [337, '📜 새 퀘스트 3종'], [338, '💰 현상금 주간 · ⛲ 행운 주간'], [339, '🏅 새 업적 3개'], [340, '📊 기록실 새 칸 3개'], [341, '🗺 보물 지도 (❌ 자리 파기)'], [342, '💚 새 정예: 치유'], [343, '🪞 오늘의 보스 특기: 분신'], [344, '🌑 투기장 일식 웨이브'], [345, '👑 황금 현상금 (3연속)'], [346, '🏦 상인 새 물건: 금고 저금'], [347, '⛲ 분수 행운 2종 더 (🧲·⚡)'], [348, '📜 새 퀘스트 3종 (지도·치유·일식)'], [349, '🗺 탐험 주간 · 🛒 큰손 주간'], [350, '🏅 업적 3개 · 📊 기록실 4칸'], [351, '🗿 영웅 동상 (🪙 금화 쓰기)'], [352, '🎟 재도전권 (동굴·보스)'], [353, '💖 금화로 바로 부활'], [354, '🐱 동료 특훈'], [355, '💰 현상금 의뢰'], [356, '🏪 상인 단골 레벨'], [357, '📜 새 퀘스트 3종 (금화 쓰기·동상·특훈)'], [358, '🏅 새 업적 3개 (동상·큰손·특훈)'], [359, '📊 기록실 새 칸 5개 (쓴 금화 등)'], [360, '💡 금화가 많으면 쓰는 곳 알려 줌']];
 function showNews(from) { const L = NEWS.filter(n => n[0] > from && n[0] <= BUILD).reverse().slice(0, 8); if (!L.length) return;
   $('dexCard').innerHTML = `<div class="card news"><h3><img class="ui" src="img/ui_news.webp" alt="">새로 생긴 것</h3><p><small>Build ${from} → ${BUILD}</small></p><div class="newsL">${L.map(n => `<div>${n[1]} <small>B${n[0]}</small></div>`).join('')}</div>${NEWS.filter(n => n[0] > from).length > 8 ? '<p><small>…그 밖에도 더 있어요!</small></p>' : ''}<div class="tap">눌러서 닫기</div></div>`;
   $('dexCard').classList.add('show'); }
@@ -1970,7 +1970,7 @@ function drawReborn(p) { const n = rebornC === null ? rebornN() : rebornC; if (!
   const t = `🌀×${n}`; ctx.lineWidth = 3; ctx.strokeStyle = '#2a0845'; ctx.strokeText(t, 0, 0); ctx.fillStyle = '#e0aaff'; ctx.fillText(t, 0, 0); ctx.restore(); }
 function renderPauseStats() { $('bReborn').style.display = G && G.lvl >= REBORN_LV ? '' : 'none'; const p = G.p, pct = v => `${v >= 1 ? '+' : ''}${Math.round((v - 1) * 100)}%`;
   const ws = Object.keys(G.weapons).map(id => `${wMini(id, G.weapons[id] > MAX_WLV)} ${G.weapons[id] > MAX_WLV ? '✨진화' : 'Lv' + G.weapons[id]}`).join(' · ');
-  const cells = [['⚔ 공격력', pct(p.dmgMul)], ['⏱ 공격 빠르기', pct(1 / p.cdMul)], ['💨 이동 속도', Math.round(p.speed)], ['❤ 최대 체력', p.maxHp], ['🧲 자석 범위', Math.round(p.magnet)], ['🎒 통나무', `${p.cap}개`]];
+  const cells = [['⚔ 공격력', pct(p.dmgMul)], ['⏱ 공격 빠르기', pct(1 / p.cdMul)], ['💨 이동 속도', Math.round(p.speed)], ['❤ 최대 체력', p.maxHp], ['🧲 자석 범위', Math.round(p.magnet)], ['🎒 통나무', `${p.cap}개`], ['🪙 이번 판 쓴 금화', (G.spentRun || 0).toLocaleString()]];   // Build 360
   const al = G.allies.map((a, i) => `<button class="anm" data-i="${i}">${ALLY_TYPES[a.type].icon} ${a.name || '?'} 🔄</button>`).join('');
   const all = [...G.allies.map((a, i) => ({ a, on: true, i })), ...(G.bench || []).map((a, i) => ({ a, on: false, i }))];
   const pk = all.length > ALLY_ACTIVE ? `<div class="ps pw">🐱 함께 다닐 동료 (최대 ${ALLY_ACTIVE}명 · 눌러서 바꾸기)<br>${all.map(o => `<button class="apk${o.on ? ' on' : ''}" data-on="${o.on ? 1 : 0}" data-i="${o.i}">${o.on ? '✅' : '💤'} ${ALLY_TYPES[o.a.type].icon} ${o.a.name || '?'} Lv${o.a.lvl || 1}</button>`).join('')}</div>` : '';
@@ -2679,7 +2679,7 @@ function updNight(dt) {
     heroSay('morning', true); banner('☀️ 아침이다!', `밤을 버텼다! 🪙${bonus}`, '#ffd23f', 2.6); sfx('cheer'); cheerAll(); floatText(p.x, p.y - 60, `+🪙${bonus}`, '#ffd23f', 20, 1.4);
   }
   if (G.dbossTold !== G.day && G.t > 6 && rushOpen() && G.dbossDay !== G.day && !G.boss && !on) { G.dbossTold = G.day; const T = dbossToday(); bannerSoft('📅 오늘의 보스가 기다려요!', `${BOSSES[T.n].name} · 지도 → 🗼 무한 탑 아래`, '#ff6b6b', 3); }   // 📅 Build 297
-  updGhostChest(dt, on, ph); updMerchant(dt, on); updRain(dt, on); updRainbow(dt); updWish(dt, on && ph > 2); updBounty(dt); updTmap(dt);
+  updGhostChest(dt, on, ph); updMerchant(dt, on); updRain(dt, on); updRainbow(dt); updWish(dt, on && ph > 2); updBounty(dt); updTmap(dt); updRich();
   // 🦇 밤 박쥐 떼 (Build 99): 밤 동안 14초마다 한 방향에서 박쥐 떼가 날아옴 (울타리를 넘어옴, 빠르지만 약함)
   if (on && ph > 3) { G.batT = (G.batT || 0) - dt; if (G.batT <= 0) { G.batT = 14; batSwarm(6 + Math.min(6, G.nights || 0)); } } else G.batT = 0;
   const k = nightK(); G.flies = (G.flies || []).filter(f => (f.life -= dt) > 0);
@@ -2745,6 +2745,11 @@ function drawEclipse() { if (!(G.mode === 'stage' && G.st && G.st.arena && G.st.
   ctx.save(); const g = ctx.createRadialGradient(x, y, R * 0.55, x, y, R * 1.5); g.addColorStop(0, 'rgba(5,3,20,0)'); g.addColorStop(1, 'rgba(5,3,20,.9)'); ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
   ctx.fillStyle = '#ff3b3b'; for (const e of G.enemies) { if (e.dead) continue; const ex = (e.x - G.cam.x) * SCALE + W / 2, ey = (e.y - 40 - G.cam.y) * SCALE * K + H / 2; if ((ex - x) ** 2 + (ey - y) ** 2 < R * R) continue; ctx.globalAlpha = 0.6 + 0.4 * Math.sin(G.t * 4 + e.id); ctx.beginPath(); ctx.arc(ex - 4, ey, 2.4, 0, 7); ctx.arc(ex + 4, ey, 2.4, 0, 7); ctx.fill(); }
   ctx.restore(); }
+// 💡 Build 360: 금화가 많이 쌓이면 4분에 한 번 "금화 쓰기"를 알려 줘요
+const RICH_G = 1500;
+function updRich() { if (G.gold < RICH_G || G.boss || G.raid || G.t - (G.richTold ?? -999) < 240 || G.t < 30 || G.banner) return; G.richTold = G.t;
+  const l = statueLv(), tip = l < STATUE_MAX && G.gold >= statueCost(l) ? `🗿 동상 Lv ${l + 1} 쌓기 🪙${statueCost(l).toLocaleString()}` : '동료 특훈 · 상인 단골 · 재도전권';
+  bannerSoft(`🪙 금화가 ${G.gold.toLocaleString()}개나 있어요!`, `출격 문 → 지도 → 🪙 금화 쓰기 · ${tip}`, '#ffd23f', 3); }
 function updMerchant(dt, night) {
   const p = G.p;
   if (!G.merchant) {
@@ -3627,7 +3632,7 @@ function updFnt(dt) { if (!(G.fntT > 0)) return; G.fntT -= dt; if (G.fntT <= 0) 
 // 🪙 Build 351: 금화 쓰기 창 — 이번 판 금화를 쓰는 곳을 한곳에 (동상 · 앞으로 더)
 const SPEND = [];   // { id, html: () => 카드 안 내용, go: () => 눌렀을 때 }
 function spendCard(msg) { $('mapCard').innerHTML = (msg ? `<div class="t" style="color:#0096c7">${msg}</div>` : '') + `<div class="t">🪙 금화 쓰기 · 지금 🪙${G.gold}</div>` + SPEND.map(o => { const h = o.html(); return h ? `<div class="r spendR" style="text-align:left;font-size:13px;line-height:1.45;margin-top:6px">${h}</div>` : ''; }).join('');
-  for (const o of SPEND) { const b = $('bSp_' + o.id); if (b) b.onclick = () => { const m = o.go(); if (m) { stAdd('goldSpent', o.paid || 0); questEvent('spend', o.paid || 0); sfx('unlock'); spendCard(m); } }; } }
+  for (const o of SPEND) { const b = $('bSp_' + o.id); if (b) b.onclick = () => { const m = o.go(); if (m) { stAdd('goldSpent', o.paid || 0); G.spentRun = (G.spentRun || 0) + (o.paid || 0); questEvent('spend', o.paid || 0); sfx('unlock'); spendCard(m); } }; } }
 const spBtn = (id, txt, cost, can) => can ? `<button class="btn" id="bSp_${id}" style="margin-top:4px;width:100%">${txt} 🪙${cost.toLocaleString()}</button>` : `<div style="color:#e63946;font-weight:800">${txt} 🪙${cost.toLocaleString()} · 금화가 모자라요</div>`;
 $('bSpend').onclick = () => { spendCard(); sfx('pick'); };
 // 🗿 영웅 동상 — 단계마다 공격·최대 체력 +2% (영구, 게임이 끝나도 남음). 값은 🪙500 × 다음 단계, 최고 25단계
@@ -3661,7 +3666,7 @@ let reviveTxt = '';
 function updReviveBtn() { const B = $('bRevive'), on = !!(G && G.p.dead && G.respawnT > 0.6 && state === 'play'); const t = on ? `💖 바로 부활! 🪙${reviveCost()}${G.gold < reviveCost() ? ' (모자라요)' : ''}` : '';
   if (t !== reviveTxt) { reviveTxt = t; B.style.display = on ? '' : 'none'; B.textContent = t; B.classList.toggle('no', on && G.gold < reviveCost()); } }
 $('bRevive').onclick = e => { e.stopPropagation(); const p = G && G.p, c = G && reviveCost(); if (!p || !p.dead || G.gold < c) { sfx('hurt'); return; }
-  G.gold -= c; G.goldRevives = (G.goldRevives || 0) + 1; stAdd('goldRevives'); stAdd('goldSpent', c); questEvent('spend', c); questEvent('grevive');
+  G.gold -= c; G.goldRevives = (G.goldRevives || 0) + 1; stAdd('goldRevives'); stAdd('goldSpent', c); G.spentRun = (G.spentRun || 0) + c; questEvent('spend', c); questEvent('grevive');
   p.dead = false; p.hp = p.maxHp; p.inv = 2.5; burst(p.x, p.y - 12, '#ff6b81', 34, 240, 6, 0.8); G.rings.push({ x: p.x, y: p.y, r: 120, life: 0.5, max: 0.5, color: '#ff4d6d' }); sfx('level'); banner('💖 금화 부활!', `🪙${c} · 그 자리에서 다시!`, '#ff6b81', 1.6); updReviveBtn(); };
 function drawStatue() { const l = statueLv(); if (!l) return; const P = statuePos(), sc = 0.8 + Math.min(1, l / STATUE_MAX) * 0.7, gold = l >= 10;
   ctx.save(); ctx.translate(P.x, P.y); ctx.scale(1, IK);

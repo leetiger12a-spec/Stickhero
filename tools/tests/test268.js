@@ -6,7 +6,7 @@ const { chromium } = require('/opt/node22/lib/node_modules/playwright');
   await ctx.addInitScript(() => { localStorage.setItem('stickhero_story', '1'); window.__noGold = true; window.__eliteP = 0; });
   const page = await ctx.newPage(); page.on('pageerror', e => errors.push(e.message)); page.on('console', m => { if (m.type() === 'error') errors.push(m.text()); });
   await page.goto('http://localhost:8765/index.html'); await page.waitForTimeout(900); await page.click('#bStart'); await page.waitForTimeout(400);
-  const r0 = await page.evaluate(() => { const G = SH.G; G.gold = 2000; G.stageN = 6; G.stars = [3, 3, 3, 3, 3, 3]; G.caveDay = 0; G.dbossDay = 0; SH.openMap(); $('bSpend').onclick(); return { cave: !!$('bSp_retry_cave'), db: !!$('bSp_retry_dboss') }; });
+  const r0 = await page.evaluate(() => { const G = SH.G; G.quests = []; G.gold = 2000; G.stageN = 6; G.stars = [3, 3, 3, 3, 3, 3]; G.caveDay = 0; G.dbossDay = 0; SH.openMap(); $('bSpend').onclick(); return { cave: !!$('bSp_retry_cave'), db: !!$('bSp_retry_dboss') }; });
   const r1 = await page.evaluate(() => { const G = SH.G; G.caveDay = G.day; G.dbossDay = G.day; $('bSpend').onclick(); return { cave: !!$('bSp_retry_cave'), db: !!$('bSp_retry_dboss') }; });
   await page.click('#bSp_retry_cave'); await page.waitForTimeout(100);
   const r2 = await page.evaluate(() => { const G = SH.G; const cd = G.caveDay; G.caveDay = G.day; $('bSpend').onclick(); return { gold: G.gold, cd, again: !!$('bSp_retry_cave'), db: !!$('bSp_retry_dboss'), st: ST.retries, spent: ST.goldSpent }; });

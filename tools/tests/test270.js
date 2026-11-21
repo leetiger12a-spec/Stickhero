@@ -6,7 +6,7 @@ const { chromium } = require('/opt/node22/lib/node_modules/playwright');
   await ctx.addInitScript(() => { localStorage.setItem('stickhero_story', '1'); window.__noGold = true; window.__eliteP = 0; });
   const page = await ctx.newPage(); page.on('pageerror', e => errors.push(e.message)); page.on('console', m => { if (m.type() === 'error') errors.push(m.text()); });
   await page.goto('http://localhost:8765/index.html'); await page.waitForTimeout(900); await page.click('#bStart'); await page.waitForTimeout(400);
-  const r0 = await page.evaluate(() => { const G = SH.G; G.gold = 2000; SH.openMap(); $('bSpend').onclick(); const none = !$('bSp_train'); G.allies.push(makeAlly('sword', 1, 0)); $('bSpend').onclick(); return { none, btn: !!$('bSp_train') }; });
+  const r0 = await page.evaluate(() => { const G = SH.G; G.quests = []; G.gold = 2000; SH.openMap(); $('bSpend').onclick(); const none = !$('bSp_train'); G.allies.push(makeAlly('sword', 1, 0)); $('bSpend').onclick(); return { none, btn: !!$('bSp_train') }; });
   await page.click('#bSp_train'); await page.waitForTimeout(80);
   const r1 = await page.evaluate(() => { const a = SH.G.allies[0]; return { lvl: a.lvl, xp: a.xp, gold: SH.G.gold, next: trainCost() }; });
   await page.click('#bSp_train'); await page.waitForTimeout(80);

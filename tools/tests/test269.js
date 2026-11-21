@@ -6,7 +6,7 @@ const { chromium } = require('/opt/node22/lib/node_modules/playwright');
   await ctx.addInitScript(() => { localStorage.setItem('stickhero_story', '1'); window.__noGold = true; window.__eliteP = 0; });
   const page = await ctx.newPage(); const OUT = process.env.OUT || 'shots'; page.on('pageerror', e => errors.push(e.message)); page.on('console', m => { if (m.type() === 'error') errors.push(m.text()); });
   await page.goto('http://localhost:8765/index.html'); await page.waitForTimeout(900); await page.click('#bStart'); await page.waitForTimeout(400);
-  const a = await page.evaluate(async () => { const G = SH.G; G.gold = 1000; G.nextBoss = 999; G.enemies = []; G.spawnAcc = -1e9; SH.enterStage(0); await new Promise(q => setTimeout(q, 300)); if (G.intro) endIntro(); G.p.x = 40; const x0 = G.p.x; G.p.inv = 0; hurtPlayer(1e9); await new Promise(q => setTimeout(q, 200));
+  const a = await page.evaluate(async () => { const G = SH.G; G.quests = []; G.gold = 1000; G.nextBoss = 999; G.enemies = []; G.spawnAcc = -1e9; SH.enterStage(0); await new Promise(q => setTimeout(q, 300)); if (G.intro) endIntro(); G.p.x = 40; const x0 = G.p.x; G.p.inv = 0; hurtPlayer(1e9); await new Promise(q => setTimeout(q, 200));
     return { dead: G.p.dead, vis: $('bRevive').style.display !== 'none', txt: $('bRevive').textContent, cost: reviveCost(), x0 }; });
   await page.screenshot({ path: `${OUT}/b353_revive.png` });
   await page.click('#bRevive', { force: true }); await page.waitForTimeout(200);
