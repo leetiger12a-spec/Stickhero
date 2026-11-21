@@ -9,13 +9,13 @@ const { chromium } = require('/opt/node22/lib/node_modules/playwright');
   await page.goto('http://localhost:8765/index.html'); await page.waitForTimeout(900);
   await page.click('#bWard'); await page.waitForTimeout(300);
   const n0 = await page.evaluate(() => ({ pool: gachaPool().length, locks: document.querySelectorAll('#ovWard .sw.lock').length }));
-  await page.click('#bGacha'); await page.waitForTimeout(200);
+  await page.click('#bGacha'); await page.waitForTimeout(300); check(await page.evaluate(() => document.getElementById('gachaMsg').textContent.includes('🎰') && gachaSpin), 'spinning'); await page.evaluate(() => doGacha()); await page.waitForTimeout(1400);
   const r1 = await page.evaluate(() => ({ pool: gachaPool().length, bank: bankGold(), got: wardGot(), msg: document.getElementById('gachaMsg').textContent, locks: document.querySelectorAll('#ovWard .sw.lock').length }));
   console.log(JSON.stringify(n0), JSON.stringify(r1));
   check(r1.pool === n0.pool - 1 && r1.bank === 700 && r1.got.length === 1 && r1.msg.includes('열렸다'), 'one unlocked, paid 500');
   check(r1.locks < n0.locks, 'one fewer lock button');
   await page.screenshot({ path: `${OUT}/b273_gacha.png` });
-  await page.click('#bGacha'); await page.click('#bGacha'); await page.waitForTimeout(200);
+  await page.click('#bGacha'); await page.waitForTimeout(1600); await page.click('#bGacha'); await page.waitForTimeout(300);
   const r2 = await page.evaluate(() => ({ bank: bankGold(), got: wardGot().length, msg: document.getElementById('gachaMsg').textContent }));
   console.log(JSON.stringify(r2)); check(r2.bank === 200 && r2.got === 2 && r2.msg.includes('모자라요'), 'not enough bank');
   // 열린 것은 고를 수 있음

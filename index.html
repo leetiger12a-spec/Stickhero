@@ -150,7 +150,7 @@ canvas{display:block;position:fixed;inset:0;width:100%;height:100%}
 h1{margin:0 0 4px;font:400 clamp(40px,12vw,72px) "BHS","Jua",system-ui,-apple-system,"Apple SD Gothic Neo","Malgun Gothic",sans-serif;letter-spacing:2px;color:#ffd23f;-webkit-text-stroke:6px #3a1a00;paint-order:stroke fill;text-shadow:0 5px 0 #3a1a00,0 10px 18px rgba(0,0,0,.55)}
 h2{margin:0 0 14px;font:400 clamp(30px,9vw,46px) "BHS","Jua",system-ui,-apple-system,"Apple SD Gothic Neo","Malgun Gothic",sans-serif;letter-spacing:1px;color:#ffd23f;-webkit-text-stroke:5px #3a1a00;paint-order:stroke fill;text-shadow:0 4px 0 #3a1a00,0 8px 16px rgba(0,0,0,.5)}
 .sub{opacity:.9;margin-bottom:18px;font-size:17px}
-#ovWard{justify-content:flex-start;overflow-y:auto;-webkit-overflow-scrolling:touch}#ovWard>*{flex-shrink:0}
+#bGacha.spin{animation:gshake .12s infinite alternate}@keyframes gshake{from{transform:rotate(-3deg) scale(1.04)}to{transform:rotate(3deg) scale(1.04)}}#ovWard{justify-content:flex-start;overflow-y:auto;-webkit-overflow-scrolling:touch}#ovWard>*{flex-shrink:0}
 .btn{font:inherit;font-size:23px;padding:12px 38px;border-radius:18px;border:3px solid #3a1a00;background:linear-gradient(#ffe680,#ffc21a 55%,#ff9a00);color:#3a1a00;text-shadow:0 1px 0 rgba(255,255,255,.55);box-shadow:inset 0 3px 0 rgba(255,255,255,.6),inset 0 -4px 0 rgba(150,60,0,.25),0 5px 0 #3a1a00,0 9px 14px rgba(0,0,0,.35);cursor:pointer;margin:8px;min-width:200px}
 .btn:active{transform:translateY(4px);box-shadow:inset 0 3px 0 rgba(255,255,255,.6),inset 0 -2px 0 rgba(150,60,0,.25),0 1px 0 #3a1a00,0 3px 6px rgba(0,0,0,.35)}
 .btn.blue{background:linear-gradient(#a8ecff,#45b4f7 55%,#1f86d9);color:#fff;text-shadow:0 2px 0 #0f4c81;border-color:#0d3358;box-shadow:inset 0 3px 0 rgba(255,255,255,.55),inset 0 -4px 0 rgba(0,40,90,.25),0 5px 0 #0d3358,0 9px 14px rgba(0,0,0,.35)}
@@ -375,7 +375,7 @@ h2 .hb{-webkit-text-stroke:0;text-shadow:none;letter-spacing:0;font-family:"Jua"
 
 <script>
 'use strict';
-const BUILD = 288;
+const BUILD = 289;
 const BOSS_INTERVAL = 180;      // 보스 등장 간격(초)
 const WAVE_INTERVAL = 60;       // 대규모 몰이 이벤트 간격(초)
 const MAX_ENEMIES = 110;   // Build 202: 220 → 110 (화면이 너무 정신없어서) — 대신 마을 적이 조금 더 튼튼(CROWD_K)
@@ -639,10 +639,16 @@ function doGacha() {
   const pool = gachaPool(), m = readJSON('stickhero_meta') || {}, bank = m.bank || 0;
   if (!pool.length) { $('gachaMsg').textContent = '모두 열었어요! 🎉'; sfx('hurt'); return; }
   if (bank < GACHA_COST) { $('gachaMsg').textContent = `금고 금화가 모자라요 (🏦 ${bank} / ${GACHA_COST})`; sfx('hurt'); return; }
+  if (gachaSpin) return;
   const k = pool[Math.floor(Math.random() * pool.length)]; m.bank = bank - GACHA_COST; m.ward = (m.ward || []).concat(k[0] + k[1]); writeJSON('stickhero_meta', m);
-  ST.gachas = (ST.gachas || 0) + 1; stDirty = true; sfx('unlock'); vib(40);
-  renderWard(); $('gachaMsg').innerHTML = `🎉 <b>${k[2]}</b> 열렸다! (남은 금고 🏦 ${m.bank})`;
+  ST.gachas = (ST.gachas || 0) + 1; stDirty = true;
+  // 🎰 Build 289: 뽑기 연출 — 1.2초 동안 이름이 빙글빙글 돌다가 멈춤 (결과는 이미 저장됨)
+  gachaSpin = true; $('bGacha').classList.add('spin'); let t = 0;
+  const tick = () => { if (t >= 1200) { gachaSpin = false; $('bGacha').classList.remove('spin'); sfx('unlock'); vib(40); renderWard(); $('gachaMsg').innerHTML = `🎉 <b>${k[2]}</b> 열렸다! (남은 금고 🏦 ${m.bank})`; return; }
+    const r = pool[Math.floor(Math.random() * pool.length)]; $('gachaMsg').innerHTML = `🎰 <b>${r[2]}</b> …`; sfx('tick'); const d = 60 + t / 12; t += d; setTimeout(tick, d); };
+  tick();
 }
+let gachaSpin = false;
 // 🍖 Build 274: 펫 간식 — 금고 금화로 고른 펫에게 경험치 (펫 Lv 5까지)
 const TREAT_COST = 300, TREAT_XP = 100;
 function giveTreat() {
