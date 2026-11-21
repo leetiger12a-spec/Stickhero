@@ -14,7 +14,7 @@ const { chromium } = require('/opt/node22/lib/node_modules/playwright');
   await page.click('#bArena'); await page.waitForTimeout(200); await page.screenshot({ path: `${OUT}/b270_card.png` });
   await page.click('#bGoArena'); await page.waitForTimeout(500);
   const r1 = await page.evaluate(() => ({ gold: SH.G.gold, arena: SH.G.st && SH.G.st.arena, mode: SH.G.mode }));
-  console.log(JSON.stringify(r1)); check(r1.gold === 50 && r1.arena === 1 && r1.mode === 'stage', 'entered, paid 100');
+  console.log(JSON.stringify(r1)); check(r1.gold === 150 && r1.arena === 1 && r1.mode === 'stage', 'entered free (first today)');
   const hp1 = await page.evaluate(() => makeEnemy('grunt', 0, 0).maxHp);
   await page.evaluate(() => { const G = SH.G; G.p.hp = G.p.maxHp = 1e9; G.st.timer = 0.05; }); await page.waitForTimeout(500);
   const r2 = await page.evaluate(() => ({ gold: SH.G.gold, arena: SH.G.st.arena, best: ST.arenaBest, hp: makeEnemy('grunt', 0, 0).maxHp }));
