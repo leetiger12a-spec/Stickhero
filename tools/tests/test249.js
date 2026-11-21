@@ -10,7 +10,7 @@ const { chromium } = require('/opt/node22/lib/node_modules/playwright');
   const r = await page.evaluate(async () => { const G = SH.G; G.p.hp = G.p.maxHp = 1e6; G.st.arenaRule = 'boomw'; const plain = makeEnemy('grunt', 0, 0).gold; G.st.arenaRule = null; const g0 = makeEnemy('grunt', 0, 0).gold; G.st.arenaRule = 'boomw';
     const e = makeEnemy('grunt', G.p.x + 30, G.p.y); G.enemies.push(e); hurtEnemy(e, 1e9, 0, 1, 0); const hz = G.hazards.filter(h => h.boomw).length, hp0 = G.p.hp;
     await new Promise(q => setTimeout(q, 1400)); return { plain, g0, hz, hurt: G.p.hp < hp0, n: Object.keys(ARENA_RULES).length }; });
-  console.log(JSON.stringify(r)); check(r.hz === 1 && r.hurt && r.plain >= r.g0 && r.n === 6, 'boom wave');
+  console.log(JSON.stringify(r)); check(r.hz === 1 && r.hurt && r.plain >= r.g0 && r.n === 7, 'boom wave');
   await page.evaluate(() => { const G = SH.G; for (let i = 0; i < 3; i++) { const e = makeEnemy('grunt', G.p.x + 60 + i * 50, G.p.y - 40); G.enemies.push(e); hurtEnemy(e, 1e9, 0, 1, 0); } }); await page.waitForTimeout(400);
   await page.screenshot({ path: `${OUT}/b333_boom.png` });
   await b.close(); console.log('ERRORS:', errors.length); errors.forEach(e => console.log(e)); process.exit(errors.length ? 1 : 0);
