@@ -375,7 +375,7 @@ h2 .hb{-webkit-text-stroke:0;text-shadow:none;letter-spacing:0;font-family:"Jua"
 
 <script>
 'use strict';
-const BUILD = 283;
+const BUILD = 284;
 const BOSS_INTERVAL = 180;      // 보스 등장 간격(초)
 const WAVE_INTERVAL = 60;       // 대규모 몰이 이벤트 간격(초)
 const MAX_ENEMIES = 110;   // Build 202: 220 → 110 (화면이 너무 정신없어서) — 대신 마을 적이 조금 더 튼튼(CROWD_K)
@@ -2396,6 +2396,7 @@ const ELITE_CHEST_P = 0.25;
 function eliteDie(e) { stAdd('elites'); questEvent('elite'); G.elitesN = (G.elitesN || 0) + 1;
   if (Math.random() < (window.__eliteChestP !== undefined ? window.__eliteChestP : ELITE_CHEST_P * (WK('treasure') ? 2 : 1))) dropChest(G.mode === 'stage' ? clamp(e.x, -STAGE_HW + 30, STAGE_HW - 30) : e.x, e.y + 16, true);
   else for (let i = 0; i < (WK('elite') ? 10 : 5); i++) dropCoin(e.x + rand(-14, 14), e.y + rand(-10, 10));
+  if (['fire', 'ice', 'bolt', 'bomb'].includes(e.elite)) questEvent('newelite');
   if (e.elite === 'bomb') { G.hazards.push({ x: e.x, y: e.y, r: 78, warn: 0.8, life: 0.3, max: 0.3, tick: 0, slam: true, dmg: e.dmg * 2 }); floatText(e.x, e.y - 40, '💣 펑!까지 도망!', '#ff9f1c', 14, 0.9); }   // 💣
   if (e.elite === 'fire') { for (let i = 0; i < 4; i++) { const a = i * 1.57 + Math.random(), rr = i ? 46 : 0; G.hazards.push({ x: e.x + Math.cos(a) * rr, y: e.y + Math.sin(a) * rr, r: 34, warn: 0.5, life: 3.5, max: 3.5, tick: 0, dmg: 7 * DF().edmg }); } burst(e.x, e.y - 12, '#ff9f1c', 26, 230, 5, 0.6); sfx('flame'); }   // 🔥 쓰러지면 불길 (0.5초 경고 뒤 3.5초)
   if (e.elite === 'split') { eliteBlock = true; for (let i = 0; i < 3; i++) { const c = makeEnemy(e.type, e.x + rand(-30, 30), e.y + rand(-20, 20)); c.hp *= 0.5; c.maxHp *= 0.5; c.scale = 0.8; c.awake = true; G.enemies.push(c); } eliteBlock = false; burst(e.x, e.y - 20, '#ff4d6d', 20, 220, 4, 0.5); }
@@ -3071,6 +3072,12 @@ const QUESTS = [ // id, 글, 목표(날짜 d), 나올 수 있는지
   // Build 255
   { id: 'dash',    txt: n => `💨 구르기 ${n}번`,                  goal: d => 15 + 5 * Math.min(4, d) },
   { id: 'merch',   txt: () => '🛒 떠돌이 상인에게 1번 사기',      goal: () => 1 },
+  // Build 284: 새 퀘스트 5종
+  { id: 'arenaw',  txt: n => `🏟 투기장 웨이브 ${n}개 깨기`,      goal: d => 4 + Math.min(4, d), ok: () => arenaOpen() },
+  { id: 'arenaOut', txt: () => '🚪 투기장 포털로 무사히 나오기',  goal: () => 1, ok: () => arenaOpen() },
+  { id: 'newelite', txt: n => `🔥❄⚡💣 새 정예 ${n}마리 잡기`,   goal: () => 2, ok: () => eliteOk() },
+  { id: 'cave',    txt: () => '🌟 비밀 동굴 다녀오기',            goal: () => 1, ok: () => caveOpen() && G.caveDay !== G.day },
+  { id: 'practice', txt: () => '⚔ 보스 연습에서 1번 이기기',      goal: () => 1, ok: () => canPractice() },
 ];
 function newQuests() {
   const d = G.day || 1, pool = QUESTS.filter(q => !q.ok || q.ok()), out = [];
@@ -3420,7 +3427,7 @@ $('bCave').onclick = () => {
   if (!caveOpen()) { sfx('hurt'); $('mapCard').innerHTML = `<div class="t">🌟 비밀 보물 동굴</div><div class="g">🔒 ⭐⭐⭐로 깬 칸 5개 (지금 ${star3()}개)</div>`; return; }
   const used = G.caveDay === G.day;
   $('mapCard').innerHTML = `<div class="t">🌟 비밀 보물 동굴</div><div class="g">40초 동안 황금 몬스터만 나와요 · 잡으면 금화 와르르</div><div class="r">하루(날짜) 1번 · ${used ? '오늘은 이미 다녀왔어요 · 내일 또!' : '오늘 갈 수 있어요!'}</div>` + (used ? '' : '<button class="btn big" id="bGoCave" style="margin-top:6px">🌟 동굴로!</button>');
-  if (!used) $('bGoCave').onclick = () => { showOv(null); state = 'play'; G.caveDay = G.day; G.caveGold0 = G.gold; G.caves = (G.caves || 0) + 1; stAdd('caves'); enterStage(0, 0, undefined, false, true); };
+  if (!used) $('bGoCave').onclick = () => { showOv(null); state = 'play'; G.caveDay = G.day; G.caveGold0 = G.gold; G.caves = (G.caves || 0) + 1; stAdd('caves'); questEvent('cave'); enterStage(0, 0, undefined, false, true); };
   sfx('pick');
 };
 // 🏟 Build 270: 투기장 — 금화 100을 내고 들어가 끝없는 웨이브(20초씩)를 버텨요. 웨이브마다 적이 세지고 금화 보상, 5웨이브마다 정예 무리
@@ -3524,7 +3531,7 @@ function returnBase(win) {
   G.mode = 'base'; G.st = null; G.stash = null; G.gateT = 0;
   p.x = GATE.x; p.y = GATE.y - 40; G.cam.x = p.x; G.cam.y = p.y - 12;
   placeAllies();
-  if (st && st.arena) { const w = st.arena - 1; banner(win ? '🏟 투기장에서 귀환!' : '🏟 투기장 끝!', `웨이브 ${w}까지 버팀 · 🏆 최고 ${ST.arenaBest || 0} · 번 금화 🪙${Math.max(0, G.gold - (G.arenaGold0 || 0))}`, '#ff6b6b', 3); saveGame(); return; }
+  if (st && st.arena) { const w = st.arena - 1; if (win) questEvent('arenaOut'); banner(win ? '🏟 투기장에서 귀환!' : '🏟 투기장 끝!', `웨이브 ${w}까지 버팀 · 🏆 최고 ${ST.arenaBest || 0} · 번 금화 🪙${Math.max(0, G.gold - (G.arenaGold0 || 0))}`, '#ff6b6b', 3); saveGame(); return; }
   if (st && st.cave) { banner(win ? '🌟 동굴에서 귀환!' : '동굴에서 쓰러졌다', `얻은 금화 🪙${G.gold - (G.caveGold0 || 0)} (쓰러져도 금화는 그대로)`, '#ffd23f', 2.8); saveGame(); return; }
   if (st && st.rush) { banner(st.clear ? '🏠 보스 러시에서 귀환!' : '보스 러시에서 쓰러졌다', `보스 ${st.rush.won}/${st.rush.list.length}마리 잡음`, st.clear ? '#7bed9f' : '#9fd8ff', 2.6); saveGame(); return; }
   if (st && st.practice !== undefined) { banner(win ? '🏠 연습 끝!' : '연습에서 쓰러졌다', win ? '또 도전해 봐요' : '괜찮아, 다시 해 보자!', win ? '#7bed9f' : '#9fd8ff', 2.4); saveGame(); return; }
@@ -3614,7 +3621,7 @@ function updStage(dt) {
       G.enemies.push(e);
     }
     if (st.timer <= 0 && st.arena) { // 🏟 투기장: 다음 웨이브
-      const w = st.arena, g = arenaPrize(w); for (const e of G.enemies) if (!e.dead) killEnemy(e);
+      const w = st.arena, g = arenaPrize(w); questEvent('arenaw'); for (const e of G.enemies) if (!e.dead) killEnemy(e);
       G.gold += g; p.hp = Math.min(p.maxHp, p.hp + p.maxHp * 0.15); G.shake = 10; sfx('bigBoom');
       if (w > (ST.arenaBest || 0)) { ST.arenaBest = w; stDirty = true; }
       st.arena++; st.n = 4 + st.arena; st.timer = ARENA_T; st.acc = -3; st.arenaRule = arenaRuleFor(st.arena);
@@ -3970,6 +3977,7 @@ function bossDie(e) {
     for (let i = 0; i < 20; i++) dropCoin(e.x + rand(-40, 40), e.y + rand(-40, 40));
     const sec = Math.max(1, Math.round(G.t - (e.bornT || G.t))), m = readJSON(META_KEY) || {}; m.pbest = m.pbest || {};   // 최고 기록 (초, 메타에 저장 — 기록·업적과 따로)
     const key = e.name + (e.hard ? ' 🔥' : ''), old = m.pbest[key], rec = !old || sec < old; if (rec) { m.pbest[key] = sec; writeJSON(META_KEY, m); }
+    questEvent('practice');
     banner(rec ? `⏱ 신기록! ${sec}초` : `⚔ 연습 승리! ${sec}초`, rec ? (old ? `${key} · 전 기록 ${old}초` : `${key} 첫 기록`) : `${key} · 최고 ${old}초`, '#ffd23f', 3);
     sfx(rec ? 'rewardEvo' : 'bigBoom');
     const R = G.st.rush; if (R) { R.won++; // 👑 보스 러시 (Build 139): 다음 보스, 5마리 다 잡으면 금고 보상
