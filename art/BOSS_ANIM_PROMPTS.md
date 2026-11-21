@@ -123,3 +123,37 @@ GRID RULES (strict):
 BACKGROUND: plain pure white (#FFFFFF) everywhere, no grid lines, no frame borders, no ground line, no shadows, no glow halo, no sticker border, no effects, no fire, no smoke, no speed lines, no impact marks, no text, no letters, no numbers, no watermark.
 QUALITY: ultra high resolution, QHD (2560x1440) or higher, crisp clean lines
 ```
+
+## B2-① 불꽃 대마왕 걷기 (불타는 거구의 큰 걸음) — 첨부 `art/boss2_src.png` · 픽스버스용(LAYOUT 포함)
+```
+TASK: one 2D game ANIMATION SPRITE SHEET of the attached boss character: exactly 12 frames arranged in a grid of 4 columns x 3 rows, read left to right, top row first.
+
+LAYOUT (very important): the whole 4x3 grid must sit in the LOWER-LEFT part of the image. Leave a big EMPTY pure white margin along the TOP edge (the top 15% of the image height) and along the RIGHT edge (the right 15% of the image width). The TOP-RIGHT CORNER of the image (the right 30% of the width x the top 20% of the height) must be COMPLETELY EMPTY white, with no part of any frame in it. Also leave a thin empty white margin along the left and bottom edges.
+
+CHARACTER: the attached Flame Demon King boss (a huge lava-rock brute with glowing orange-yellow lava cracks all over its dark red body, a round head with glowing yellow eyes and a wide toothy grin, big dark curved horns with lava cracks, flames burning on top of the head, a gold crown with red gems, black-and-gold spiked shoulder plates, a thick gold chain with a red gem, black-and-gold studded arm bands, huge lava fists with small flames on the wrists, a belt with a gold skull buckle, a torn red cloth, black-and-gold studded leg bands, big lava-rock feet). Keep EXACTLY the same design, colors, thick black outlines, cel shading, proportions and art style in every frame. The head flames, crown, horns, shoulder plates, chain, skull belt and wrist flames are in EVERY frame. The flames are part of the character's body only (same size in every frame).
+
+ANIMATION: a slow, powerful MENACING WALK in place, facing right (seen from the 3/4 front-right like the attached image). The LEGS MUST CLEARLY MOVE: in every frame the two legs are in a DIFFERENT position, exactly like this (the "front leg" is the leg on the right side of the picture):
+- Frame 1: both feet on the ground, legs apart, standing like the attached image.
+- Frame 2: the front leg starts to lift, its knee bending, its heel off the ground.
+- Frame 3: the front leg lifted HIGH, knee up at belt height, foot clearly in the air; the body leans slightly back.
+- Frame 4: the front leg swinging forward, foot still in the air and further to the right.
+- Frame 5: the front foot lands far forward, legs in a wide step; the body dips, the head flames flicker backward.
+- Frame 6: weight moves onto the front leg; the back foot's heel lifts.
+- Frame 7: the back leg starts to lift, its knee bending, its foot off the ground.
+- Frame 8: the back leg lifted HIGH, knee up at belt height, foot clearly in the air.
+- Frame 9: the back leg swinging forward past the front leg, foot in the air.
+- Frame 10: the back foot lands; legs in a wide step the other way; the body dips.
+- Frame 11: weight shifting back to the middle, both feet on the ground, legs wide.
+- Frame 12: standing up again, almost like frame 1, flowing back into frame 1.
+The fists swing opposite to the legs. The torn red cloth sways with each step. The head flames flicker a little differently in each frame. The face keeps the same evil grin.
+
+GRID RULES (strict):
+- Every frame: the SAME boss at the SAME size (the same crown and head size in all 3 rows), facing right, 3/4 top-down game view, same as the attached image.
+- Same ground line in every frame; the boss stays in the center of its cell.
+- The boss (including the head flames) fills about 70% of its cell height (leave room for the lifted knees and the flames).
+- VERY WIDE empty white gaps between all cells and between the rows; no horn, flame, crown, fist, foot or spike may touch or come near another cell.
+- Only the 12 frames. No extra poses, no labels.
+
+BACKGROUND: plain pure white (#FFFFFF) everywhere, no grid lines, no frame borders, no ground line, no shadows, no glow halo around the body, no sticker border, no extra fire or smoke or embers floating away from the body, no lava puddles, no footprints, no speed lines, no text, no letters, no numbers, no watermark.
+QUALITY: ultra high resolution, QHD (2560x1440) or higher, crisp clean lines
+```
