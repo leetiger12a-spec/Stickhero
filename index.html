@@ -375,7 +375,7 @@ h2 .hb{-webkit-text-stroke:0;text-shadow:none;letter-spacing:0;font-family:"Jua"
 
 <script>
 'use strict';
-const BUILD = 286;
+const BUILD = 287;
 const BOSS_INTERVAL = 180;      // 보스 등장 간격(초)
 const WAVE_INTERVAL = 60;       // 대규모 몰이 이벤트 간격(초)
 const MAX_ENEMIES = 110;   // Build 202: 220 → 110 (화면이 너무 정신없어서) — 대신 마을 적이 조금 더 튼튼(CROWD_K)
@@ -5865,6 +5865,12 @@ function drawMinimap(x, y, size) { // 작은 지도: 마을·적 진지·바위�
   if (G.boss && G.mode === 'base') { ctx.fillStyle = Math.floor(G.t * 4) % 2 ? '#ff3b3b' : '#ffd23f'; ctx.beginPath(); ctx.arc(cx + G.boss.x * k, cy + G.boss.y * k, 4, 0, 7); ctx.fill(); }
   ctx.fillStyle = '#ffb703'; ctx.strokeStyle = '#222'; ctx.lineWidth = 1; for (const c of G.chests || []) { ctx.fillRect(cx + c.x * k - 3, cy + c.y * k - 2.5, 6, 5); ctx.strokeRect(cx + c.x * k - 3, cy + c.y * k - 2.5, 6, 5); }   // Build 106: 보물 상자
   if (G.ghost) { ctx.fillStyle = Math.floor(G.t * 3) % 2 ? '#b8f2ff' : '#ffffff'; ctx.beginPath(); ctx.arc(cx + G.ghost.x * k, cy + G.ghost.y * k, 4.5, 0, 7); ctx.fill(); }   // 유령 상자
+  // 🧭 Build 287: 정예(분홍 마름모)·황금 몬스터(금색 점)·떠돌이 상인(초록 네모)
+  ctx.lineWidth = 1; ctx.strokeStyle = '#222';
+  for (const e of G.enemies) { if (e.dead || e.boss) continue; const ex = cx + e.x * k, ey = cy + e.y * k;
+    if (e.elite) { ctx.fillStyle = '#ff4d6d'; ctx.beginPath(); ctx.moveTo(ex, ey - 4); ctx.lineTo(ex + 3.5, ey); ctx.lineTo(ex, ey + 4); ctx.lineTo(ex - 3.5, ey); ctx.closePath(); ctx.fill(); ctx.stroke(); }
+    else if (e.golden) { ctx.fillStyle = Math.floor(G.t * 4) % 2 ? '#ffd23f' : '#fff7c2'; ctx.beginPath(); ctx.arc(ex, ey, 3, 0, 7); ctx.fill(); ctx.stroke(); } }
+  if (G.merchant) { const mx = cx + G.merchant.x * k, my = cy + G.merchant.y * k; ctx.fillStyle = '#2ecc71'; ctx.fillRect(mx - 3.5, my - 3.5, 7, 7); ctx.strokeRect(mx - 3.5, my - 3.5, 7, 7); }
   ctx.fillStyle = '#ffd23f'; ctx.strokeStyle = '#222'; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.arc(cx + G.p.x * k, cy + G.p.y * k, 3, 0, 7); ctx.fill(); ctx.stroke();
   ctx.strokeStyle = 'rgba(255,255,255,.7)'; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(cx, cy, R, 0, 7); ctx.stroke();
   ctx.restore();
