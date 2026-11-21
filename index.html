@@ -372,7 +372,7 @@ h2 .hb{-webkit-text-stroke:0;text-shadow:none;letter-spacing:0;font-family:"Jua"
 
 <script>
 'use strict';
-const BUILD = 270;
+const BUILD = 271;
 const BOSS_INTERVAL = 180;      // 보스 등장 간격(초)
 const WAVE_INTERVAL = 60;       // 대규모 몰이 이벤트 간격(초)
 const MAX_ENEMIES = 110;   // Build 202: 220 → 110 (화면이 너무 정신없어서) — 대신 마을 적이 조금 더 튼튼(CROWD_K)
@@ -2439,6 +2439,7 @@ function spawnBoss(bx, by) {
   if (!inStage && n >= 3 && pr === undefined && !window.__noGold && Math.random() < GOLD_GOLEM_P) n = GOLD_GOLEM;   // 황금 골렘은 마을에서만 아주 드물게 (__noGold: 정확한 기록을 보는 시험용)
   if (pr !== undefined && pr !== 'final') n = pr;
   if (inStage && G.st.duel2 && G.st.def.boss !== undefined) n = G.st.def.boss;   // ⚔ 두 번째 보스 (모험 대결 왕국·탑 대결 층)
+  if (inStage && G.st.arena) n = ARENA_BOSS[(Math.floor(G.st.arena / 10) - 1) % ARENA_BOSS.length];   // 🏟 투기장 보스
   if (window.__bossN !== undefined) n = window.__bossN;   // 시험용
   if (!inStage) G.bossCount++;
   const B = final ? { name: '왕관 괴물 대왕', color: '#b5179e' } : BOSSES[n];
@@ -2449,6 +2450,7 @@ function spawnBoss(bx, by) {
   const b = { id: ++eid, type: 'boss', boss: true, name: B.name, x: bx, y: by, inside: false, atk: 0, lunge: 0, r: 58, hp, maxHp: hp, spd: final ? BOSS_FINAL.spd : n <= 5 ? 50 + n * 6 : n === GOLD_GOLEM ? 75 : 58, dmg: (final ? BOSS_FINAL.dmg : BOSS_DMG[n]) * DF().edmg * ls.dmg * ts.dmg, color: B.color, xp: 0, flash: 0, hitT: 0, kx: 0, ky: 0, swordCd: 0, wob: 0, mode: 'walk', st: 3, rings: 0, ax: 0, ay: 0, lvl: Math.min(5, n), spr: final ? (SPR.boss_final ? 'boss_final' : 'boss0') : 'boss' + BOSSES.indexOf(B) };
   if (final) { b.r = 76; b.final = true; }
   b.bornT = G.t;
+  if (inStage && G.st.arena) { const k = 1 + 0.1 * G.st.arena; b.hp *= k; b.maxHp *= k; }   // 🏟 웨이브가 높을수록 보스도 튼튼
   if (pr !== undefined && G.st.hard) { b.hard = true; b.hp *= 2; b.maxHp *= 2; b.dmg *= 1.5; }   // 🔥 도전: 체력 2배 · 공격 1.5배   // 보스 연습 기록용 (등장 장면 동안은 G.t가 멈춤)
   G.enemies.push(b); G.boss = b; G.saidBoss = b; heroSay('boss', true);
   // 등장 컷신: 어두워짐 → 하늘에서 쿵! → 쿵쿵 발 구르기 → 이름표 쾅! (화면을 누르면 넘김)
@@ -3373,6 +3375,7 @@ $('bCave').onclick = () => {
 };
 // 🏟 Build 270: 투기장 — 금화 100을 내고 들어가 끝없는 웨이브(20초씩)를 버텨요. 웨이브마다 적이 세지고 금화 보상, 5웨이브마다 정예 무리
 const ARENA_COST = 100, ARENA_T = 20, arenaOpen = () => G.stageN >= 3;
+const ARENA_BOSS = [2, 5, 7, 11, 12, 13, 14, 15];   // 👑 Build 271: 10웨이브마다 나오는 보스 차례 (불꽃 대마왕 → 해골 왕 → 용암 골렘 → 해골 왕 4종…)
 const arenaPrize = w => 40 + 15 * w + (w % 5 === 0 ? 100 + 20 * w : 0);
 $('bArena').onclick = () => {
   if (!arenaOpen()) { sfx('hurt'); $('mapCard').innerHTML = `<div class="t">🏟 투기장</div><div class="g">🔒 3칸을 깨면 열려요</div>`; return; }
@@ -3549,8 +3552,8 @@ function updStage(dt) {
   }
   // 버티기: 위아래에서 계속 몰려옴
   if (def.goal === 'survive' && !st.clear) {
-    st.timer -= dt;
-    st.acc += (1.6 + st.n * 0.25) * DF().rate * dt;
+    if (!(st.arena && G.boss)) st.timer -= dt;   // 🏟 보스 웨이브: 보스를 잡아야 끝
+    st.acc += (G.boss && st.arena ? 0.35 : 1) * (1.6 + st.n * 0.25) * DF().rate * dt;
     while (st.acc >= 1 && G.enemies.length < 120) {
       st.acc--;
       const type = (Math.random() < 0.22 && pickSpecial(st.n)) || tierType(tierNow(), [0.5, 0.38, 0.12 + st.n * 0.01]), up = Math.random() < 0.5;
@@ -3562,6 +3565,7 @@ function updStage(dt) {
       G.gold += g; p.hp = Math.min(p.maxHp, p.hp + p.maxHp * 0.15); G.shake = 10; sfx('bigBoom');
       if (w > (ST.arenaBest || 0)) { ST.arenaBest = w; stDirty = true; }
       st.arena++; st.n = 4 + st.arena; st.timer = ARENA_T; st.acc = -3;
+      if (st.arena % 10 === 0) { spawnBoss(0, p.y - 260); return; }   // 👑 10웨이브마다 보스
       banner(`🏟 웨이브 ${st.arena}${st.arena % 5 === 0 ? ' · 정예 무리!' : ''}`, `웨이브 ${w} 클리어 +🪙${g} · 체력 15% 회복`, st.arena % 5 === 0 ? '#ff9f1c' : '#ff6b6b', 2.2);
     }
     else if (st.timer <= 0) { // 버티기 성공: 남은 적이 모두 펑!
@@ -3932,6 +3936,7 @@ function bossDie(e) {
     G.st.duel2 = true; G.st.def = Object.assign({}, G.st.def, { boss: G.st.def.boss2 }); G.st.bossOn = false; G.p.hp = Math.min(G.p.maxHp, G.p.hp + G.p.maxHp * 0.3);
     banner('⚔ 두 번째 보스가 온다!', `${BOSSES[G.st.def.boss2].name} · 체력 30% 회복`, '#ff6b6b', 2.6); sfx('warn'); return; }
   if (G.mode === 'stage' && G.st && G.st.duel2 && G.st.tower) stAdd('towerDuels');   // Build 255: 탑 대결 층 깬 횟수
+  if (G.mode === 'stage' && G.st && G.st.arena) { const g = 200 + 30 * G.st.arena; G.gold += g; floatText(G.p.x, G.p.y - 90, `👑 투기장 보스 +🪙${g}`, '#ffd23f', 20, 2); stAdd('arenaBoss'); G.st.timer = 0.01; sfx('bigBoom'); return; }   // 🏟 보스를 잡으면 웨이브 끝
   if (G.mode === 'stage') stageClear(e.x, e.y + 60);
   sfx('bigBoom');
 }
