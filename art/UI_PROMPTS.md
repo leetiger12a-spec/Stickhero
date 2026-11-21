@@ -43,3 +43,24 @@ GRID RULES (strict):
 BACKGROUND: plain pure white (#FFFFFF) everywhere, no grid lines, no frame borders, no shadows, no glow halo, no sticker border, no text, no letters, no numbers, no watermark.
 QUALITY: ultra high resolution, QHD (2560x1440) or higher, crisp clean lines
 ```
+
+## ② UI 아이콘 2번째 시트 16개 (Build 293~) — ChatGPT, 첨부 2장: `art/ui_icons_src.png`(첫 시트 = 그림체 정답) + `art/ref/STYLE_MASTER.png`
+```
+TASK: one 2D game UI ICON SHEET: exactly 16 NEW icons arranged in a grid of 4 columns x 4 rows, read left to right, top row first.
+
+STYLE (most important): image 1 is a finished icon sheet from the same game. Match it 100%: same thick dark outlines, same flat cel shading with 2-3 tones plus one sharp white highlight, same bright saturated colors, same chunky shapes, same size inside each cell, same slight 3/4 view. Image 2 shows the game's characters for extra style reference. Every icon is a single solid object, very readable at small size (32 px).
+
+ICONS IN THIS EXACT ORDER:
+- Row 1: (1) a round blue badge with a big white question mark (help), (2) an open storybook with a red bookmark (story), (3) two golden music notes (music), (4) a volume knob dial with tick marks (volume).
+- Row 2: (5) a painter's palette with a brush (customize), (6) a flexing arm with a red headband (power-up), (7) a desk calendar page with a red ring (daily check-in), (8) a smartphone with vibration lines (vibration).
+- Row 3: (9) a red number "123" badge on a white tag (damage numbers), (10) a brass spyglass telescope (view), (11) an orange cat head wearing a tiny helmet (team tactics), (12) a slider bar with a round knob (screen shake).
+- Row 4: (13) a sparkling blue evolution crystal (evolution book), (14) two crossed steel swords with gold hilts (battle), (15) a crescent moon with two little stars (night), (16) a flaming fire symbol (combo).
+
+GRID RULES (strict):
+- Every icon is centered in its cell and fills about 70% of the cell, all icons the SAME visual size.
+- VERY WIDE empty white gaps between all icons and between the rows; nothing touches or comes near another cell.
+- Only the 16 icons. No labels, no letters or numbers except the "123" on icon 9, no extra items.
+
+BACKGROUND: plain pure white (#FFFFFF) everywhere, no grid lines, no frame borders, no shadows, no glow halo, no sticker border, no text, no watermark.
+QUALITY: ultra high resolution, QHD (2560x1440) or higher, crisp clean lines
+```
