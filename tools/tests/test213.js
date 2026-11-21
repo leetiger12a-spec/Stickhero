@@ -10,7 +10,7 @@ const { chromium } = require('/opt/node22/lib/node_modules/playwright');
   await page.evaluate(() => { ST.arenaBest = 12; ST.bloods = 2; ST.bfast = { '거미 여왕': 41 }; ST.bk = { '거미 여왕': 3, '대왕 슬라임': 1 }; });
   await page.click('#bStats'); await page.waitForTimeout(300);
   const t = await page.evaluate(() => ({ txt: document.getElementById('statList').innerText.replace(/\s+/g, ' '), h: document.querySelectorAll('#statList .stH').length }));
-  console.log(t.txt.slice(-400)); check(t.h === 2 && t.txt.includes('웨이브 12') && t.txt.includes('41초') && t.txt.includes('기록 없음') && t.txt.includes('❓'), 'new rows');
+  console.log(t.txt.slice(-400)); check(t.h === 2 && t.txt.includes('웨이브 12') && t.txt.includes('오늘의 보스 승리') && t.txt.includes('41초') && t.txt.includes('기록 없음') && t.txt.includes('❓'), 'new rows');
   await page.evaluate(() => { const l = document.getElementById('statList'); l.scrollTop = 99999; }); await page.waitForTimeout(150); await page.screenshot({ path: `${OUT}/b280_stats.png` });
   await b.close(); console.log('ERRORS:', errors.length); errors.forEach(e => console.log(e)); process.exit(errors.length ? 1 : 0);
 })();
