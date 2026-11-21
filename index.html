@@ -378,7 +378,7 @@ h2 .hb{-webkit-text-stroke:0;text-shadow:none;letter-spacing:0;font-family:"Jua"
 
 <script>
 'use strict';
-const BUILD = 298;
+const BUILD = 299;
 const BOSS_INTERVAL = 180;      // 보스 등장 간격(초)
 const WAVE_INTERVAL = 60;       // 대규모 몰이 이벤트 간격(초)
 const MAX_ENEMIES = 110;   // Build 202: 220 → 110 (화면이 너무 정신없어서) — 대신 마을 적이 조금 더 튼튼(CROWD_K)
@@ -1862,6 +1862,8 @@ const WEEKLY = [
   { id: 'treasure', name: '🎁 보물 주간', desc: '정예가 상자를 2배 자주 · 보스가 작은 상자 하나 더' },   // Build 246
   { id: 'elite', name: '⚔ 정예 주간', desc: '정예 몬스터가 4배 자주 · 정예 금화 2배' },   // Build 277
   { id: 'bossw', name: '👑 보스 주간', desc: '마을 보스가 1.6배 자주 · 보스 금화 2배' },   // Build 277
+  { id: 'goldw', name: '✨ 황금 주간', desc: '황금 몬스터가 5배 자주 나와요' },   // Build 299
+  { id: 'heartw', name: '❤ 하트 주간', desc: '하트가 3배 자주 · 대신 적 공격 1.2배' },   // Build 299
 ];
 const weekNo = (t = Date.now()) => Math.floor((t / 86400000 + 3) / 7);
 let WEEKLY_FORCE = null;   // 시험용: 규칙 고정
@@ -2380,10 +2382,10 @@ function makeEnemy(type, x, y) {
   announceType(type);
   const ls = lvlScale(), ts = towerScale(), T = ETYPES[type], hm = DF().ehp * ls.hp * ts.hp;   // Build 67: 같은 적은 세기 고정 · Build 166: 영웅 레벨·탑 층 맞춤
   const e = { id: ++eid, type, x, y, r: T.r, hp: T.hp * hm, maxHp: T.hp * hm, spd: T.spd * rand(0.9, 1.1), dmg: T.dmg * DF().edmg * ls.dmg * ts.dmg, color: T.color, xp: T.xp, gold: T.gold, flash: 0, hitT: 0, kx: 0, ky: 0, swordCd: 0, wob: Math.random() * 6, inside: Math.hypot(x, y) < WALL_R, atk: 0.5, lunge: 0, face: 1 };
-  if (G && G.weekly) { if (WK('giant')) { e.hp *= 1.6; e.maxHp *= 1.6; e.gold *= 2; } else if (WK('swift')) e.spd *= 1.25; else if (WK('swarm')) { e.hp *= 0.6; e.maxHp *= 0.6; } }   // 이번 주 도전
+  if (G && G.weekly) { if (WK('giant')) { e.hp *= 1.6; e.maxHp *= 1.6; e.gold *= 2; } else if (WK('swift')) e.spd *= 1.25; else if (WK('heartw')) e.dmg *= 1.2; else if (WK('swarm')) { e.hp *= 0.6; e.maxHp *= 0.6; } }   // 이번 주 도전
   if (G && G.mode === 'stage' && G.st && G.st.cave) { makeGolden(e); e.hp /= 3; e.maxHp /= 3; }   // 동굴: 모두 황금 (체력은 보통)
   else if (G && G.mode === 'stage' && G.st && G.st.rule === 'gold' && Math.random() < 0.3) makeGolden(e);   // 💰 황금 층
-  else if (!window.__noGold && Math.random() < GOLD_P) makeGolden(e);   // __noGold: 정확한 기록을 보는 시험용
+  else if (!window.__noGold && Math.random() < GOLD_P * (WK('goldw') ? 5 : 1)) makeGolden(e);   // __noGold: 정확한 기록을 보는 시험용
   if (!e.golden && eliteOk() && Math.random() < (window.__eliteP !== undefined ? window.__eliteP : (ELITE_P + (G.lvl >= LVL_FREE ? 0.02 : 0)) * (WK('elite') ? 4 : 1) + (G.blood && G.mode === 'base' ? 0.12 : 0))) makeElite(e);
   if (G && G.mode === 'stage' && G.st && G.st.rule === 'giant' && !T.boss) { e.hp *= 2; e.maxHp *= 2; e.r *= 1.4; e.scale = 1.45; e.spd *= 0.7; }   // 🐘 거인 층 (Build 244)
   if (G && G.mode === 'stage' && G.st && G.st.rule === 'vamp') e.dmg *= 1.3;
@@ -3967,7 +3969,7 @@ function killEnemy(e) {
   dropGem(e.x, e.y, e.xp);
   if (Math.random() < upPct('luck') / 100) dropCoin(e.x, e.y);   // 행운 강화: 금화 하나 더
   for (let i = 0; i < e.gold; i++) if (i > 0 || Math.random() < 0.7) dropCoin(e.x + rand(-8, 8), e.y + rand(-8, 8));
-  if (Math.random() < 0.012) G.hearts.push({ x: e.x, y: e.y, bob: 0 });
+  if (Math.random() < 0.012 * (WK('heartw') ? 3 : 1)) G.hearts.push({ x: e.x, y: e.y, bob: 0 });
   rollItem(e.x, e.y);
   if ((e.type === 'e_snowman' || e.type === 'e_ginger') && !e.small) { const r = Math.random(); if (r < 0.15) dropItem('gift', e.x, e.y); else if (r < 0.3) dropItem('candy', e.x, e.y); }   // 🎄
 }
