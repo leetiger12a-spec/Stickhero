@@ -379,7 +379,7 @@ h2 .hb{-webkit-text-stroke:0;text-shadow:none;letter-spacing:0;font-family:"Jua"
 
 <script>
 'use strict';
-const BUILD = 302;
+const BUILD = 303;
 const BOSS_INTERVAL = 180;      // 보스 등장 간격(초)
 const WAVE_INTERVAL = 60;       // 대규모 몰이 이벤트 간격(초)
 const MAX_ENEMIES = 110;   // Build 202: 220 → 110 (화면이 너무 정신없어서) — 대신 마을 적이 조금 더 튼튼(CROWD_K)
@@ -2645,6 +2645,9 @@ const MERCH = [
   { k: 'heal',  txt: '❤ 체력 모두 회복', price: l => 30 + 3 * l, ok: () => G.p.hp < G.p.maxHp, buy: () => { G.p.hp = G.p.maxHp; burst(G.p.x, G.p.y - 20, '#ff6b81', 20, 160, 5, 0.6); } },
   { k: 'chest', txt: '🎁 보물 상자',     price: l => 80 + 4 * l, ok: () => true, buy: () => { bagPut({ small: false }); } },
   { k: 'ult',   txt: '💥 필살기 가득',   price: l => 60 + 3 * l, ok: () => (G.ult || 0) < ULT_MAX, buy: () => { G.ult = ULT_MAX; } },
+  // Build 303: 새 물건 2개
+  { k: 'xp',    txt: '⭐ 경험치 묶음',   price: l => 70 + 4 * l, ok: () => true, buy: () => { G.xp += Math.ceil(G.need * 0.6); } },
+  { k: 'guard', txt: '🛡 10초 무적',     price: l => 50 + 3 * l, ok: () => !(G.p.inv > 2), buy: () => { G.p.inv = 10; burst(G.p.x, G.p.y - 20, '#9fd8ff', 24, 180, 5, 0.6); } },
 ];
 function updMerchant(dt, night) {
   const p = G.p;
