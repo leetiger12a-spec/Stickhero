@@ -381,7 +381,7 @@ h2 .hb{-webkit-text-stroke:0;text-shadow:none;letter-spacing:0;font-family:"Jua"
 
 <script>
 'use strict';
-const BUILD = 323;
+const BUILD = 324;
 const BOSS_INTERVAL = 180;      // 보스 등장 간격(초)
 const WAVE_INTERVAL = 60;       // 대규모 몰이 이벤트 간격(초)
 const MAX_ENEMIES = 110;   // Build 202: 220 → 110 (화면이 너무 정신없어서) — 대신 마을 적이 조금 더 튼튼(CROWD_K)
@@ -1355,6 +1355,7 @@ function showDexCard(k, ally) {
     const d = DEX.find(x => x.k === k); if (!d) return; const n = dexCount(d); img = k; name = d.name; desc = d.desc; st = dexStars(d); cls = d.boss ? 'boss' : '';
     sub = `${n.toLocaleString()}${d.boss ? '번 잡음' : '마리 잡음'}`; gold = d.boss ? ST.goldB.includes(d.boss) : ST.goldT.includes(d.k);   // ✨ Build 241: 황금을 잡았으면 금색 카드
     if (d.boss) { const fast = (ST.bfast || {})[d.boss], pb = pbest(d.boss); if (fast) extra += `<p>🏆 가장 빨리 ${fast}초</p>`; if (pb) extra += `<p>⏱ 연습 최고 ${pb}초</p>`; extra += `<p class="btip">💡 <b>이기는 법</b> · ${BOSS_TIP[k === 'boss_final' ? 'jump' : BOSS_KIND[k]] || BOSS_TIP.jump}<br><small>🎯 과녁이 보일 때 때리면 1.5배!</small></p>`; if (canPractice()) extra += `<button class="dexFight" data-k="${k}">⚔ 다시 싸우기</button>`; }
+    if (d.boss && G && rushOpen() && k !== 'boss_final') { const T = dbossToday(); if (T.n === +k.slice(4)) extra = `<p class="btip" style="border-color:#ff6b6b;background:rgba(255,107,107,.15)">📅 <b>오늘의 보스!</b> 특기: ${DBOSS_MOD[T.mod][0]} ${DBOSS_MOD[T.mod][1]}${G.dbossDay === G.day ? ' · 오늘은 도전 완료' : ' · 지도 → 🗼 무한 탑 아래'}</p>` + extra; }   // Build 324
     if (d.boss) { const bi = k === 'boss_final' ? -1 : +k.slice(4), hp = bi < 0 ? BOSS_FINAL.hp : BOSS_HP[bi], dm = bi < 0 ? BOSS_FINAL.dmg : BOSS_DMG[bi]; stats = [['❤', hp.toLocaleString()], ['⚔', dm]]; }
     else { const T = ETYPES[k]; if (T) stats = [['❤', T.hp], ['⚔', T.dmg], ['👟', T.spd]]; }
   }
