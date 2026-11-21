@@ -154,6 +154,7 @@ h2{margin:0 0 14px;font:400 clamp(30px,9vw,46px) "BHS","Jua",system-ui,-apple-sy
 #bGacha.spin{animation:gshake .12s infinite alternate}@keyframes gshake{from{transform:rotate(-3deg) scale(1.04)}to{transform:rotate(3deg) scale(1.04)}}/* ✨ Build 291: 큰 버튼에 지나가는 빛 */.btn::after{content:'';position:absolute;top:0;left:-60%;width:40%;height:100%;background:linear-gradient(100deg,transparent,rgba(255,255,255,.45),transparent);transform:skewX(-20deg);animation:btnShine 3.2s ease-in-out infinite;pointer-events:none}@keyframes btnShine{0%,70%{left:-60%}100%{left:130%}}
 /* 🖼 Build 292: 그림 아이콘 */img.ui{height:1.25em;width:auto;vertical-align:-0.28em;margin-right:4px;filter:drop-shadow(0 1px 0 rgba(0,0,0,.4))}img.uib{width:30px;height:30px;object-fit:contain;display:block;margin:auto;pointer-events:none}#bSound{position:relative}#bSound.muted img{filter:grayscale(1) brightness(.7)}#bSound.muted::after{content:'✕';position:absolute;right:3px;bottom:0;color:#ff4d6d;font-size:18px;font-weight:900;text-shadow:0 0 2px #000}
 i.cfx{position:fixed;top:-40px;z-index:99;font-style:normal;pointer-events:none;animation:cfxFall 2.6s cubic-bezier(.3,.6,.6,1) forwards}@keyframes cfxFall{to{transform:translateY(110vh) rotate(540deg);opacity:.2}}
+.sale{display:inline-block;margin-top:2px;font-size:11px;font-weight:800;color:#fff;background:linear-gradient(90deg,#ff6b6b,#ff9f1c);border-radius:7px;padding:0 6px}
 #ovWard{justify-content:flex-start;overflow-y:auto;-webkit-overflow-scrolling:touch}#ovWard>*{flex-shrink:0}
 .btn{position:relative;overflow:hidden;font:inherit;font-size:23px;padding:12px 38px;border-radius:18px;border:3px solid #3a1a00;background:linear-gradient(#ffe680,#ffc21a 55%,#ff9a00);color:#3a1a00;text-shadow:0 1px 0 rgba(255,255,255,.55);box-shadow:inset 0 3px 0 rgba(255,255,255,.6),inset 0 -4px 0 rgba(150,60,0,.25),0 5px 0 #3a1a00,0 9px 14px rgba(0,0,0,.35);cursor:pointer;margin:8px;min-width:200px}
 .btn:active{transform:translateY(4px);box-shadow:inset 0 3px 0 rgba(255,255,255,.6),inset 0 -2px 0 rgba(150,60,0,.25),0 1px 0 #3a1a00,0 3px 6px rgba(0,0,0,.35)}
@@ -379,7 +380,7 @@ h2 .hb{-webkit-text-stroke:0;text-shadow:none;letter-spacing:0;font-family:"Jua"
 
 <script>
 'use strict';
-const BUILD = 311;
+const BUILD = 312;
 const BOSS_INTERVAL = 180;      // 보스 등장 간격(초)
 const WAVE_INTERVAL = 60;       // 대규모 몰이 이벤트 간격(초)
 const MAX_ENEMIES = 110;   // Build 202: 220 → 110 (화면이 너무 정신없어서) — 대신 마을 적이 조금 더 튼튼(CROWD_K)
@@ -1449,6 +1450,7 @@ const UPGRADES = [
   { id: 'luck', icon: '🍀', name: '행운',        max: 16, top: 8,  per: 8,  st: 4, base: 45, desc: l => `금화가 더 나올 확률 +${upPct('luck', l)}%` },
   { id: 'start',icon: '💰', name: '든든한 시작', max: 20, top: 5,  per: 25, st: 25, base: 60, desc: l => `새 판 시작 금화 +${upPct('start', l)}` },
 ];
+const saleId = () => { if (window.__noSale) return null; const L = UPGRADES.filter(u => upLv(u.id) < u.max); return L.length ? L[(window.__saleDay ?? Math.floor(Date.now() / 86400000)) % L.length].id : null; };   // 날마다 바뀜 (다 찬 것은 빼고)
 function upLv(id) { const m = readJSON('stickhero_meta') || {}; return (m.up && m.up[id]) || 0; }
 function upPct(id, l) { const u = UPGRADES.find(x => x.id === id); if (l === undefined) l = upLv(id); return Math.min(l, u.top) * u.per + Math.max(0, l - u.top) * u.st; }
 const upCost = (u, l) => Math.round(u.base * Math.pow(l + 1, 1.45) * (l >= u.top ? 1.5 * Math.pow(1.08, l - u.top) : 1));
@@ -1462,9 +1464,9 @@ function renderShop() {
   $('shopWallet').innerHTML = inGame ? `🪙 지금 가진 금화 <b>${wallet}</b>` : `<img class="ui" src="img/ui_vault.webp" alt="">금고 <b>${wallet}</b> <small style="opacity:.75">(게임오버 때 남은 금화의 절반이 모여요)</small>`;
   const box = $('shopList'); box.innerHTML = '';
   UPGRADES.forEach(u => {
-    const l = upLv(u.id), max = l >= u.max, cost = upCost(u, l), can = !max && wallet >= cost;
+    const l = upLv(u.id), max = l >= u.max, sale = u.id === saleId(), cost = Math.round(upCost(u, l) * (sale ? 0.7 : 1)), can = !max && wallet >= cost;   // 🔥 Build 312: 오늘의 할인
     const row = document.createElement('div'); row.className = 'srow';
-    row.innerHTML = `<div class="ic">${u.icon}</div><div class="tx"><b>${u.name}</b> <span class="lv">${l >= u.top && u.max > u.top ? `⭐ ★${l - u.top}/${u.max - u.top}` : `Lv ${l}/${u.top}`}</span><br><small>${u.desc(l)}${max ? '' : ' → ' + u.desc(l + 1).replace(/^[^+]*/, '')}</small></div>`;
+    row.innerHTML = `<div class="ic">${u.icon}</div><div class="tx"><b>${u.name}</b> <span class="lv">${l >= u.top && u.max > u.top ? `⭐ ★${l - u.top}/${u.max - u.top}` : `Lv ${l}/${u.top}`}</span><br><small>${u.desc(l)}${max ? '' : ' → ' + u.desc(l + 1).replace(/^[^+]*/, '')}</small>${sale && !max ? '<br><span class="sale">🔥 오늘 30% 할인!</span>' : ''}</div>`;
     const bt = document.createElement('button'); bt.className = 'sbuy' + (can ? '' : ' off'); bt.textContent = max ? 'MAX' : `🪙${cost}`;
     bt.onclick = () => {
       if (!can) { sfx('hurt'); return; }
