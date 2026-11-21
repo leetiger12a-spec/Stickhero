@@ -325,6 +325,7 @@ h2 .hb{-webkit-text-stroke:0;text-shadow:none;letter-spacing:0;font-family:"Jua"
   <div id="hatGrid"></div>
   <div class="wardH">🐾 펫 친구</div>
   <div id="petGrid"></div>
+  <div><button class="btn" id="bTreat" style="width:auto;min-width:0;padding:5px 12px;font-size:14px;margin:2px 0"></button></div>
   <div class="wardH" id="pet2H">🐾 두 번째 펫</div>
   <div id="pet2Grid"></div>
   <button class="btn" id="bWardOk">완료</button>
@@ -374,7 +375,7 @@ h2 .hb{-webkit-text-stroke:0;text-shadow:none;letter-spacing:0;font-family:"Jua"
 
 <script>
 'use strict';
-const BUILD = 273;
+const BUILD = 274;
 const BOSS_INTERVAL = 180;      // 보스 등장 간격(초)
 const WAVE_INTERVAL = 60;       // 대규모 몰이 이벤트 간격(초)
 const MAX_ENEMIES = 110;   // Build 202: 220 → 110 (화면이 너무 정신없어서) — 대신 마을 적이 조금 더 튼튼(CROWD_K)
@@ -642,8 +643,20 @@ function doGacha() {
   ST.gachas = (ST.gachas || 0) + 1; stDirty = true; sfx('unlock'); vib(40);
   renderWard(); $('gachaMsg').innerHTML = `🎉 <b>${k[2]}</b> 열렸다! (남은 금고 🏦 ${m.bank})`;
 }
+// 🍖 Build 274: 펫 간식 — 금고 금화로 고른 펫에게 경험치 (펫 Lv 5까지)
+const TREAT_COST = 300, TREAT_XP = 100;
+function giveTreat() {
+  const P = PETS[petSel], m = readJSON('stickhero_meta') || {}, bank = m.bank || 0;
+  if (!P || !P.id) { $('gachaMsg').textContent = '먼저 펫을 골라요 🐾'; sfx('hurt'); return; }
+  if (petLv(P.id) >= PET_XP.length) { $('gachaMsg').textContent = `${P.name}는 이미 최고 레벨이에요 ✨`; sfx('hurt'); return; }
+  if (bank < TREAT_COST) { $('gachaMsg').textContent = `금고 금화가 모자라요 (🏦 ${bank} / ${TREAT_COST})`; sfx('hurt'); return; }
+  const b0 = petLv(P.id); m.bank = bank - TREAT_COST; writeJSON('stickhero_meta', m); ST.petXp = ST.petXp || {}; ST.petXp[P.id] = (ST.petXp[P.id] || 0) + TREAT_XP; ST.treats = (ST.treats || 0) + 1; stDirty = true;
+  const L = petLv(P.id); sfx(L > b0 ? 'unlock' : 'coin'); renderWard();
+  $('gachaMsg').innerHTML = L > b0 ? `🎉 <b>${P.name} Lv ${L}!</b> (남은 금고 🏦 ${m.bank})` : `🍖 냠냠! ${P.name} 경험치 +${TREAT_XP} (다음 Lv까지 ${PET_XP[L] - ST.petXp[P.id]}) · 🏦 ${m.bank}`;
+}
 function renderWard() {
   const have = totalStars();
+  { const P = PETS[petSel], t = $('bTreat'); t.onclick = giveTreat; t.style.display = P && P.id ? '' : 'none'; if (P && P.id) t.textContent = petLv(P.id) >= PET_XP.length ? `🍖 ${P.name} 최고 레벨 ✨` : `🍖 ${P.name}에게 간식 🏦${TREAT_COST} (+${TREAT_XP} 경험치)`; }
   { const n = gachaPool().length, bank = (readJSON('stickhero_meta') || {}).bank || 0; $('bGacha').textContent = n ? `🎰 꾸미기 뽑기 🏦${GACHA_COST} (남은 ${n}개)` : '🎰 모두 열었어요!'; $('bGacha').onclick = doGacha; if (!$('gachaMsg').dataset.t) $('gachaMsg').textContent = `금고 🏦 ${bank} · 잠긴 머리띠·모자·펫 중 하나가 바로 열려요`; }
   $('wardSub').textContent = `모은 별 ⭐ ${have}개 · 별을 모으면 새 색·모자가 열려요`;
   const g = $('wardGrid'); g.innerHTML = '';
