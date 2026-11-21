@@ -9,7 +9,7 @@ const { chromium } = require('/opt/node22/lib/node_modules/playwright');
   await page.goto('http://localhost:8765/index.html'); await page.waitForTimeout(900); await page.click('#bStart'); await page.waitForTimeout(400);
   const r = await page.evaluate(async () => {
     const G = SH.G; G.nextBoss = 999; G.nextWave = 999; G.spawnAcc = -1e9; G.enemies = []; G.p.hp = G.p.maxHp = 1e6; G.gold = 0;
-    const R = Math.random; Math.random = () => 0.4; G.merchT = 0.05; await new Promise(q => setTimeout(q, 200)); Math.random = R;
+    const R = Math.random; Math.random = () => 0.3;   /* 물건 8종 중 'ult'(3번째)가 나오게 */ G.merchT = 0.05; await new Promise(q => setTimeout(q, 200)); Math.random = R;
     const m = G.merchant; if (!m) return { none: true };
     const k = m.k, price = m.price; G.p.x = m.x; G.p.y = m.y; G.p.hp = G.p.maxHp * 0.5;
     await new Promise(q => setTimeout(q, 1500)); const stillPoor = !!G.merchant;

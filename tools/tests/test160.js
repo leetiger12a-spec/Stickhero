@@ -13,7 +13,7 @@ const BN = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15];
       const G = SH.G, k = 'boss' + n; G.p.hp = G.p.maxHp = 1e9; G.enemies = []; G.boss = null; window.__bossN = n; SH.spawnBoss(); G.intro = null;
       const bo = G.boss; bo.hp = bo.maxHp = 1e9; bo.x = G.p.x + 120; bo.y = G.p.y - 60; bo.spd = 0;
       let seen = false; const d = CanvasRenderingContext2D.prototype.drawImage;
-      CanvasRenderingContext2D.prototype.drawImage = function (img) { if (img === SPR[k] || img === SPR_SRC[k]) seen = true; return d.apply(this, arguments); };
+      CanvasRenderingContext2D.prototype.drawImage = function (img) { if (img === SPR[k] || img === SPR_SRC[k] || (SPR[k + '_walk'] && img === SPR[k + '_walk'])) seen = true;   /* Build 328~: 걷기 시트가 있는 보스 */ return d.apply(this, arguments); };
       await new Promise(q => setTimeout(q, 300)); CanvasRenderingContext2D.prototype.drawImage = d;
       const h = SPR_SRC[k] && SPR_SRC[k].naturalHeight; G.enemies = []; G.boss = null; return { seen, h };
     }, n);
