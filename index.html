@@ -375,7 +375,7 @@ h2 .hb{-webkit-text-stroke:0;text-shadow:none;letter-spacing:0;font-family:"Jua"
 
 <script>
 'use strict';
-const BUILD = 274;
+const BUILD = 275;
 const BOSS_INTERVAL = 180;      // 보스 등장 간격(초)
 const WAVE_INTERVAL = 60;       // 대규모 몰이 이벤트 간격(초)
 const MAX_ENEMIES = 110;   // Build 202: 220 → 110 (화면이 너무 정신없어서) — 대신 마을 적이 조금 더 튼튼(CROWD_K)
@@ -2352,7 +2352,7 @@ function makeEnemy(type, x, y) {
   return e;
 }
 // ⚔ 정예 몬스터 (Build 168): 빨간 기운 · 이름표 · 체력 4배 · 공격 1.5배 · 특기 하나 (🛡 방패 / ✂ 분열 / 🌀 순간이동) · 잡으면 작은 상자
-const ELITE_P = 0.03, ELITE_K = { shield: ['🛡', '방패'], split: ['✂', '분열'], blink: ['🌀', '순간이동'], regen: ['🩹', '재생'], haste: ['💨', '질주'] };   // Build 247: 재생·질주
+const ELITE_P = 0.03, ELITE_K = { shield: ['🛡', '방패'], split: ['✂', '분열'], blink: ['🌀', '순간이동'], regen: ['🩹', '재생'], haste: ['💨', '질주'], fire: ['🔥', '불꽃'], ice: ['❄', '얼음'] };   // Build 275: 불꽃(쓰러지면 불길)·얼음(맞으면 느려짐)   // Build 247: 재생·질주
 let eliteBlock = false;
 function eliteOk() { if (!G || eliteBlock || (window.__noGold && window.__eliteP === undefined)) return false;
   if (G.mode === 'stage') return G.st && !G.st.cave && (G.st.tower ? G.st.tower >= 6 : G.st.n >= 3);
@@ -2378,6 +2378,7 @@ const ELITE_CHEST_P = 0.25;
 function eliteDie(e) { stAdd('elites'); questEvent('elite'); G.elitesN = (G.elitesN || 0) + 1;
   if (Math.random() < (window.__eliteChestP !== undefined ? window.__eliteChestP : ELITE_CHEST_P * (WK('treasure') ? 2 : 1))) dropChest(G.mode === 'stage' ? clamp(e.x, -STAGE_HW + 30, STAGE_HW - 30) : e.x, e.y + 16, true);
   else for (let i = 0; i < 5; i++) dropCoin(e.x + rand(-14, 14), e.y + rand(-10, 10));
+  if (e.elite === 'fire') { for (let i = 0; i < 4; i++) { const a = i * 1.57 + Math.random(), rr = i ? 46 : 0; G.hazards.push({ x: e.x + Math.cos(a) * rr, y: e.y + Math.sin(a) * rr, r: 34, warn: 0.5, life: 3.5, max: 3.5, tick: 0, dmg: 7 * DF().edmg }); } burst(e.x, e.y - 12, '#ff9f1c', 26, 230, 5, 0.6); sfx('flame'); }   // 🔥 쓰러지면 불길 (0.5초 경고 뒤 3.5초)
   if (e.elite === 'split') { eliteBlock = true; for (let i = 0; i < 3; i++) { const c = makeEnemy(e.type, e.x + rand(-30, 30), e.y + rand(-20, 20)); c.hp *= 0.5; c.maxHp *= 0.5; c.scale = 0.8; c.awake = true; G.enemies.push(c); } eliteBlock = false; burst(e.x, e.y - 20, '#ff4d6d', 20, 220, 4, 0.5); }
 }
 // ---------- 야생 지대: 적 진지 ----------
@@ -4366,7 +4367,7 @@ function update(dt) {
     }
     e.x += e.kx * dt; e.y += e.ky * dt;
     const decay = Math.exp(-9 * dt); e.kx *= decay; e.ky *= decay;
-    if (!p.dead && pd < e.r + p.r + 2 && !(e.z > 30) && !(e.hideT > 0)) { hurtPlayer(e.dmg); if (e.type === 'e_ghost') slowHero(1.2); }   // 공중에 뜬 보스·숨은 암살자는 안 닿음, 유령 기사 쇠사슬은 느리게
+    if (!p.dead && pd < e.r + p.r + 2 && !(e.z > 30) && !(e.hideT > 0)) { hurtPlayer(e.dmg); if (e.type === 'e_ghost' || e.elite === 'ice') slowHero(1.2); }   // ❄ 얼음 정예도 느리게   // 공중에 뜬 보스·숨은 암살자는 안 닿음, 유령 기사 쇠사슬은 느리게
   }
   // 겹침 방지
   const es = G.enemies;

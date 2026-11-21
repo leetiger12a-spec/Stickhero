@@ -16,7 +16,7 @@ const { chromium } = require('/opt/node22/lib/node_modules/playwright');
     return { healed: a.hp > hp0, hasted, moved, kinds: Object.keys(ELITE_K).length };
   });
   console.log(JSON.stringify(r));
-  check(r.healed, 'regen heals'); check(r.hasted && r.moved > 0, 'haste dash'); check(r.kinds === 5, 'five elite kinds');
+  check(r.healed, 'regen heals'); check(r.hasted && r.moved > 0, 'haste dash'); check(r.kinds === 7, 'five elite kinds');
   await page.evaluate(() => { const G = SH.G; G.cam.x = G.p.x; G.cam.y = G.p.y; }); await page.waitForTimeout(200);
   await page.screenshot({ path: `${OUT}/b247_elite.png` });
   await b.close(); console.log('ERRORS:', errors.length); errors.forEach(e => console.log(e)); process.exit(errors.length ? 1 : 0);
