@@ -193,3 +193,37 @@ GRID RULES (strict):
 BACKGROUND: plain pure white (#FFFFFF) everywhere, no grid lines, no frame borders, no ground line, no shadows, no glow halo around the body, no sticker border, no fire on the ground, no fire waves, no explosions, no smoke, no embers floating away from the body, no lava puddles, no cracks in the ground, no text, no letters, no numbers, no watermark.
 QUALITY: ultra high resolution, QHD (2560x1440) or higher, crisp clean lines
 ```
+
+## B3-① 얼음 용 걷기 (네 발로 성큼 + 날개 들썩) — 첨부 `art/boss3_src.png` · 픽스버스용(LAYOUT 포함)
+```
+TASK: one 2D game ANIMATION SPRITE SHEET of the attached boss character: exactly 12 frames arranged in a grid of 4 columns x 3 rows, read left to right, top row first.
+
+LAYOUT (very important): the whole 4x3 grid must sit in the LOWER-LEFT part of the image. Leave a big EMPTY pure white margin along the TOP edge (the top 15% of the image height) and along the RIGHT edge (the right 15% of the image width). The TOP-RIGHT CORNER of the image (the right 30% of the width x the top 20% of the height) must be COMPLETELY EMPTY white, with no part of any frame in it. Also leave a thin empty white margin along the left and bottom edges.
+
+CHARACTER: the attached Ice Dragon boss (a big blue four-legged dragon with a pale belly, a head facing right with glowing cyan eyes and an open toothy mouth, light-blue ice crystal spikes on the head, back and tail, a small gold crown with red gems, two big blue bat-like wings with ice crystals and gold studs on the wing joints, grey-and-gold studded shoulder armor with a big red gem on the chest, grey-and-gold studded bands on the legs and tail, and big white claws). Keep EXACTLY the same design, colors, thick black outlines, cel shading, proportions and art style in every frame. The crown, ice spikes, wings, chest armor with the red gem, leg bands and white claws are in EVERY frame.
+
+ANIMATION: a heavy FOUR-LEGGED PROWLING WALK in place, facing right (3/4 view like the attached image). The LEGS MUST CLEARLY MOVE in every frame, like a big lizard walking (diagonal legs move together):
+- Frame 1: standing like the attached image, all four feet on the ground, wings half open.
+- Frame 2: the front-right claw and the back-left foot start to lift.
+- Frame 3: the front-right claw lifted high and reaching forward, the back-left foot in the air; the wings rise a little.
+- Frame 4: the front-right claw stretched far forward just above the ground.
+- Frame 5: the front-right claw lands far forward, the body dips, the head lowers, the wings go down.
+- Frame 6: the body slides forward over the planted claw, the tail swings to the other side.
+- Frame 7: the front-left claw and the back-right foot start to lift.
+- Frame 8: the front-left claw lifted high and reaching forward; the wings rise a little.
+- Frame 9: the front-left claw stretched far forward just above the ground.
+- Frame 10: the front-left claw lands, the body dips, the head lowers, the wings go down.
+- Frame 11: the body slides forward, the tail swinging back.
+- Frame 12: almost like frame 1, flowing back into frame 1.
+The tail sways side to side and the wings gently rise and fall with each step. The head stays facing right with the open mouth and glowing eyes.
+
+GRID RULES (strict):
+- Every frame: the SAME dragon at the SAME size (the same crown and head size in all 3 rows), facing right, 3/4 top-down game view, same as the attached image.
+- Same ground line in every frame; the dragon stays in the center of its cell.
+- The dragon (including the wings and tail) fills about 70% of its cell width and height.
+- VERY WIDE empty white gaps between all cells and between the rows; no wing tip, tail tip, ice spike, crown or claw may touch or come near another cell.
+- Only the 12 frames. No extra poses, no labels.
+
+BACKGROUND: plain pure white (#FFFFFF) everywhere, no grid lines, no frame borders, no ground line, no shadows, no glow halo, no sticker border, no snow, no ice on the ground, no frost breath, no sparkles floating away from the body, no footprints, no text, no letters, no numbers, no watermark.
+QUALITY: ultra high resolution, QHD (2560x1440) or higher, crisp clean lines
+```
