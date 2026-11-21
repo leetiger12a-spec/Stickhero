@@ -379,7 +379,7 @@ h2 .hb{-webkit-text-stroke:0;text-shadow:none;letter-spacing:0;font-family:"Jua"
 
 <script>
 'use strict';
-const BUILD = 307;
+const BUILD = 308;
 const BOSS_INTERVAL = 180;      // 보스 등장 간격(초)
 const WAVE_INTERVAL = 60;       // 대규모 몰이 이벤트 간격(초)
 const MAX_ENEMIES = 110;   // Build 202: 220 → 110 (화면이 너무 정신없어서) — 대신 마을 적이 조금 더 튼튼(CROWD_K)
@@ -2393,7 +2393,7 @@ function makeEnemy(type, x, y) {
   if (!e.golden && eliteOk() && Math.random() < (window.__eliteP !== undefined ? window.__eliteP : (ELITE_P + (G.lvl >= LVL_FREE ? 0.02 : 0)) * (WK('elite') ? 4 : 1) + (G.blood && G.mode === 'base' ? 0.12 : 0))) makeElite(e);
   if (G && G.mode === 'stage' && G.st && G.st.rule === 'giant' && !T.boss) { e.hp *= 2; e.maxHp *= 2; e.r *= 1.4; e.scale = 1.45; e.spd *= 0.7; }   // 🐘 거인 층 (Build 244)
   if (G && G.mode === 'stage' && G.st && G.st.rule === 'vamp') e.dmg *= 1.3;
-  if (G && G.mode === 'stage' && G.st && G.st.arena && !T.boss) { const w = G.st.arena - 1; e.hp *= 1 + 0.18 * w; e.maxHp *= 1 + 0.18 * w; e.dmg *= 1 + 0.07 * w; if (G.st.arena % 5 === 0 && !e.elite && !e.golden && Math.random() < 0.3) makeElite(e); const R = G.st.arenaRule; if (R === 'giant') { e.hp *= 2; e.maxHp *= 2; e.r *= 1.4; e.scale = (e.scale || 1) * 1.45; e.spd *= 0.7; } else if (R === 'swift') e.spd *= 1.4; else if (R === 'swarm') { e.hp *= 0.5; e.maxHp *= 0.5; } }   // 🏟 투기장 웨이브 세기   // 🩸 흡혈 층: 적 공격 1.3배
+  if (G && G.mode === 'stage' && G.st && G.st.arena && !T.boss) { const w = G.st.arena - 1; e.hp *= 1 + 0.18 * w; e.maxHp *= 1 + 0.18 * w; e.dmg *= 1 + 0.07 * w; if (G.st.arena % 5 === 0 && !e.elite && !e.golden && Math.random() < 0.3) makeElite(e); const R = G.st.arenaRule; if (R === 'giant') { e.hp *= 2; e.maxHp *= 2; e.r *= 1.4; e.scale = (e.scale || 1) * 1.45; e.spd *= 0.7; } else if (R === 'swift') e.spd *= 1.4; else if (R === 'swarm') { e.hp *= 0.5; e.maxHp *= 0.5; } else if (R === 'elitew' && !e.elite && !e.golden && Math.random() < 0.4) makeElite(e); else if (R === 'goldw' && !e.elite && !e.golden && Math.random() < 0.25) makeGolden(e); }   // 🏟 투기장 웨이브 세기   // 🩸 흡혈 층: 적 공격 1.3배
   return e;
 }
 // ⚔ 정예 몬스터 (Build 168): 빨간 기운 · 이름표 · 체력 4배 · 공격 1.5배 · 특기 하나 (🛡 방패 / ✂ 분열 / 🌀 순간이동) · 잡으면 작은 상자
@@ -3480,8 +3480,8 @@ $('bCave').onclick = () => {
 const ARENA_COST = 100, ARENA_T = 20, arenaOpen = () => G.stageN >= 3;
 const ARENA_BOSS = [2, 5, 7, 11, 12, 13, 14, 15];   // 👑 Build 271: 10웨이브마다 나오는 보스 차례 (불꽃 대마왕 → 해골 왕 → 용암 골렘 → 해골 왕 4종…)
 // 🎲 Build 282: 3웨이브마다(5·10 배수 빼고) 특별 웨이브
-const ARENA_RULES = { giant: ['🐘', '거인 웨이브', '적이 크고 튼튼해요 (체력 2배·느림)'], swift: ['💨', '질주 웨이브', '적이 1.4배 빨라요'], swarm: ['🐜', '떼 웨이브', '적이 1.8배 많이 · 체력은 절반'] };
-const arenaRuleFor = w => w % 3 === 0 && w % 5 && w % 10 ? (window.__arenaRule || Object.keys(ARENA_RULES)[Math.floor(Math.random() * 3)]) : null;
+const ARENA_RULES = { giant: ['🐘', '거인 웨이브', '적이 크고 튼튼해요 (체력 2배·느림)'], swift: ['💨', '질주 웨이브', '적이 1.4배 빨라요'], swarm: ['🐜', '떼 웨이브', '적이 1.8배 많이 · 체력은 절반'], elitew: ['⚔', '정예 웨이브', '적의 40%가 정예!'], goldw: ['✨', '황금 웨이브', '황금 몬스터가 잔뜩 · 금화 와르르'] };   // Build 308: 2개 더
+const arenaRuleFor = w => w % 3 === 0 && w % 5 && w % 10 ? (window.__arenaRule || Object.keys(ARENA_RULES)[Math.floor(Math.random() * Object.keys(ARENA_RULES).length)]) : null;
 const arenaPrize = w => 40 + 15 * w + (w % 5 === 0 ? 100 + 20 * w : 0);
 $('bArena').onclick = () => {
   if (!arenaOpen()) { sfx('hurt'); $('mapCard').innerHTML = `<div class="t">🏟 투기장</div><div class="g">🔒 3칸을 깨면 열려요</div>`; return; }
