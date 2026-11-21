@@ -381,7 +381,7 @@ h2 .hb{-webkit-text-stroke:0;text-shadow:none;letter-spacing:0;font-family:"Jua"
 
 <script>
 'use strict';
-const BUILD = 321;
+const BUILD = 322;
 const BOSS_INTERVAL = 180;      // 보스 등장 간격(초)
 const WAVE_INTERVAL = 60;       // 대규모 몰이 이벤트 간격(초)
 const MAX_ENEMIES = 110;   // Build 202: 220 → 110 (화면이 너무 정신없어서) — 대신 마을 적이 조금 더 튼튼(CROWD_K)
@@ -595,7 +595,7 @@ function updPetOne(dt, sel, key, side) { const P = PETS[sel], p = G.p; if (!P ||
   else if (P.id === 'kitten') { pt.cd = 1.3 - 0.1 * L; const g = G.gems.filter(g => !g.pull && (g.x - p.x) ** 2 + (g.y - p.y) ** 2 < 320 * 320).slice(0, 4 + 2 * L); for (const k of g) k.pull = true; if (g.length) { questEvent('petfetch', g.length); floatText(pt.x, pt.y - 34, '냥!', '#bde0fe', 12, 0.6); } }
   else if (P.id === 'chick') { pt.cd = 3; if (p.hp < p.maxHp) { p.hp = Math.min(p.maxHp, p.hp + 2 * L); floatText(pt.x, pt.y - 34, `삐약 +${2 * L}`, '#7bed9f', 12, 0.7); } }
   else if (P.id === 'dragon') { pt.cd = 2.2 - 0.2 * L; const e = nearest(pt.x, pt.y, 300); if (e) { const a = Math.atan2(e.y - pt.y, e.x - pt.x); G.bullets.push({ x: pt.x, y: pt.y - 14, vx: Math.cos(a) * 420, vy: Math.sin(a) * 420, r: 5, dmg: (8 + 2 * G.lvl) * (1 + 0.25 * (L - 1)), life: 0.8, pierce: L >= 5 ? 2 : 0, hits: [], kind: 'pistol', pet: true }); pt.face = Math.cos(a) > 0 ? 1 : -1; sfx('toss'); } } }
-const PET_XP = [0, 100, 300, 700, 1500];   // 펫이 함께 잡은 적 수로 레벨 (영원히)
+const PET_XP = [0, 100, 300, 700, 1500, 3000, 5000];   // Build 322: 최고 Lv 5 → 7   // 펫이 함께 잡은 적 수로 레벨 (영원히)
 const petLv = id => { const x = ((ST.petXp || {})[id]) || 0; let l = 1; for (let i = 1; i < PET_XP.length; i++) if (x >= PET_XP[i]) l = i + 1; return l; };
 function petGain() { petGainOne(petSel, G.pet); if (G.pet2) petGainOne(pet2Sel, G.pet2); }
 function petGainOne(sel, pt) { const P = PETS[sel]; if (!P || !P.id || !pt) return; ST.petXp = ST.petXp || {}; const before = petLv(P.id); ST.petXp[P.id] = (ST.petXp[P.id] || 0) + 1; stDirty = true;
