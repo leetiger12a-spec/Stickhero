@@ -8,7 +8,7 @@ const { chromium } = require('/opt/node22/lib/node_modules/playwright');
   page.on('pageerror', e => errors.push(e.message)); page.on('console', m => { if (m.type() === 'error') errors.push(m.text()); });
   await page.goto('http://localhost:8765/index.html'); await page.waitForTimeout(1500);
   await page.evaluate(() => { ST.kc.e_charger = 5; showDexCard('e_charger'); }); await page.waitForTimeout(300);
-  const seen = new Set(); for (let i = 0; i < 30; i++) { seen.add(await page.evaluate(() => { const l = document.querySelector('#dexCard .dexAnimLab'); return l && l.textContent; })); await page.waitForTimeout(150); }
+  const seen = new Set(); for (let i = 0; i < 30; i++) { seen.add(await page.evaluate(() => { const l = document.querySelector('#dexCard .dexAnimLab'); return l && l.textContent.split(' · ')[0]; })); await page.waitForTimeout(150); }
   console.log([...seen]); check(seen.has('🚶 걷기') && seen.has('⚔ 공격'), 'walk and attack shown');
   check(await page.evaluate(() => !!document.querySelector('#dexCard canvas.dexAnim')), 'canvas');
   await page.screenshot({ path: `${OUT}/b269_dex.png` });

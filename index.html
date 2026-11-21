@@ -375,7 +375,7 @@ h2 .hb{-webkit-text-stroke:0;text-shadow:none;letter-spacing:0;font-family:"Jua"
 
 <script>
 'use strict';
-const BUILD = 278;
+const BUILD = 279;
 const BOSS_INTERVAL = 180;      // 보스 등장 간격(초)
 const WAVE_INTERVAL = 60;       // 대규모 몰이 이벤트 간격(초)
 const MAX_ENEMIES = 110;   // Build 202: 220 → 110 (화면이 너무 정신없어서) — 대신 마을 적이 조금 더 튼튼(CROWD_K)
@@ -1338,9 +1338,14 @@ function dexAnim(k) {
   const im = $('dexCard').querySelector('img'); if (!im) return;
   const cv = document.createElement('canvas'); cv.className = 'dexAnim'; cv.width = 320; cv.height = 200; im.replaceWith(cv);
   const lab = document.createElement('div'); lab.className = 'dexAnimLab'; cv.after(lab);
-  const c = cv.getContext('2d'), list = [];
-  const W = SHEETS[wn], wf = W.seq || [...Array(W.n).keys()]; for (let r = 0; r < 2; r++) wf.forEach(f => list.push([wn, f, 1 / 12, '🚶 걷기']));
-  if (an && SPR[an] && SHEETS[an]) { const A = SHEETS[an], af = A.play || [...Array(A.n).keys()]; af.forEach((f, i) => list.push([an, f, i === af.length - 1 ? 0.5 : 1 / 14, '⚔ 공격'])); }
+  const c = cv.getContext('2d'), WL = [], AL = []; let list;
+  const W = SHEETS[wn], wf = W.seq || [...Array(W.n).keys()]; wf.forEach(f => WL.push([wn, f, 1 / 12, '🚶 걷기']));
+  if (an && SPR[an] && SHEETS[an]) { const A = SHEETS[an], af = A.play || [...Array(A.n).keys()]; af.forEach((f, i) => AL.push([an, f, i === af.length - 1 ? 0.5 : 1 / 14, '⚔ 공격'])); }
+  // 🎞 Build 279: 그림을 누르면 자동 → 걷기만 → 공격만 → 자동
+  const MODES = AL.length ? ['auto', 'walk', 'atk'] : ['auto']; let mode = 0;
+  const build = () => { const m = MODES[mode]; list = m === 'walk' ? WL : m === 'atk' ? AL : [...WL, ...WL, ...AL]; };
+  build();
+  cv.onclick = ev => { ev.stopPropagation(); if (MODES.length < 2) return; mode = (mode + 1) % MODES.length; build(); i = 0; t = 0; sfx('pick'); };
   const fit = n => { const S = SHEETS[n], img = SPR[n], cwI = img.width / S.n, r = cwI / img.height; return Math.min(185 * S.body, 316 / r * S.body / Math.max(S.ax, 1 - S.ax) / 2); };
   const bodyPx = Math.min(...[...new Set(list.map(x => x[0]))].map(fit));
   let i = 0, t = 0, last = performance.now();
@@ -1350,9 +1355,10 @@ function dexAnim(k) {
     while (t >= list[i][2]) { t -= list[i][2]; i = (i + 1) % list.length; }
     const [n, f, , tx] = list[i], S = SHEETS[n], img = SPR[n], cwI = img.width / S.n, ch = bodyPx / S.body, cw = ch * cwI / img.height;
     c.clearRect(0, 0, cv.width, cv.height); c.fillStyle = 'rgba(0,0,0,.18)'; c.beginPath(); c.ellipse(160, 190, 60, 9, 0, 0, 7); c.fill();
-    c.drawImage(img, f * cwI, 0, cwI, img.height, 160 - cw * S.ax, 190 - ch * S.ay, cw, ch); lab.textContent = tx;
+    c.drawImage(img, f * cwI, 0, cwI, img.height, 160 - cw * S.ax, 190 - ch * S.ay, cw, ch); lab.textContent = tx + (MODES.length > 1 ? (MODES[mode] === 'auto' ? ' · 👆 눌러서 고르기' : ' 만 보기 · 👆 눌러서 바꾸기') : '');
     requestAnimationFrame(loop);
   })(last);
+  lab.dataset.hint = AL.length ? '1' : '';
 }
 $('dexCard').onclick = () => $('dexCard').classList.remove('show');
 $('bDexA').onclick = () => { sfx('pick'); openDex(); };
