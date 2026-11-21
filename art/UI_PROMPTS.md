@@ -64,3 +64,24 @@ GRID RULES (strict):
 BACKGROUND: plain pure white (#FFFFFF) everywhere, no grid lines, no frame borders, no shadows, no glow halo, no sticker border, no text, no watermark.
 QUALITY: ultra high resolution, QHD (2560x1440) or higher, crisp clean lines
 ```
+
+## ③ UI 아이콘 3번째 시트 16개 (Build 326~) — ChatGPT, 첨부 2장: `art/ui_icons_src.png` + `art/ui_icons2_src.png` (앞 두 시트 = 그림체 정답)
+```
+TASK: one 2D game UI ICON SHEET: exactly 16 NEW icons arranged in a grid of 4 columns x 4 rows, read left to right, top row first.
+
+STYLE (most important): images 1 and 2 are finished icon sheets from the same game. Match them 100%: same thick dark outlines, same flat cel shading with 2-3 tones plus one sharp white highlight, same bright saturated colors, same chunky shapes, same size inside each cell, same slight 3/4 view. Every icon is a single solid object, very readable at small size (32 px).
+
+ICONS IN THIS EXACT ORDER:
+- Row 1: (1) a tall stone tower with a purple flag (endless tower), (2) a glowing cave entrance with gold coins inside (secret cave), (3) a round stone colosseum arena with red banners (arena), (4) a red-and-gold slot machine with three sevens (lucky spin).
+- Row 2: (5) a swirling purple magic portal (rebirth), (6) a golden royal crown with red gems (boss rush), (7) a flaming red skull (hard mode), (8) a desk calendar page with a small angry horned monster face on it (today's boss).
+- Row 3: (9) a roasted meat drumstick on a bone (pet treat), (10) a brown leather treasure sack tied with gold rope (treasure bag), (11) a small wooden merchant cart with a striped awning (traveling merchant), (12) a red-and-white archery target with an arrow in the center (weekly challenge).
+- Row 4: (13) a sealed envelope with a red heart sticker (gift mail), (14) a rolled newspaper with a star on it (news), (15) a red rocket with a flame (checkpoint), (16) a round dark-navy badge with a bold white X and a gold rim (close).
+
+GRID RULES (strict):
+- Every icon is centered in its cell and fills about 70% of the cell, all icons the SAME visual size.
+- VERY WIDE empty white gaps between all icons and between the rows; nothing touches or comes near another cell.
+- Only the 16 icons. No labels, no letters or numbers except the three sevens on icon 4, no extra items.
+
+BACKGROUND: plain pure white (#FFFFFF) everywhere, no grid lines, no frame borders, no shadows, no glow halo, no sticker border, no text, no watermark.
+QUALITY: ultra high resolution, QHD (2560x1440) or higher, crisp clean lines
+```
