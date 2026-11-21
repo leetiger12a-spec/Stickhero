@@ -226,10 +226,10 @@ h2 .hb{-webkit-text-stroke:0;text-shadow:none;letter-spacing:0;font-family:"Jua"
    <button id="bWeekly"></button>
    <button class="btn big" id="bContinue" style="display:none">▶ 이어하기</button>
    <div class="best" id="saveInfo" style="margin-top:0"></div>
-   <button class="btn big" id="bStart">⚔ 출전!</button>
+   <button class="btn big" id="bStart"><img class="ui" src="img/ui_battle.webp" alt="">출전!</button>
   </div>
   <div class="best" id="bestTitle"></div>
-  <div class="mrow"><button class="hb" id="bHelp">❓ 조작법</button><button class="hb" id="bStory" style="display:none">📖 이야기</button><button class="hb" id="bMusicT">🎵 음악</button><button class="hb" id="bVolT">🔈 소리 크기</button><button class="hb" id="bWard">🎨 꾸미기</button><button class="hb" id="bShopT">💪 강화</button><button class="hb" id="bAchT"><img class="ui" src="img/ui_trophy.webp" alt="">업적</button><button class="hb" id="bDaily">📅 출석</button><button class="hb" id="bStats"><img class="ui" src="img/ui_trophy.webp" alt="">기록</button></div>
+  <div class="mrow"><button class="hb" id="bHelp"><img class="ui" src="img/ui_help.webp" alt="">조작법</button><button class="hb" id="bStory" style="display:none"><img class="ui" src="img/ui_story.webp" alt="">이야기</button><button class="hb" id="bMusicT"><img class="ui" src="img/ui_music.webp" alt="">음악</button><button class="hb" id="bVolT"><img class="ui" src="img/ui_volume.webp" alt="">소리 크기</button><button class="hb" id="bWard"><img class="ui" src="img/ui_ward.webp" alt="">꾸미기</button><button class="hb" id="bShopT"><img class="ui" src="img/ui_power.webp" alt="">강화</button><button class="hb" id="bAchT"><img class="ui" src="img/ui_trophy.webp" alt="">업적</button><button class="hb" id="bDaily"><img class="ui" src="img/ui_daily.webp" alt="">출석</button><button class="hb" id="bStats"><img class="ui" src="img/ui_trophy.webp" alt="">기록</button></div>
   <div class="hint" id="helpBox" style="display:none">📱 화면을 끌어서 이동 · 공격은 자동<br>🌳 나무 옆에 서면 통나무를 모아요 → 🪵 동그라미 위에 서면 건설!<br>⚔ 출격 문으로 모험 → 보스를 잡고 금화를 가져와요<br>📻 위험할 땐 지원 버튼! SKYFANG 비행기가 폭격 (60초마다)<br>💨 구르기 버튼: 휙 굴러서 잠깐 안 맞아요 (3.5초마다)<br>💻 WASD / 방향키 이동 · Shift 구르기 · E 지원 요청 · P 일시정지</div>
  </div>
 </div>
@@ -250,7 +250,7 @@ h2 .hb{-webkit-text-stroke:0;text-shadow:none;letter-spacing:0;font-family:"Jua"
 </div>
 
 <div class="ov" id="ovAch">
-  <h2 style="margin-bottom:2px">🏅 업적 <button class="hb" id="bEvoA" style="width:auto;padding:0 10px;font-weight:800;font-size:14px;vertical-align:middle">✨ 진화 도감</button> <button class="hb" id="bDexA" style="width:auto;padding:0 10px;font-weight:800;font-size:14px;vertical-align:middle"><img class="ui" src="img/ui_dex.webp" alt="">몬스터</button></h2>
+  <h2 style="margin-bottom:2px">🏅 업적 <button class="hb" id="bEvoA" style="width:auto;padding:0 10px;font-weight:800;font-size:14px;vertical-align:middle"><img class="ui" src="img/ui_evo.webp" alt="">진화 도감</button> <button class="hb" id="bDexA" style="width:auto;padding:0 10px;font-weight:800;font-size:14px;vertical-align:middle"><img class="ui" src="img/ui_dex.webp" alt="">몬스터</button></h2>
   <div class="sub" id="achSub" style="margin-bottom:6px;font-size:13px"></div>
   <div id="achNext"></div>
   <div id="achList"></div>
@@ -360,10 +360,10 @@ h2 .hb{-webkit-text-stroke:0;text-shadow:none;letter-spacing:0;font-family:"Jua"
   <h2>일시정지</h2>
   <div id="pauseStats"></div>
   <button class="btn" id="bResume">계속하기</button>
-  <button class="btn blue" id="bShopP">💪 영웅 강화</button>
+  <button class="btn blue" id="bShopP"><img class="ui" src="img/ui_power.webp" alt="">영웅 강화</button>
   <button class="btn" id="bAchP"><img class="ui" src="img/ui_trophy.webp" alt="">업적</button>
   <button class="btn" id="bReborn" style="display:none;background:linear-gradient(#c77dff,#7b2cbf);color:#fff">🌀 환생하기</button>
-  <div class="mrow" style="margin:6px 0 10px"><button class="hb" id="bMusicP" style="width:auto;padding:0 14px;font-weight:800">🎵 음악</button><button class="hb" id="bVolP" style="width:auto;padding:0 14px;font-weight:800">🔈 소리 크기</button><button class="hb" id="bVibP" style="width:auto;padding:0 14px;font-weight:800">📳 진동</button><button class="hb" id="bNumP" style="width:auto;padding:0 14px;font-weight:800">🔢 숫자</button><button class="hb" id="bViewP" style="width:auto;padding:0 14px;font-weight:800">🔭 보통</button><button class="hb" id="bAllyP" style="width:auto;padding:0 14px;font-weight:800">🐱 작전: 보통</button><button class="hb" id="bShakeP" style="width:auto;padding:0 14px;font-weight:800">🎚 흔들림</button><button class="hb" id="bEvoP" style="width:auto;padding:0 14px;font-weight:800">✨ 진화 도감</button><button class="hb" id="bDexP" style="width:auto;padding:0 14px;font-weight:800"><img class="ui" src="img/ui_dex.webp" alt="">몬스터 도감</button></div>
+  <div class="mrow" style="margin:6px 0 10px"><button class="hb" id="bMusicP" style="width:auto;padding:0 14px;font-weight:800"><img class="ui" src="img/ui_music.webp" alt="">음악</button><button class="hb" id="bVolP" style="width:auto;padding:0 14px;font-weight:800"><img class="ui" src="img/ui_volume.webp" alt="">소리 크기</button><button class="hb" id="bVibP" style="width:auto;padding:0 14px;font-weight:800"><img class="ui" src="img/ui_vib.webp" alt="">진동</button><button class="hb" id="bNumP" style="width:auto;padding:0 14px;font-weight:800"><img class="ui" src="img/ui_num.webp" alt="">숫자</button><button class="hb" id="bViewP" style="width:auto;padding:0 14px;font-weight:800"><img class="ui" src="img/ui_view.webp" alt="">보통</button><button class="hb" id="bAllyP" style="width:auto;padding:0 14px;font-weight:800"><img class="ui" src="img/ui_tactic.webp" alt="">작전: 보통</button><button class="hb" id="bShakeP" style="width:auto;padding:0 14px;font-weight:800"><img class="ui" src="img/ui_shake.webp" alt="">흔들림</button><button class="hb" id="bEvoP" style="width:auto;padding:0 14px;font-weight:800"><img class="ui" src="img/ui_evo.webp" alt="">진화 도감</button><button class="hb" id="bDexP" style="width:auto;padding:0 14px;font-weight:800"><img class="ui" src="img/ui_dex.webp" alt="">몬스터 도감</button></div>
   <button class="btn gray" id="bQuit">처음으로</button>
 </div>
 
@@ -377,7 +377,7 @@ h2 .hb{-webkit-text-stroke:0;text-shadow:none;letter-spacing:0;font-family:"Jua"
 
 <script>
 'use strict';
-const BUILD = 293;
+const BUILD = 294;
 const BOSS_INTERVAL = 180;      // 보스 등장 간격(초)
 const WAVE_INTERVAL = 60;       // 대규모 몰이 이벤트 간격(초)
 const MAX_ENEMIES = 110;   // Build 202: 220 → 110 (화면이 너무 정신없어서) — 대신 마을 적이 조금 더 튼튼(CROWD_K)
@@ -1838,7 +1838,7 @@ function refreshTitle() {
   const d = readJSON(SAVE_KEY);
   $('bContinue').style.display = d ? '' : 'none';
   $('saveInfo').innerHTML = d ? saveSummary(d) : '';
-  $('bStart').textContent = d ? '새로 시작' : '⚔ 출전!';
+  if (d) $('bStart').textContent = '새로 시작'; else setIco('bStart', 'battle', '출전!');
   $('bStart').classList.toggle('big', !d);
   $('bStart').style.fontSize = d ? '17px' : '';
   $('bStart').style.background = d ? 'linear-gradient(#ddd,#aaa)' : ''; $('bStart').style.boxShadow = d ? '0 5px 0 #666' : '';
@@ -1984,13 +1984,15 @@ $('bResume').onclick = togglePause;
 $('bQuit').onclick = toTitle;
 $('bPause').onclick = () => { audioInit(); togglePause(); };
 $('bSound').onclick = () => { audioInit(); muted = !muted; try { localStorage.setItem('stickhero_mute', muted ? '1' : '0'); } catch (e) {} refreshSettings(); };
+// 🖼 Build 294: 버튼 = 그림 아이콘 + 글
+function setIco(id, n, t) { $(id).innerHTML = `<img class="ui" src="img/ui_${n}.webp" alt="">${t}`; }
 function refreshSettings() {
   $('bSound').classList.toggle('muted', !!muted);   // 🖼 Build 292: 아이콘 그림 (꺼지면 회색 + ✕)
-  for (const id of ['bMusicT', 'bMusicP']) { $(id).textContent = musicOn ? '🎵 음악 켬' : '🎵 음악 끔'; $(id).style.opacity = musicOn ? 1 : 0.55; }
-  $('bVibP').textContent = vibOn ? '📳 진동 켬' : '📳 진동 끔'; $('bVibP').style.opacity = vibOn ? 1 : 0.55;
-  $('bNumP').textContent = numOn ? '🔢 피해 숫자 켬' : '🔢 피해 숫자 끔'; $('bNumP').style.opacity = numOn ? 1 : 0.55;
-  $('bViewP').textContent = VIEWS[viewI][0]; $('bAllyP').textContent = ALLY_MODES[allyMode][0];
-  $('bShakeP').textContent = shakeOn ? '🎚 화면 흔들림 켬' : '🎚 화면 흔들림 끔'; $('bShakeP').style.opacity = shakeOn ? 1 : 0.55;
+  for (const id of ['bMusicT', 'bMusicP']) { setIco(id, 'music', musicOn ? '음악 켬' : '음악 끔'); $(id).style.opacity = musicOn ? 1 : 0.55; }
+  setIco('bVibP', 'vib', vibOn ? '진동 켬' : '진동 끔'); $('bVibP').style.opacity = vibOn ? 1 : 0.55;
+  setIco('bNumP', 'num', numOn ? '피해 숫자 켬' : '피해 숫자 끔'); $('bNumP').style.opacity = numOn ? 1 : 0.55;
+  setIco('bViewP', 'view', VIEWS[viewI][0].replace(/^\S+\s/, '')); setIco('bAllyP', 'tactic', ALLY_MODES[allyMode][0].replace(/^\S+\s/, ''));
+  setIco('bShakeP', 'shake', shakeOn ? '화면 흔들림 켬' : '화면 흔들림 끔'); $('bShakeP').style.opacity = shakeOn ? 1 : 0.55;
 }
 const toggleMusic = () => { audioInit(); musicOn = !musicOn; try { localStorage.setItem('stickhero_music', musicOn ? '1' : '0'); } catch (e) {} if (!musicOn && bgmCur) { const k = bgmCur.key; playBgm('__none'); bgmWant = k; } refreshSettings(); };
 $('bMusicT').onclick = toggleMusic; $('bMusicP').onclick = toggleMusic;
@@ -3344,7 +3346,7 @@ function renderMap() {
     <div class="g">${goal}</div>
     <div class="r">${'⭐'.repeat(st)}${'☆'.repeat(3 - st)} · ⭐1 클리어 ⭐2 체력 절반 이상 ⭐3 ${d.goal === 'survive' ? '거의 안 맞기' : '빨리 깨기'}</div>
     <div class="r">보상 🪙${stageReward(mapSel, first)}${first ? ' (첫 클리어)' : ''}${(u => u && bestStage() < u.at ? ` + 🎁 ${u.name}` : '')(UNLOCKS.find(u => u.at === mapSel + 1))}</div>
-    <button class="btn big" id="bGo" style="margin-top:6px">⚔ 출격!</button>`;
+    <button class="btn big" id="bGo" style="margin-top:6px"><img class="ui" src="img/ui_battle.webp" alt="">출격!</button>`;
   $('bGo').onclick = () => { showOv(null); state = 'play'; enterStage(mapSel); };
 }
 const stageReward = (i, first) => first ? 60 + i * 35 : 20 + i * 8;
