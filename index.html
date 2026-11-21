@@ -211,7 +211,7 @@ h2 .hb{-webkit-text-stroke:0;text-shadow:none;letter-spacing:0;font-family:"Jua"
 <canvas id="cv"></canvas>
 
 <div id="questBox"></div>
-<button id="bBag" aria-label="보물 가방"><span class="ic">🎁</span><span class="n" id="bagN">0</span></button><button id="bDash" aria-label="구르기"><div class="in"><span class="ic">💨</span><span class="tx" id="dashTx">구르기</span></div></button><button id="bUlt" aria-label="필살기"><div class="in"><span class="ic">💥</span><span class="tx" id="ultTx">0%</span></div></button><button id="bSos" aria-label="SKYFANG 지원 요청"><div class="in"><span class="ic">📻</span><span class="tx" id="sosTx">지원</span></div></button>
+<button id="bBag" aria-label="보물 가방"><span class="ic"><img src="img/ui_bag.webp" alt="" style="width:30px;height:30px;object-fit:contain;display:block"></span><span class="n" id="bagN">0</span></button><button id="bDash" aria-label="구르기"><div class="in"><span class="ic">💨</span><span class="tx" id="dashTx">구르기</span></div></button><button id="bUlt" aria-label="필살기"><div class="in"><span class="ic">💥</span><span class="tx" id="ultTx">0%</span></div></button><button id="bSos" aria-label="SKYFANG 지원 요청"><div class="in"><span class="ic">📻</span><span class="tx" id="sosTx">지원</span></div></button>
 <div id="hudBtns"><button class="hb" id="bPause" aria-label="일시정지"><img class="uib" src="img/ui_pause.webp" alt=""></button><button class="hb" id="bSound" aria-label="소리"><img class="uib" src="img/ui_sound.webp" alt=""></button></div>
 
 <div class="ov show" id="ovTitle">
@@ -290,7 +290,7 @@ h2 .hb{-webkit-text-stroke:0;text-shadow:none;letter-spacing:0;font-family:"Jua"
   <div id="dailyGrid"></div>
   <button class="btn" id="bDailyGet">받기!</button>
   <div id="spinBox"><div id="spinWheel"></div><div id="spinPin">▼</div></div>
-  <button class="btn blue" id="bSpin">🎰 행운 룰렛 돌리기</button>
+  <button class="btn blue" id="bSpin"><img class="ui" src="img/ui_spin.webp" alt="">행운 룰렛 돌리기</button>
   <div class="sub" id="spinRes"></div>
   <button class="btn" id="bDailyOk" style="background:#ddd">닫기</button>
 </div>
@@ -338,7 +338,7 @@ h2 .hb{-webkit-text-stroke:0;text-shadow:none;letter-spacing:0;font-family:"Jua"
 </div>
 
 <div class="ov" id="ovMap">
-  <div id="mapHead"><h2 style="margin:0"><img class="ui" src="img/ui_map.webp" alt="">모험 지도</h2><button class="hb" id="bMapBack" style="display:none;width:auto;padding:0 10px;font-weight:800;background:#2a9d8f;color:#fff"><img class="ui" src="img/ui_map.webp" alt="">지도</button><button class="hb" id="bTower" style="width:auto;padding:0 10px;font-weight:800;background:#b5179e;color:#fff">🗼 무한 탑</button><button class="hb" id="bCave" style="width:auto;padding:0 10px;font-weight:800;background:#ffd23f;color:#222">🌟 동굴</button><button class="hb" id="bArena" style="width:auto;padding:0 10px;font-weight:800;background:#e63946;color:#fff">🏟 투기장</button><button class="hb" id="bMapClose" style="width:auto;padding:0 12px;font-weight:800">✖ 닫기</button></div>
+  <div id="mapHead"><h2 style="margin:0"><img class="ui" src="img/ui_map.webp" alt="">모험 지도</h2><button class="hb" id="bMapBack" style="display:none;width:auto;padding:0 10px;font-weight:800;background:#2a9d8f;color:#fff"><img class="ui" src="img/ui_map.webp" alt="">지도</button><button class="hb" id="bTower" style="width:auto;padding:0 10px;font-weight:800;background:#b5179e;color:#fff"><img class="ui" src="img/ui_tower.webp" alt="">무한 탑</button><button class="hb" id="bCave" style="width:auto;padding:0 10px;font-weight:800;background:#ffd23f;color:#222"><img class="ui" src="img/ui_cave.webp" alt="">동굴</button><button class="hb" id="bArena" style="width:auto;padding:0 10px;font-weight:800;background:#e63946;color:#fff"><img class="ui" src="img/ui_arena.webp" alt="">투기장</button><button class="hb" id="bMapClose" style="width:auto;padding:0 12px;font-weight:800"><img class="ui" src="img/ui_close.webp" alt="">닫기</button></div>
   <div id="mapScroll"><div id="mapInner"></div></div>
   <div id="mapCard"></div>
 </div>
@@ -366,7 +366,7 @@ h2 .hb{-webkit-text-stroke:0;text-shadow:none;letter-spacing:0;font-family:"Jua"
   <button class="btn" id="bResume">계속하기</button>
   <button class="btn blue" id="bShopP"><img class="ui" src="img/ui_power.webp" alt="">영웅 강화</button>
   <button class="btn" id="bAchP"><img class="ui" src="img/ui_trophy.webp" alt="">업적</button>
-  <button class="btn" id="bReborn" style="display:none;background:linear-gradient(#c77dff,#7b2cbf);color:#fff">🌀 환생하기</button>
+  <button class="btn" id="bReborn" style="display:none;background:linear-gradient(#c77dff,#7b2cbf);color:#fff"><img class="ui" src="img/ui_reborn.webp" alt="">환생하기</button>
   <div class="mrow" style="margin:6px 0 10px"><button class="hb" id="bMusicP" style="width:auto;padding:0 14px;font-weight:800"><img class="ui" src="img/ui_music.webp" alt="">음악</button><button class="hb" id="bVolP" style="width:auto;padding:0 14px;font-weight:800"><img class="ui" src="img/ui_volume.webp" alt="">소리 크기</button><button class="hb" id="bVibP" style="width:auto;padding:0 14px;font-weight:800"><img class="ui" src="img/ui_vib.webp" alt="">진동</button><button class="hb" id="bNumP" style="width:auto;padding:0 14px;font-weight:800"><img class="ui" src="img/ui_num.webp" alt="">숫자</button><button class="hb" id="bViewP" style="width:auto;padding:0 14px;font-weight:800"><img class="ui" src="img/ui_view.webp" alt="">보통</button><button class="hb" id="bAllyP" style="width:auto;padding:0 14px;font-weight:800"><img class="ui" src="img/ui_tactic.webp" alt="">작전: 보통</button><button class="hb" id="bShakeP" style="width:auto;padding:0 14px;font-weight:800"><img class="ui" src="img/ui_shake.webp" alt="">흔들림</button><button class="hb" id="bEvoP" style="width:auto;padding:0 14px;font-weight:800"><img class="ui" src="img/ui_evo.webp" alt="">진화 도감</button><button class="hb" id="bDexP" style="width:auto;padding:0 14px;font-weight:800"><img class="ui" src="img/ui_dex.webp" alt="">몬스터 도감</button></div>
   <button class="btn gray" id="bQuit">처음으로</button>
 </div>
@@ -381,7 +381,7 @@ h2 .hb{-webkit-text-stroke:0;text-shadow:none;letter-spacing:0;font-family:"Jua"
 
 <script>
 'use strict';
-const BUILD = 326;
+const BUILD = 327;
 const BOSS_INTERVAL = 180;      // 보스 등장 간격(초)
 const WAVE_INTERVAL = 60;       // 대규모 몰이 이벤트 간격(초)
 const MAX_ENEMIES = 110;   // Build 202: 220 → 110 (화면이 너무 정신없어서) — 대신 마을 적이 조금 더 튼튼(CROWD_K)
@@ -668,8 +668,8 @@ function giveTreat() {
 }
 function renderWard() {
   const have = totalStars();
-  { const P = PETS[petSel], t = $('bTreat'); t.onclick = giveTreat; t.style.display = P && P.id ? '' : 'none'; if (P && P.id) t.textContent = petLv(P.id) >= PET_XP.length ? `🍖 ${P.name} 최고 레벨 ✨` : `🍖 ${P.name}에게 간식 🏦${TREAT_COST} (+${TREAT_XP} 경험치)`; }
-  { const n = gachaPool().length, bank = (readJSON('stickhero_meta') || {}).bank || 0; $('bGacha').textContent = n ? `🎰 꾸미기 뽑기 🏦${GACHA_COST} (남은 ${n}개)` : '🎰 모두 열었어요!'; $('bGacha').onclick = doGacha; if (!$('gachaMsg').dataset.t) $('gachaMsg').textContent = `금고 🏦 ${bank} · 잠긴 머리띠·모자·펫 중 하나가 바로 열려요`; }
+  { const P = PETS[petSel], t = $('bTreat'); t.onclick = giveTreat; t.style.display = P && P.id ? '' : 'none'; if (P && P.id) t.innerHTML = '<img class="ui" src="img/ui_treat.webp" alt="">' + (petLv(P.id) >= PET_XP.length ? `${P.name} 최고 레벨 ✨` : `${P.name}에게 간식 🏦${TREAT_COST} (+${TREAT_XP} 경험치)`); }
+  { const n = gachaPool().length, bank = (readJSON('stickhero_meta') || {}).bank || 0; $('bGacha').innerHTML = `<img class="ui" src="img/ui_spin.webp" alt="">` + (n ? `꾸미기 뽑기 🏦${GACHA_COST} (남은 ${n}개)` : '모두 열었어요!'); $('bGacha').onclick = doGacha; if (!$('gachaMsg').dataset.t) $('gachaMsg').textContent = `금고 🏦 ${bank} · 잠긴 머리띠·모자·펫 중 하나가 바로 열려요`; }
   $('wardSub').textContent = `모은 별 ⭐ ${have}개 · 별을 모으면 새 색·모자가 열려요`;
   const g = $('wardGrid'); g.innerHTML = '';
   HEADBANDS.forEach((h, i) => {
@@ -1892,16 +1892,16 @@ const NEWS = [[256, '💡 보스를 처음 만나면 이기는 법 카드'], [25
   [269, '🎞 도감 몬스터가 움직여요'], [270, '🏟 투기장! 끝없는 웨이브'], [271, '👑 투기장 10웨이브마다 보스'], [272, '🚪 투기장 귀환 포털'], [273, '🎰 꾸미기 뽑기'], [274, '🍖 펫 간식'], [275, '🔥❄ 새 정예 2종'], [276, '🩸 핏빛 달 밤'], [277, '📅 정예 주간 · 보스 주간'], [278, '💡 도감 보스 팁'], [279, '🎞 도감 동작 고르기'], [280, '🏆 기록실 넓히기'],
   [281, '🏅 새 업적 4개'], [282, '🎲 투기장 특별 웨이브'], [283, '⚡💣 새 정예 2종'], [284, '📜 새 퀘스트 5종'], [285, '🎟 투기장 하루 첫 입장 무료'], [286, '🏆 투기장 TOP 5'], [287, '🧭 미니맵에 정예·상인'], [288, '🩸 핏빛 대장'], [289, '🎰 뽑기 연출'], [290, '📰 새 기능 안내'], [291, '✨ 막대·버튼 멋있게'], [292, '🖼 그림 아이콘'], [293, '✨ 일시정지·기록실 새 디자인'], [294, '🖼 버튼 아이콘 16개'], [295, '🎁 상자 화면 빛줄기'], [296, '📅 오늘의 보스'], [297, '📅 오늘의 보스 알림'], [298, '🏅 새 업적 3개'], [299, '✨ 황금 주간 · ❤ 하트 주간'], [300, '🎉 300번째 업데이트!'], [301, '🎁 투기장 웨이브 상자'], [302, '⏱ 보스 러시 기록'], [303, '🛒 상인 새 물건 2개'], [304, '📜 새 퀘스트 3종'], [305, '✨ 레벨업 카드 새 디자인'], [306, '🏆 기록실 새 칸 3개'], [307, '📅 오늘의 보스 특기 2개 더'], [308, '🎲 투기장 정예·황금 웨이브'], [309, '💪 투기장 기세'], [310, '🏅 새 업적 3개'], [311, '🔥 오늘의 보스 연속 승리'], [312, '🔥 강화 상점 오늘의 할인'], [313, '🍀 행운의 레벨업 (카드 4장)'], [314, '🧲 자석 정예'], [315, '🏆 투기장 새 기록 보너스'], [316, '📊 기록실: 연속 승리'], [317, '🩸 핏빛 대장 호위대'], [318, '🔥 하드 보스 러시'], [319, '🔥 상인 반값 세일'], [320, '🏅 새 업적 3개'], [321, '🚀 질주 주간 · 💎 구슬 주간'], [322, '🐾 펫 최고 Lv 7'], [323, '✨ 투기장 황금 보스'], [324, '📅 도감에 오늘의 보스'], [325, '📜 새 퀘스트 2종'], [326, '📊 기록실 새 칸 3개']];
 function showNews(from) { const L = NEWS.filter(n => n[0] > from && n[0] <= BUILD).reverse().slice(0, 8); if (!L.length) return;
-  $('dexCard').innerHTML = `<div class="card news"><h3>📰 새로 생긴 것</h3><p><small>Build ${from} → ${BUILD}</small></p><div class="newsL">${L.map(n => `<div>${n[1]} <small>B${n[0]}</small></div>`).join('')}</div>${NEWS.filter(n => n[0] > from).length > 8 ? '<p><small>…그 밖에도 더 있어요!</small></p>' : ''}<div class="tap">눌러서 닫기</div></div>`;
+  $('dexCard').innerHTML = `<div class="card news"><h3><img class="ui" src="img/ui_news.webp" alt="">새로 생긴 것</h3><p><small>Build ${from} → ${BUILD}</small></p><div class="newsL">${L.map(n => `<div>${n[1]} <small>B${n[0]}</small></div>`).join('')}</div>${NEWS.filter(n => n[0] > from).length > 8 ? '<p><small>…그 밖에도 더 있어요!</small></p>' : ''}<div class="tap">눌러서 닫기</div></div>`;
   $('dexCard').classList.add('show'); }
 function mailState() { const m = readJSON(META_KEY) || {}; if (m.lastBuild === undefined) { m.lastBuild = BUILD; writeJSON(META_KEY, m); return null; } return m.lastBuild < BUILD ? m.lastBuild : null; }
 // 🎉 Build 300: 300번째 업데이트 기념 — 300을 넘어오는 선물은 🏦1000 + 색종이
 const giftAmt = from => from < 300 && BUILD >= 300 ? 1000 : MAIL_GIFT;
 function confetti() { for (let i = 0; i < 60; i++) { const c = document.createElement('i'); c.className = 'cfx'; c.textContent = ['🎉', '⭐', '✨', '🎊', '🪙'][i % 5]; c.style.left = Math.random() * 100 + 'vw'; c.style.animationDelay = Math.random() * 0.8 + 's'; c.style.fontSize = 14 + Math.random() * 18 + 'px'; document.body.appendChild(c); setTimeout(() => c.remove(), 3600); } }
-function refreshMail() { const from = mailState(); $('bMail').style.display = from ? '' : 'none'; if (from) $('bMail').innerHTML = from < 300 && BUILD >= 300 ? `🎉 300번째 업데이트 기념 선물! (Build ${from} → ${BUILD})<br><small>눌러서 금고 🏦1000 받기</small>` : `📬 새 버전 선물 도착! (Build ${from} → ${BUILD})<br><small>눌러서 금고 🪙${MAIL_GIFT} 받기</small>`; }
+function refreshMail() { const from = mailState(); $('bMail').style.display = from ? '' : 'none'; if (from) $('bMail').innerHTML = from < 300 && BUILD >= 300 ? `<img class="ui" src="img/ui_mail.webp" alt="">300번째 업데이트 기념 선물! (Build ${from} → ${BUILD})<br><small>눌러서 금고 🏦1000 받기</small>` : `<img class="ui" src="img/ui_mail.webp" alt="">새 버전 선물 도착! (Build ${from} → ${BUILD})<br><small>눌러서 금고 🪙${MAIL_GIFT} 받기</small>`; }
 $('bMail').onclick = () => { audioInit(); const m = readJSON(META_KEY) || {}; if (!(m.lastBuild < BUILD)) return; const from0 = m.lastBuild, g = giftAmt(from0); m.lastBuild = BUILD; m.bank = (m.bank || 0) + g; writeJSON(META_KEY, m); sfx('unlock'); if (g > MAIL_GIFT) confetti(); $('bMail').innerHTML = `🎉 금고에 🏦${g} 넣었어요! 새 기능을 즐겨요`; setTimeout(refreshMail, 1800); showNews(from0); };
 function refreshWeekly() { const m = readJSON(META_KEY) || {}, w = weekNow(), done = m.weeklyDone === weekNo();
-  $('bWeekly').innerHTML = `🎯 이번 주 도전: <b>${w.name}</b> ${m.weeklyOn ? '✅ 켜짐' : '⬜ 꺼짐'}${done ? ' · 🏆 보상 받음' : ''}<br><small>${w.desc} · 보스 3마리 = 금고 🪙300</small>`; }
+  $('bWeekly').innerHTML = `<img class="ui" src="img/ui_weekly.webp" alt="">이번 주 도전: <b>${w.name}</b> ${m.weeklyOn ? '✅ 켜짐' : '⬜ 꺼짐'}${done ? ' · 🏆 보상 받음' : ''}<br><small>${w.desc} · 보스 3마리 = 금고 🪙300</small>`; }
 $('bWeekly').onclick = () => { audioInit(); sfx('pick'); const m = readJSON(META_KEY) || {}; m.weeklyOn = !m.weeklyOn; writeJSON(META_KEY, m); refreshWeekly(); };
 function weeklyBoss() { if (!G || !G.weekly) return; G.weeklyB = (G.weeklyB || 0) + 1; const m = readJSON(META_KEY) || {};
   if (G.weeklyB >= 3 && m.weeklyDone !== weekNo()) { m.weeklyDone = weekNo(); m.bank = (m.bank || 0) + 300; writeJSON(META_KEY, m); banner('🏆 이번 주 도전 성공!', '금고에 🪙300', '#ffd23f', 3); sfx('unlock'); }
@@ -3421,7 +3421,7 @@ function towerCard() {
   $('mapCard').innerHTML = `<div class="t">🗼 ${f}층 <span style="font-size:13px;color:#fff;opacity:.7">· ${THEME_ICO[Math.floor((f - 1) / 5) % 6]} ${th.name}</span></div><div class="g">${what} · 보상 🪙${towerPrize(f)}${f % 10 === 0 ? ' + 🌟 대박 상자' + (f > best ? ` + 🏦${10 * f}` : '') : ''}${f <= best ? ' · ✅ 가 봤어요' : ''}</div>
     <div class="r">🏆 최고 기록 <b>${best}층</b> · 층을 깨면 🗼 다음 층 / 🏠 마을로 중에 골라요</div>
     <div class="r">🎲 6층부터 가끔 특별 층: ⚡번개 · 💰황금 · 🌑어둠 · 💨바람 (보상 더 많이!)</div>
-    <div style="display:flex;gap:8px;margin-top:6px;width:min(100%,360px)"><button class="btn" id="bGoTower" style="flex:1;min-width:0;margin:0;white-space:nowrap;font-size:19px;padding:12px 4px">🗼 1층부터</button>${towerCp() > 1 ? `<button class="btn" id="bGoTowerCp" style="flex:1;min-width:0;margin:0;white-space:nowrap;font-size:19px;padding:12px 4px;background:#3a86ff;color:#fff">🚀 ${towerCp()}층부터</button>` : ''}</div>
+    <div style="display:flex;gap:8px;margin-top:6px;width:min(100%,360px)"><button class="btn" id="bGoTower" style="flex:1;min-width:0;margin:0;white-space:nowrap;font-size:19px;padding:12px 4px"><img class="ui" src="img/ui_tower.webp" alt="">1층부터</button>${towerCp() > 1 ? `<button class="btn" id="bGoTowerCp" style="flex:1;min-width:0;margin:0;white-space:nowrap;font-size:19px;padding:12px 4px;background:#3a86ff;color:#fff"><img class="ui" src="img/ui_rocket.webp" alt="">${towerCp()}층부터</button>` : ''}</div>
     <div class="r">${towerCp() > 1 ? `🚀 체크포인트: 10층마다 깬 곳 다음 층부터 바로 갈 수 있어요` : '🚀 10층을 깨면 다음부터 11층에서 바로 시작할 수 있어요'}</div>` + rushHtml() + dbossHtml();
   $('bGoTower').onclick = () => towerGo(1);
   if ($('bGoTowerCp')) $('bGoTowerCp').onclick = () => { G.cpUsed = (G.cpUsed || 0) + 1; towerGo(towerCp()); };
@@ -3497,7 +3497,7 @@ const caveOpen = () => star3() >= 5;
 $('bCave').onclick = () => {
   if (!caveOpen()) { sfx('hurt'); $('mapCard').innerHTML = `<div class="t">🌟 비밀 보물 동굴</div><div class="g">🔒 ⭐⭐⭐로 깬 칸 5개 (지금 ${star3()}개)</div>`; return; }
   const used = G.caveDay === G.day;
-  $('mapCard').innerHTML = `<div class="t">🌟 비밀 보물 동굴</div><div class="g">40초 동안 황금 몬스터만 나와요 · 잡으면 금화 와르르</div><div class="r">하루(날짜) 1번 · ${used ? '오늘은 이미 다녀왔어요 · 내일 또!' : '오늘 갈 수 있어요!'}</div>` + (used ? '' : '<button class="btn big" id="bGoCave" style="margin-top:6px">🌟 동굴로!</button>');
+  $('mapCard').innerHTML = `<div class="t">🌟 비밀 보물 동굴</div><div class="g">40초 동안 황금 몬스터만 나와요 · 잡으면 금화 와르르</div><div class="r">하루(날짜) 1번 · ${used ? '오늘은 이미 다녀왔어요 · 내일 또!' : '오늘 갈 수 있어요!'}</div>` + (used ? '' : '<button class="btn big" id="bGoCave" style="margin-top:6px"><img class="ui" src="img/ui_cave.webp" alt="">동굴로!</button>');
   if (!used) $('bGoCave').onclick = () => { showOv(null); state = 'play'; G.caveDay = G.day; G.caveGold0 = G.gold; G.caves = (G.caves || 0) + 1; stAdd('caves'); questEvent('cave'); enterStage(0, 0, undefined, false, true); };
   sfx('pick');
 };
@@ -3512,18 +3512,18 @@ const arenaPrize = w => 40 + 15 * w + (w % 5 === 0 ? 100 + 20 * w : 0);
 $('bArena').onclick = () => {
   if (!arenaOpen()) { sfx('hurt'); $('mapCard').innerHTML = `<div class="t">🏟 투기장</div><div class="g">🔒 3칸을 깨면 열려요</div>`; return; }
   const best = ST.arenaBest || 0, free = G.arenaDay !== G.day, cost = free ? 0 : ARENA_COST, can = G.gold >= cost;   // 🎟 Build 285: 하루(날짜) 첫 입장은 무료
-  $('mapCard').innerHTML = `<div class="t">🏟 투기장</div><div class="g">${ARENA_T}초씩 끝없이 몰려오는 웨이브를 버텨요 · 웨이브마다 적이 더 세지고 🪙 보상 · 5웨이브마다 정예 무리</div>${(ST.arenaTop || []).length ? `<div class="r" style="text-align:left;font-size:13px;line-height:1.5">${ST.arenaTop.map((t, i) => `${['🥇', '🥈', '🥉', '4.', '5.'][i]} 웨이브 <b>${t.w}</b> · 🪙${t.g} · ${t.d}${t.out ? ' 🚪' : ''}`).join('<br>')}</div>` : ''}<div class="r">🏆 최고 기록 웨이브 <b>${best}</b> · ${free ? '🎟 오늘 첫 입장 <b>무료!</b>' : `입장료 🪙${ARENA_COST} (지금 🪙${G.gold})`}</div>` + (can ? `<button class="btn big" id="bGoArena" style="margin-top:6px">🏟 ${free ? '무료 입장!' : '입장!'}</button>` : '<div class="r" style="color:#e63946">금화가 모자라요</div>');
+  $('mapCard').innerHTML = `<div class="t">🏟 투기장</div><div class="g">${ARENA_T}초씩 끝없이 몰려오는 웨이브를 버텨요 · 웨이브마다 적이 더 세지고 🪙 보상 · 5웨이브마다 정예 무리</div>${(ST.arenaTop || []).length ? `<div class="r" style="text-align:left;font-size:13px;line-height:1.5">${ST.arenaTop.map((t, i) => `${['🥇', '🥈', '🥉', '4.', '5.'][i]} 웨이브 <b>${t.w}</b> · 🪙${t.g} · ${t.d}${t.out ? ' 🚪' : ''}`).join('<br>')}</div>` : ''}<div class="r">🏆 최고 기록 웨이브 <b>${best}</b> · ${free ? '🎟 오늘 첫 입장 <b>무료!</b>' : `입장료 🪙${ARENA_COST} (지금 🪙${G.gold})`}</div>` + (can ? `<button class="btn big" id="bGoArena" style="margin-top:6px"><img class="ui" src="img/ui_arena.webp" alt="">${free ? '무료 입장!' : '입장!'}</button>` : '<div class="r" style="color:#e63946">금화가 모자라요</div>');
   if (can) $('bGoArena').onclick = () => { showOv(null); state = 'play'; G.gold -= cost; G.arenaDay = G.day; G.arenaGold0 = G.gold; stAdd('arenas'); enterStage(0, 0, undefined, false, false, true); };
   sfx('pick');
 };
 const rushOpen = () => G.stageN >= 5;
 function rushHtml() { if (!rushOpen()) return '<div class="r" style="margin-top:8px">👑 보스 러시: 🔒 모험 지도 5칸을 깨면 열려요</div>';
-  const used = G.rushDay === G.day; return `<div class="r" style="margin-top:8px">👑 <b>보스 러시</b>: 보스 5마리와 연달아 싸워요 (사이에 체력 25% 회복) · 완주하면 금고 🪙300 · 하루 1번${G.stageN >= 15 ? ' · 💀 해골 왕도 나와요' : ''}</div>` + (ST.rushBest ? `<div class="r">⏱ 최고 기록 ${fmtTime(ST.rushBest)}</div>` : '') + (used ? '<div class="r">오늘은 이미 도전했어요 · 내일 또!</div>' : '<button class="btn big" id="bGoRush" style="margin-top:6px;background:#ff9f1c">👑 보스 러시 도전!</button>') + ((ST.rushes || 0) >= 1 ? (G.hrushDay === G.day ? '<div class="r">🔥 하드 러시도 오늘은 끝!</div>' : '<button class="btn" id="bGoHRush" style="margin-top:6px;background:linear-gradient(#ff6b6b,#9d0208);color:#fff">🔥 하드 러시 (체력 2배 · 🏦800)</button>') : '<div class="r">🔥 하드 러시: 🔒 보스 러시를 한 번 완주하면 열려요</div>'); }   /* Build 318 */
+  const used = G.rushDay === G.day; return `<div class="r" style="margin-top:8px">👑 <b>보스 러시</b>: 보스 5마리와 연달아 싸워요 (사이에 체력 25% 회복) · 완주하면 금고 🪙300 · 하루 1번${G.stageN >= 15 ? ' · 💀 해골 왕도 나와요' : ''}</div>` + (ST.rushBest ? `<div class="r">⏱ 최고 기록 ${fmtTime(ST.rushBest)}</div>` : '') + (used ? '<div class="r">오늘은 이미 도전했어요 · 내일 또!</div>' : '<button class="btn big" id="bGoRush" style="margin-top:6px;background:#ff9f1c"><img class="ui" src="img/ui_rush.webp" alt="">보스 러시 도전!</button>') + ((ST.rushes || 0) >= 1 ? (G.hrushDay === G.day ? '<div class="r">🔥 하드 러시도 오늘은 끝!</div>' : '<button class="btn" id="bGoHRush" style="margin-top:6px;background:linear-gradient(#ff6b6b,#9d0208);color:#fff"><img class="ui" src="img/ui_hard.webp" alt="">하드 러시 · 🏦800</button>') : '<div class="r">🔥 하드 러시: 🔒 보스 러시를 한 번 완주하면 열려요</div>'); }   /* Build 318 */
 // 📅 Build 296: 오늘의 보스 — 날(게임 날짜)마다 정해진 보스 1마리 + 오늘의 특기, 하루 1번, 이기면 금고 🏦400 + 보물 상자
 const DBOSS_MOD = [['🔥', '불꽃 몸', '닿으면 불길이 남아요'], ['💨', '날쌘 발', '1.4배 빨라요'], ['🛡', '두꺼운 갑옷', '체력 1.5배'], ['😡', '처음부터 화남', '시작부터 화난 상태'], ['❄', '얼음 몸', '닿으면 느려져요'], ['👥', '부하 거느림', '졸개 6마리와 함께 와요']];   // Build 307: 특기 2개 더
 const dbossToday = () => { if (window.__dboss) return window.__dboss; const pool = rushPool(), d = G.day || 1; return { n: pool[(d * 7 + 3) % pool.length], mod: (d * 5 + 1) % DBOSS_MOD.length }; };
 function dbossHtml() { if (!rushOpen()) return ''; const T = dbossToday(), M = DBOSS_MOD[T.mod], used = G.dbossDay === G.day;
-  return `<div class="r" style="margin-top:8px">📅 <b>오늘의 보스</b>: ${BOSSES[T.n].name} · ${M[0]} ${M[1]} (${M[2]}) · 이기면 금고 🏦400 + 보물 상자 · 하루 1번${ST.dbStreak && ST.dbLast === G.day - 1 ? ` · 🔥 ${ST.dbStreak}일 연속 중! 오늘 이기면 +🏦${Math.min(5, ST.dbStreak) * 100}` : ' · 날마다 연속으로 이기면 보너스'}</div>` + (used ? '<div class="r">오늘의 보스는 이미 도전했어요 · 내일 또!</div>' : '<button class="btn big" id="bGoDBoss" style="margin-top:6px;background:linear-gradient(#ff6b6b,#c1121f);color:#fff">📅 오늘의 보스 도전!</button>'); }
+  return `<div class="r" style="margin-top:8px">📅 <b>오늘의 보스</b>: ${BOSSES[T.n].name} · ${M[0]} ${M[1]} (${M[2]}) · 이기면 금고 🏦400 + 보물 상자 · 하루 1번${ST.dbStreak && ST.dbLast === G.day - 1 ? ` · 🔥 ${ST.dbStreak}일 연속 중! 오늘 이기면 +🏦${Math.min(5, ST.dbStreak) * 100}` : ' · 날마다 연속으로 이기면 보너스'}</div>` + (used ? '<div class="r">오늘의 보스는 이미 도전했어요 · 내일 또!</div>' : '<button class="btn big" id="bGoDBoss" style="margin-top:6px;background:linear-gradient(#ff6b6b,#c1121f);color:#fff"><img class="ui" src="img/ui_dboss.webp" alt="">오늘의 보스 도전!</button>'); }
 function startDBoss() { if (!rushOpen() || G.dbossDay === G.day) return; const T = dbossToday(); showOv(null); state = 'play'; G.dbossDay = G.day; enterStage(0, 0, T.n); G.st.dboss = T.mod; const M = DBOSS_MOD[T.mod]; banner(`📅 오늘의 보스: ${BOSSES[T.n].name}`, `${M[0]} ${M[1]} · ${M[2]}`, '#ff6b6b', 2.6); }
 function rushPool() { // 👑 러시 보스 후보 (Build 170): 해골 왕국을 열었으면(모험 16칸) 해골 왕 5마리도 · 영웅 Lv 30부터는 센 보스(4번째부터)만
   let pool = [...Array(10).keys()]; if (G.stageN >= 15) pool.push(11, 12, 13, 14, 15);
