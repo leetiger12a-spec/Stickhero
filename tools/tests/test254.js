@@ -9,7 +9,7 @@ const { chromium } = require('/opt/node22/lib/node_modules/playwright');
   const r = await page.evaluate(() => { const out = {}; for (const w of [null, 'bountyw', 'luckw']) { WEEKLY_FORCE = w; const m = readJSON(META_KEY) || {}; m.weeklyOn = !!w; writeJSON(META_KEY, m); startGame(); const G = SH.G, e = makeEnemy('grunt', 0, 0);
       out[w || 'none'] = { wk: G.weekly, hp: e.maxHp, dmg: e.dmg, prize: bountyPrize(), cost: fntCost(), dur: fntDur() }; } return { out, n: WEEKLY.length }; });
   console.log(JSON.stringify(r)); const o = r.out;
-  check(r.n === 14 && o.bountyw.wk === 'bountyw' && Math.abs(o.bountyw.hp / o.none.hp - 1.1) < 0.01 && o.bountyw.prize === Math.round(o.none.prize * 1.5), 'bounty week');
+  check(r.n === 16 && o.bountyw.wk === 'bountyw' && Math.abs(o.bountyw.hp / o.none.hp - 1.1) < 0.01 && o.bountyw.prize === Math.round(o.none.prize * 1.5), 'bounty week');
   check(o.luckw.wk === 'luckw' && Math.abs(o.luckw.dmg / o.none.dmg - 1.15) < 0.01 && o.luckw.cost === 75 && o.luckw.dur === 240 && o.none.cost === 150, 'luck week');
   await b.close(); console.log('ERRORS:', errors.length); errors.forEach(e => console.log(e)); process.exit(errors.length ? 1 : 0);
 })();
