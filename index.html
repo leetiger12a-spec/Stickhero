@@ -379,7 +379,7 @@ h2 .hb{-webkit-text-stroke:0;text-shadow:none;letter-spacing:0;font-family:"Jua"
 
 <script>
 'use strict';
-const BUILD = 300;
+const BUILD = 301;
 const BOSS_INTERVAL = 180;      // 보스 등장 간격(초)
 const WAVE_INTERVAL = 60;       // 대규모 몰이 이벤트 간격(초)
 const MAX_ENEMIES = 110;   // Build 202: 220 → 110 (화면이 너무 정신없어서) — 대신 마을 적이 조금 더 튼튼(CROWD_K)
@@ -3672,6 +3672,7 @@ function updStage(dt) {
       G.gold += g; p.hp = Math.min(p.maxHp, p.hp + p.maxHp * 0.15); G.shake = 10; sfx('bigBoom');
       if (w > (ST.arenaBest || 0)) { ST.arenaBest = w; stDirty = true; }
       st.arena++; st.n = 4 + st.arena; st.timer = ARENA_T; st.acc = -3; st.arenaRule = arenaRuleFor(st.arena);
+      if (w % 5 === 0) dropChest(clamp(p.x + rand(-60, 60), -STAGE_HW + 30, STAGE_HW - 30), p.y - 70, w % 10 !== 0);   // 🎁 Build 301: 5웨이브마다 상자 (10웨이브마다 큰 상자)
       if (w % 5 === 0) { st.portal = { x: clamp(p.x + (p.x > 0 ? -130 : 130), -STAGE_HW + 40, STAGE_HW - 40), y: p.y, t: 0, hold: 0, on: false, life: 10 }; floatText(p.x, p.y - 120, '🚪 10초 동안 귀환 포털! 더 버틸까, 나갈까?', '#9fd8ff', 16, 2.5); }   // 🚪 Build 272
       if (st.arena % 10 === 0) { spawnBoss(0, p.y - 260); return; }   // 👑 10웨이브마다 보스
       const AR = st.arenaRule && ARENA_RULES[st.arenaRule];
