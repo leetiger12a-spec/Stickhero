@@ -105,7 +105,7 @@ canvas{display:block;position:fixed;inset:0;width:100%;height:100%}
 #mapHead{display:flex;align-items:center;justify-content:space-between;width:min(94vw,440px);margin-bottom:6px}
 #mapHead{gap:6px;flex-wrap:wrap;justify-content:flex-end}#mapHead h2{font-size:22px;white-space:nowrap;flex:1}#mapHead .hb{white-space:nowrap;flex:none}
 #mapScroll{flex:1;width:100%;overflow-y:auto;-webkit-overflow-scrolling:touch;touch-action:pan-y}
-#mapInner{position:relative;width:min(94vw,440px);margin:0 auto}
+#mapInner{position:relative;width:min(94vw,440px);margin:0 auto;border-left:3px solid #e9b949;border-right:3px solid #e9b949;box-shadow:0 0 0 2px #0b0f1f,0 0 24px rgba(0,0,0,.5)}
 .mnode{position:absolute;width:66px;height:66px;margin:-33px 0 0 -33px;border-radius:50%;border:4px solid #222;font:inherit;font-size:24px;font-weight:900;color:#fff;cursor:pointer;box-shadow:0 5px 0 rgba(0,0,0,.45);display:flex;align-items:center;justify-content:center;flex-direction:column;line-height:1}
 .mnode small{font-size:11px;font-weight:800}
 .mnode.lock{filter:grayscale(1) brightness(.6)}
@@ -157,6 +157,7 @@ i.cfx{position:fixed;top:-40px;z-index:99;font-style:normal;pointer-events:none;
 .sale{display:inline-block;margin-top:2px;font-size:11px;font-weight:800;color:#fff;background:linear-gradient(90deg,#ff6b6b,#ff9f1c);border-radius:7px;padding:0 6px}
 .lucky{font-weight:800;color:#7bed9f;font-size:16px;text-shadow:0 1px 0 #000;animation:pop .3s ease-out}
 #ovWard{justify-content:flex-start;overflow-y:auto;-webkit-overflow-scrolling:touch}#ovWard>*{flex-shrink:0}
+/* 🌌 Build 331: 메뉴 창 배경 — 별 + 금빛 줄기 + 아래 성 그림자 (그림 없이) */.ov{background:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%20400%20120%22%20preserveAspectRatio%3D%22xMidYMax%20slice%22%3E%3Cpath%20d%3D%22M0%20120V92%20Q60%2070%20120%2088%20T240%2084%20T400%2090V120Z%22%20fill%3D%22%230b0f22%22/%3E%3Cpath%20d%3D%22M130%20120V60h12V44h10v16h14V30l10-18%2010%2018v30h14V44h10v16h12v60Z%22%20fill%3D%22%23070a18%22/%3E%3Cpath%20d%3D%22M40%20120V78h8v-8h6v8h8v42Z%20M320%20120V72h8v-10h6v10h8v48Z%22%20fill%3D%22%23070a18%22/%3E%3Cg%20fill%3D%22%23ffcf5a%22%3E%3Crect%20x%3D%22171%22%20y%3D%2240%22%20width%3D%225%22%20height%3D%228%22%20rx%3D%222%22/%3E%3Crect%20x%3D%22183%22%20y%3D%2240%22%20width%3D%225%22%20height%3D%228%22%20rx%3D%222%22/%3E%3Crect%20x%3D%22152%22%20y%3D%2270%22%20width%3D%224%22%20height%3D%227%22%20rx%3D%222%22/%3E%3Crect%20x%3D%22204%22%20y%3D%2270%22%20width%3D%224%22%20height%3D%227%22%20rx%3D%222%22/%3E%3Crect%20x%3D%22176%22%20y%3D%2268%22%20width%3D%228%22%20height%3D%2212%22%20rx%3D%224%22/%3E%3Crect%20x%3D%22325%22%20y%3D%2282%22%20width%3D%224%22%20height%3D%226%22%20rx%3D%222%22/%3E%3Crect%20x%3D%2245%22%20y%3D%2288%22%20width%3D%224%22%20height%3D%226%22%20rx%3D%222%22/%3E%3C/g%3E%3C/svg%3E") center bottom/100% auto no-repeat,radial-gradient(1.2px 1.2px at 12% 18%,#fff 60%,transparent),radial-gradient(1px 1px at 28% 8%,#fff 60%,transparent),radial-gradient(1.4px 1.4px at 47% 22%,#fff8 60%,transparent),radial-gradient(1px 1px at 66% 12%,#fff 60%,transparent),radial-gradient(1.3px 1.3px at 83% 26%,#fff 60%,transparent),radial-gradient(1px 1px at 92% 6%,#fff 60%,transparent),radial-gradient(1px 1px at 6% 40%,#fffa 60%,transparent),radial-gradient(1.2px 1.2px at 74% 44%,#fff8 60%,transparent),radial-gradient(1px 1px at 38% 48%,#fff8 60%,transparent),linear-gradient(180deg,rgba(255,214,102,.10),transparent 30%),radial-gradient(ellipse at 50% 30%,rgba(76,46,140,.85),rgba(10,12,32,.96) 70%)}#ovLevel,#ovChest{background:radial-gradient(ellipse at 50% 38%,rgba(34,46,92,.82),rgba(8,10,24,.94) 75%)}
 .btn{position:relative;overflow:hidden;font:inherit;font-size:23px;padding:12px 38px;border-radius:18px;border:3px solid #3a1a00;background:linear-gradient(#ffe680,#ffc21a 55%,#ff9a00);color:#3a1a00;text-shadow:0 1px 0 rgba(255,255,255,.55);box-shadow:inset 0 3px 0 rgba(255,255,255,.6),inset 0 -4px 0 rgba(150,60,0,.25),0 5px 0 #3a1a00,0 9px 14px rgba(0,0,0,.35);cursor:pointer;margin:8px;min-width:200px}
 .btn:active{transform:translateY(4px);box-shadow:inset 0 3px 0 rgba(255,255,255,.6),inset 0 -2px 0 rgba(150,60,0,.25),0 1px 0 #3a1a00,0 3px 6px rgba(0,0,0,.35)}
 .btn.blue{background:linear-gradient(#a8ecff,#45b4f7 55%,#1f86d9);color:#fff;text-shadow:0 2px 0 #0f4c81;border-color:#0d3358;box-shadow:inset 0 3px 0 rgba(255,255,255,.55),inset 0 -4px 0 rgba(0,40,90,.25),0 5px 0 #0d3358,0 9px 14px rgba(0,0,0,.35)}
@@ -381,7 +382,7 @@ h2 .hb{-webkit-text-stroke:0;text-shadow:none;letter-spacing:0;font-family:"Jua"
 
 <script>
 'use strict';
-const BUILD = 329;
+const BUILD = 330;
 const BOSS_INTERVAL = 180;      // 보스 등장 간격(초)
 const WAVE_INTERVAL = 60;       // 대규모 몰이 이벤트 간격(초)
 const MAX_ENEMIES = 110;   // Build 202: 220 → 110 (화면이 너무 정신없어서) — 대신 마을 적이 조금 더 튼튼(CROWD_K)
@@ -3370,8 +3371,15 @@ function renderMap() {
   const pos = i => ({ x: Wd * (0.5 + 0.3 * Math.sin(i * 1.15)), y: Hh - 50 - i * rowH });
   // 테마 띠 배경 + 길(점선)
   let svg = `<svg width="${Wd}" height="${Hh}" style="position:absolute;left:0;top:0">`;
-  STAGES.forEach((d, i) => { const y = pos(i).y; svg += `<rect x="0" y="${y - rowH / 2}" width="${Wd}" height="${rowH}" fill="${THEMES[d.th].map}" opacity=".55"/>`; });
-  svg += `<polyline fill="none" stroke="#fff" stroke-width="6" stroke-dasharray="10 10" stroke-linecap="round" opacity=".8" points="${STAGES.map((_, i) => pos(i).x + ',' + pos(i).y).join(' ')}"/></svg>`;
+  // 🗺 Build 330: 테마마다 그라디언트 띠 + 작은 무늬 + 테마가 바뀌는 곳 빛 줄 + 금빛 길
+  const PAT = { tree: (x, y) => `<path d="M${x} ${y - 9} l7 12 h-14z" fill="#1f5f28" opacity=".45"/><rect x="${x - 1.5}" y="${y + 3}" width="3" height="4" fill="#5b3a1e" opacity=".45"/>`, pillar: (x, y) => `<rect x="${x - 3}" y="${y - 9}" width="6" height="16" rx="1" fill="#fff" opacity=".18"/>`, torch: (x, y) => `<circle cx="${x}" cy="${y}" r="3" fill="#ffb703" opacity=".35"/><circle cx="${x}" cy="${y}" r="7" fill="#ffb703" opacity=".08"/>`, ice: (x, y) => `<path d="M${x} ${y - 7} l3 7 -3 7 -3 -7z" fill="#fff" opacity=".35"/>` };
+  svg += '<defs>' + THEMES.map((t, k) => `<linearGradient id="mB${k}" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#000" stop-opacity=".35"/><stop offset=".18" stop-color="${t.map}" stop-opacity=".75"/><stop offset=".82" stop-color="${t.map}" stop-opacity=".75"/><stop offset="1" stop-color="#000" stop-opacity=".35"/></linearGradient>`).join('') + '<filter id="mGlow"><feGaussianBlur stdDeviation="3"/></filter></defs>';
+  let mr = 11; const mrn = () => (mr = (mr * 16807) % 2147483647) / 2147483647;
+  STAGES.forEach((d, i) => { const y = pos(i).y, th = THEMES[d.th]; svg += `<rect x="0" y="${y - rowH / 2}" width="${Wd}" height="${rowH}" fill="url(#mB${d.th})"/>`;
+    for (let k = 0; k < 7; k++) svg += (PAT[th.deco] || PAT.pillar)(Wd * (0.04 + mrn() * 0.92), y - rowH / 2 + 10 + mrn() * (rowH - 20));
+    if (i > 0 && STAGES[i - 1].th !== d.th) svg += `<rect x="0" y="${y + rowH / 2 - 2}" width="${Wd}" height="4" fill="#ffd23f" opacity=".55" filter="url(#mGlow)"/>`; });
+  const pts = STAGES.map((_, i) => pos(i).x + ',' + pos(i).y).join(' ');
+  svg += `<polyline fill="none" stroke="#000" stroke-width="10" stroke-linecap="round" stroke-linejoin="round" opacity=".25" points="${pts}"/><polyline fill="none" stroke="#ffe08a" stroke-width="6" stroke-dasharray="10 10" stroke-linecap="round" opacity=".95" points="${pts}"/></svg>`;
   let h = svg;
   STAGES.forEach((d, i) => {
     const q = pos(i), lock = i > G.stageN, st = G.stars[i] || 0, cur = i === G.stageN && !lock;
