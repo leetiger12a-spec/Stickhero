@@ -13,11 +13,14 @@ cells = [(r * H // R, (r + 1) * H // R, c * W // C, (c + 1) * W // C) for r in r
 if opts.get('blobs'):   # blobs=1: 캐릭터가 칸 경계를 넘을 만큼 클 때 — 덩어리를 찾아 각자의 범위로 자름
     bg0 = (A.min(-1) > 225) & (A.max(-1) - A.min(-1) < 30); lb, nk = ndimage.label(~bg0); sz0 = ndimage.sum(~bg0, lb, range(1, nk + 1))
     top = sorted(np.argsort(-sz0)[:R * C]); ob0 = ndimage.find_objects(lb)
-    bx = [ob0[i] for i in top]; bx.sort(key=lambda o: ((o[0].start + o[0].stop) // 2 * R // H, o[1].start))
-    cells = [(max(0, o[0].start - 12), min(H, o[0].stop + 12), max(0, o[1].start - 12), min(W, o[1].stop + 12)) for o in bx]
-for (y0, y1, x0, x1) in cells:
+    bx = [(ob0[i], i + 1) for i in top]; bx.sort(key=lambda t: t[0][0].start + t[0][0].stop)   # 줄 순서: 위→아래로 C개씩 묶고 (여백이 고르지 않아도 됨, Build 366)
+    bx = sum([sorted(bx[k:k + C], key=lambda t: t[0][1].start) for k in range(0, len(bx), C)], [])
+    cells = [(max(0, o[0].start - 12), min(H, o[0].stop + 12), max(0, o[1].start - 12), min(W, o[1].stop + 12)) for o, _ in bx]
+    own = [li for _, li in bx]   # 칸마다 자기 덩어리만 남김 (옆 칸 날개 끝 같은 조각 빼기)
+for ci, (y0, y1, x0, x1) in enumerate(cells):
     if True:
         a = A[y0:y1, x0:x1]
+        if opts.get('blobs'): a = a.copy(); a[lb[y0:y1, x0:x1] != own[ci]] = 255
         bgish = (a.min(-1) > 225) & (a.max(-1) - a.min(-1) < 30); bl, _ = ndimage.label(bgish)
         edge = set(np.unique(np.concatenate([bl[0], bl[-1], bl[:, 0], bl[:, -1]]))) - {0}
         fg = ~np.isin(bl, list(edge))

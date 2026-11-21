@@ -17,7 +17,7 @@ const { chromium } = require('/opt/node22/lib/node_modules/playwright');
     return { h1: base.hp, h94: hi.hp, d1: base.dmg, d94: hi.dmg, h30: at30.hp };
   });
   console.log(JSON.stringify(r));
-  check(Math.abs(r.h94 / r.h1 - 4.16) < 0.01 && Math.abs(r.d94 / r.d1 - 2.58) < 0.01 && Math.abs(r.h30 / r.h1 - 1.6) < 0.01, 'level scale');
+  check(Math.abs(r.h94 / r.h1 - 6.04) < 0.01 && Math.abs(r.d94 / r.d1 - 3.52) < 0.01 && Math.abs(r.h30 / r.h1 - 2.2) < 0.01   /* Build 361: Lv10부터 체력 +6%·공격 +3% */, 'level scale');
   // 10레벨마다 알림
   await page.evaluate(() => { const G = SH.G; G.lvl = 34; G.xp = G.need + 1; G.p.hp = G.p.maxHp = 1e6; }); await page.waitForTimeout(500);
   check(await page.evaluate(() => SH.G.lvl === 35 && SH.G.banner && SH.G.banner.text.includes('강해졌다')), 'lvl 35 banner');

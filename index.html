@@ -383,7 +383,7 @@ h2 .hb{-webkit-text-stroke:0;text-shadow:none;letter-spacing:0;font-family:"Jua"
 
 <script>
 'use strict';
-const BUILD = 365;
+const BUILD = 366;
 const BOSS_INTERVAL = 180;      // 보스 등장 간격(초)
 const WAVE_INTERVAL = 60;       // 대규모 몰이 이벤트 간격(초)
 const MAX_ENEMIES = 110;   // Build 202: 220 → 110 (화면이 너무 정신없어서) — 대신 마을 적이 조금 더 튼튼(CROWD_K)
@@ -4762,7 +4762,7 @@ function update(dt) {
   while (G.xp >= G.need) {
     G.xp -= G.need; G.lvl++; G.need = xpNeed(G.lvl); G.pending++; lvlMilestone(G.lvl);
     if (G.lvl === REBORN_LV) banner('🌀 Lv 100! 환생할 수 있어요', '⏸ 일시정지 → 🌀 환생하기 · 영원히 공격·체력 +10%', '#c77dff', 3);
-    else if (G.lvl >= LVL_FREE + 10 && (G.lvl - LVL_FREE) % 10 === 0) { const s = lvlScale(); banner('😈 적들도 강해졌다!', `영웅 Lv ${G.lvl} · 적 체력 x${s.hp.toFixed(2)} · 공격 x${s.dmg.toFixed(2)}`, '#ff6b6b', 2.4); }
+    else if (G.lvl >= LVL_FREE + 5 && (G.lvl - LVL_FREE) % 10 === 5) { const s = lvlScale();   /* Build 366: Lv 15·25·35… (레벨 20·40… 축하 알림과 겹치지 않게) */ banner('😈 적들도 강해졌다!', `영웅 Lv ${G.lvl} · 적 체력 x${s.hp.toFixed(2)} · 공격 x${s.dmg.toFixed(2)}`, '#ff6b6b', 2.4); }
   }
 
   // 이펙트

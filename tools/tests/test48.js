@@ -9,7 +9,7 @@ const { chromium } = require('/opt/node22/lib/node_modules/playwright');
   await page.goto('http://localhost:8765/index.html'); await page.waitForTimeout(900); await page.click('#bStart'); await page.waitForTimeout(400);
   const spawn = n => page.evaluate(n => { const G = SH.G; window.__bossN = n; G.enemies = []; G.hazards = []; G.ebullets = []; G.weapons = {}; G.p.hp = G.p.maxHp = 1e6; G.p.x = 0; G.p.y = 300; G.nextBoss = 999; G.nextWave = 999; G.spawnAcc = -1e9;
     SH.spawnBoss(0, 150); SH.skipIntro(); delete window.__bossN; const e = G.boss; return { name: e.name, hp: Math.round(e.maxHp), dmg: Math.round(e.dmg), spr: e.spr, img: !!SPR[e.spr], gold: !!e.goldG }; }, n);
-  const want = { 6: ['바위 골렘 왕', 65000], 7: ['용암 골렘', 65000], 8: ['얼음 골렘', 65000], 9: ['숲 골렘', 65000], 10: ['황금 골렘', 52000] };
+  const want = { 6: ['바위 골렘 왕', 104000], 7: ['용암 골렘', 104000], 8: ['얼음 골렘', 104000], 9: ['숲 골렘', 104000], 10: ['황금 골렘', 83200]   /* Build 361: 보통 보스 체력 ×1.6 */ };
   for (const n of [6, 7, 8, 9, 10]) { const r = await spawn(n); console.log(n, JSON.stringify(r)); check(r.name === want[n][0] && r.hp === want[n][1] && r.img, `boss ${n} wrong: ${JSON.stringify(r)}`); }
   // 바위 골렘 왕: 충격파 → 바위 조각 10개, 반쯤 다치면 작은 골렘 3
   await spawn(6);
