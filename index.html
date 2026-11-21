@@ -379,7 +379,7 @@ h2 .hb{-webkit-text-stroke:0;text-shadow:none;letter-spacing:0;font-family:"Jua"
 
 <script>
 'use strict';
-const BUILD = 310;
+const BUILD = 311;
 const BOSS_INTERVAL = 180;      // 보스 등장 간격(초)
 const WAVE_INTERVAL = 60;       // 대규모 몰이 이벤트 간격(초)
 const MAX_ENEMIES = 110;   // Build 202: 220 → 110 (화면이 너무 정신없어서) — 대신 마을 적이 조금 더 튼튼(CROWD_K)
@@ -3503,7 +3503,7 @@ function rushHtml() { if (!rushOpen()) return '<div class="r" style="margin-top:
 const DBOSS_MOD = [['🔥', '불꽃 몸', '닿으면 불길이 남아요'], ['💨', '날쌘 발', '1.4배 빨라요'], ['🛡', '두꺼운 갑옷', '체력 1.5배'], ['😡', '처음부터 화남', '시작부터 화난 상태'], ['❄', '얼음 몸', '닿으면 느려져요'], ['👥', '부하 거느림', '졸개 6마리와 함께 와요']];   // Build 307: 특기 2개 더
 const dbossToday = () => { if (window.__dboss) return window.__dboss; const pool = rushPool(), d = G.day || 1; return { n: pool[(d * 7 + 3) % pool.length], mod: (d * 5 + 1) % DBOSS_MOD.length }; };
 function dbossHtml() { if (!rushOpen()) return ''; const T = dbossToday(), M = DBOSS_MOD[T.mod], used = G.dbossDay === G.day;
-  return `<div class="r" style="margin-top:8px">📅 <b>오늘의 보스</b>: ${BOSSES[T.n].name} · ${M[0]} ${M[1]} (${M[2]}) · 이기면 금고 🏦400 + 보물 상자 · 하루 1번</div>` + (used ? '<div class="r">오늘의 보스는 이미 도전했어요 · 내일 또!</div>' : '<button class="btn big" id="bGoDBoss" style="margin-top:6px;background:linear-gradient(#ff6b6b,#c1121f);color:#fff">📅 오늘의 보스 도전!</button>'); }
+  return `<div class="r" style="margin-top:8px">📅 <b>오늘의 보스</b>: ${BOSSES[T.n].name} · ${M[0]} ${M[1]} (${M[2]}) · 이기면 금고 🏦400 + 보물 상자 · 하루 1번${ST.dbStreak && ST.dbLast === G.day - 1 ? ` · 🔥 ${ST.dbStreak}일 연속 중! 오늘 이기면 +🏦${Math.min(5, ST.dbStreak) * 100}` : ' · 날마다 연속으로 이기면 보너스'}</div>` + (used ? '<div class="r">오늘의 보스는 이미 도전했어요 · 내일 또!</div>' : '<button class="btn big" id="bGoDBoss" style="margin-top:6px;background:linear-gradient(#ff6b6b,#c1121f);color:#fff">📅 오늘의 보스 도전!</button>'); }
 function startDBoss() { if (!rushOpen() || G.dbossDay === G.day) return; const T = dbossToday(); showOv(null); state = 'play'; G.dbossDay = G.day; enterStage(0, 0, T.n); G.st.dboss = T.mod; const M = DBOSS_MOD[T.mod]; banner(`📅 오늘의 보스: ${BOSSES[T.n].name}`, `${M[0]} ${M[1]} · ${M[2]}`, '#ff6b6b', 2.6); }
 function rushPool() { // 👑 러시 보스 후보 (Build 170): 해골 왕국을 열었으면(모험 16칸) 해골 왕 5마리도 · 영웅 Lv 30부터는 센 보스(4번째부터)만
   let pool = [...Array(10).keys()]; if (G.stageN >= 15) pool.push(11, 12, 13, 14, 15);
@@ -4041,7 +4041,7 @@ function bossDie(e) {
     questEvent('practice');
     banner(rec ? `⏱ 신기록! ${sec}초` : `⚔ 연습 승리! ${sec}초`, rec ? (old ? `${key} · 전 기록 ${old}초` : `${key} 첫 기록`) : `${key} · 최고 ${old}초`, '#ffd23f', 3);
     sfx(rec ? 'rewardEvo' : 'bigBoom');
-    if (G.st.dboss !== undefined) { const m = readJSON(META_KEY) || {}; m.bank = (m.bank || 0) + 400; writeJSON(META_KEY, m); dropChest(clamp(e.x, -STAGE_HW + 30, STAGE_HW - 30), clamp(e.y + 30, -G.st.L - 350, 80)); stAdd('dbossWins'); questEvent('dboss'); banner('📅 오늘의 보스 격파!', '금고 🏦400 + 보물 상자!', '#ffd23f', 3); sfx('unlock'); }
+    if (G.st.dboss !== undefined) { ST.dbStreak = ST.dbLast === G.day - 1 ? (ST.dbStreak || 0) + 1 : 1; ST.dbLast = G.day; stDirty = true; const sb = Math.min(5, ST.dbStreak - 1) * 100, m = readJSON(META_KEY) || {}; m.bank = (m.bank || 0) + 400 + sb; writeJSON(META_KEY, m); if (sb) floatText(G.p.x, G.p.y - 110, `🔥 ${ST.dbStreak}일 연속! +🏦${sb}`, '#ff9f1c', 18, 2.2);   /* Build 311: 연속 승리 보너스 */ dropChest(clamp(e.x, -STAGE_HW + 30, STAGE_HW - 30), clamp(e.y + 30, -G.st.L - 350, 80)); stAdd('dbossWins'); questEvent('dboss'); banner('📅 오늘의 보스 격파!', '금고 🏦400 + 보물 상자!', '#ffd23f', 3); sfx('unlock'); }
     const R = G.st.rush; if (R) { R.won++; // 👑 보스 러시 (Build 139): 다음 보스, 5마리 다 잡으면 금고 보상
       if (R.i < R.list.length - 1) { R.i++; G.st.practice = R.list[R.i]; G.st.bossOn = false; G.st.t = -1.5; G.p.hp = Math.min(G.p.maxHp, G.p.hp + G.p.maxHp * 0.25); banner(`👑 보스 러시 ${R.i + 1}/${R.list.length}`, '체력 25% 회복 · 다음 보스가 와요!', '#ff9f1c', 2.4); return; }
       const v = 300, m2 = readJSON(META_KEY) || {}; m2.bank = (m2.bank || 0) + v; writeJSON(META_KEY, m2); stAdd('rushes'); const rs = Math.max(1, Math.round(G.t - (R.t0 ?? G.t))), rec = !ST.rushBest || rs < ST.rushBest; if (rec) { ST.rushBest = rs; stDirty = true; } banner(rec ? `👑 러시 완주 신기록! ${fmtTime(rs)}` : '👑 보스 러시 완주!', `보스 ${R.list.length}마리 연속 · ${fmtTime(rs)} · 금고에 🪙${v}`, '#ffd23f', 3.2);   /* ⏱ Build 302 */ sfx('unlock'); }
