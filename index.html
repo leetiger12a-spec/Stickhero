@@ -28,7 +28,7 @@ canvas{display:block;position:fixed;inset:0;width:100%;height:100%}
 .btn.big::after{content:'';position:absolute;top:0;left:-60%;width:40%;height:100%;background:linear-gradient(100deg,transparent,rgba(255,255,255,.7),transparent);transform:skewX(-20deg);animation:shine 2.6s infinite}
 @keyframes shine{0%,55%{left:-60%}100%{left:130%}}
 .mrow{display:flex;gap:8px;margin-top:6px}
-#bDaily{position:relative}#bDaily.new::after{content:'';position:absolute;top:-4px;right:-4px;width:12px;height:12px;border-radius:50%;background:#ff3b3b;border:2px solid #fff}
+#bDaily{position:relative}#bTower.new{position:relative}#bTower.new::after,#bDaily.new::after{content:'';position:absolute;top:-4px;right:-4px;width:12px;height:12px;border-radius:50%;background:#ff3b3b;border:2px solid #fff}
 #statList{width:min(92vw,360px);margin:10px 0;display:grid;grid-template-columns:1fr 1fr;gap:8px;max-height:62vh;overflow-y:auto;padding:2px}#statList .st{background:linear-gradient(#2e3b66,#18203d);color:#cfd8ff;border:2px solid #e9b949;border-radius:12px;padding:7px 8px;font-size:12px;font-weight:800;box-shadow:inset 0 1px 0 rgba(255,255,255,.25),0 2px 0 #0b0f1f}#statList .st b{display:block;font-size:19px;color:#ffd23f;text-shadow:0 1px 0 #000}#statList .stH{grid-column:1/-1;color:#ffd23f;font-weight:800;font-size:15px;margin-top:6px;text-align:left}
 #spinBox{position:relative;width:170px;height:170px;margin:4px auto 6px}#spinWheel{width:170px;height:170px;border-radius:50%;border:4px solid #222;transition:transform 2.6s cubic-bezier(.15,.9,.2,1);position:relative;overflow:hidden}#spinWheel span{position:absolute;left:50%;top:50%;width:0;height:0;font-size:12px;font-weight:800;color:#222}#spinWheel span i{position:absolute;transform:translate(-50%,-50%);white-space:nowrap;font-style:normal}#spinPin{position:absolute;left:50%;top:-14px;transform:translateX(-50%);font-size:24px;color:#ff3b3b;text-shadow:0 2px 0 #222}#spinRes{min-height:18px;color:#ffd23f}
 #dailyGrid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;width:min(92vw,360px);margin:10px 0}
@@ -378,7 +378,7 @@ h2 .hb{-webkit-text-stroke:0;text-shadow:none;letter-spacing:0;font-family:"Jua"
 
 <script>
 'use strict';
-const BUILD = 296;
+const BUILD = 297;
 const BOSS_INTERVAL = 180;      // 보스 등장 간격(초)
 const WAVE_INTERVAL = 60;       // 대규모 몰이 이벤트 간격(초)
 const MAX_ENEMIES = 110;   // Build 202: 220 → 110 (화면이 너무 정신없어서) — 대신 마을 적이 조금 더 튼튼(CROWD_K)
@@ -2621,6 +2621,7 @@ function updNight(dt) {
     G.nightOn = false; G.nights = (G.nights || 0) + 1; questEvent('night'); stAdd('nightsAll'); const bonus = (40 + 20 * G.nights) * (G.moon || G.blood ? 2 : 1); G.gold += bonus; if (G.moon) stAdd('moons'); if (G.blood) { stAdd('bloods'); dropChest(p.x + 40, p.y + 20); banner('🩸 핏빛 달을 버텼다!', '보물 상자 + 아침 보너스 2배', '#ff4d6d', 2.4); } G.moon = false; G.blood = false;
     heroSay('morning', true); banner('☀️ 아침이다!', `밤을 버텼다! 🪙${bonus}`, '#ffd23f', 2.6); sfx('cheer'); cheerAll(); floatText(p.x, p.y - 60, `+🪙${bonus}`, '#ffd23f', 20, 1.4);
   }
+  if (G.dbossTold !== G.day && G.t > 6 && rushOpen() && G.dbossDay !== G.day && !G.boss && !on) { G.dbossTold = G.day; const T = dbossToday(); bannerSoft('📅 오늘의 보스가 기다려요!', `${BOSSES[T.n].name} · 지도 → 🗼 무한 탑 아래`, '#ff6b6b', 3); }   // 📅 Build 297
   updGhostChest(dt, on, ph); updMerchant(dt, on); updRain(dt, on); updRainbow(dt); updWish(dt, on && ph > 2);
   // 🦇 밤 박쥐 떼 (Build 99): 밤 동안 14초마다 한 방향에서 박쥐 떼가 날아옴 (울타리를 넘어옴, 빠르지만 약함)
   if (on && ph > 3) { G.batT = (G.batT || 0) - dt; if (G.batT <= 0) { G.batT = 14; batSwarm(6 + Math.min(6, G.nights || 0)); } } else G.batT = 0;
@@ -3316,7 +3317,7 @@ let mapSel = 0;
 function openMap() {
   state = 'map'; joy = null;
   mapSel = Math.min(G.stageN, STAGES.length - 1);
-  mapView(false); renderMap(); showOv('ovMap'); $('bCave').style.display = caveOpen() ? '' : 'none'; $('bArena').style.display = arenaOpen() ? '' : 'none';   // 비밀: 조건이 되면 나타남
+  mapView(false); renderMap(); showOv('ovMap'); $('bCave').style.display = caveOpen() ? '' : 'none'; $('bArena').style.display = arenaOpen() ? '' : 'none'; $('bTower').classList.toggle('new', rushOpen() && G.dbossDay !== G.day);   // 비밀 · 📅 Build 297: 오늘의 보스 빨간 점: 조건이 되면 나타남
   if (caveOpen()) showTip('cave'); else if (rushOpen()) showTip('rush');
   setTimeout(() => { const n = document.querySelector('.mnode.cur') || document.querySelector('.mnode.sel'); if (n) n.scrollIntoView({ block: 'center' }); }, 30);
   sfx('pick');
