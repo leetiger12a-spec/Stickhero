@@ -157,3 +157,39 @@ GRID RULES (strict):
 BACKGROUND: plain pure white (#FFFFFF) everywhere, no grid lines, no frame borders, no ground line, no shadows, no glow halo around the body, no sticker border, no extra fire or smoke or embers floating away from the body, no lava puddles, no footprints, no speed lines, no text, no letters, no numbers, no watermark.
 QUALITY: ultra high resolution, QHD (2560x1440) or higher, crisp clean lines
 ```
+
+## B2-② 불꽃 대마왕 공격 (두 주먹 들어 땅 내려치기 → 불바다) — 첨부 `art/boss2_src.png` · 픽스버스용(LAYOUT 포함)
+```
+TASK: one 2D game ANIMATION SPRITE SHEET of the attached boss character: exactly 12 frames arranged in a grid of 4 columns x 3 rows, read left to right, top row first.
+
+LAYOUT (very important): the whole 4x3 grid must sit in the LOWER-LEFT part of the image. Leave a big EMPTY pure white margin along the TOP edge (the top 15% of the image height) and along the RIGHT edge (the right 15% of the image width). The TOP-RIGHT CORNER of the image (the right 30% of the width x the top 20% of the height) must be COMPLETELY EMPTY white, with no part of any frame in it. Also leave a thin empty white margin along the left and bottom edges.
+
+CHARACTER: the attached Flame Demon King boss (a huge lava-rock brute with glowing orange-yellow lava cracks all over its dark red body, a round head with glowing yellow eyes and a wide toothy grin, big dark curved horns with lava cracks, flames burning on top of the head, a gold crown with red gems, black-and-gold spiked shoulder plates, a thick gold chain with a red gem, black-and-gold studded arm bands, huge lava fists with small flames on the wrists, a belt with a gold skull buckle, a torn red cloth, black-and-gold studded leg bands, big lava-rock feet). Keep EXACTLY the same design, colors, thick black outlines, cel shading, proportions and art style in every frame. The head flames, crown, horns, shoulder plates, chain and skull belt are in EVERY frame.
+
+ANIMATION: a FIRE SLAM in place, facing right. Each frame MUST show a DIFFERENT pose, exactly like this:
+- Frame 1: standing like the attached image, fists at the sides.
+- Frame 2: both fists rising to chest height, the wrist flames growing a little bigger.
+- Frame 3: both fists raised above the shoulders, the flames on the fists bigger, the head flames rising taller.
+- Frame 4: both fists raised HIGH above the head, the fists burning with big flames, mouth wide open roaring, the lava cracks glowing brighter.
+- Frame 5: same high pose, leaning slightly back, eyes blazing (maximum power).
+- Frame 6: both fists swinging down in front of the chest, knees bending.
+- Frame 7: both fists almost hitting the ground, the body leaning far forward, knees bent low.
+- Frame 8: SLAM: both burning fists smashed on the ground in front, the body crouched low, the head flames blown up tall.
+- Frame 9: still crouched with the fists on the ground, grinning, the fist flames still big.
+- Frame 10: starting to rise, the fists lifting off the ground, the fist flames shrinking.
+- Frame 11: almost standing up, fists coming back to the sides.
+- Frame 12: standing like frame 1 again, flowing back into frame 1.
+The flames stay attached to the fists and the head only (they can grow bigger on the fists in frames 3-9).
+
+SIZE RULES (strict): the crown, horns and head are EXACTLY THE SAME SIZE in all 12 frames. Only the arms, legs, body lean and flame size change; the boss never gets bigger or closer to the camera.
+
+GRID RULES (strict):
+- Every frame: the SAME boss, facing right, 3/4 top-down game view, same as the attached image.
+- Same ground line in every frame; the boss stays in the center of its cell.
+- The boss (including the raised burning fists and head flames) fills about 65% of its cell height (leave room above for the raised fists).
+- VERY WIDE empty white gaps between all cells and between the rows; no horn, flame, crown, fist, foot or spike may touch or come near another cell.
+- Only the 12 frames. No extra poses, no labels.
+
+BACKGROUND: plain pure white (#FFFFFF) everywhere, no grid lines, no frame borders, no ground line, no shadows, no glow halo around the body, no sticker border, no fire on the ground, no fire waves, no explosions, no smoke, no embers floating away from the body, no lava puddles, no cracks in the ground, no text, no letters, no numbers, no watermark.
+QUALITY: ultra high resolution, QHD (2560x1440) or higher, crisp clean lines
+```
