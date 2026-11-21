@@ -4,7 +4,7 @@ const { chromium } = require('/opt/node22/lib/node_modules/playwright');
 const PICK = process.env.BOT_PICK || 'random', RUNS = +process.argv[2] || 4, MINUTES = +process.argv[3] || 15, STYLE = process.argv[4] || 'normal';
 (async () => {
   const browser = await chromium.launch();
-  { const _nc = browser.newContext.bind(browser); browser.newContext = async o => { const c = await _nc(o); await c.addInitScript(st => { try { localStorage.setItem('stickhero_story', '1'); if (st) localStorage.setItem('stickhero_meta', JSON.stringify({ maxStage: st })); } catch (e) {} }, +process.env.BOT_STAGE || 0); /* BOT_STAGE: 모험 칸을 이만큼 깬 것으로 시작 (열린 무기·동료 시험용) */ return c; }; } const results = []; const errors = [];
+  { const _nc = browser.newContext.bind(browser); browser.newContext = async o => { const c = await _nc(o); await c.addInitScript(([st, mj]) => { try { localStorage.setItem('stickhero_story', '1'); const m = Object.assign(st ? { maxStage: st } : {}, JSON.parse(mj || '{}')); if (Object.keys(m).length) localStorage.setItem('stickhero_meta', JSON.stringify(m)); } catch (e) {} }, [+process.env.BOT_STAGE || 0, process.env.BOT_META || '']);   /* BOT_META: 저장(강화 등)을 JSON으로 */ /* BOT_STAGE: 모험 칸을 이만큼 깬 것으로 시작 (열린 무기·동료 시험용) */ return c; }; } const results = []; const errors = [];
   for (let run = 0; run < RUNS; run++) {
     const page = await (await browser.newContext({ viewport: { width: 390, height: 844 } })).newPage();
     page.on('pageerror', e => errors.push(`run${run}: ${e.message}`));
