@@ -227,3 +227,39 @@ GRID RULES (strict):
 BACKGROUND: plain pure white (#FFFFFF) everywhere, no grid lines, no frame borders, no ground line, no shadows, no glow halo, no sticker border, no snow, no ice on the ground, no frost breath, no sparkles floating away from the body, no footprints, no text, no letters, no numbers, no watermark.
 QUALITY: ultra high resolution, QHD (2560x1440) or higher, crisp clean lines
 ```
+
+## B3-② 얼음 용 공격 (숨 들이마시고 → 얼음 숨결 내뿜기) — 첨부 `art/boss3_src.png` · 픽스버스용(LAYOUT 포함)
+```
+TASK: one 2D game ANIMATION SPRITE SHEET of the attached boss character: exactly 12 frames arranged in a grid of 4 columns x 3 rows, read left to right, top row first.
+
+LAYOUT (very important): the whole 4x3 grid must sit in the LOWER-LEFT part of the image. Leave a big EMPTY pure white margin along the TOP edge (the top 15% of the image height) and along the RIGHT edge (the right 15% of the image width). The TOP-RIGHT CORNER of the image (the right 30% of the width x the top 20% of the height) must be COMPLETELY EMPTY white, with no part of any frame in it. Also leave a thin empty white margin along the left and bottom edges.
+
+CHARACTER: the attached Ice Dragon boss (a big blue four-legged dragon with a pale belly, a head facing right with glowing cyan eyes and an open toothy mouth, light-blue ice crystal spikes on the head, back and tail, a small gold crown with red gems, two big blue bat-like wings with ice crystals and gold studs on the wing joints, grey-and-gold studded shoulder armor with a big red gem on the chest, grey-and-gold studded bands on the legs and tail, and big white claws). Keep EXACTLY the same design, colors, thick black outlines, cel shading, proportions and art style in every frame. The crown, ice spikes, wings, chest armor with the red gem, leg bands and white claws are in EVERY frame.
+
+ANIMATION: an ICE BREATH attack in place, facing right. Each frame MUST show a DIFFERENT pose, exactly like this:
+- Frame 1: standing like the attached image, wings half open.
+- Frame 2: the head pulls back and up, the mouth closing, the chest starting to swell.
+- Frame 3: rearing up on the back legs a little, the front claws lifting off the ground, the head pulled far back, the chest swollen (breathing in), the wings spreading wide.
+- Frame 4: reared up higher, wings fully spread wide open, the chest and throat glowing light cyan inside, eyes squinting.
+- Frame 5: same high pose, the cheeks puffed, the light cyan glow brighter in the throat (maximum charge).
+- Frame 6: the head snapping forward and down toward the right, the mouth opening wide.
+- Frame 7: BREATH: the front claws slam back on the ground, the neck stretched far forward to the right, the jaws wide open, the wings pushed back.
+- Frame 8: same breathing pose, the body pushing forward, the tail lifted high.
+- Frame 9: still breathing forward, the head shaking slightly, the wings starting to fold.
+- Frame 10: the mouth closing, the head pulling back to normal, the wings half open.
+- Frame 11: settling down, all four feet on the ground.
+- Frame 12: almost like frame 1, flowing back into frame 1.
+Draw ONLY the dragon: the breath itself is NOT drawn (no frost cloud, no ice beam coming out of the mouth).
+
+SIZE RULES (strict): the crown and head are EXACTLY THE SAME SIZE in all 12 frames. Only the neck, legs, wings and body pose change; the dragon never gets bigger or closer to the camera.
+
+GRID RULES (strict):
+- Every frame: the SAME dragon, facing right, 3/4 top-down game view, same as the attached image.
+- Same ground line in every frame (the reared-up frames keep the back feet on the same ground line); the dragon stays in the center of its cell.
+- The dragon (including the spread wings and tail) fills about 65% of its cell width and height (leave room for the fully spread wings and the stretched neck).
+- VERY WIDE empty white gaps between all cells and between the rows; no wing tip, tail tip, ice spike, crown or claw may touch or come near another cell.
+- Only the 12 frames. No extra poses, no labels.
+
+BACKGROUND: plain pure white (#FFFFFF) everywhere, no grid lines, no frame borders, no ground line, no shadows, no glow halo around the body, no sticker border, no frost breath, no ice beam, no snow, no ice shards flying, no sparkles floating away from the body, no text, no letters, no numbers, no watermark.
+QUALITY: ultra high resolution, QHD (2560x1440) or higher, crisp clean lines
+```
