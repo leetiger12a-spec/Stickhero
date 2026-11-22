@@ -432,3 +432,68 @@ GRID RULES (strict):
 BACKGROUND: plain pure white (#FFFFFF) everywhere, no grid lines, no frame borders, no ground line, no shadows, no glow halo around the body, no sticker border, no magic beams, no green fire, no smoke, no sparkles or runes floating away, no portals, no bones on the ground, no text, no letters, no numbers, no watermark.
 QUALITY: ultra high resolution, QHD (2560x1440) or higher, crisp clean lines
 ```
+
+## B6-① 바위 골렘 왕 걷기 (쿵쿵 무거운 돌 걸음) — 첨부 `art/boss6_src.png` · ChatGPT용
+```
+TASK: one 2D game ANIMATION SPRITE SHEET of the attached boss character: exactly 12 frames arranged in a grid of 4 columns x 3 rows, read left to right, top row first. Wide landscape image (3:2).
+
+CHARACTER: the attached Rock Golem King boss (a huge dark slate-blue stone golem made of rock chunks with glowing light-blue cracks, a blocky head with glowing cyan eyes and a wide toothy grin, a gold crown with a blue gem, big light-blue ice-like crystals growing from the shoulders, back, forearms and legs, gold-and-grey studded shoulder armor and arm bands, a gold chest emblem with a blue gem, a gold studded belt, a purple scarf and a purple cape with gold trim, huge rock fists and big rock feet). Keep EXACTLY the same design, colors, thick black outlines, cel shading, proportions and art style in every frame. The crown, glowing eyes, blue crystals, gold armor, purple scarf and cape are in EVERY frame.
+
+ANIMATION: a slow, very HEAVY STOMPING WALK in place, facing right (seen from the 3/4 front-right like the attached image). THE LEGS MUST CLEARLY MOVE: in every frame the two legs are in a DIFFERENT position, and in the lifting frames the raised rock foot is clearly HIGH in the air with a big empty white gap under it (the "front leg" is the leg on the right side of the picture):
+- Frame 1: standing like the attached image, both rock feet on the ground.
+- Frame 2: the front leg starts to lift, its knee bending, its foot off the ground.
+- Frame 3: the front leg lifted HIGH, knee up, rock foot clearly in the air; the body leans slightly back.
+- Frame 4: the front leg swinging forward, foot still in the air and further to the right.
+- Frame 5: the front foot STOMPS down far forward, legs in a wide step; the body dips low, both fists swing down.
+- Frame 6: weight moves onto the front leg; the back foot's heel lifts.
+- Frame 7: the back leg starts to lift, its knee bending, its foot off the ground.
+- Frame 8: the back leg lifted HIGH, knee up, rock foot clearly in the air.
+- Frame 9: the back leg swinging forward past the front leg, foot in the air.
+- Frame 10: the back foot STOMPS down; legs in a wide step the other way; the body dips low.
+- Frame 11: weight shifting back to the middle, both feet on the ground, legs wide.
+- Frame 12: standing up again, almost like frame 1, flowing back into frame 1.
+The big fists swing opposite to the legs. The head bobs down on every stomp. The cape and scarf sway with each step. The face keeps the same angry grin.
+
+GRID RULES (strict):
+- Every frame: the SAME boss at the SAME size (the same crown and head size in all 3 rows), facing right, 3/4 top-down game view, same as the attached image. The bottom row must NOT be bigger than the top row.
+- Same ground line in every frame; the boss stays in the center of its cell.
+- The boss (including the crystals and cape) fills about 75% of its cell height.
+- VERY WIDE empty white gaps between all cells and between the rows; no crystal, crown, fist, foot or cape tip may touch or come near another cell.
+- Only the 12 frames. No extra poses, no labels.
+
+BACKGROUND: plain pure white (#FFFFFF) everywhere, no grid lines, no frame borders, no ground line, no shadows, no glow halo around the body, no sticker border, no flying rocks, no dust clouds, no impact marks, no cracks in the ground, no footprints, no text, no letters, no numbers, no watermark.
+QUALITY: ultra high resolution, QHD (2560x1440) or higher, crisp clean lines
+```
+
+## B6-② 바위 골렘 왕 공격 (두 주먹 들어 → 쾅! 땅 흔들기) — 첨부 `art/boss6_src.png` · ChatGPT용
+```
+TASK: one 2D game ANIMATION SPRITE SHEET of the attached boss character: exactly 12 frames arranged in a grid of 4 columns x 3 rows, read left to right, top row first. Wide landscape image (3:2).
+
+CHARACTER: the attached Rock Golem King boss (a huge dark slate-blue stone golem made of rock chunks with glowing light-blue cracks, a blocky head with glowing cyan eyes and a wide toothy grin, a gold crown with a blue gem, big light-blue ice-like crystals growing from the shoulders, back, forearms and legs, gold-and-grey studded shoulder armor and arm bands, a gold chest emblem with a blue gem, a gold studded belt, a purple scarf and a purple cape with gold trim, huge rock fists and big rock feet). Keep EXACTLY the same design, colors, thick black outlines, cel shading, proportions and art style in every frame. The crown, glowing eyes, blue crystals, gold armor, purple scarf and cape are in EVERY frame.
+
+ANIMATION: a GROUND QUAKE SLAM in place, facing right. Each frame MUST show a DIFFERENT pose, exactly like this:
+- Frame 1: standing like the attached image.
+- Frame 2: crouching a little, both fists pulled back to the sides.
+- Frame 3: both fists rising to chest height, knees bending, the blue cracks glowing brighter.
+- Frame 4: both fists raised HIGH above the head, the body stretched tall, mouth wide open roaring.
+- Frame 5: same high pose, leaning slightly back, the eyes and cracks blazing bright cyan (maximum power).
+- Frame 6: both fists swinging down in front of the chest, knees bending.
+- Frame 7: both fists almost hitting the ground, the body leaning far forward, knees bent low.
+- Frame 8: SLAM: both huge fists smashed on the ground in front, the body crouched very low, the cape flying up behind.
+- Frame 9: still crouched with the fists on the ground, grinning, the cracks glowing.
+- Frame 10: starting to rise, the fists lifting off the ground.
+- Frame 11: almost standing up, fists coming back to the sides.
+- Frame 12: standing like frame 1 again, flowing back into frame 1.
+
+SIZE RULES (strict): the crown and head are EXACTLY THE SAME SIZE in all 12 frames, even when the head tilts. Only the arms, legs, body lean and cape change; the boss never gets bigger or closer to the camera. The bottom row must NOT be bigger than the top row.
+
+GRID RULES (strict):
+- Every frame: the SAME boss, facing right, 3/4 top-down game view, same as the attached image.
+- Same ground line in every frame; the boss stays in the center of its cell.
+- The boss (including the raised fists) fills about 70% of its cell height (leave room above for the raised fists).
+- VERY WIDE empty white gaps between all cells and between the rows; no crystal, crown, fist, foot or cape tip may touch or come near another cell.
+- Only the 12 frames. No extra poses, no labels.
+
+BACKGROUND: plain pure white (#FFFFFF) everywhere, no grid lines, no frame borders, no ground line, no shadows, no glow halo around the body, no sticker border, no shockwaves, no flying rocks, no dust clouds, no impact marks, no cracks in the ground, no text, no letters, no numbers, no watermark.
+QUALITY: ultra high resolution, QHD (2560x1440) or higher, crisp clean lines
+```
