@@ -330,3 +330,39 @@ GRID RULES (strict):
 BACKGROUND: plain pure white (#FFFFFF) everywhere, no grid lines, no frame borders, no ground line, no shadows, no glow halo, no sticker border, no webs, no silk threads, no baby spiders, no dust, no impact marks, no cracks, no text, no letters, no numbers, no watermark.
 QUALITY: ultra high resolution, QHD (2560x1440) or higher, crisp clean lines
 ```
+
+## B4-①-2 거미 여왕 걷기 다시 (첫 번째: 1536×1024로 작고, 다리가 거의 안 들리고, 아래 줄로 갈수록 커짐) — 첨부 `art/boss4_src.png` · 픽스버스용
+```
+TASK: one 2D game ANIMATION SPRITE SHEET of the attached boss character: exactly 12 frames arranged in a grid of 4 columns x 3 rows, read left to right, top row first.
+
+LAYOUT (very important): the whole 4x3 grid must sit in the LOWER-LEFT part of the image. Leave a big EMPTY pure white margin along the TOP edge (the top 15% of the image height) and along the RIGHT edge (the right 15% of the image width). The TOP-RIGHT CORNER of the image (the right 30% of the width x the top 20% of the height) must be COMPLETELY EMPTY white, with no part of any frame in it. Also leave a thin empty white margin along the left and bottom edges.
+
+CHARACTER: the attached Spider Queen boss (a big purple spider with a round striped purple abdomen covered by a grey armor plate with gold spikes and studs, a purple head facing right with many glowing red eyes, big ivory fangs and a toothy mouth, a gold crown with a red gem on a grey armored collar, grey-and-gold armor on the shoulders, and eight thick purple legs with gold studded bands and glossy bright purple pointed tips). Keep EXACTLY the same design, colors, thick black outlines, cel shading, proportions and art style in every frame. The crown, red eyes, fangs, abdomen armor with gold spikes and all eight legs are in EVERY frame.
+
+ANIMATION: a quick SCUTTLING WALK in place, facing right (3/4 view like the attached image). THE LEG MOVEMENT MUST BE BIG AND OBVIOUS: in the lifting frames the raised leg tips are clearly HIGH in the air with a big empty white gap under them (at least half a leg length above the ground line), and the raised legs bend sharply at the joints. The legs move in two alternating groups of four:
+- Frame 1: standing like the attached image, all eight leg tips on the ground.
+- Frame 2: group A legs (front-right, third-right, second-left, back-left) lifting, tips clearly off the ground.
+- Frame 3: group A legs lifted HIGH, knees bent sharply upward, tips high in the air; group B legs planted.
+- Frame 4: group A legs swinging forward to the right, still high in the air.
+- Frame 5: group A leg tips land far forward; the body shifts forward and dips low.
+- Frame 6: all legs on the ground, the body forward, the abdomen swaying back.
+- Frame 7: group B legs (second-right, back-right, front-left, third-left) lifting, tips clearly off the ground.
+- Frame 8: group B legs lifted HIGH, knees bent sharply upward, tips high in the air; group A legs planted.
+- Frame 9: group B legs swinging forward to the right, still high in the air.
+- Frame 10: group B leg tips land far forward; the body dips low.
+- Frame 11: all legs on the ground, the abdomen swaying back.
+- Frame 12: almost like frame 1, flowing back into frame 1.
+The abdomen bobs up and down with each step. The head stays facing right with the red eyes glowing.
+
+SIZE RULES (strict): the spider is EXACTLY THE SAME SIZE in all 12 frames and in all 3 rows (the same crown, head and abdomen size). The bottom row must NOT be bigger than the top row. Never move closer to the camera.
+
+GRID RULES (strict):
+- Every frame: the SAME spider, facing right, 3/4 top-down game view, same as the attached image.
+- Same ground line in every frame; the spider stays in the center of its cell.
+- The spider (including all legs) fills about 70% of its cell width and height.
+- VERY WIDE empty white gaps between all cells and between the rows; no leg tip, spike, fang or crown may touch or come near another cell.
+- Only the 12 frames. No extra poses, no labels.
+
+BACKGROUND: plain pure white (#FFFFFF) everywhere, no grid lines, no frame borders, no ground line, no shadows, no glow halo, no sticker border, no webs, no silk threads, no baby spiders, no dust, no footprints, no text, no letters, no numbers, no watermark.
+QUALITY: ultra high resolution, QHD (2560x1440) or higher, crisp clean lines
+```
