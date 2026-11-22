@@ -366,3 +366,69 @@ GRID RULES (strict):
 BACKGROUND: plain pure white (#FFFFFF) everywhere, no grid lines, no frame borders, no ground line, no shadows, no glow halo, no sticker border, no webs, no silk threads, no baby spiders, no dust, no footprints, no text, no letters, no numbers, no watermark.
 QUALITY: ultra high resolution, QHD (2560x1440) or higher, crisp clean lines
 ```
+
+## B5-① 해골 왕 걷기 (망토 휘날리며 성큼) — 첨부 `art/boss5_src.png` · ChatGPT용 (픽스버스면 TASK 아래에 PIXVERSE LAYOUT 문단을 넣고 "Wide landscape image (3:2)." 문장을 뺌)
+```
+TASK: one 2D game ANIMATION SPRITE SHEET of the attached boss character: exactly 12 frames arranged in a grid of 4 columns x 3 rows, read left to right, top row first. Wide landscape image (3:2).
+
+CHARACTER: the attached Skeleton King boss (a skeleton with a white skull, glowing green eyes and a toothy grin, a big gold crown with red gems, a tall purple-and-gold collar, gold spiked shoulder armor with purple plates, a gold chest plate with red gems, a brown belt with a gold buckle, a purple tabard, a torn purple cape with gold trim, bony white hands, gold-and-brown armored boots, and a long wooden staff with gold bands topped by a glowing green skull with gold horns, held in the right-side hand). Keep EXACTLY the same design, colors, thick black outlines, cel shading, proportions and art style in every frame. The crown, glowing green eyes, cape, armor and the green-skull staff are in EVERY frame.
+
+ANIMATION: a slow, proud, creepy MARCHING WALK in place, facing right (seen from the 3/4 front-right like the attached image). The LEGS MUST CLEARLY MOVE: in every frame the two legs are in a DIFFERENT position, exactly like this (the "front leg" is the leg on the right side of the picture):
+- Frame 1: standing like the attached image, both boots on the ground.
+- Frame 2: the front leg starts to lift, its bony knee bending, its heel off the ground.
+- Frame 3: the front leg lifted HIGH, knee up, boot clearly in the air; the staff swings forward.
+- Frame 4: the front leg reaching forward, boot still in the air and further to the right.
+- Frame 5: the front boot lands far forward, legs in a wide step; the body dips; the cape blows back.
+- Frame 6: weight moves onto the front leg; the back boot's heel lifts.
+- Frame 7: the back leg starts to lift, its knee bending, its boot off the ground.
+- Frame 8: the back leg lifted HIGH, knee up, boot clearly in the air; the staff swings back.
+- Frame 9: the back leg swinging forward past the front leg, boot in the air.
+- Frame 10: the back boot lands; legs in a wide step the other way; the body dips; the cape blows back.
+- Frame 11: weight shifting back to the middle, both boots on the ground.
+- Frame 12: standing up again, almost like frame 1, flowing back into frame 1.
+The staff hand moves with the steps (the staff stays upright and always in the hand). The free bony hand swings opposite to the legs. The torn cape flows and ripples differently in each frame. The skull keeps the same evil grin and green glowing eyes.
+
+GRID RULES (strict):
+- Every frame: the SAME boss at the SAME size (the same crown and skull size in all 3 rows), facing right, 3/4 top-down game view, same as the attached image. The bottom row must NOT be bigger than the top row.
+- Same ground line in every frame; the boss stays in the center of its cell.
+- The boss (including the staff and cape) fills about 75% of its cell height.
+- VERY WIDE empty white gaps between all cells and between the rows; no crown, staff, cape tip, hand or boot may touch or come near another cell.
+- Only the 12 frames. No extra poses, no labels.
+
+BACKGROUND: plain pure white (#FFFFFF) everywhere, no grid lines, no frame borders, no ground line, no shadows, no glow halo around the body, no sticker border, no green magic effects floating away, no smoke, no bones on the ground, no footprints, no text, no letters, no numbers, no watermark.
+QUALITY: ultra high resolution, QHD (2560x1440) or higher, crisp clean lines
+```
+
+## B5-② 해골 왕 공격 (지팡이 들어 마법 → 사라지기 순간이동) — 첨부 `art/boss5_src.png` · ChatGPT용
+```
+TASK: one 2D game ANIMATION SPRITE SHEET of the attached boss character: exactly 12 frames arranged in a grid of 4 columns x 3 rows, read left to right, top row first. Wide landscape image (3:2).
+
+CHARACTER: the attached Skeleton King boss (a skeleton with a white skull, glowing green eyes and a toothy grin, a big gold crown with red gems, a tall purple-and-gold collar, gold spiked shoulder armor with purple plates, a gold chest plate with red gems, a brown belt with a gold buckle, a purple tabard, a torn purple cape with gold trim, bony white hands, gold-and-brown armored boots, and a long wooden staff with gold bands topped by a glowing green skull with gold horns, held in the right-side hand). Keep EXACTLY the same design, colors, thick black outlines, cel shading, proportions and art style in every frame. The crown, glowing green eyes, cape, armor and the green-skull staff are in EVERY frame.
+
+ANIMATION: a DARK MAGIC SPELL in place, facing right. Each frame MUST show a DIFFERENT pose, exactly like this:
+- Frame 1: standing like the attached image.
+- Frame 2: the staff hand starts to lift the staff, the free hand opening, the cape spreading a little.
+- Frame 3: the staff raised high above the head with both hands, the green skull on the staff glowing brighter, the jaw open laughing.
+- Frame 4: same raised pose, leaning back, the cape spread wide like wings, the eyes blazing bright green.
+- Frame 5: the staff swinging down and forward, pointing to the right, the free hand reaching forward with spread bony fingers.
+- Frame 6: the staff pointing far forward at the right, the body leaning forward, the cape flowing back (casting).
+- Frame 7: the staff slammed down, its bottom tip touching the ground in front, both hands on the staff.
+- Frame 8: holding the staff on the ground, laughing, the head tilted back, the jaw wide open.
+- Frame 9: the cape wrapping around the body, only the skull, crown and staff top showing above it.
+- Frame 10: fully wrapped in the cape, crouching low (about to vanish).
+- Frame 11: rising out of the cape again, the cape opening.
+- Frame 12: standing like frame 1 again, flowing back into frame 1.
+The green glow stays ON the staff skull and in the eyes only (it can be brighter in frames 3-8).
+
+SIZE RULES (strict): the crown and skull are EXACTLY THE SAME SIZE in all 12 frames. Only the arms, staff, cape and body pose change; the boss never gets bigger or closer to the camera. The bottom row must NOT be bigger than the top row.
+
+GRID RULES (strict):
+- Every frame: the SAME boss, facing right, 3/4 top-down game view, same as the attached image.
+- Same ground line in every frame; the boss stays in the center of its cell.
+- The boss (including the raised staff and the spread cape) fills about 70% of its cell height (leave room above for the raised staff).
+- VERY WIDE empty white gaps between all cells and between the rows; no crown, staff, cape tip, hand or boot may touch or come near another cell.
+- Only the 12 frames. No extra poses, no labels.
+
+BACKGROUND: plain pure white (#FFFFFF) everywhere, no grid lines, no frame borders, no ground line, no shadows, no glow halo around the body, no sticker border, no magic beams, no green fire, no smoke, no sparkles or runes floating away, no portals, no bones on the ground, no text, no letters, no numbers, no watermark.
+QUALITY: ultra high resolution, QHD (2560x1440) or higher, crisp clean lines
+```
