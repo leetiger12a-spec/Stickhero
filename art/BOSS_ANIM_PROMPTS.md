@@ -633,3 +633,70 @@ GRID RULES (strict):
 BACKGROUND: plain pure white (#FFFFFF) everywhere, no grid lines, no frame borders, no ground line, no shadows, no glow halo around the body, no sticker border, no frost breath, no ice beam, no snow, no ice shards flying, no sparkles floating away, no text, no letters, no numbers, no watermark.
 QUALITY: ultra high resolution, QHD (2560x1440) or higher, crisp clean lines
 ```
+
+## B9-① 숲 골렘 걷기 — 첨부 `art/boss9_src.png` · ChatGPT용
+```
+TASK: one 2D game ANIMATION SPRITE SHEET of the attached boss character: exactly 12 frames arranged in a grid of 4 columns x 3 rows, read left to right, top row first. Wide landscape image (3:2).
+
+CHARACTER: the attached Forest Golem boss (a huge golem made of mossy grey-green stone and brown tree bark, a blocky mossy stone head with glowing green eyes and a wide toothy grin, a gold crown with a green gem, a broken tree-trunk stump growing from the right-side shoulder, thick bark arms ending in huge mossy stone fists, green moss patches, green vines with small leaves and little pink flowers wrapped around the whole body, a bark body and legs, and mossy stone feet). Keep EXACTLY the same design, colors, thick black outlines, cel shading, proportions and art style in every frame. The crown, glowing green eyes, tree stump on the shoulder, vines, leaves, pink flowers and moss are in EVERY frame. The feet are always mossy grey-green stone (never gold).
+
+ANIMATION: a slow, very HEAVY STOMPING WALK in place, facing right (seen from the 3/4 front-right like the attached image). THE LEGS MUST CLEARLY MOVE: in every frame the two legs are in a DIFFERENT position, and in the lifting frames the raised stone foot is clearly HIGH in the air with a big empty white gap under it (the "front leg" is the leg on the right side of the picture):
+- Frame 1: standing like the attached image, both stone feet on the ground.
+- Frame 2: the front leg starts to lift, its knee bending, its foot off the ground.
+- Frame 3: the front leg lifted HIGH, knee up, stone foot clearly in the air; the body leans slightly back.
+- Frame 4: the front leg swinging forward, foot still in the air and further to the right.
+- Frame 5: the front foot STOMPS down far forward, legs in a wide step; the body dips low, both fists swing down.
+- Frame 6: weight moves onto the front leg; the back foot's heel lifts.
+- Frame 7: the back leg starts to lift, its knee bending, its foot off the ground.
+- Frame 8: the back leg lifted HIGH, knee up, stone foot clearly in the air.
+- Frame 9: the back leg swinging forward past the front leg, foot in the air.
+- Frame 10: the back foot STOMPS down; legs in a wide step the other way; the body dips low.
+- Frame 11: weight shifting back to the middle, both feet on the ground, legs wide.
+- Frame 12: standing up again, almost like frame 1, flowing back into frame 1.
+The big fists swing opposite to the legs. The head bobs down on every stomp. The vines and leaves sway a little with each step. The face keeps the same angry grin.
+
+SIZE RULES (strict): the crown and head are EXACTLY THE SAME SIZE in all 12 frames and in all 3 rows. The bottom row must NOT be bigger than the top row. Never move closer to the camera.
+
+GRID RULES (strict):
+- Every frame: the SAME boss, facing right, 3/4 top-down game view, same as the attached image.
+- Same ground line in every frame; the boss stays in the center of its cell.
+- The boss (including the tree stump) fills about 75% of its cell height.
+- VERY WIDE empty white gaps between all cells and between the rows; no stump, crown, fist, foot, leaf or vine may touch or come near another cell.
+- Only the 12 frames. No extra poses, no labels.
+
+BACKGROUND: plain pure white (#FFFFFF) everywhere, no grid lines, no frame borders, no ground line, no shadows, no glow halo around the body, no sticker border, no grass, no falling leaves or petals floating away, no dust, no roots in the ground, no footprints, no text, no letters, no numbers, no watermark.
+QUALITY: ultra high resolution, QHD (2560x1440) or higher, crisp clean lines
+```
+
+## B9-② 숲 골렘 공격 (뿌리 덫: 주먹을 땅에 박아 뿌리 부르기) — 첨부 `art/boss9_src.png` · ChatGPT용 (팔은 어깨까지·머리 바로)
+```
+TASK: one 2D game ANIMATION SPRITE SHEET of the attached boss character: exactly 12 frames arranged in a grid of 4 columns x 3 rows, read left to right, top row first. Wide landscape image (3:2).
+
+CHARACTER: the attached Forest Golem boss (a huge golem made of mossy grey-green stone and brown tree bark, a blocky mossy stone head with glowing green eyes and a wide toothy grin, a gold crown with a green gem, a broken tree-trunk stump growing from the right-side shoulder, thick bark arms ending in huge mossy stone fists, green moss patches, green vines with small leaves and little pink flowers wrapped around the whole body, a bark body and legs, and mossy stone feet). Keep EXACTLY the same design, colors, thick black outlines, cel shading, proportions and art style in every frame. The crown, glowing green eyes, tree stump on the shoulder, vines, leaves, pink flowers and moss are in EVERY frame.
+
+ANIMATION: a ROOT TRAP spell in place, facing right. The fists NEVER go above the shoulders, and the head NEVER tilts back: the head and crown stay upright facing right in every frame. Each frame MUST show a DIFFERENT pose, exactly like this:
+- Frame 1: standing like the attached image.
+- Frame 2: both fists pulled back to the hips, knees bending a little, the eyes glowing brighter green.
+- Frame 3: both fists brought together in front of the chest, the vines on the body starting to wriggle and lift up.
+- Frame 4: both fists pressed together at shoulder height, the vines on the arms curling and glowing light green, the flowers opening wider.
+- Frame 5: same pose, crouching a little lower, the whole body's vines glowing light green (maximum power).
+- Frame 6: both fists swinging down in front, knees bending.
+- Frame 7: both fists almost hitting the ground, the body leaning forward, knees bent low.
+- Frame 8: PLANT: both fists pushed deep into the ground in front (the fists half hidden at the ground line), the body crouched low, grinning.
+- Frame 9: still crouched with the fists in the ground, the vines on the arms stretching down toward the ground.
+- Frame 10: pulling the fists out of the ground, starting to rise.
+- Frame 11: almost standing up, fists coming back to the sides.
+- Frame 12: standing like frame 1 again, flowing back into frame 1.
+
+SIZE RULES (strict): the crown and head are EXACTLY THE SAME SIZE AND SHAPE in all 12 frames (same width as in frame 1, always upright). Only the arms, legs, body lean, vines and glow change; the boss never gets bigger or closer to the camera. The bottom row must NOT be bigger than the top row.
+
+GRID RULES (strict):
+- Every frame: the SAME boss, facing right, 3/4 top-down game view, same as the attached image.
+- Same ground line in every frame; the boss stays in the center of its cell.
+- The boss fills about 72% of its cell height.
+- VERY WIDE empty white gaps between all cells and between the rows; no stump, crown, fist, foot, leaf or vine may touch or come near another cell.
+- Only the 12 frames. No extra poses, no labels.
+
+BACKGROUND: plain pure white (#FFFFFF) everywhere, no grid lines, no frame borders, no ground line, no shadows, no glow halo around the body, no sticker border, no roots coming out of the ground, no grass, no dirt, no holes, no cracks in the ground, no falling leaves or petals floating away, no text, no letters, no numbers, no watermark.
+QUALITY: ultra high resolution, QHD (2560x1440) or higher, crisp clean lines
+```
