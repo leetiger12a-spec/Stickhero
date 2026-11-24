@@ -16,7 +16,7 @@ const { chromium } = require('/opt/node22/lib/node_modules/playwright');
       phase = 'hit'; await new Promise(q => setTimeout(q, 700)); CanvasRenderingContext2D.prototype.drawImage = d;
       return { n, loaded: !!W && !!A, atkOnly: !W && !!A, walk: walk.size, wind: [...wind].sort((a, b) => a - b), hit: [...hit].sort((a, b) => a - b) }; }, n);
     console.log(JSON.stringify(r));
-    check((r.loaded && r.walk >= 8 || r.atkOnly)   /* boss11: 공격 시트만 (Build 375) */ && r.wind.length >= 3 && r.hit.some(f => f >= 6) || (n === 5 || n === 11) && r.hit.some(f => f >= 9), 'boss' + n + ' anim');
+    check(r.loaded && r.walk >= 8 && r.wind.length >= 3 && r.hit.some(f => f >= 6) || (n === 5 || n === 11) && r.hit.some(f => f >= 9), 'boss' + n + ' anim');
     if (n === 7) check(r.wind.includes(3) && r.wind.includes(4), 'boss7 uses frames 4-5');
     if (n === 6) check(!r.wind.includes(3) && !r.wind.includes(4) && !r.hit.includes(3) && !r.hit.includes(4), 'boss6 skips frames 4-5');
     if (n === 5) check(!r.wind.includes(2) && !r.wind.includes(3) && !r.wind.includes(7) && !r.hit.includes(2) && !r.hit.includes(3) && !r.hit.includes(7), 'boss5 skips frames 3-4-8');
