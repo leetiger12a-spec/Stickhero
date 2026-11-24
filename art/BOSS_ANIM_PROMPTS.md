@@ -767,3 +767,71 @@ GRID RULES (strict):
 BACKGROUND: plain pure white (#FFFFFF) everywhere, no grid lines, no frame borders, no ground line, no shadows, no glow halo around the body, no sticker border, no fire, no smoke, no speed lines, no impact marks, no sparkles or coins floating around, no text, no letters, no numbers, no watermark.
 QUALITY: ultra high resolution, QHD (2560x1440) or higher, crisp clean lines
 ```
+
+## B11-① 번개 해골 왕 걷기 — 첨부 `art/boss11_src.png` · ChatGPT용
+```
+TASK: one 2D game ANIMATION SPRITE SHEET of the attached boss character: exactly 12 frames arranged in a grid of 4 columns x 3 rows, read left to right, top row first. Wide landscape image (3:2).
+
+CHARACTER: the attached Lightning Skeleton King boss (a dark navy-blue skeleton with glowing cyan lightning cracks on the bones, a skull with glowing cyan eyes and a toothy grin, a crown of tall light-blue ice crystals on a gold band, a big white-and-lavender fur collar, a torn purple cape, grey steel chest armor with gold trim and rivets, gold-trimmed steel shoulder plates, arm guards and knee guards, a purple tabard, bony dark feet, and a long wooden-and-gold scythe with a big curved steel blade held across the body in both hands). Keep EXACTLY the same design, colors, thick black outlines, cel shading, proportions and art style in every frame. The crystal crown, glowing eyes, fur collar, cape, armor, lightning cracks and the scythe are in EVERY frame.
+
+ANIMATION: a slow, creepy, proud MARCHING WALK in place, facing right (seen from the 3/4 front-right like the attached image). THE LEGS MUST CLEARLY MOVE: in every frame the two legs are in a DIFFERENT position, and in the lifting frames the raised foot is clearly HIGH in the air with a big empty white gap under it (the "front leg" is the leg on the right side of the picture):
+- Frame 1: standing like the attached image, both feet on the ground.
+- Frame 2: the front leg starts to lift, its bony knee bending, its heel off the ground.
+- Frame 3: the front leg lifted HIGH, knee up, foot clearly in the air.
+- Frame 4: the front leg reaching forward, foot still in the air and further to the right.
+- Frame 5: the front foot lands far forward, legs in a wide step; the body dips; the cape blows back.
+- Frame 6: weight moves onto the front leg; the back foot's heel lifts.
+- Frame 7: the back leg starts to lift, its knee bending, its foot off the ground.
+- Frame 8: the back leg lifted HIGH, knee up, foot clearly in the air.
+- Frame 9: the back leg swinging forward past the front leg, foot in the air.
+- Frame 10: the back foot lands; legs in a wide step the other way; the body dips; the cape blows back.
+- Frame 11: weight shifting back to the middle, both feet on the ground.
+- Frame 12: standing up again, almost like frame 1, flowing back into frame 1.
+The scythe stays held across the body in both hands in every frame and bobs a little with the steps. The torn cape flows and ripples differently in each frame. The head stays upright facing right with the same evil grin.
+
+SIZE RULES (strict): the crown and skull are EXACTLY THE SAME SIZE in all 12 frames and in all 3 rows. The bottom row must NOT be bigger than the top row. Never move closer to the camera.
+
+GRID RULES (strict):
+- Every frame: the SAME boss, facing right, 3/4 top-down game view, same as the attached image.
+- Same ground line in every frame; the boss stays in the center of its cell.
+- The boss (including the scythe and cape) fills about 75% of its cell height.
+- VERY WIDE empty white gaps between all cells and between the rows; no crown, scythe blade, cape tip, hand or foot may touch or come near another cell.
+- Only the 12 frames. No extra poses, no labels.
+
+BACKGROUND: plain pure white (#FFFFFF) everywhere, no grid lines, no frame borders, no ground line, no shadows, no glow halo around the body, no sticker border, no lightning bolts in the air, no sparks floating away, no smoke, no bones on the ground, no footprints, no text, no letters, no numbers, no watermark.
+QUALITY: ultra high resolution, QHD (2560x1440) or higher, crisp clean lines
+```
+
+## B11-② 번개 해골 왕 공격 (낫 휘두르기 → 망토로 감싸고 사라지기) — 첨부 `art/boss11_src.png` · ChatGPT용 (낫·팔은 어깨 높이 이하·머리 바로)
+```
+TASK: one 2D game ANIMATION SPRITE SHEET of the attached boss character: exactly 12 frames arranged in a grid of 4 columns x 3 rows, read left to right, top row first. Wide landscape image (3:2).
+
+CHARACTER: the attached Lightning Skeleton King boss (a dark navy-blue skeleton with glowing cyan lightning cracks on the bones, a skull with glowing cyan eyes and a toothy grin, a crown of tall light-blue ice crystals on a gold band, a big white-and-lavender fur collar, a torn purple cape, grey steel chest armor with gold trim and rivets, gold-trimmed steel shoulder plates, arm guards and knee guards, a purple tabard, bony dark feet, and a long wooden-and-gold scythe with a big curved steel blade held in both hands). Keep EXACTLY the same design, colors, thick black outlines, cel shading, proportions and art style in every frame. The crystal crown, glowing eyes, fur collar, cape, armor, lightning cracks and the scythe are in EVERY frame.
+
+ANIMATION: a LIGHTNING SCYTHE SWEEP then VANISH in place, facing right. The hands and the scythe handle NEVER go above the shoulders, and the head NEVER tilts back: the head and crown stay upright facing right in every frame. Each frame MUST show a DIFFERENT pose, exactly like this:
+- Frame 1: standing like the attached image.
+- Frame 2: pulling the scythe back to the left side at waist height, knees bending, the lightning cracks glowing brighter.
+- Frame 3: the scythe pulled far back behind the body at waist height, the body twisted, the blade glowing cyan.
+- Frame 4: same wound-up pose, crouching lower, the whole body's cracks blazing bright cyan (maximum charge).
+- Frame 5: SWEEP: swinging the scythe forward in a wide flat arc at waist height, the blade in front of the body.
+- Frame 6: the scythe swept all the way to the right, the blade pointing far forward, the body leaning right, the cape flying back.
+- Frame 7: follow-through, the scythe blade now low in front, the body still leaning forward, grinning.
+- Frame 8: pulling the scythe back upright in front of the body with both hands.
+- Frame 9: the cape wrapping around the body, only the crown, skull and the scythe blade showing above it.
+- Frame 10: fully wrapped in the cape, crouching low (about to vanish).
+- Frame 11: rising out of the cape again, the cape opening.
+- Frame 12: standing like frame 1 again, flowing back into frame 1.
+The cyan glow stays ON the bones, eyes and blade only.
+
+SIZE RULES (strict): the crown and skull are EXACTLY THE SAME SIZE AND SHAPE in all 12 frames (same width as in frame 1, always upright). Only the arms, scythe, cape and body pose change; the boss never gets bigger or closer to the camera. The bottom row must NOT be bigger than the top row.
+
+GRID RULES (strict):
+- Every frame: the SAME boss, facing right, 3/4 top-down game view, same as the attached image.
+- Same ground line in every frame; the boss stays in the center of its cell.
+- The boss (including the scythe and the spread cape) fills about 70% of its cell height (leave room on the right for the swept scythe).
+- VERY WIDE empty white gaps between all cells and between the rows; no crown, scythe blade, cape tip, hand or foot may touch or come near another cell.
+- Only the 12 frames. No extra poses, no labels.
+
+BACKGROUND: plain pure white (#FFFFFF) everywhere, no grid lines, no frame borders, no ground line, no shadows, no glow halo around the body, no sticker border, no lightning bolts in the air, no slash trails, no sparks floating away, no smoke, no portals, no text, no letters, no numbers, no watermark.
+QUALITY: ultra high resolution, QHD (2560x1440) or higher, crisp clean lines
+```
