@@ -6,7 +6,7 @@ const { chromium } = require('/opt/node22/lib/node_modules/playwright');
   await ctx.addInitScript(() => { localStorage.setItem('stickhero_story', '1'); window.__noGold = true; window.__eliteP = 0; });
   const page = await ctx.newPage(); const OUT = process.env.OUT || 'shots'; page.on('pageerror', e => errors.push(e.message)); page.on('console', m => { if (m.type() === 'error') errors.push(m.text()); });
   await page.goto('http://localhost:8765/index.html'); await page.waitForTimeout(1400); await page.click('#bStart'); await page.waitForTimeout(400);
-  for (const n of [1, 2, 3, 4, 5, 6, 7, 8]) {
+  for (const n of [1, 2, 3, 4, 5, 6, 7, 8, 9]) {
     const r = await page.evaluate(async n => { const G = SH.G; G.p.hp = G.p.maxHp = 1e9; G.enemies = []; G.boss = null; G.spawnAcc = -1e9; window.__bossN = n; SH.spawnBoss(); endIntro(); const B = G.boss; B.x = G.p.x + 170; B.y = G.p.y - 40;
       const k = 'boss' + n, W = SPR[k + '_walk'], A = SPR[k + '_atk'], walk = new Set(), wind = new Set(), hit = new Set(); let phase = 'walk';
       const d = CanvasRenderingContext2D.prototype.drawImage; CanvasRenderingContext2D.prototype.drawImage = function (img, sx) { if (arguments.length > 5) { if (img === W) walk.add(Math.round(sx / (W.width / 12))); if (img === A) (phase === 'wind' ? wind : hit).add(Math.round(sx / (A.width / 12))); } return d.apply(this, arguments); };
