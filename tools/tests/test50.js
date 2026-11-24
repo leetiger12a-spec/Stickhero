@@ -14,7 +14,7 @@ const { chromium } = require('/opt/node22/lib/node_modules/playwright');
   console.log('after first KO', JSON.stringify(a));
   check(a.name === '왕관 괴물 대왕' && !a.dead && a.phase2 && a.hpPct === 50 && a.trans && a.faster && a.boss && a.immune, 'final boss did not transform');
   await page.waitForTimeout(700); await page.screenshot({ path: `${OUT}/b88_transform.png` });
-  await page.waitForTimeout(1600);
+  await page.waitForFunction(() => SH.G.boss && !(SH.G.boss.transT > 0), null, { timeout: 8000 }).catch(() => {});   /* Build 378: 느린 화면(1.2초)+무적(1.8초)이 끝날 때까지 기다림 (고정 2.3초는 기계 속도에 따라 모자람) */
   const b2 = await page.evaluate(() => { const G = SH.G, e = G.boss; const moving = e.transT <= 0; hurtEnemy(e, 1e9, 0, 1, 0); return { moving, dead: !!e.dead, boss: !!G.boss, clear: !!(G.st && G.st.clear) }; });
   console.log('after second KO', JSON.stringify(b2)); check(b2.moving && b2.dead && !b2.boss && b2.clear, 'final boss did not die on phase 2');
   // 다른 보스는 변신 안 함

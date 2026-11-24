@@ -29,7 +29,7 @@ const { chromium } = require('/opt/node22/lib/node_modules/playwright');
       const cage = st.cages.find(c => !c.freed);
       if (st.portal) { G.p.x = st.portal.x; G.p.y = st.portal.y; }
       else if (cage && G.p.y < cage.y + 400) { G.p.x = cage.x; G.p.y = cage.y + 10; }
-      else if (st.def.goal !== 'survive') { G.p.y -= 4; if (G.boss) G.boss.hp -= 60; }
+      else if (st.def.goal !== 'survive') { G.p.y -= 4; if (G.boss) G.boss.hp -= Math.max(60, G.boss.maxHp * 0.003); }   /* Build 378: 보스 체력 ×1.6(Build 361) 뒤로는 고정 60이면 최종 보스를 못 잡음 */
       for (const e of G.enemies) if (!e.boss && Math.random() < 0.02) e.hp = 0;
       update(1 / 30);
     }
