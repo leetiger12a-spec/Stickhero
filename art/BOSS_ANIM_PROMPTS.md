@@ -565,3 +565,71 @@ GRID RULES (strict):
 BACKGROUND: plain pure white (#FFFFFF) everywhere, no grid lines, no frame borders, no ground line, no shadows, no glow halo around the body, no sticker border, no fire on the ground, no lava puddles, no explosions, no shockwaves, no embers or smoke floating away, no flying rocks, no cracks in the ground, no text, no letters, no numbers, no watermark.
 QUALITY: ultra high resolution, QHD (2560x1440) or higher, crisp clean lines
 ```
+
+## B8-① 얼음 골렘 걷기 — 첨부 `art/boss8_src.png` · ChatGPT용
+```
+TASK: one 2D game ANIMATION SPRITE SHEET of the attached boss character: exactly 12 frames arranged in a grid of 4 columns x 3 rows, read left to right, top row first. Wide landscape image (3:2).
+
+CHARACTER: the attached Ice Golem boss (a huge golem made of light-blue ice crystal chunks, big sharp ice crystals growing from the shoulders, back, forearms and knees, a blocky icy head with glowing cyan eyes, a wide toothy grin and a big fluffy white frost beard, a gold crown with a blue gem, gold-and-brown studded shoulder straps with round gold studs, wide gold studded bands on both forearms, a gold studded belt with a blue gem buckle, gold bands on the knees, a purple cape with gold trim, huge ice fists and big ice feet). Keep EXACTLY the same design, colors, thick black outlines, cel shading, proportions and art style in every frame. The crown, glowing eyes, white beard, ice crystals, gold armor and purple cape are in EVERY frame. The feet are always light-blue ice (never gold).
+
+ANIMATION: a slow, very HEAVY STOMPING WALK in place, facing right (seen from the 3/4 front-right like the attached image). THE LEGS MUST CLEARLY MOVE: in every frame the two legs are in a DIFFERENT position, and in the lifting frames the raised ice foot is clearly HIGH in the air with a big empty white gap under it (the "front leg" is the leg on the right side of the picture):
+- Frame 1: standing like the attached image, both ice feet on the ground.
+- Frame 2: the front leg starts to lift, its knee bending, its foot off the ground.
+- Frame 3: the front leg lifted HIGH, knee up, ice foot clearly in the air; the body leans slightly back.
+- Frame 4: the front leg swinging forward, foot still in the air and further to the right.
+- Frame 5: the front foot STOMPS down far forward, legs in a wide step; the body dips low, both fists swing down.
+- Frame 6: weight moves onto the front leg; the back foot's heel lifts.
+- Frame 7: the back leg starts to lift, its knee bending, its foot off the ground.
+- Frame 8: the back leg lifted HIGH, knee up, ice foot clearly in the air.
+- Frame 9: the back leg swinging forward past the front leg, foot in the air.
+- Frame 10: the back foot STOMPS down; legs in a wide step the other way; the body dips low.
+- Frame 11: weight shifting back to the middle, both feet on the ground, legs wide.
+- Frame 12: standing up again, almost like frame 1, flowing back into frame 1.
+The big fists swing opposite to the legs. The head bobs down on every stomp. The cape and beard sway with each step. The face keeps the same angry grin.
+
+SIZE RULES (strict): the crown and head are EXACTLY THE SAME SIZE in all 12 frames and in all 3 rows. The bottom row must NOT be bigger than the top row. Never move closer to the camera.
+
+GRID RULES (strict):
+- Every frame: the SAME boss, facing right, 3/4 top-down game view, same as the attached image.
+- Same ground line in every frame; the boss stays in the center of its cell.
+- The boss (including the crystals and cape) fills about 75% of its cell height.
+- VERY WIDE empty white gaps between all cells and between the rows; no crystal, crown, fist, foot or cape tip may touch or come near another cell.
+- Only the 12 frames. No extra poses, no labels.
+
+BACKGROUND: plain pure white (#FFFFFF) everywhere, no grid lines, no frame borders, no ground line, no shadows, no glow halo around the body, no sticker border, no snow, no ice on the ground, no frost clouds, no sparkles floating away, no flying ice shards, no footprints, no text, no letters, no numbers, no watermark.
+QUALITY: ultra high resolution, QHD (2560x1440) or higher, crisp clean lines
+```
+
+## B8-② 얼음 골렘 공격 (숨 모으기 → 얼음 숨결) — 첨부 `art/boss8_src.png` · ChatGPT용 (팔은 어깨까지·머리 바로)
+```
+TASK: one 2D game ANIMATION SPRITE SHEET of the attached boss character: exactly 12 frames arranged in a grid of 4 columns x 3 rows, read left to right, top row first. Wide landscape image (3:2).
+
+CHARACTER: the attached Ice Golem boss (a huge golem made of light-blue ice crystal chunks, big sharp ice crystals growing from the shoulders, back, forearms and knees, a blocky icy head with glowing cyan eyes, a wide toothy grin and a big fluffy white frost beard, a gold crown with a blue gem, gold-and-brown studded shoulder straps with round gold studs, wide gold studded bands on both forearms, a gold studded belt with a blue gem buckle, gold bands on the knees, a purple cape with gold trim, huge ice fists and big ice feet). Keep EXACTLY the same design, colors, thick black outlines, cel shading, proportions and art style in every frame. The crown, glowing eyes, white beard, ice crystals, gold armor and purple cape are in EVERY frame.
+
+ANIMATION: an ICE BREATH attack in place, facing right. The fists NEVER go above the shoulders, and the head NEVER tilts back: the head and crown stay upright facing right in every frame. Each frame MUST show a DIFFERENT pose, exactly like this:
+- Frame 1: standing like the attached image.
+- Frame 2: the chest swelling (breathing in), both fists pulled back to the hips, mouth closed.
+- Frame 3: the chest swollen bigger, the shoulders raised, the crystals on the back glowing light cyan, cheeks puffed.
+- Frame 4: leaning back a little from the hips (head still upright), both fists at the sides clenched, the eyes glowing brighter.
+- Frame 5: same pose, the whole body glowing light cyan (maximum charge).
+- Frame 6: leaning forward to the right, the mouth starting to open.
+- Frame 7: BREATH: leaning far forward, the mouth wide open facing right, both fists pushed back behind, the beard and cape blowing back.
+- Frame 8: same breathing pose, the body pushing forward, knees bent.
+- Frame 9: still breathing forward, the glow fading a little.
+- Frame 10: the mouth closing, the body straightening.
+- Frame 11: almost standing up, fists coming back to the sides.
+- Frame 12: standing like frame 1 again, flowing back into frame 1.
+Draw ONLY the golem: the breath itself is NOT drawn (no frost cloud, no ice beam coming out of the mouth).
+
+SIZE RULES (strict): the crown and head are EXACTLY THE SAME SIZE AND SHAPE in all 12 frames (same width as in frame 1, always upright). Only the arms, legs, body lean, glow and cape change; the boss never gets bigger or closer to the camera. The bottom row must NOT be bigger than the top row.
+
+GRID RULES (strict):
+- Every frame: the SAME boss, facing right, 3/4 top-down game view, same as the attached image.
+- Same ground line in every frame; the boss stays in the center of its cell.
+- The boss fills about 72% of its cell height.
+- VERY WIDE empty white gaps between all cells and between the rows; no crystal, crown, fist, foot or cape tip may touch or come near another cell.
+- Only the 12 frames. No extra poses, no labels.
+
+BACKGROUND: plain pure white (#FFFFFF) everywhere, no grid lines, no frame borders, no ground line, no shadows, no glow halo around the body, no sticker border, no frost breath, no ice beam, no snow, no ice shards flying, no sparkles floating away, no text, no letters, no numbers, no watermark.
+QUALITY: ultra high resolution, QHD (2560x1440) or higher, crisp clean lines
+```
