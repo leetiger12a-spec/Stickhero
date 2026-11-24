@@ -835,3 +835,71 @@ GRID RULES (strict):
 BACKGROUND: plain pure white (#FFFFFF) everywhere, no grid lines, no frame borders, no ground line, no shadows, no glow halo around the body, no sticker border, no lightning bolts in the air, no slash trails, no sparks floating away, no smoke, no portals, no text, no letters, no numbers, no watermark.
 QUALITY: ultra high resolution, QHD (2560x1440) or higher, crisp clean lines
 ```
+
+## B12-① 용암 해골 왕 걷기 — 첨부 `art/boss12_src.png` · ChatGPT용 (걷기·공격은 대화창을 나눠서)
+```
+TASK: one 2D game ANIMATION SPRITE SHEET of the attached boss character: exactly 12 frames arranged in a grid of 4 columns x 3 rows, read left to right, top row first. Wide landscape image (3:2). This is a WALK cycle (not an attack).
+
+CHARACTER: the attached Lava Skeleton King boss (a charcoal-black skeleton with glowing orange lava cracks on the bones, a skull with glowing orange eyes and a toothy grin, a bronze-gold crown, small flames burning on both shoulders, dark bronze armor with rivets on the chest, shoulders, forearms and shins, a dark brown torn cape and tabard, bony black feet, and a tall twisted dark wooden staff in the right-side hand topped by a burning lava skull). Keep EXACTLY the same design, colors, thick black outlines, cel shading, proportions and art style in every frame. The crown, glowing eyes, shoulder flames, bronze armor, torn cape and the burning-skull staff are in EVERY frame.
+
+ANIMATION: a slow, creepy, proud MARCHING WALK in place, facing right (seen from the 3/4 front-right like the attached image). THE LEGS MUST CLEARLY MOVE with BIG steps: in every frame the two legs are in a DIFFERENT position, and in the lifting frames the raised foot is clearly HIGH in the air (knee at belt height) with a big empty white gap under it (the "front leg" is the leg on the right side of the picture):
+- Frame 1: standing like the attached image, both feet on the ground.
+- Frame 2: the front leg starts to lift, its bony knee bending, its heel off the ground.
+- Frame 3: the front leg lifted HIGH, knee up at belt height, foot clearly in the air.
+- Frame 4: the front leg reaching forward, foot still in the air and further to the right.
+- Frame 5: the front foot lands far forward, legs in a wide step; the body dips; the cape blows back.
+- Frame 6: weight moves onto the front leg; the back foot's heel lifts.
+- Frame 7: the back leg starts to lift, its knee bending, its foot off the ground.
+- Frame 8: the back leg lifted HIGH, knee up at belt height, foot clearly in the air.
+- Frame 9: the back leg swinging forward past the front leg, foot in the air.
+- Frame 10: the back foot lands; legs in a wide step the other way; the body dips; the cape blows back.
+- Frame 11: weight shifting back to the middle, both feet on the ground.
+- Frame 12: standing up again, almost like frame 1, flowing back into frame 1.
+The staff stays upright in the right-side hand in every frame and moves forward with the steps. The free bony hand swings opposite to the legs. The torn cape flows differently in each frame. The flames flicker a little (same size). The head stays upright facing right with the same evil grin.
+
+SIZE RULES (strict): the crown and skull are EXACTLY THE SAME SIZE in all 12 frames and in all 3 rows. The bottom row must NOT be bigger than the top row. Never move closer to the camera.
+
+GRID RULES (strict):
+- Every frame: the SAME boss, facing right, 3/4 top-down game view, same as the attached image.
+- Same ground line in every frame; the boss stays in the center of its cell.
+- The boss (including the tall staff and its flame) fills about 75% of its cell height.
+- VERY WIDE empty white gaps between all cells and between the rows; no crown, staff, flame, cape tip, hand or foot may touch or come near another cell.
+- Only the 12 frames. No extra poses, no labels.
+
+BACKGROUND: plain pure white (#FFFFFF) everywhere, no grid lines, no frame borders, no ground line, no shadows, no glow halo around the body, no sticker border, no fire on the ground, no lava puddles, no embers or smoke floating away, no bones on the ground, no footprints, no text, no letters, no numbers, no watermark.
+QUALITY: ultra high resolution, QHD (2560x1440) or higher, crisp clean lines
+```
+
+## B12-② 용암 해골 왕 공격 (지팡이에 불 모으기 → 땅 짚어 불바다) — 첨부 `art/boss12_src.png` · ChatGPT용 (손은 어깨 아래·머리 바로)
+```
+TASK: one 2D game ANIMATION SPRITE SHEET of the attached boss character: exactly 12 frames arranged in a grid of 4 columns x 3 rows, read left to right, top row first. Wide landscape image (3:2). This is an ATTACK (spell) animation.
+
+CHARACTER: the attached Lava Skeleton King boss (a charcoal-black skeleton with glowing orange lava cracks on the bones, a skull with glowing orange eyes and a toothy grin, a bronze-gold crown, small flames burning on both shoulders, dark bronze armor with rivets on the chest, shoulders, forearms and shins, a dark brown torn cape and tabard, bony black feet, and a tall twisted dark wooden staff in the right-side hand topped by a burning lava skull). Keep EXACTLY the same design, colors, thick black outlines, cel shading, proportions and art style in every frame. The crown, glowing eyes, shoulder flames, bronze armor, torn cape and the burning-skull staff are in EVERY frame.
+
+ANIMATION: a FIRE STAFF SLAM in place, facing right. The hands NEVER go above the shoulders, and the head NEVER tilts back: the head and crown stay upright facing right in every frame. Each frame MUST show a DIFFERENT pose, exactly like this:
+- Frame 1: standing like the attached image.
+- Frame 2: both hands grabbing the staff at chest height, knees bending a little.
+- Frame 3: the staff held in front of the chest with both hands, the skull on top burning with a bigger flame, the lava cracks glowing brighter.
+- Frame 4: leaning back a little from the hips (head still upright), the staff pulled back toward the body, the flame on the staff huge, the eyes blazing.
+- Frame 5: same pose, the whole skeleton's cracks blazing bright orange, the shoulder flames bigger (maximum power).
+- Frame 6: thrusting the staff forward and down to the right with both hands.
+- Frame 7: the staff's bottom end almost hitting the ground in front, the body leaning forward, knees bent.
+- Frame 8: SLAM: the staff's bottom end planted hard on the ground in front, the body crouched low, the cape flying up behind.
+- Frame 9: still crouched holding the planted staff, grinning, the flame on the staff still big.
+- Frame 10: pulling the staff up from the ground, starting to rise, the flames shrinking.
+- Frame 11: almost standing up, the staff coming back upright in the right-side hand.
+- Frame 12: standing like frame 1 again, flowing back into frame 1.
+The flames stay ON the staff skull, the shoulders and inside the cracks only.
+
+SIZE RULES (strict): the crown and skull are EXACTLY THE SAME SIZE AND SHAPE in all 12 frames (same width as in frame 1, always upright). Only the arms, staff, cape, glow and body pose change; the boss never gets bigger or closer to the camera. The bottom row must NOT be bigger than the top row.
+
+GRID RULES (strict):
+- Every frame: the SAME boss, facing right, 3/4 top-down game view, same as the attached image.
+- Same ground line in every frame; the boss stays in the center of its cell.
+- The boss (including the staff and its flame) fills about 70% of its cell height.
+- VERY WIDE empty white gaps between all cells and between the rows; no crown, staff, flame, cape tip, hand or foot may touch or come near another cell.
+- Only the 12 frames. No extra poses, no labels.
+
+BACKGROUND: plain pure white (#FFFFFF) everywhere, no grid lines, no frame borders, no ground line, no shadows, no glow halo around the body, no sticker border, no fire on the ground, no fire waves, no explosions, no lava puddles, no embers or smoke floating away, no cracks in the ground, no text, no letters, no numbers, no watermark.
+QUALITY: ultra high resolution, QHD (2560x1440) or higher, crisp clean lines
+```
