@@ -700,3 +700,70 @@ GRID RULES (strict):
 BACKGROUND: plain pure white (#FFFFFF) everywhere, no grid lines, no frame borders, no ground line, no shadows, no glow halo around the body, no sticker border, no roots coming out of the ground, no grass, no dirt, no holes, no cracks in the ground, no falling leaves or petals floating away, no text, no letters, no numbers, no watermark.
 QUALITY: ultra high resolution, QHD (2560x1440) or higher, crisp clean lines
 ```
+
+## B10-① 황금 골렘 걷기 — 첨부 `art/boss10_src.png` · ChatGPT용
+```
+TASK: one 2D game ANIMATION SPRITE SHEET of the attached boss character: exactly 12 frames arranged in a grid of 4 columns x 3 rows, read left to right, top row first. Wide landscape image (3:2).
+
+CHARACTER: the attached Golden Golem boss (a huge golem made entirely of shiny gold bricks, a blocky gold head with glowing red eyes, a wide toothy grin with two big tusks, a gold crown with red, blue and green gems, and many red, blue and green gems set all over the shoulders, chest, arms, fists and legs, huge gold brick fists and big gold brick feet). Keep EXACTLY the same design, colors, thick black outlines, cel shading, proportions and art style in every frame. The crown, glowing red eyes, tusks and the colored gems are in EVERY frame.
+
+ANIMATION: a slow, very HEAVY STOMPING WALK in place, facing right (seen from the 3/4 front-right like the attached image). THE LEGS MUST CLEARLY MOVE: in every frame the two legs are in a DIFFERENT position, and in the lifting frames the raised gold foot is clearly HIGH in the air with a big empty white gap under it (the "front leg" is the leg on the right side of the picture):
+- Frame 1: standing like the attached image, both gold feet on the ground.
+- Frame 2: the front leg starts to lift, its knee bending, its foot off the ground.
+- Frame 3: the front leg lifted HIGH, knee up, gold foot clearly in the air; the body leans slightly back.
+- Frame 4: the front leg swinging forward, foot still in the air and further to the right.
+- Frame 5: the front foot STOMPS down far forward, legs in a wide step; the body dips low, both fists swing down.
+- Frame 6: weight moves onto the front leg; the back foot's heel lifts.
+- Frame 7: the back leg starts to lift, its knee bending, its foot off the ground.
+- Frame 8: the back leg lifted HIGH, knee up, gold foot clearly in the air.
+- Frame 9: the back leg swinging forward past the front leg, foot in the air.
+- Frame 10: the back foot STOMPS down; legs in a wide step the other way; the body dips low.
+- Frame 11: weight shifting back to the middle, both feet on the ground, legs wide.
+- Frame 12: standing up again, almost like frame 1, flowing back into frame 1.
+The big fists swing opposite to the legs. The head bobs down on every stomp. The face keeps the same angry grin.
+
+SIZE RULES (strict): the crown and head are EXACTLY THE SAME SIZE in all 12 frames and in all 3 rows. The bottom row must NOT be bigger than the top row. Never move closer to the camera.
+
+GRID RULES (strict):
+- Every frame: the SAME boss, facing right, 3/4 top-down game view, same as the attached image.
+- Same ground line in every frame; the boss stays in the center of its cell.
+- The boss fills about 75% of its cell height.
+- VERY WIDE empty white gaps between all cells and between the rows; no crown, fist or foot may touch or come near another cell.
+- Only the 12 frames. No extra poses, no labels.
+
+BACKGROUND: plain pure white (#FFFFFF) everywhere, no grid lines, no frame borders, no ground line, no shadows, no glow halo around the body, no sticker border, no sparkles or shine stars floating around, no coins, no dust, no footprints, no text, no letters, no numbers, no watermark.
+QUALITY: ultra high resolution, QHD (2560x1440) or higher, crisp clean lines
+```
+
+## B10-② 황금 골렘 공격 (로켓 펀치: 주먹 뒤로 당기기 → 쭉 내지르기) — 첨부 `art/boss10_src.png` · ChatGPT용 (팔은 어깨 높이 이하·머리 바로)
+```
+TASK: one 2D game ANIMATION SPRITE SHEET of the attached boss character: exactly 12 frames arranged in a grid of 4 columns x 3 rows, read left to right, top row first. Wide landscape image (3:2).
+
+CHARACTER: the attached Golden Golem boss (a huge golem made entirely of shiny gold bricks, a blocky gold head with glowing red eyes, a wide toothy grin with two big tusks, a gold crown with red, blue and green gems, and many red, blue and green gems set all over the shoulders, chest, arms, fists and legs, huge gold brick fists and big gold brick feet). Keep EXACTLY the same design, colors, thick black outlines, cel shading, proportions and art style in every frame. The crown, glowing red eyes, tusks and the colored gems are in EVERY frame. Both fists stay attached to the arms in every frame.
+
+ANIMATION: a big straight ROCKET PUNCH in place, facing right. The fists NEVER go above the shoulders, and the head NEVER tilts back: the head and crown stay upright facing right in every frame. Each frame MUST show a DIFFERENT pose, exactly like this (the "punching arm" is the arm on the right side of the picture):
+- Frame 1: fighting stance like the attached image.
+- Frame 2: the body twists back to the left, the punching arm starts pulling back at chest height.
+- Frame 3: the punching arm pulled FAR back behind the body at chest height, the fist clenched tight, the other fist forward as a guard; knees bent low.
+- Frame 4: same wound-up pose, the gems on the punching arm glowing brighter, teeth clenched.
+- Frame 5: still wound up, the back foot digs in, the whole punching arm glowing gold (maximum charge).
+- Frame 6: the body turning forward, the punching arm swinging forward at chest height.
+- Frame 7: the punching arm shooting forward, halfway straight, the body leaning right.
+- Frame 8: FULL PUNCH: the punching arm completely straight to the right at chest height, the big fist far out in front, the body leaning far forward, the front foot stepped forward, mouth wide open shouting.
+- Frame 9: the punch held fully extended, the other arm pulled back to the hip.
+- Frame 10: the punching arm starts pulling back, the body straightening.
+- Frame 11: both arms coming back to the front, the knees straightening.
+- Frame 12: back to the fighting stance, almost like frame 1, flowing back into frame 1.
+
+SIZE RULES (strict): the crown and head are EXACTLY THE SAME SIZE AND SHAPE in all 12 frames (same width as in frame 1, always upright). Only the arms, legs and body lean change; the boss never gets bigger or closer to the camera. The bottom row must NOT be bigger than the top row.
+
+GRID RULES (strict):
+- Every frame: the SAME boss, facing right, 3/4 top-down game view, same as the attached image.
+- Same ground line in every frame; the boss stays in the center of its cell.
+- The boss fills about 70% of its cell height (leave room on the right for the long straight punch).
+- VERY WIDE empty white gaps between all cells and between the rows; no crown, fist or foot may touch or come near another cell.
+- Only the 12 frames. No extra poses, no labels.
+
+BACKGROUND: plain pure white (#FFFFFF) everywhere, no grid lines, no frame borders, no ground line, no shadows, no glow halo around the body, no sticker border, no fire, no smoke, no speed lines, no impact marks, no sparkles or coins floating around, no text, no letters, no numbers, no watermark.
+QUALITY: ultra high resolution, QHD (2560x1440) or higher, crisp clean lines
+```
