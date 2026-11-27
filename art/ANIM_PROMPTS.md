@@ -702,3 +702,39 @@ GRID RULES (strict):
 BACKGROUND: plain pure white (#FFFFFF) everywhere, no grid lines, no frame borders, no ground line, no shadows, no snow on the ground, no falling snowflakes, no glow halo, no sticker border, no sparkles, no motion lines, no snowballs flying, no ice chunks, no impact marks, no text, no letters, no numbers, no watermark.
 QUALITY: ultra high resolution, QHD (2560x1440) or higher, crisp clean lines
 ```
+
+## ㉒ 생강빵 쿠키맨 걷기 (쫄랑쫄랑 뛰어가기) — 첨부 `art/ginger_src.png` (art/winter_src.png에서 자른 것) · 제미나이용 (ChatGPT면 LAYOUT 문단을 빼고 TASK 끝에 "Wide landscape image (3:2)." 넣음)
+```
+TASK: one 2D game ANIMATION SPRITE SHEET of the attached character: exactly 12 frames arranged in a grid of 4 columns x 3 rows, read left to right, top row first. This is a RUN (moving) cycle, not an attack.
+
+LAYOUT (very important): leave a big EMPTY pure white margin along the BOTTOM edge (the bottom 12% of the image height) and along the RIGHT edge (the right 10% of the image width). The BOTTOM-RIGHT CORNER of the image (the right 20% of the width x the bottom 20% of the height) must be COMPLETELY EMPTY white, with no part of any frame in it.
+
+CHARACTER: the attached angry Gingerbread Man monster (a glossy golden-brown gingerbread cookie body with a big round head, thick white icing angry eyebrows, shiny black eyes, a wide open shouting mouth with a red tongue, a red bow tie, one green and one red candy button down the front, white zigzag icing on both wrists and both ankles, short rounded stubby arms and legs). Keep EXACTLY the same design, colors, thick black outlines, cel shading, proportions and art style in every frame. The icing eyebrows, the bow tie, the two candy buttons and the icing zigzags are in EVERY frame.
+
+ANIMATION: a fast, cheeky RUN in place, facing right (seen from the 3/4 front-right like the attached image). THE LEGS MUST CLEARLY MOVE with BIG steps: in every frame the two stubby legs are in a DIFFERENT position, and in the lifting frames the raised foot is clearly in the air with an empty white gap under it (the "front leg" is the leg on the right side of the picture):
+- Frame 1: standing like the attached image, both feet on the ground.
+- Frame 2: the front leg starts to lift, the knee bending, the arms starting to swing.
+- Frame 3: the front leg lifted HIGH, the foot clearly in the air, the back arm swinging forward.
+- Frame 4: the front leg reaching forward, the body leaning right, a little hop with both feet off the ground.
+- Frame 5: the front foot lands far forward, legs in a wide step, the body dips a little.
+- Frame 6: weight moves onto the front leg, the back heel lifts.
+- Frame 7: the back leg starts to lift, the arms swinging the other way.
+- Frame 8: the back leg lifted HIGH, the foot clearly in the air.
+- Frame 9: the back leg swinging forward past the front leg, a little hop with both feet off the ground.
+- Frame 10: the back foot lands; legs in a wide step the other way; the body dips a little.
+- Frame 11: weight shifting back to the middle, both feet on the ground.
+- Frame 12: standing up again, almost like frame 1, flowing back into frame 1.
+The stubby arms swing opposite to the legs. The head bobs a little with each step but keeps the same angry shouting face facing right.
+
+SIZE RULES (strict): the head is EXACTLY THE SAME SIZE in all 12 frames and in all 3 rows. The cookie never gets bigger or closer to the camera. The bottom row must NOT be bigger than the top row.
+
+GRID RULES (strict):
+- Every frame: the SAME gingerbread man, facing right, 3/4 top-down game view, same as the attached image.
+- Same ground line in every frame (except the 2 hop frames, which are only slightly higher); the cookie stays in the center of its cell.
+- The cookie fills about 65% of its cell height.
+- VERY WIDE empty white gaps between all cells and between the rows; no hand, foot or head may touch or come near another cell.
+- Only the 12 frames. No extra poses, no labels.
+
+BACKGROUND: plain pure white (#FFFFFF) everywhere, no grid lines, no frame borders, no ground line, no shadows, no crumbs, no sprinkles, no glow halo, no sticker border, no sparkles, no motion lines, no text, no letters, no numbers, no watermark.
+QUALITY: ultra high resolution, QHD (2560x1440) or higher, crisp clean lines
+```
