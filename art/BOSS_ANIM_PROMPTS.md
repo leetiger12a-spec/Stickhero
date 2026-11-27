@@ -1044,3 +1044,39 @@ GRID RULES (strict):
 BACKGROUND: plain pure white (#FFFFFF) everywhere, no grid lines, no frame borders, no ground line, no shadows, no glow halo around the body, no sticker border, no roots coming out of the ground, no grass, no dirt, no holes, no cracks in the ground, no falling leaves or petals floating away, no text, no letters, no numbers, no watermark.
 QUALITY: ultra high resolution, QHD (2560x1440) or higher, crisp clean lines
 ```
+
+## B14-②-2 숲 해골 왕 공격 다시 (첫 번째: 5~12번 칸이 거의 같은 선 자세, 땅에 꽂기 없음) — 첨부 `art/boss14_src.png` · 제미나이용 (GEMINI CORNER 포함)
+```
+TASK: one 2D game ANIMATION SPRITE SHEET of the attached boss character: exactly 12 frames arranged in a grid of 4 columns x 3 rows, read left to right, top row first. This is an ATTACK (spell) animation with BIG, VERY DIFFERENT poses.
+
+LAYOUT (very important): leave a big EMPTY pure white margin along the BOTTOM edge (the bottom 12% of the image height) and along the RIGHT edge (the right 10% of the image width). The BOTTOM-RIGHT CORNER of the image (the right 20% of the width x the bottom 20% of the height) must be COMPLETELY EMPTY white, with no part of any frame in it.
+
+CHARACTER: the attached Forest Skeleton King boss (a skeleton made of brown tree wood and bark with green moss patches, a wooden skull with glowing green eyes and a toothy grin, a gold crown with a green gem, broken branch stumps sticking up from both shoulders, dark wood armor with grey metal bands and rivets, a green scarf and a torn mossy green cape, green vines with small leaves and little pink flowers on the arms and legs, wooden feet, and a tall twisted root staff topped by a glowing green mossy skull). Keep EXACTLY the same design, colors, thick black outlines, cel shading, proportions and art style in every frame.
+
+ANIMATION: a ROOT TRAP SPELL in place, facing right. The head stays upright facing right in every frame (never tilted back), and the hands stay below the shoulders. EVERY FRAME MUST LOOK CLEARLY DIFFERENT — the STAFF ANGLE and the BODY HEIGHT change a lot:
+- Frame 1: standing like the attached image, the staff upright in the right-side hand.
+- Frame 2: BOTH hands now on the staff, holding it upright in front of the chest.
+- Frame 3: the staff TILTED BACK diagonally over the left shoulder (top of the staff pointing up-left), knees bent, the green skull glowing brighter.
+- Frame 4: same tilted-back staff, body crouched lower, the vines on the arms glowing green.
+- Frame 5: the staff swinging forward, now HORIZONTAL at chest height pointing to the right.
+- Frame 6: the staff tilted DOWN diagonally, its bottom end pointing at the ground in front, the body leaning far forward.
+- Frame 7: STAB: the bottom end of the staff stabbed deep into the ground in front of the feet, the staff leaning forward, both hands on top of it, the body bent low over it.
+- Frame 8: VERY LOW CROUCH: one knee touching the ground, both hands pushing the planted staff down, the cape flying up behind, the head still upright facing right.
+- Frame 9: still kneeling with the planted staff, grinning, the vines from the arms reaching down along the staff to the ground.
+- Frame 10: rising from the knee, pulling the staff out of the ground.
+- Frame 11: standing up, the staff held diagonally across the body.
+- Frame 12: standing like frame 1 again, the staff upright in the right-side hand, flowing back into frame 1.
+The green glow stays ON the staff skull, the eyes and the vines only.
+
+SIZE RULES (strict): the crown and skull are EXACTLY THE SAME SIZE in all 12 frames (only the body pose changes; the boss never gets bigger or closer to the camera). The bottom row must NOT be bigger than the top row.
+
+GRID RULES (strict):
+- Every frame: the SAME boss, facing right, 3/4 top-down game view, same as the attached image.
+- Same ground line in every frame; the boss stays in the center of its cell.
+- The boss (including the staff) fills about 70% of its cell height.
+- VERY WIDE empty white gaps between all cells and between the rows; no crown, staff, branch, leaf, cape tip, hand or foot may touch or come near another cell.
+- Only the 12 frames. No extra poses, no labels.
+
+BACKGROUND: plain pure white (#FFFFFF) everywhere, no grid lines, no frame borders, no ground line, no shadows, no glow halo around the body, no sticker border, no roots coming out of the ground, no grass, no dirt, no holes, no cracks in the ground, no falling leaves or petals floating away, no text, no letters, no numbers, no watermark.
+QUALITY: ultra high resolution, QHD (2560x1440) or higher, crisp clean lines
+```
