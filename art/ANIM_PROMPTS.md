@@ -775,3 +775,6 @@ GRID RULES (strict):
 BACKGROUND: plain pure white (#FFFFFF) everywhere, no grid lines, no frame borders, no ground line, no shadows, no crumbs, no sprinkles, no glow halo, no sticker border, no sparkles, no motion lines, no impact marks, no stars, no text, no letters, no numbers, no watermark.
 QUALITY: ultra high resolution, QHD (2560x1440) or higher, crisp clean lines
 ```
+
+
+## ㉒-P·㉓-P 생강빵 쿠키맨 걷기·공격 픽스버스용 — ㉒·㉓의 LAYOUT 문단을 PIXVERSE LAYOUT 문단(art/BOSS_ANIM_PROMPTS.md 맨 위)으로 바꾼 것 (나머지는 똑같음)
