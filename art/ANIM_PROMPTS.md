@@ -665,3 +665,40 @@ GRID RULES (strict):
 BACKGROUND: plain pure white (#FFFFFF) everywhere, no grid lines, no frame borders, no ground line, no shadows, no snow on the ground, no falling snowflakes, no glow halo, no sticker border, no sparkles, no motion lines, no text, no letters, no numbers, no watermark.
 QUALITY: ultra high resolution, QHD (2560x1440) or higher, crisp clean lines
 ```
+
+
+## ㉑ 눈사람 공격 (몸통 박치기) — 첨부 `art/snowman_src.png` · 제미나이용 (ChatGPT면 LAYOUT 문단을 빼고 TASK 끝에 "Wide landscape image (3:2)." 넣음)
+```
+TASK: one 2D game ANIMATION SPRITE SHEET of the attached character: exactly 12 frames arranged in a grid of 4 columns x 3 rows, read left to right, top row first. This is an ATTACK animation with BIG, VERY DIFFERENT poses.
+
+LAYOUT (very important): leave a big EMPTY pure white margin along the BOTTOM edge (the bottom 12% of the image height) and along the RIGHT edge (the right 10% of the image width). The BOTTOM-RIGHT CORNER of the image (the right 20% of the width x the bottom 20% of the height) must be COMPLETELY EMPTY white, with no part of any frame in it.
+
+CHARACTER: the attached angry Snowman monster (two round white snowballs with light blue shading, angry black eyes with thick black eyebrows, a long orange carrot nose, a mouth of small black coal dots, a black top hat with a red band and green holly leaves with red berries, a red striped knitted scarf with fringed ends hanging down the front, two brown twig arms, and two black coal buttons on the lower snowball). Keep EXACTLY the same design, colors, thick black outlines, cel shading, proportions and art style in every frame. The top hat, holly, carrot nose, scarf, twig arms and coal buttons are in EVERY frame.
+
+ANIMATION: an angry BODY-SLAM LUNGE in place, facing right (seen from the 3/4 front-right like the attached image). EVERY FRAME MUST LOOK CLEARLY DIFFERENT:
+- Frame 1: standing like the attached image.
+- Frame 2: leaning back to the left, both twig arms raised high, the angry eyes squinting.
+- Frame 3: leaning FAR back, the bottom snowball squashed, the twig arms pulled back behind the body, the hat tipping back.
+- Frame 4: same wound-up pose, shaking with anger, the eyebrows pressed down hard.
+- Frame 5: springing forward, the body stretching to the right, the twig arms swinging forward.
+- Frame 6: LUNGING far forward to the right, the head and carrot nose pushed far forward, the twig arms stretched forward like claws, the scarf ends flying back.
+- Frame 7: FULL HIT: the body leaning furthest forward, the bottom snowball squashed against the ground, the mouth open shouting, the hat nearly falling off forward.
+- Frame 8: still leaning forward, the twig arms scratching down.
+- Frame 9: pulling back up, the body straightening, the hat bouncing back on the head.
+- Frame 10: rocking back a little to the left.
+- Frame 11: settling, small wobble.
+- Frame 12: back to standing like frame 1, flowing back into frame 1.
+The face keeps the same angry look facing right in every frame.
+
+SIZE RULES (strict): the head and the top hat are EXACTLY THE SAME SIZE in all 12 frames and in all 3 rows. Only the bottom snowball squashes and stretches; the snowman never gets bigger or closer to the camera. The bottom row must NOT be bigger than the top row.
+
+GRID RULES (strict):
+- Every frame: the SAME snowman, facing right, 3/4 top-down game view, same as the attached image.
+- Same ground line in every frame; the snowman stays in the center of its cell.
+- The snowman (including the hat and twig arms) fills about 60% of its cell height (leave room on the right for the forward lunge).
+- VERY WIDE empty white gaps between all cells and between the rows; no hat, twig, carrot or scarf end may touch or come near another cell.
+- Only the 12 frames. No extra poses, no labels.
+
+BACKGROUND: plain pure white (#FFFFFF) everywhere, no grid lines, no frame borders, no ground line, no shadows, no snow on the ground, no falling snowflakes, no glow halo, no sticker border, no sparkles, no motion lines, no snowballs flying, no ice chunks, no impact marks, no text, no letters, no numbers, no watermark.
+QUALITY: ultra high resolution, QHD (2560x1440) or higher, crisp clean lines
+```
