@@ -629,3 +629,39 @@ GRID RULES (strict):
 BACKGROUND: plain pure white (#FFFFFF) everywhere, no grid lines, no frame borders, no ground line, no shadows, no glow halo, no sticker border, no effects, no dust clouds, no impact marks, no speed lines, no text, no letters, no numbers, no watermark.
 QUALITY: ultra high resolution, QHD (2560x1440) or higher, crisp clean lines
 ```
+
+## ⑳ 눈사람 걷기 (통통 뛰어가기) — 첨부 `art/snowman_src.png` (art/winter_src.png에서 자른 것) · 제미나이용 (ChatGPT면 LAYOUT 문단을 빼고 TASK 끝에 "Wide landscape image (3:2)." 넣음)
+```
+TASK: one 2D game ANIMATION SPRITE SHEET of the attached character: exactly 12 frames arranged in a grid of 4 columns x 3 rows, read left to right, top row first. This is a WALK (moving) cycle, not an attack.
+
+LAYOUT (very important): leave a big EMPTY pure white margin along the BOTTOM edge (the bottom 12% of the image height) and along the RIGHT edge (the right 10% of the image width). The BOTTOM-RIGHT CORNER of the image (the right 20% of the width x the bottom 20% of the height) must be COMPLETELY EMPTY white, with no part of any frame in it.
+
+CHARACTER: the attached angry Snowman monster (two round white snowballs with light blue shading, angry black eyes with thick black eyebrows, a long orange carrot nose, a mouth of small black coal dots, a black top hat with a red band and green holly leaves with red berries, a red striped knitted scarf with fringed ends hanging down the front, two brown twig arms, and two black coal buttons on the lower snowball). Keep EXACTLY the same design, colors, thick black outlines, cel shading, proportions and art style in every frame. The top hat, holly, carrot nose, scarf, twig arms and coal buttons are in EVERY frame.
+
+ANIMATION: a grumpy BOUNCING HOP in place, facing right (seen from the 3/4 front-right like the attached image). The snowman has NO legs: it moves by squashing and hopping its bottom snowball. EVERY FRAME MUST SHOW A CLEARLY DIFFERENT POSE:
+- Frame 1: standing like the attached image, the bottom snowball on the ground.
+- Frame 2: the bottom snowball squashes a little (wider and lower), the twig arms lift up a little.
+- Frame 3: SQUASHED low and wide, getting ready to hop, the twig arms raised, the hat tipping back.
+- Frame 4: hopping up: the body stretched a little taller, the bottom snowball just leaving the ground, the scarf ends flying down.
+- Frame 5: in the air (only slightly higher in its cell), leaning forward to the right, the twig arms swinging back.
+- Frame 6: landing: the bottom snowball touches the ground and squashes wide, the hat bouncing up a little, the scarf ends flying up.
+- Frame 7: settling back up to the normal shape, the twig arms swinging forward.
+- Frame 8: the bottom snowball squashes again, the twig arms lifting the other way.
+- Frame 9: SQUASHED low and wide again, ready to hop.
+- Frame 10: hopping up again, leaning forward, the scarf ends flying down.
+- Frame 11: landing, the bottom snowball squashing wide.
+- Frame 12: back to standing, almost like frame 1, flowing back into frame 1.
+The face keeps the same angry look facing right in every frame. The twig arms and the scarf ends move differently in each frame.
+
+SIZE RULES (strict): the head and the top hat are EXACTLY THE SAME SIZE in all 12 frames and in all 3 rows. Only the bottom snowball squashes and stretches; the snowman never gets bigger or closer to the camera. The bottom row must NOT be bigger than the top row.
+
+GRID RULES (strict):
+- Every frame: the SAME snowman, facing right, 3/4 top-down game view, same as the attached image.
+- Same ground line in every frame (except the 1-2 air frames, which are only slightly higher); the snowman stays in the center of its cell.
+- The snowman (including the hat and twig arms) fills about 65% of its cell height.
+- VERY WIDE empty white gaps between all cells and between the rows; no hat, twig, carrot or scarf end may touch or come near another cell.
+- Only the 12 frames. No extra poses, no labels.
+
+BACKGROUND: plain pure white (#FFFFFF) everywhere, no grid lines, no frame borders, no ground line, no shadows, no snow on the ground, no falling snowflakes, no glow halo, no sticker border, no sparkles, no motion lines, no text, no letters, no numbers, no watermark.
+QUALITY: ultra high resolution, QHD (2560x1440) or higher, crisp clean lines
+```
