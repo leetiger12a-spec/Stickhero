@@ -11,7 +11,8 @@ A = np.asarray(Image.open(src).convert('RGB')).astype(np.int16); H, W = A.shape[
 frames = []
 cells = [(r * H // R, (r + 1) * H // R, c * W // C, (c + 1) * W // C) for r in range(R) for c in range(C)]
 if opts.get('blobs'):   # blobs=1: 캐릭터가 칸 경계를 넘을 만큼 클 때 — 덩어리를 찾아 각자의 범위로 자름
-    bg0 = (A.min(-1) > 225) & (A.max(-1) - A.min(-1) < 30); lb, nk = ndimage.label(~bg0); sz0 = ndimage.sum(~bg0, lb, range(1, nk + 1))
+    bg0 = (A.min(-1) > 225) & (A.max(-1) - A.min(-1) < 30); J = int(opts.get('join', 0))   # join=N: N픽셀 안의 떨어진 조각(지팡이 둘레 얼음 조각 등)도 같은 칸으로 (Build 378)
+    lb, nk = ndimage.label(ndimage.binary_dilation(~bg0, iterations=J) if J else ~bg0); sz0 = ndimage.sum(~bg0, lb, range(1, nk + 1))
     top = sorted(np.argsort(-sz0)[:R * C]); ob0 = ndimage.find_objects(lb)
     bx = [(ob0[i], i + 1) for i in top]; bx.sort(key=lambda t: t[0][0].start + t[0][0].stop)   # 줄 순서: 위→아래로 C개씩 묶고 (여백이 고르지 않아도 됨, Build 366)
     bx = sum([sorted(bx[k:k + C], key=lambda t: t[0][1].start) for k in range(0, len(bx), C)], [])
@@ -20,7 +21,7 @@ if opts.get('blobs'):   # blobs=1: 캐릭터가 칸 경계를 넘을 만큼 클 
 for ci, (y0, y1, x0, x1) in enumerate(cells):
     if True:
         a = A[y0:y1, x0:x1]
-        if opts.get('blobs'): a = a.copy(); a[lb[y0:y1, x0:x1] != own[ci]] = 255
+        if opts.get('blobs'): a = a.copy(); a[lb[y0:y1, x0:x1] != own[ci]] = 255   # (join이면 늘린 범위로 판단, 바탕 픽셀은 원래대로 흰색이라 그대로 지워짐)
         bgish = (a.min(-1) > 225) & (a.max(-1) - a.min(-1) < 30); bl, _ = ndimage.label(bgish)
         edge = set(np.unique(np.concatenate([bl[0], bl[-1], bl[:, 0], bl[:, -1]]))) - {0}
         fg = ~np.isin(bl, list(edge))
