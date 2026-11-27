@@ -1147,3 +1147,37 @@ GRID RULES (strict):
 BACKGROUND: plain pure white (#FFFFFF) everywhere, no grid lines, no frame borders, no ground line, no shadows, no glow halo around the body, no sticker border, no fire, no smoke, no speed lines, no impact marks, no sparkles or coins floating around, no text, no letters, no numbers, no watermark.
 QUALITY: ultra high resolution, QHD (2560x1440) or higher, crisp clean lines
 ```
+
+## BF-① 최종 보스(슬라임 대왕) 걷기 (꿀렁꿀렁 미끄러지기, 망토·홀은 그대로) — 첨부 `art/boss_final_src.png` · ChatGPT용 (제미나이면 "Wide landscape image (3:2)." 문장을 빼고 TASK 아래에 GEMINI CORNER 문단을 넣음)
+```
+TASK: one 2D game ANIMATION SPRITE SHEET of the attached boss character: exactly 12 frames arranged in a grid of 4 columns x 3 rows, read left to right, top row first. Wide landscape image (3:2). This is a WALK (moving) cycle, not an attack.
+
+CHARACTER: the attached Final Boss Slime Emperor (a huge glossy magenta-pink slime with no legs, glowing yellow-orange angry eyes and a wide grin full of sharp white teeth, a big gold crown with red gems and gold balls on its points, huge gold shoulder armor with red gems, a gold collar with red gems, a dark belt with gold studs and a red-and-gold crown banner hanging in front, a red cape with a white fur trim with black spots over both shoulders, a pink slime claw hand on the left side, and a pink slime hand on the right side holding a gold scepter topped by a big red crystal). Keep EXACTLY the same design, colors, thick black outlines, cel shading, proportions and art style in every frame. The crown, the eyes, the teeth, the fur cape, the belt banner and the red crystal scepter are in EVERY frame.
+
+ANIMATION: a heavy, proud OOZING SLIDE in place, facing right (seen from the 3/4 front-right like the attached image). The slime has NO legs: it moves by squashing and stretching its body and its puddle bottom. EVERY FRAME MUST SHOW A CLEARLY DIFFERENT BODY SHAPE:
+- Frame 1: like the attached image, round and calm, the puddle bottom flat on the ground.
+- Frame 2: the body starts to squash down, getting a little wider and lower; the puddle spreads.
+- Frame 3: SQUASHED: the body clearly lower and wider, the puddle spread wide on both sides; the crown sinks with the head.
+- Frame 4: the body starts to stretch up and lean to the right; the puddle pulls in on the left side.
+- Frame 5: STRETCHED: the body clearly taller and thinner, leaning forward to the right; the claw hand reaches forward.
+- Frame 6: the body slides forward, the puddle bulging out on the right side and pulling in on the left; the cape swings back.
+- Frame 7: the body settles down onto the new spot, a wobble going through the slime.
+- Frame 8: squashing again, lower and wider, the puddle spreading to the right.
+- Frame 9: stretching up again and leaning forward; the scepter tips forward a little with the body.
+- Frame 10: the body slides forward again, the puddle bulging out on the right side.
+- Frame 11: settling back, small wobbles on the body.
+- Frame 12: back to round and calm, almost like frame 1, flowing back into frame 1.
+The scepter stays in the right-side hand in every frame, held upright beside the body and moving with it. The claw hand sways with the body. The fur cape and the red cape flow differently in each frame. The face keeps the same evil grin.
+
+SIZE RULES (strict): the crown and the face are EXACTLY THE SAME SIZE in all 12 frames and in all 3 rows. Only the body squashes and stretches; the boss never gets bigger or closer to the camera. The bottom row must NOT be bigger than the top row.
+
+GRID RULES (strict):
+- Every frame: the SAME boss, facing right, 3/4 top-down game view, same as the attached image.
+- Same ground line in every frame (the puddle bottom always on it); the boss stays in the center of its cell.
+- The boss (including the crown, scepter and cape) fills about 70% of its cell height.
+- VERY WIDE empty white gaps between all cells and between the rows; no crown, scepter, cape tip, claw or puddle may touch or come near another cell.
+- Only the 12 frames. No extra poses, no labels.
+
+BACKGROUND: plain pure white (#FFFFFF) everywhere, no grid lines, no frame borders, no ground line, no shadows, no glow halo around the body, no sticker border, no slime trail, no drips or droplets flying away from the body, no sparkles, no text, no letters, no numbers, no watermark.
+QUALITY: ultra high resolution, QHD (2560x1440) or higher, crisp clean lines
+```
