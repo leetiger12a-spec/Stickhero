@@ -21,7 +21,7 @@ if opts.get('blobs'):   # blobs=1: 캐릭터가 칸 경계를 넘을 만큼 클 
 for ci, (y0, y1, x0, x1) in enumerate(cells):
     if True:
         a = A[y0:y1, x0:x1]
-        if opts.get('blobs'): a = a.copy(); a[lb[y0:y1, x0:x1] != own[ci]] = 255   # (join이면 늘린 범위로 판단, 바탕 픽셀은 원래대로 흰색이라 그대로 지워짐)
+        if opts.get('blobs'): a = a.copy(); a[~ndimage.binary_fill_holes(lb[y0:y1, x0:x1] == own[ci])] = 255   # (join이면 늘린 범위로 판단, 바탕 픽셀은 원래대로 흰색이라 그대로 지워짐) · Build 387: 덩어리 안에 둘러싸인 조각(흰 얼굴 속 눈, 흰 털 속 점)은 지우지 않음
         bgish = (a.min(-1) > 225) & (a.max(-1) - a.min(-1) < 30); bl, _ = ndimage.label(bgish)
         edge = set(np.unique(np.concatenate([bl[0], bl[-1], bl[:, 0], bl[:, -1]]))) - {0}
         fg = ~np.isin(bl, list(edge))

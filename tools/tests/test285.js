@@ -1,4 +1,4 @@
-// Build 384·386: ⛄ 눈사람 통통 걷기 (12칸 시트, 12번 칸 ✦ 뺌) — 걸을 때 칸이 바뀌고 12번 칸은 안 씀
+// Build 384·386·387: ⛄ 눈사람 통통 걷기 (12칸 시트, 12번 칸 ✦ 뺌) — 걸을 때 칸이 바뀌고 12번 칸은 안 씀
 const { chromium } = require('/opt/node22/lib/node_modules/playwright');
 (async () => {
   const b = await chromium.launch(); const errors = []; const check = (c, m) => { if (!c) errors.push(m); };
@@ -12,6 +12,10 @@ const { chromium } = require('/opt/node22/lib/node_modules/playwright');
   const solid = await page.evaluate(() => ['e_snowman_walk', 'e_snowman_atk'].every(k => { const im = SPR_SRC[k], c = document.createElement('canvas'); c.width = im.naturalWidth; c.height = im.naturalHeight; const x = c.getContext('2d'); x.drawImage(im, 0, 0); const cw = c.width / 12;
     for (let i = 0; i < 12; i++) for (const y of [0.4, 0.8]) if (x.getImageData(Math.floor(i * cw + cw / 2), Math.floor(c.height * y), 1, 1).data[3] < 200) return false; return true; }));
   console.log('snowman body solid', solid); check(solid, 'snowman white face/body not cut out');
+  // Build 387: 흰 얼굴 속 눈(떨어진 조각)이 지워지지 않았는지 — 걷기 12칸 윗부분(모자·눈)의 검은 점 수 합 (눈 빠졌을 때 약 15300, 고친 뒤 약 17400)
+  const dark = await page.evaluate(() => { const im = SPR_SRC.e_snowman_walk, c = document.createElement('canvas'); c.width = im.naturalWidth; c.height = im.naturalHeight; const x = c.getContext('2d'); x.drawImage(im, 0, 0);
+    const d = x.getImageData(0, Math.floor(c.height * 0.25), c.width, Math.floor(c.height * 0.2)).data; let n = 0; for (let i = 0; i < d.length; i += 4) if (Math.max(d[i], d[i + 1], d[i + 2]) < 70 && d[i + 3] > 200) n++; return n; });
+  console.log('snowman eye area dark px', dark); check(dark > 16500, 'snowman both eyes kept ' + dark);
   const frames = await page.evaluate(async () => {
     const G = SH.G; G.nextBoss = 999; G.nextWave = 999; G.spawnAcc = -1e9; G.enemies = []; G.p.hp = G.p.maxHp = 1e6;
     const e = makeEnemy('e_snowman', G.p.x + 150, G.p.y - 80); e.dmg = 0; e.hp = e.maxHp = 1e9; G.enemies.push(e);
