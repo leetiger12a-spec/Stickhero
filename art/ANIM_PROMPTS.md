@@ -738,3 +738,40 @@ GRID RULES (strict):
 BACKGROUND: plain pure white (#FFFFFF) everywhere, no grid lines, no frame borders, no ground line, no shadows, no crumbs, no sprinkles, no glow halo, no sticker border, no sparkles, no motion lines, no text, no letters, no numbers, no watermark.
 QUALITY: ultra high resolution, QHD (2560x1440) or higher, crisp clean lines
 ```
+
+
+## ㉓ 생강빵 쿠키맨 공격 (뛰어올라 발차기) — 첨부 `art/ginger_src.png` · 제미나이용 (ChatGPT면 LAYOUT 문단을 빼고 TASK 끝에 "Wide landscape image (3:2)." 넣음)
+```
+TASK: one 2D game ANIMATION SPRITE SHEET of the attached character: exactly 12 frames arranged in a grid of 4 columns x 3 rows, read left to right, top row first. This is an ATTACK animation with BIG, VERY DIFFERENT poses.
+
+LAYOUT (very important): leave a big EMPTY pure white margin along the BOTTOM edge (the bottom 12% of the image height) and along the RIGHT edge (the right 10% of the image width). The BOTTOM-RIGHT CORNER of the image (the right 20% of the width x the bottom 20% of the height) must be COMPLETELY EMPTY white, with no part of any frame in it.
+
+CHARACTER: the attached angry Gingerbread Man monster (a glossy golden-brown gingerbread cookie body with a big round head, thick white icing angry eyebrows, shiny black eyes, a wide open shouting mouth with a red tongue, a red bow tie, one green and one red candy button down the front, white zigzag icing on both wrists and both ankles, short rounded stubby arms and legs). Keep EXACTLY the same design, colors, thick black outlines, cel shading, proportions and art style in every frame. The icing eyebrows, the bow tie, the two candy buttons and the icing zigzags are in EVERY frame.
+
+ANIMATION: a cheeky JUMPING FLYING KICK in place, facing right (seen from the 3/4 front-right like the attached image). EVERY FRAME MUST LOOK CLEARLY DIFFERENT:
+- Frame 1: standing like the attached image.
+- Frame 2: crouching down, both knees bent, the arms pulled back, the eyebrows pressed down.
+- Frame 3: crouched LOW, ready to jump, the body leaning forward to the right.
+- Frame 4: jumping up, both feet off the ground, the arms swinging up.
+- Frame 5: in the air (only slightly higher in its cell), the front leg pulled up to the chest, the back leg bent.
+- Frame 6: FLYING KICK: the front leg kicking STRAIGHT out to the right, the foot far out in front, the back leg bent under the body, the arms thrown back, the mouth wide open shouting.
+- Frame 7: the kick held fully extended, the body leaning back a little.
+- Frame 8: coming down, the kicking leg pulling back in.
+- Frame 9: landing on both feet, knees bent, the arms out for balance.
+- Frame 10: straightening up, a little wobble.
+- Frame 11: a cheeky pose, one fist raised, still angry.
+- Frame 12: back to standing like frame 1, flowing back into frame 1.
+The head keeps the same angry shouting face facing right in every frame. The icing eyebrows, bow tie and candy buttons are in every frame.
+
+SIZE RULES (strict): the head is EXACTLY THE SAME SIZE in all 12 frames and in all 3 rows. The cookie never gets bigger or closer to the camera. The bottom row must NOT be bigger than the top row.
+
+GRID RULES (strict):
+- Every frame: the SAME gingerbread man, facing right, 3/4 top-down game view, same as the attached image.
+- Same ground line in every frame (except the 2-3 jump frames, which are only slightly higher); the cookie stays in the center of its cell.
+- The cookie fills about 60% of its cell height (leave room on the right for the flying kick).
+- VERY WIDE empty white gaps between all cells and between the rows; no hand, foot or head may touch or come near another cell.
+- Only the 12 frames. No extra poses, no labels.
+
+BACKGROUND: plain pure white (#FFFFFF) everywhere, no grid lines, no frame borders, no ground line, no shadows, no crumbs, no sprinkles, no glow halo, no sticker border, no sparkles, no motion lines, no impact marks, no stars, no text, no letters, no numbers, no watermark.
+QUALITY: ultra high resolution, QHD (2560x1440) or higher, crisp clean lines
+```
