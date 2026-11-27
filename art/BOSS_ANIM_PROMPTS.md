@@ -976,3 +976,71 @@ GRID RULES (strict):
 BACKGROUND: plain pure white (#FFFFFF) everywhere, no grid lines, no frame borders, no ground line, no shadows, no glow halo around the body, no sticker border, no frost beam, no frost breath, no snow, no ice shards flying, no sparkles floating away, no text, no letters, no numbers, no watermark.
 QUALITY: ultra high resolution, QHD (2560x1440) or higher, crisp clean lines
 ```
+
+## B14-① 숲 해골 왕 걷기 — 첨부 `art/boss14_src.png` · ChatGPT용 (걷기·공격은 대화창을 나눠서)
+```
+TASK: one 2D game ANIMATION SPRITE SHEET of the attached boss character: exactly 12 frames arranged in a grid of 4 columns x 3 rows, read left to right, top row first. Wide landscape image (3:2). This is a WALK cycle (not an attack).
+
+CHARACTER: the attached Forest Skeleton King boss (a skeleton made of brown tree wood and bark with green moss patches, a wooden skull with glowing green eyes and a toothy grin, a gold crown with a green gem, broken branch stumps sticking up from both shoulders, dark wood armor with grey metal bands and rivets on the shoulders, forearms, belt and knees, a green scarf and a torn mossy green cape, green vines with small leaves and little pink flowers wrapped around the arms and legs, wooden feet, and a tall twisted root staff in the right-side hand topped by a glowing green mossy skull wrapped in vines). Keep EXACTLY the same design, colors, thick black outlines, cel shading, proportions and art style in every frame. The crown, glowing eyes, shoulder branches, moss, vines, pink flowers, cape and the green-skull root staff are in EVERY frame.
+
+ANIMATION: a slow, creepy, proud MARCHING WALK in place, facing right (seen from the 3/4 front-right like the attached image). THE LEGS MUST CLEARLY MOVE with BIG steps: in every frame the two legs are in a DIFFERENT position, and in the lifting frames the raised foot is clearly HIGH in the air (knee at belt height) with a big empty white gap under it (the "front leg" is the leg on the right side of the picture):
+- Frame 1: standing like the attached image, both feet on the ground.
+- Frame 2: the front leg starts to lift, its knee bending, its heel off the ground.
+- Frame 3: the front leg lifted HIGH, knee up at belt height, foot clearly in the air.
+- Frame 4: the front leg reaching forward, foot still in the air and further to the right.
+- Frame 5: the front foot lands far forward, legs in a wide step; the body dips; the cape blows back.
+- Frame 6: weight moves onto the front leg; the back foot's heel lifts.
+- Frame 7: the back leg starts to lift, its knee bending, its foot off the ground.
+- Frame 8: the back leg lifted HIGH, knee up at belt height, foot clearly in the air.
+- Frame 9: the back leg swinging forward past the front leg, foot in the air.
+- Frame 10: the back foot lands; legs in a wide step the other way; the body dips; the cape blows back.
+- Frame 11: weight shifting back to the middle, both feet on the ground.
+- Frame 12: standing up again, almost like frame 1, flowing back into frame 1.
+The staff stays upright in the right-side hand in every frame and moves forward with the steps (its bottom roots lift off the ground with the steps). The free wooden hand swings opposite to the legs. The torn cape flows differently in each frame. The head stays upright facing right with the same evil grin.
+
+SIZE RULES (strict): the crown and skull are EXACTLY THE SAME SIZE in all 12 frames and in all 3 rows. The bottom row must NOT be bigger than the top row. Never move closer to the camera.
+
+GRID RULES (strict):
+- Every frame: the SAME boss, facing right, 3/4 top-down game view, same as the attached image.
+- Same ground line in every frame; the boss stays in the center of its cell.
+- The boss (including the tall staff) fills about 72% of its cell height.
+- VERY WIDE empty white gaps between all cells and between the rows; no crown, staff, branch, leaf, cape tip, hand or foot may touch or come near another cell.
+- Only the 12 frames. No extra poses, no labels.
+
+BACKGROUND: plain pure white (#FFFFFF) everywhere, no grid lines, no frame borders, no ground line, no shadows, no glow halo around the body, no sticker border, no grass, no roots in the ground, no falling leaves or petals floating away, no bones on the ground, no footprints, no text, no letters, no numbers, no watermark.
+QUALITY: ultra high resolution, QHD (2560x1440) or higher, crisp clean lines
+```
+
+## B14-② 숲 해골 왕 공격 (지팡이에 숲의 힘 모으기 → 땅에 꽂아 뿌리 덫) — 첨부 `art/boss14_src.png` · ChatGPT용 (손은 어깨 아래·머리 바로)
+```
+TASK: one 2D game ANIMATION SPRITE SHEET of the attached boss character: exactly 12 frames arranged in a grid of 4 columns x 3 rows, read left to right, top row first. Wide landscape image (3:2). This is an ATTACK (spell) animation.
+
+CHARACTER: the attached Forest Skeleton King boss (a skeleton made of brown tree wood and bark with green moss patches, a wooden skull with glowing green eyes and a toothy grin, a gold crown with a green gem, broken branch stumps sticking up from both shoulders, dark wood armor with grey metal bands and rivets on the shoulders, forearms, belt and knees, a green scarf and a torn mossy green cape, green vines with small leaves and little pink flowers wrapped around the arms and legs, wooden feet, and a tall twisted root staff in the right-side hand topped by a glowing green mossy skull wrapped in vines). Keep EXACTLY the same design, colors, thick black outlines, cel shading, proportions and art style in every frame. The crown, glowing eyes, shoulder branches, moss, vines, pink flowers, cape and the green-skull root staff are in EVERY frame.
+
+ANIMATION: a ROOT TRAP SPELL in place, facing right. The hands NEVER go above the shoulders, and the head NEVER tilts back: the head and crown stay upright facing right in every frame. Each frame MUST show a DIFFERENT pose, exactly like this:
+- Frame 1: standing like the attached image.
+- Frame 2: both hands grabbing the staff at chest height, knees bending a little.
+- Frame 3: the staff held in front of the chest with both hands, the green skull on top glowing brighter, the vines on the arms starting to wriggle.
+- Frame 4: leaning back a little from the hips (head still upright), the staff pulled back toward the body, the skull glowing bright green, the flowers opening wider.
+- Frame 5: same pose, the vines all over the body glowing light green (maximum power).
+- Frame 6: lifting the staff a little and swinging its bottom end forward and down.
+- Frame 7: the staff's bottom end almost hitting the ground in front, the body leaning forward, knees bent.
+- Frame 8: PLANT: the staff's bottom end stabbed hard into the ground in front, the body crouched low, the cape flying up behind.
+- Frame 9: still crouched holding the planted staff, grinning, the vines on the staff stretching down toward the ground.
+- Frame 10: pulling the staff up from the ground, starting to rise, the glow fading.
+- Frame 11: almost standing up, the staff coming back upright in the right-side hand.
+- Frame 12: standing like frame 1 again, flowing back into frame 1.
+The green glow stays ON the staff skull, the eyes and the vines only.
+
+SIZE RULES (strict): the crown and skull are EXACTLY THE SAME SIZE AND SHAPE in all 12 frames (same width as in frame 1, always upright). Only the arms, staff, cape, vines, glow and body pose change; the boss never gets bigger or closer to the camera. The bottom row must NOT be bigger than the top row.
+
+GRID RULES (strict):
+- Every frame: the SAME boss, facing right, 3/4 top-down game view, same as the attached image.
+- Same ground line in every frame; the boss stays in the center of its cell.
+- The boss (including the staff) fills about 70% of its cell height.
+- VERY WIDE empty white gaps between all cells and between the rows; no crown, staff, branch, leaf, cape tip, hand or foot may touch or come near another cell.
+- Only the 12 frames. No extra poses, no labels.
+
+BACKGROUND: plain pure white (#FFFFFF) everywhere, no grid lines, no frame borders, no ground line, no shadows, no glow halo around the body, no sticker border, no roots coming out of the ground, no grass, no dirt, no holes, no cracks in the ground, no falling leaves or petals floating away, no text, no letters, no numbers, no watermark.
+QUALITY: ultra high resolution, QHD (2560x1440) or higher, crisp clean lines
+```
