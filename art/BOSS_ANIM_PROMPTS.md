@@ -1080,3 +1080,70 @@ GRID RULES (strict):
 BACKGROUND: plain pure white (#FFFFFF) everywhere, no grid lines, no frame borders, no ground line, no shadows, no glow halo around the body, no sticker border, no roots coming out of the ground, no grass, no dirt, no holes, no cracks in the ground, no falling leaves or petals floating away, no text, no letters, no numbers, no watermark.
 QUALITY: ultra high resolution, QHD (2560x1440) or higher, crisp clean lines
 ```
+
+## B15-① 황금 해골 왕 걷기 — 첨부 `art/boss15_src.png` · ChatGPT용 (걷기·공격은 대화창을 나눠서)
+```
+TASK: one 2D game ANIMATION SPRITE SHEET of the attached boss character: exactly 12 frames arranged in a grid of 4 columns x 3 rows, read left to right, top row first. Wide landscape image (3:2). This is a WALK cycle (not an attack).
+
+CHARACTER: the attached Golden Skeleton King boss (a shiny gold skeleton with glowing red eyes and a toothy grin, a big gold crown with red, blue and green gems, ornate gold shoulder armor with red and green gems, a gold collar, gold gauntlets and boots covered in colorful gems, a long red cape with ornate gold trim, gold feet, and a gold scepter in the right-side hand topped by a gold skull covered in gems). Keep EXACTLY the same design, colors, thick black outlines, cel shading, proportions and art style in every frame. The crown, red eyes, gems, red cape and the gold skull scepter are in EVERY frame.
+
+ANIMATION: a slow, proud, royal MARCHING WALK in place, facing right (seen from the 3/4 front-right like the attached image). THE LEGS MUST CLEARLY MOVE with BIG steps: in every frame the two legs are in a DIFFERENT position, and in the lifting frames the raised foot is clearly HIGH in the air (knee at belt height) with a big empty white gap under it (the "front leg" is the leg on the right side of the picture):
+- Frame 1: standing like the attached image, both feet on the ground.
+- Frame 2: the front leg starts to lift, its bony knee bending, its heel off the ground.
+- Frame 3: the front leg lifted HIGH, knee up at belt height, foot clearly in the air.
+- Frame 4: the front leg reaching forward, foot still in the air and further to the right.
+- Frame 5: the front foot lands far forward, legs in a wide step; the body dips; the cape blows back.
+- Frame 6: weight moves onto the front leg; the back foot's heel lifts.
+- Frame 7: the back leg starts to lift, its knee bending, its foot off the ground.
+- Frame 8: the back leg lifted HIGH, knee up at belt height, foot clearly in the air.
+- Frame 9: the back leg swinging forward past the front leg, foot in the air.
+- Frame 10: the back foot lands; legs in a wide step the other way; the body dips; the cape blows back.
+- Frame 11: weight shifting back to the middle, both feet on the ground.
+- Frame 12: standing up again, almost like frame 1, flowing back into frame 1.
+The scepter stays upright in the right-side hand in every frame and moves forward with the steps. The free gold fist swings opposite to the legs. The red cape flows differently in each frame. The head stays upright facing right with the same evil grin.
+
+SIZE RULES (strict): the crown and skull are EXACTLY THE SAME SIZE in all 12 frames and in all 3 rows. The bottom row must NOT be bigger than the top row. Never move closer to the camera.
+
+GRID RULES (strict):
+- Every frame: the SAME boss, facing right, 3/4 top-down game view, same as the attached image.
+- Same ground line in every frame; the boss stays in the center of its cell.
+- The boss (including the scepter and cape) fills about 72% of its cell height.
+- VERY WIDE empty white gaps between all cells and between the rows; no crown, scepter, cape tip, hand or foot may touch or come near another cell.
+- Only the 12 frames. No extra poses, no labels.
+
+BACKGROUND: plain pure white (#FFFFFF) everywhere, no grid lines, no frame borders, no ground line, no shadows, no glow halo around the body, no sticker border, no sparkles or shine stars floating around, no coins, no bones on the ground, no footprints, no text, no letters, no numbers, no watermark.
+QUALITY: ultra high resolution, QHD (2560x1440) or higher, crisp clean lines
+```
+
+## B15-② 황금 해골 왕 공격 (로켓 펀치: 주먹 뒤로 당기기 → 쭉 내지르기, 홀은 다른 손에) — 첨부 `art/boss15_src.png` · ChatGPT용 (팔은 가슴 높이·머리 바로)
+```
+TASK: one 2D game ANIMATION SPRITE SHEET of the attached boss character: exactly 12 frames arranged in a grid of 4 columns x 3 rows, read left to right, top row first. Wide landscape image (3:2). This is an ATTACK animation with BIG, VERY DIFFERENT poses.
+
+CHARACTER: the attached Golden Skeleton King boss (a shiny gold skeleton with glowing red eyes and a toothy grin, a big gold crown with red, blue and green gems, ornate gold shoulder armor with red and green gems, a gold collar, gold gauntlets and boots covered in colorful gems, a long red cape with ornate gold trim, gold feet, and a gold scepter topped by a gold skull covered in gems). Keep EXACTLY the same design, colors, thick black outlines, cel shading, proportions and art style in every frame. The crown, red eyes, gems, red cape and the gold skull scepter are in EVERY frame.
+
+ANIMATION: a big straight ROCKET PUNCH with the free gold fist (the left-side fist in the attached image), facing right. The scepter stays in the other hand, held upright beside the body in every frame. The fists NEVER go above the shoulders, and the head NEVER tilts back: the head and crown stay upright facing right in every frame. EVERY FRAME MUST LOOK CLEARLY DIFFERENT:
+- Frame 1: standing like the attached image.
+- Frame 2: the body twists back to the left, the punching fist starts pulling back at chest height.
+- Frame 3: the punching fist pulled FAR back behind the body at chest height, clenched tight; knees bent low.
+- Frame 4: same wound-up pose, the gems on the punching gauntlet glowing brighter, teeth clenched.
+- Frame 5: still wound up, the back foot digs in, the whole punching arm glowing gold (maximum charge).
+- Frame 6: the body turning forward, the punching fist swinging forward at chest height.
+- Frame 7: the punching arm shooting forward, halfway straight, the body leaning right.
+- Frame 8: FULL PUNCH: the punching arm completely straight to the right at chest height, the gold fist far out in front, the body leaning far forward, the front foot stepped forward, the jaw wide open shouting.
+- Frame 9: the punch held fully extended, the cape flying back.
+- Frame 10: the punching arm starts pulling back, the body straightening.
+- Frame 11: both arms coming back, the knees straightening.
+- Frame 12: back to standing like frame 1, flowing back into frame 1.
+
+SIZE RULES (strict): the crown and skull are EXACTLY THE SAME SIZE AND SHAPE in all 12 frames (same width as in frame 1, always upright). Only the arms, legs, body lean and cape change; the boss never gets bigger or closer to the camera. The bottom row must NOT be bigger than the top row.
+
+GRID RULES (strict):
+- Every frame: the SAME boss, facing right, 3/4 top-down game view, same as the attached image.
+- Same ground line in every frame; the boss stays in the center of its cell.
+- The boss fills about 70% of its cell height (leave room on the right for the long straight punch).
+- VERY WIDE empty white gaps between all cells and between the rows; no crown, scepter, fist, cape tip or foot may touch or come near another cell.
+- Only the 12 frames. No extra poses, no labels.
+
+BACKGROUND: plain pure white (#FFFFFF) everywhere, no grid lines, no frame borders, no ground line, no shadows, no glow halo around the body, no sticker border, no fire, no smoke, no speed lines, no impact marks, no sparkles or coins floating around, no text, no letters, no numbers, no watermark.
+QUALITY: ultra high resolution, QHD (2560x1440) or higher, crisp clean lines
+```
