@@ -1214,3 +1214,5 @@ GRID RULES (strict):
 BACKGROUND: plain pure white (#FFFFFF) everywhere, no grid lines, no frame borders, no ground line, no shadows, no glow halo around the body, no sticker border, no shockwaves, no dust, no impact marks, no cracks, no drips or droplets flying away from the body, no sparkles, no text, no letters, no numbers, no watermark.
 QUALITY: ultra high resolution, QHD (2560x1440) or higher, crisp clean lines
 ```
+
+## BF-②-G 최종 보스 공격 제미나이용 — BF-②에서 "Wide landscape image (3:2)." 문장을 빼고 TASK 아래에 GEMINI CORNER 문단을 넣은 것 (나머지 문단은 BF-②와 똑같음)
