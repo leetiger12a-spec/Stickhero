@@ -1181,3 +1181,36 @@ GRID RULES (strict):
 BACKGROUND: plain pure white (#FFFFFF) everywhere, no grid lines, no frame borders, no ground line, no shadows, no glow halo around the body, no sticker border, no slime trail, no drips or droplets flying away from the body, no sparkles, no text, no letters, no numbers, no watermark.
 QUALITY: ultra high resolution, QHD (2560x1440) or higher, crisp clean lines
 ```
+
+## BF-② 최종 보스(슬라임 대왕) 공격 (뛰어올라 홀로 쿵!) — 첨부 `art/boss_final_src.png` · ChatGPT용 (홀은 모든 칸에서 오른쪽 손에)
+```
+TASK: one 2D game ANIMATION SPRITE SHEET of the attached boss character: exactly 12 frames arranged in a grid of 4 columns x 3 rows, read left to right, top row first. Wide landscape image (3:2). This is an ATTACK animation with BIG, VERY DIFFERENT poses.
+
+CHARACTER: the attached Final Boss Slime Emperor (a huge glossy magenta-pink slime with no legs, glowing yellow-orange angry eyes and a wide grin full of sharp white teeth, a big gold crown with red gems and gold balls on its points, huge gold shoulder armor with red gems, a gold collar with red gems, a dark belt with gold studs and a red-and-gold crown banner hanging in front, a red cape with a white fur trim with black spots over both shoulders, a pink slime claw hand on the left side, and a pink slime hand on the right side holding a gold scepter topped by a big red crystal). Keep EXACTLY the same design, colors, thick black outlines, cel shading, proportions and art style in every frame. The crown, the eyes, the teeth, the fur cape, the belt banner and the red crystal scepter are in EVERY frame.
+
+ANIMATION: a big JUMP AND SLAM in place, facing right. THE SCEPTER IS ALWAYS HELD IN THE RIGHT-SIDE HAND, IN ALL 12 FRAMES (never dropped, never missing). The head and crown stay upright in every frame. EVERY FRAME MUST LOOK CLEARLY DIFFERENT:
+- Frame 1: round ready shape like the attached image.
+- Frame 2: squashing down, lower and wider, the claw hand pressed on the ground, eyes narrowing.
+- Frame 3: SQUASHED very low and wide, gathering power, the scepter crystal starting to glow red.
+- Frame 4: springing up, the body stretching tall and thin, the puddle bottom leaving the ground.
+- Frame 5: in the air, the body round, the scepter raised high in the right-side hand (the crystal just above the crown), the claw hand raised, the mouth wide open roaring (draw the boss only a little higher in its cell, keep it inside the cell).
+- Frame 6: at the top of the jump, the same raised pose, the fur cape floating up.
+- Frame 7: falling down, the body stretching downward, the scepter swinging down in front of the body.
+- Frame 8: SLAMMING onto the ground: the body squashed extremely flat and wide, the scepter smashed down on the ground in front, the claw hand slapping the ground, the puddle splashing out wide.
+- Frame 9: still flat, wobbling, grinning, the scepter still on the ground.
+- Frame 10: starting to rise, the scepter lifted back up beside the body.
+- Frame 11: almost round again, small wobbles.
+- Frame 12: back to the round ready shape, almost like frame 1, flowing back into frame 1.
+
+SIZE RULES (strict): the crown and the face are EXACTLY THE SAME SIZE in all 12 frames and in all 3 rows. Only the body squashes and stretches; the boss never gets bigger or closer to the camera. The bottom row must NOT be bigger than the top row.
+
+GRID RULES (strict):
+- Every frame: the SAME boss, facing right, 3/4 top-down game view, same as the attached image.
+- Same ground line in every frame (except the 2-3 air frames, which are only slightly higher); the boss stays in the center of its cell.
+- The boss fills about 60% of its cell height (leave room for the raised scepter and the wide slam).
+- VERY WIDE empty white gaps between all cells and between the rows; no crown, scepter, cape tip, claw or puddle may touch or come near another cell.
+- Only the 12 frames. No extra poses, no labels.
+
+BACKGROUND: plain pure white (#FFFFFF) everywhere, no grid lines, no frame borders, no ground line, no shadows, no glow halo around the body, no sticker border, no shockwaves, no dust, no impact marks, no cracks, no drips or droplets flying away from the body, no sparkles, no text, no letters, no numbers, no watermark.
+QUALITY: ultra high resolution, QHD (2560x1440) or higher, crisp clean lines
+```
