@@ -10,7 +10,7 @@ const { chromium } = require('/opt/node22/lib/node_modules/playwright');
   const r = await page.evaluate(async () => { const G = SH.G; G.p.hp = G.p.maxHp = 1e9; G.st.arenaRule = null; const g0 = makeEnemy('grunt', 0, 0).gold; G.st.arenaRule = 'eclipse'; const g1 = makeEnemy('grunt', 0, 0).gold;
     let dark = 0; const f = CanvasRenderingContext2D.prototype.createRadialGradient; CanvasRenderingContext2D.prototype.createRadialGradient = function () { dark++; return f.apply(this, arguments); };
     G.st.acc = 6; await new Promise(q => setTimeout(q, 1500)); CanvasRenderingContext2D.prototype.createRadialGradient = f; return { g0, g1, dark, n: Object.keys(ARENA_RULES).length }; });
-  console.log(JSON.stringify(r)); check(r.g1 === Math.ceil(r.g0 * 2) && r.dark > 10 && r.n === 7, 'eclipse wave');
+  console.log(JSON.stringify(r)); check(r.g1 === Math.ceil(r.g0 * 2) && r.dark > 10 && r.n === 8, 'eclipse wave');
   await page.screenshot({ path: `${OUT}/b344_eclipse.png` });
   await b.close(); console.log('ERRORS:', errors.length); errors.forEach(e => console.log(e)); process.exit(errors.length ? 1 : 0);
 })();
