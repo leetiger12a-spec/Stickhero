@@ -257,3 +257,4 @@ STYLE: cartoon fantasy game art, clean shapes, soft cel shading, matching the at
 FORMAT: square image, the pattern fills the whole image edge to edge, no border, no frame, no text, no letters, no numbers, no watermark.
 QUALITY: ultra high resolution, QHD (2560x1440) or higher, crisp clean lines
 ```
+### T-①-G 소품 시트 제미나이용 — T-①에서 "Wide landscape image (3:2)." 문장을 빼고 TASK 아래에 GEMINI CORNER 문단(art/BOSS_ANIM_PROMPTS.md)을 넣은 것. 바닥 무늬(T-②·③)는 제미나이 ✦ 표시가 타일마다 반복되므로 ChatGPT로만 만든다.
