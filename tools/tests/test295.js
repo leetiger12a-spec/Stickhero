@@ -10,7 +10,7 @@ const { chromium } = require('/opt/node22/lib/node_modules/playwright');
     const r = await page.evaluate(async () => { const G = SH.G; G.p.hp = G.p.maxHp = 1e9; const seen = new Set(), d = CanvasRenderingContext2D.prototype.drawImage;
       const names = ['tf_wall', 'tf_wall_top', 'tf_wall_boss', 'tf_wall_boss_top', 'tf_brazier', 'tf_banner', 'tf_banner_boss', 'tf_circle'];
       CanvasRenderingContext2D.prototype.drawImage = function (img) { for (const n of names) if (img === SPR[n]) seen.add(n); return d.apply(this, arguments); };
-      await new Promise(q => setTimeout(q, 800)); CanvasRenderingContext2D.prototype.drawImage = d; if (TF_CA.some(Boolean)) seen.add('tf_circle'); return { pat: !!TEX.tower, seen: [...seen], tower: G.st && G.st.tower, loaded: names.every(n => SPR[n]) }; });
+      await new Promise(q => setTimeout(q, 800)); CanvasRenderingContext2D.prototype.drawImage = d; if (TF_CA.some(Boolean)) seen.add('tf_circle'); return { pat: !!TEX.tower && !!TEX.tower_boss, seen: [...seen], tower: G.st && G.st.tower, loaded: names.every(n => SPR[n]) }; });
     await ctx.close(); return r; };
   const a = await run(4), bo = await run(10);
   console.log(JSON.stringify(a), JSON.stringify(bo));
