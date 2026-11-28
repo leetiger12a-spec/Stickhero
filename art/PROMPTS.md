@@ -384,3 +384,19 @@ STYLE: bright cartoon fantasy game art matching the attached images: thick clean
 BACKGROUND: plain pure white (#FFFFFF) everywhere, no wall behind the banner, no ground, no cast shadows, no frame, no sticker border, no other objects, no sparkle marks or star symbols in the corners, no text, no letters, no numbers, no watermark.
 QUALITY: ultra high resolution, QHD (2560x1440) or higher, crisp clean lines
 ```
+
+#### G5-P 보스 깃발 (픽스버스용) → `img/tf_banner_boss.webp` · 첨부 3장: `art/ref/tower_ref.png` + `art/ref/STYLE_MASTER.png` + `art/tf_banner_src.png`(G4 결과, ✦ 없음)
+```
+TASK: ONE single game prop illustration: a BOSS BANNER for the boss floors of a legendary magic sky tower in a top-down 2D action game. Only this one item. Make it look premium, dramatic and menacing, like a high-end mobile RPG.
+
+LAYOUT (very important): the item is SMALL and sits in the LOWER-LEFT-CENTER part of the image: it fills only about 65% of the image height. Leave a big EMPTY pure white margin along the TOP edge (the top 20% of the image height) and along the RIGHT edge (the right 20% of the image width). The TOP-RIGHT CORNER of the image (the right 35% of the width x the top 25% of the height) must be COMPLETELY EMPTY white, with no part of the item in it. Also leave an empty white margin along the left and bottom edges: the whole item must be fully inside the image.
+
+SAME SHAPE AS THE THIRD ATTACHED IMAGE: exactly the same banner shape, size and layout as the third attached banner (gold rod with round end caps and two gold tassels, gold borders with gems at the corners, a big emblem in the middle, a swallow-tail bottom edge with gold fringe). Only the colors and the emblem change as described below.
+
+ITEM: deep crimson red velvet cloth with black and gold embroidered borders, small glowing red gems at the corners of the border (instead of cyan), and in the middle a big emblem: a shiny gold crown sitting on top of a white bone skull, on a glowing dark-red shield-shaped badge with a gold rim. A few tiny embers glow near the emblem. Hanging straight down.
+
+STYLE: bright cartoon fantasy game art matching the attached images: thick clean dark outlines, bold saturated colors, cel shading with strong highlights, lots of shine, gold trim and glowing gems, chunky cute proportions.
+
+BACKGROUND: plain pure white (#FFFFFF) everywhere, no wall behind the banner, no ground, no cast shadows, no frame, no sticker border, no other objects, no sparkle marks or star symbols in the corners, no text, no letters, no numbers, no watermark.
+QUALITY: ultra high resolution, QHD (2560x1440) or higher, crisp clean lines
+```
