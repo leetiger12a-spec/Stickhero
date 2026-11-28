@@ -258,3 +258,83 @@ FORMAT: square image, the pattern fills the whole image edge to edge, no border,
 QUALITY: ultra high resolution, QHD (2560x1440) or higher, crisp clean lines
 ```
 ### T-①-G 소품 시트 제미나이용 — T-①에서 "Wide landscape image (3:2)." 문장을 빼고 TASK 아래에 GEMINI CORNER 문단(art/BOSS_ANIM_PROMPTS.md)을 넣은 것. 바닥 무늬(T-②·③)는 제미나이 ✦ 표시가 타일마다 반복되므로 ChatGPT로만 만든다.
+
+### T-①-G1~G6 소품 한 개씩 (제미나이용) — 첨부 `art/ref/tower_ref.png` + `art/ref/STYLE_MASTER.png`
+#### G1 → `img/tf_wall.webp`
+```
+TASK: ONE single game prop illustration: a GRAND TOWER WALL SEGMENT for the inside of a legendary magic sky tower in a top-down 2D action game. Only this one item, centered. Tall portrait image (2:3). Make it look premium, glowing and magical, like a high-end mobile RPG.
+
+LAYOUT (very important): the item sits in the CENTER of the image and fills about 70% of the image height. Leave a wide EMPTY pure white margin on all four sides. The BOTTOM-RIGHT CORNER of the image (the right 20% of the width x the bottom 20% of the height) must be COMPLETELY EMPTY white, with no part of the item in it.
+
+ITEM: a TALL vertical piece of tower wall seen from the front, about 1 wide x 2.5 tall: pale lavender-gray stone bricks with polished white marble edges, thick gold trim bands at the top and bottom, a tall arched stained-glass window in the middle glowing with blue, purple and gold light, two small glowing cyan crystals set into the stone, a few green ivy leaves, and a crenellated top with gold caps. The top and bottom edges are straight so the segments can be stacked.
+
+STYLE: bright cartoon fantasy game art matching the attached images: thick clean dark outlines, bold saturated colors, cel shading with strong highlights, lots of shine, gold trim and glowing gems, chunky cute proportions.
+
+BACKGROUND: plain pure white (#FFFFFF) everywhere, no ground, no cast shadows, no frame, no sticker border, no other objects, no text, no letters, no numbers, no watermark.
+QUALITY: ultra high resolution, QHD (2560x1440) or higher, crisp clean lines
+```
+#### G2 → `img/tf_wall_boss.webp`
+```
+TASK: ONE single game prop illustration: a BOSS TOWER WALL SEGMENT for the inside of a legendary magic sky tower in a top-down 2D action game. Only this one item, centered. Tall portrait image (2:3). Make it look premium, glowing and magical, like a high-end mobile RPG.
+
+LAYOUT (very important): the item sits in the CENTER of the image and fills about 70% of the image height. Leave a wide EMPTY pure white margin on all four sides. The BOTTOM-RIGHT CORNER of the image (the right 20% of the width x the bottom 20% of the height) must be COMPLETELY EMPTY white, with no part of the item in it.
+
+ITEM: a TALL vertical piece of tower wall seen from the front, about 1 wide x 2.5 tall: dark obsidian-black stone bricks with glowing red-orange lava cracks, red gems, thick gold trim bands at the top and bottom, a tall arched red stained-glass window with a gold crown, a carved gold skull above the window, and a crenellated top with gold caps. The top and bottom edges are straight so the segments can be stacked.
+
+STYLE: bright cartoon fantasy game art matching the attached images: thick clean dark outlines, bold saturated colors, cel shading with strong highlights, lots of shine, gold trim and glowing gems, chunky cute proportions.
+
+BACKGROUND: plain pure white (#FFFFFF) everywhere, no ground, no cast shadows, no frame, no sticker border, no other objects, no text, no letters, no numbers, no watermark.
+QUALITY: ultra high resolution, QHD (2560x1440) or higher, crisp clean lines
+```
+#### G3 → `img/tf_brazier.webp`
+```
+TASK: ONE single game prop illustration: a MAGIC CRYSTAL BRAZIER for the inside of a legendary magic sky tower in a top-down 2D action game. Only this one item, centered. Tall portrait image (2:3). Make it look premium, glowing and magical, like a high-end mobile RPG.
+
+LAYOUT (very important): the item sits in the CENTER of the image and fills about 70% of the image height. Leave a wide EMPTY pure white margin on all four sides. The BOTTOM-RIGHT CORNER of the image (the right 20% of the width x the bottom 20% of the height) must be COMPLETELY EMPTY white, with no part of the item in it.
+
+ITEM: a tall ornate gold and dark-iron standing brazier on a round stone base, holding a big glowing crystal that burns with a swirling magic flame in purple, pink and cyan, tiny sparkles floating up. Standing upright, seen from the front.
+
+STYLE: bright cartoon fantasy game art matching the attached images: thick clean dark outlines, bold saturated colors, cel shading with strong highlights, lots of shine, gold trim and glowing gems, chunky cute proportions.
+
+BACKGROUND: plain pure white (#FFFFFF) everywhere, no ground, no cast shadows, no frame, no sticker border, no other objects, no text, no letters, no numbers, no watermark.
+QUALITY: ultra high resolution, QHD (2560x1440) or higher, crisp clean lines
+```
+#### G4 → `img/tf_banner.webp`
+```
+TASK: ONE single game prop illustration: a ROYAL TOWER BANNER for the inside of a legendary magic sky tower in a top-down 2D action game. Only this one item, centered. Tall portrait image (2:3). Make it look premium, glowing and magical, like a high-end mobile RPG.
+
+LAYOUT (very important): the item sits in the CENTER of the image and fills about 70% of the image height. Leave a wide EMPTY pure white margin on all four sides. The BOTTOM-RIGHT CORNER of the image (the right 20% of the width x the bottom 20% of the height) must be COMPLETELY EMPTY white, with no part of the item in it.
+
+ITEM: a long hanging tapestry banner on a gold rod with gold tassels: deep royal purple cloth with gold embroidered borders and a big glowing white-gold star emblem with a small tower in it. Hanging straight down, slightly waving at the bottom.
+
+STYLE: bright cartoon fantasy game art matching the attached images: thick clean dark outlines, bold saturated colors, cel shading with strong highlights, lots of shine, gold trim and glowing gems, chunky cute proportions.
+
+BACKGROUND: plain pure white (#FFFFFF) everywhere, no ground, no cast shadows, no frame, no sticker border, no other objects, no text, no letters, no numbers, no watermark.
+QUALITY: ultra high resolution, QHD (2560x1440) or higher, crisp clean lines
+```
+#### G5 → `img/tf_banner_boss.webp`
+```
+TASK: ONE single game prop illustration: a BOSS BANNER for the inside of a legendary magic sky tower in a top-down 2D action game. Only this one item, centered. Tall portrait image (2:3). Make it look premium, glowing and magical, like a high-end mobile RPG.
+
+LAYOUT (very important): the item sits in the CENTER of the image and fills about 70% of the image height. Leave a wide EMPTY pure white margin on all four sides. The BOTTOM-RIGHT CORNER of the image (the right 20% of the width x the bottom 20% of the height) must be COMPLETELY EMPTY white, with no part of the item in it.
+
+ITEM: a long hanging tapestry banner on a gold rod with gold tassels: crimson red cloth with black and gold borders and a big gold crown and skull emblem. Hanging straight down, slightly waving at the bottom.
+
+STYLE: bright cartoon fantasy game art matching the attached images: thick clean dark outlines, bold saturated colors, cel shading with strong highlights, lots of shine, gold trim and glowing gems, chunky cute proportions.
+
+BACKGROUND: plain pure white (#FFFFFF) everywhere, no ground, no cast shadows, no frame, no sticker border, no other objects, no text, no letters, no numbers, no watermark.
+QUALITY: ultra high resolution, QHD (2560x1440) or higher, crisp clean lines
+```
+#### G6 → `img/tf_circle.webp`
+```
+TASK: ONE single game prop illustration: a LEGENDARY MAGIC CIRCLE for the inside of a legendary magic sky tower in a top-down 2D action game. Only this one item, centered. Square image (1:1). Make it look premium, glowing and magical, like a high-end mobile RPG.
+
+LAYOUT (very important): the item sits in the CENTER of the image and fills about 70% of the image height. Leave a wide EMPTY pure white margin on all four sides. The BOTTOM-RIGHT CORNER of the image (the right 20% of the width x the bottom 20% of the height) must be COMPLETELY EMPTY white, with no part of the item in it.
+
+ITEM: a flat glowing magic circle seen straight from above (top-down, perfectly round, NOT tilted), very detailed: three layered rings of glowing violet and cyan light, a six-pointed star, a smaller inner ring of runes, tiny glowing gems at the star points, sparkles. Only glowing lines and runes: NO filled background disc, the white paper must show through between the lines.
+
+STYLE: bright cartoon fantasy game art matching the attached images: thick clean dark outlines, bold saturated colors, cel shading with strong highlights, lots of shine, gold trim and glowing gems, chunky cute proportions.
+
+BACKGROUND: plain pure white (#FFFFFF) everywhere, no ground, no cast shadows, no frame, no sticker border, no other objects, no text, no letters, no numbers, no watermark.
+QUALITY: ultra high resolution, QHD (2560x1440) or higher, crisp clean lines
+```
