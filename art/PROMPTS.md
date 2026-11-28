@@ -400,3 +400,18 @@ STYLE: bright cartoon fantasy game art matching the attached images: thick clean
 BACKGROUND: plain pure white (#FFFFFF) everywhere, no wall behind the banner, no ground, no cast shadows, no frame, no sticker border, no other objects, no sparkle marks or star symbols in the corners, no text, no letters, no numbers, no watermark.
 QUALITY: ultra high resolution, QHD (2560x1440) or higher, crisp clean lines
 ```
+
+#### G6-P 전설의 마법진 (픽스버스용, 검은 배경) → `img/tf_circle.webp` · 첨부 2장: `art/ref/tower_ref.png` + `art/ref/STYLE_MASTER.png`
+검은 배경으로 받아 게임에서 "빛 더하기(lighter)"로 그림 → 검은색은 안 보이고 빛나는 선만 남음 (흰 배경 지우기를 하면 흰 빛이 잘려 나감)
+```
+TASK: ONE single game effect illustration: a LEGENDARY MAGIC CIRCLE that glows on the floor of a legendary magic sky tower in a top-down 2D action game. Only this one item. Make it look premium, glowing and magical, like a high-end mobile RPG.
+
+LAYOUT (very important): the circle is SMALL and sits in the LOWER-LEFT-CENTER part of the image: its diameter is about 65% of the image height. Leave a big EMPTY pure black margin along the TOP edge (the top 20% of the image height) and along the RIGHT edge (the right 20% of the image width). The TOP-RIGHT CORNER of the image (the right 35% of the width x the top 25% of the height) must be COMPLETELY EMPTY black, with nothing in it. The whole circle must be fully inside the image.
+
+ITEM: a flat magic circle seen STRAIGHT FROM ABOVE (top-down, perfectly round, NOT tilted, NOT in perspective), very detailed and symmetrical: an outer thick ring and a thin ring of glowing violet light with a band of small glowing rune symbols between them, a large six-pointed star made of two glowing triangles, a smaller inner ring of cyan runes, a small glowing circle in the very center, tiny bright gems glowing at the six star points, and a few small sparkles. All lines are made of bright glowing light in violet, magenta and cyan, with a soft glow around the lines.
+
+STYLE: bright fantasy game effect art, crisp clean glowing lines, matching the bright colors of the attached images.
+
+BACKGROUND: solid pure black (#000000) everywhere, including inside the circle between the lines. No floor, no stone, no texture, no filled disc, no frame, no text, no letters, no numbers, no watermark.
+QUALITY: ultra high resolution, QHD (2560x1440) or higher, crisp clean lines
+```
