@@ -370,3 +370,17 @@ STYLE: bright cartoon fantasy game art matching the attached images: thick clean
 BACKGROUND: plain pure white (#FFFFFF) everywhere, no ground, no cast shadows, no frame, no sticker border, no other objects, no sparkle marks or star symbols in the corners, no text, no letters, no numbers, no watermark.
 QUALITY: ultra high resolution, QHD (2560x1440) or higher, crisp clean lines
 ```
+
+#### G4-P 왕실 깃발 (픽스버스용) → `img/tf_banner.webp` · 첨부 2장: `art/ref/tower_ref.png` + `art/ref/STYLE_MASTER.png`
+```
+TASK: ONE single game prop illustration: a ROYAL TOWER BANNER for the inside of a legendary magic sky tower in a top-down 2D action game. Only this one item. Make it look premium, rich and magical, like a high-end mobile RPG.
+
+LAYOUT (very important): the item is SMALL and sits in the LOWER-LEFT-CENTER part of the image: it fills only about 65% of the image height. Leave a big EMPTY pure white margin along the TOP edge (the top 20% of the image height) and along the RIGHT edge (the right 20% of the image width). The TOP-RIGHT CORNER of the image (the right 35% of the width x the top 25% of the height) must be COMPLETELY EMPTY white, with no part of the item in it. Also leave an empty white margin along the left and bottom edges: the whole item must be fully inside the image.
+
+ITEM: a long hanging tapestry banner seen from the front, about 1 wide x 2.5 tall, hanging from a short horizontal gold rod with round gold end caps and two gold tassels. Deep royal purple velvet cloth with thick gold embroidered borders, a big glowing white-gold star emblem in the middle with a small silver tower inside the star, small cyan gems at the corners of the border, and a pointed swallow-tail bottom edge with gold fringe, the bottom slightly waving. Hanging straight down.
+
+STYLE: bright cartoon fantasy game art matching the attached images: thick clean dark outlines, bold saturated colors, cel shading with strong highlights, lots of shine, gold trim and glowing gems, chunky cute proportions.
+
+BACKGROUND: plain pure white (#FFFFFF) everywhere, no wall behind the banner, no ground, no cast shadows, no frame, no sticker border, no other objects, no sparkle marks or star symbols in the corners, no text, no letters, no numbers, no watermark.
+QUALITY: ultra high resolution, QHD (2560x1440) or higher, crisp clean lines
+```
