@@ -19,7 +19,7 @@ const { chromium } = require('/opt/node22/lib/node_modules/playwright');
   check(await page.evaluate(() => { ST.wk = { pistol: 2100, ice: 99 }; return wMaster('pistol') === 3 && wMaster('ice') === 0 && wMaster('xbow') === 0; }), 'mastery stars');
   await page.evaluate(() => { checkAch(); togglePause(); openEvo(); }); await page.waitForTimeout(200);
   const t = await page.evaluate(() => [...document.querySelectorAll('.master')].map(e => e.textContent)); console.log(t.slice(0, 3).join(' | '));
-  check(t.length === 10 && t.some(x => x.includes('★★★☆☆') && x.includes('2,100')), 'not in evo dex');
+  check(t.length === 11 && t.some(x => x.includes('★★★☆☆') && x.includes('2,100')), 'not in evo dex');
   check(await page.evaluate(() => (JSON.parse(localStorage.getItem('stickhero_meta')).st || {}).wk.pistol === 2100), 'not saved');
   await page.screenshot({ path: `${OUT}/b149_master.png` });
   console.log(errors.length ? 'ERRORS:\n' + errors.join('\n') : 'OK');

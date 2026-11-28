@@ -7,7 +7,7 @@ const { chromium } = require('/opt/node22/lib/node_modules/playwright');
   const page = await ctx.newPage(); const OUT = process.env.OUT || 'shots';
   page.on('pageerror', e => errors.push(e.message)); page.on('console', m => { if (m.type() === 'error') errors.push(m.text()); });
   await page.goto('http://localhost:8765/index.html'); await page.waitForTimeout(900); await page.click('#bStart'); await page.waitForTimeout(400);
-  const n = await page.evaluate(() => PROJ_IMG.filter(k => WICON[k]).length); console.log('proj images', n); check(n === 8, 'proj images not 8');
+  const n = await page.evaluate(() => PROJ_IMG.filter(k => WICON[k]).length); console.log('proj images', n); check(n === 10, 'proj images not 8');
   // 멈춘 총알을 영웅 둘레에 늘어놓고 한 프레임에 그려진 그림 세기
   const seen = await page.evaluate(async () => {
     const G = SH.G, p = G.p; G.nextBoss = 999; G.nextWave = 999; G.spawnAcc = -1e9; G.enemies = []; p.inv = 0; p.hp = p.maxHp = 1e6;   /* inv를 크게 하면 화면이 빨갛게 덮임 */

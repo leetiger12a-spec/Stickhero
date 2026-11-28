@@ -8,6 +8,6 @@ const { chromium } = require('/opt/node22/lib/node_modules/playwright');
   await page.goto('http://localhost:8765/index.html'); await page.waitForTimeout(900); await page.click('#bStart'); await page.waitForTimeout(400);
   const r = await page.evaluate(() => { const ids = ['fnt10', 'bounty10', 'ghostel10'], m0 = readJSON('stickhero_meta') || {}, before = ids.map(i => !!(m0.ach || {})[i]); checkAch(); const m1 = readJSON('stickhero_meta') || {}, early = ids.map(i => !!(m1.ach || {})[i]);
     ST.fountains = 10; ST.bounties = 10; ST.ghostElites = 10; checkAch(); const m = readJSON('stickhero_meta') || {}; return { n: ACH.length, early, got: ids.map(i => !!(m.ach || {})[i]) }; });
-  console.log(JSON.stringify(r)); check(r.n === 83 && r.early.every(x => !x) && r.got.every(x => x), 'new achievements');
+  console.log(JSON.stringify(r)); check(r.n === 87 && r.early.every(x => !x) && r.got.every(x => x), 'new achievements');
   await b.close(); console.log('ERRORS:', errors.length); errors.forEach(e => console.log(e)); process.exit(errors.length ? 1 : 0);
 })();
