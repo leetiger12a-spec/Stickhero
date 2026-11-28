@@ -189,3 +189,25 @@ OUTPUT: 1 second long, 24 frames (24 fps), looping. Export as an animated GIF on
 
 ## 👑 보스 새 그림체 (Build 224~, 제미나이, 한 번에 1마리)
 첨부: `art/ref/STYLE_MONSTERS.png` 1장만 (옛 그림 첨부 금지). `THE NEW BOSS:` 줄만 바꿈. 목록은 대화 답변의 표 참고 (boss0~5, boss_final 먼저).
+
+## 🌪 새 무기 "바람 부채" 그림 4개 (한 장 시트) — 첨부 `art/ref/STYLE_MASTER.png` · ChatGPT용 (Build 394 준비)
+넣는 곳: ① `img/w_fan.webp` ② `img/w_fan_evo.webp` ③ `img/pj_tornado.webp` ④ `img/pj_tornado_evo.webp`
+```
+TASK: one game ITEM SPRITE SHEET with exactly 4 separate items arranged in a grid of 2 columns x 2 rows, read left to right, top row first. Wide landscape image (3:2).
+
+STYLE: the same bright cartoon game-icon style as the attached image: thick clean black outlines, bold saturated colors, cel shading with soft highlights, a little sparkle glow, chunky cute proportions. Each item is drawn as a standalone game icon, seen slightly from the front, NOT inside a frame or badge.
+
+ITEMS:
+1. (top-left) WIND FAN weapon: a magic folding hand fan opened wide like a half circle, made of pale mint-green and white paper panels with thin bamboo-brown ribs, a gold handle with a small round emerald gem, and three small curly white wind swirls coming off the top edge of the fan. Fan tilted about 30 degrees, handle at the bottom-left.
+2. (top-right) EVOLVED TYPHOON FAN: the same fan shape but bigger and more powerful: deep teal and silver panels with glowing cyan patterns, a gold handle with a big glowing cyan crystal, and a strong spiral of cyan wind and tiny leaves swirling around the fan. Same tilt as item 1.
+3. (bottom-left) WHIRLWIND: a small cute cartoon tornado, a funnel of curved pale mint-green and white wind bands, wide at the top and narrow at the bottom, with a few tiny green leaves caught in it. Standing upright.
+4. (bottom-right) BIG TYPHOON: a bigger, stronger cartoon tornado, curved teal and cyan wind bands with glowing cyan edges, small lightning sparks and leaves spinning in it. Standing upright. About 1.3 times taller than item 3.
+
+GRID RULES (strict):
+- Exactly 4 items, each centered in its own quarter of the image, each filling about 65% of its quarter.
+- VERY WIDE empty white gaps between the items; no item may touch or come near another.
+- No labels, no numbers, no text.
+
+BACKGROUND: plain pure white (#FFFFFF) everywhere, no grid lines, no frame borders, no shadows on the ground, no sticker border, no text, no letters, no numbers, no watermark.
+QUALITY: ultra high resolution, QHD (2560x1440) or higher, crisp clean lines
+```
