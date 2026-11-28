@@ -212,26 +212,48 @@ BACKGROUND: plain pure white (#FFFFFF) everywhere, no grid lines, no frame borde
 QUALITY: ultra high resolution, QHD (2560x1440) or higher, crisp clean lines
 ```
 
-## 🗼 무한 탑 안 꾸미기 그림 6개 (한 장 시트) — 첨부 `art/ref/tower_ref.png`(탑 지도 그림) + `art/ref/STYLE_MASTER.png` · ChatGPT용 (Build 395 준비)
-넣는 곳: ① `img/tf_merlon.webp` ② `img/tf_merlon_boss.webp` ③ `img/tf_torch.webp` ④ `img/tf_flag.webp` ⑤ `img/tf_flag_boss.webp` ⑥ `img/tf_circle.webp`
+## 🗼 무한 탑 안 화려하게 (Build 395 준비, 아빠: "넘 허접 · 화려하게") — ChatGPT용 3장 · 첨부 `art/ref/tower_ref.png` + `art/ref/STYLE_MASTER.png`
+### T-① 소품 시트 6개 → `tf_wall` `tf_wall_boss` `tf_brazier` `tf_banner` `tf_banner_boss` `tf_circle`
 ```
-TASK: one game PROP SPRITE SHEET with exactly 6 separate items arranged in a grid of 3 columns x 2 rows, read left to right, top row first. Wide landscape image (3:2). These are decorations for the inside of a magic tower floor in a top-down 2D action game.
+TASK: one game PROP SPRITE SHEET with exactly 6 separate items arranged in a grid of 3 columns x 2 rows, read left to right, top row first. Wide landscape image (3:2). These are EPIC, RICHLY DETAILED decorations for the inside of a legendary magic sky tower in a top-down 2D action game. Make them look premium, glowing and magical, like a high-end mobile RPG.
 
-STYLE: EXACTLY the same cartoon style as the first attached image (the stone tower pieces): light lavender-gray stone bricks with soft highlights, thick clean dark outlines, bold colors, cel shading, chunky cute proportions. Same stone color and brick size as the attached image.
+STYLE: bright cartoon fantasy game art matching the attached images: thick clean dark outlines, bold saturated colors, cel shading with strong highlights, lots of shine, gold trim and glowing gems, chunky cute proportions.
 
 ITEMS:
-1. (top-left) STONE MERLON BLOCK: one single square battlement block (a crenel tooth) of the same lavender-gray stone bricks, seen from the front and slightly from above (3/4 top-down game view), a lighter top face, 2 rows of bricks, about as wide as it is tall.
-2. (top-middle) BOSS MERLON BLOCK: the same block shape, but made of dark maroon-red stone bricks with a small carved gold skull in the middle of the front face.
-3. (top-right) WALL TORCH: a short iron torch post with a round iron bowl on top holding a bright orange-yellow flame, a small round stone base at the bottom. Standing upright, seen from the front.
-4. (bottom-left) TOWER FLAG: a thin silver flag pole with a small gold ball on top and a purple pennant flag with a white star, waving to the right. Standing upright.
-5. (bottom-middle) BOSS FLAG: the same flag pole with a red pennant flag with a gold crown, waving to the right. Standing upright.
-6. (bottom-right) MAGIC CIRCLE: a flat glowing magic circle seen straight from above (top-down, perfectly round, NOT tilted): two thin bright violet rings, a six-pointed star inside, small rune symbols between the rings, a soft violet glow. Mostly see-through: only the glowing lines, no filled background disc.
+1. (top-left) GRAND TOWER WALL SEGMENT: a TALL vertical piece of tower wall seen from the front, about 1 wide x 2.5 tall: pale lavender-gray stone bricks with polished white marble edges, thick gold trim bands at the top and bottom, a tall arched stained-glass window in the middle glowing with blue, purple and gold light, two small glowing cyan crystals set into the stone, a few green ivy leaves, and a crenellated top with gold caps. The top and bottom edges are straight so the segments can be stacked.
+2. (top-middle) BOSS TOWER WALL SEGMENT: the same shape and size, but dark obsidian-black stone with glowing red-orange lava cracks, red gems, gold trim, a red stained-glass window with a gold crown, and a carved gold skull above the window.
+3. (top-right) MAGIC CRYSTAL BRAZIER: a tall ornate gold and dark-iron standing brazier on a round stone base, holding a big glowing crystal that burns with a swirling magic flame in purple, pink and cyan, tiny sparkles floating up. Standing upright.
+4. (bottom-left) ROYAL TOWER BANNER: a long hanging tapestry banner on a gold rod with gold tassels: deep royal purple cloth with gold embroidered borders and a big glowing white-gold star emblem with a small tower in it. Hanging straight down, slightly waving at the bottom.
+5. (bottom-middle) BOSS BANNER: the same banner but crimson red cloth with black and gold borders and a big gold crown and skull emblem.
+6. (bottom-right) LEGENDARY MAGIC CIRCLE: a flat glowing magic circle seen straight from above (top-down, perfectly round, NOT tilted), very detailed: three layered rings of glowing violet and cyan light, a six-pointed star, a smaller rotating inner ring of runes, tiny glowing gems at the star points, sparkles. Only glowing lines and runes on a transparent-looking background: NO filled background disc, the white paper must show through between the lines.
 
 GRID RULES (strict):
-- Exactly 6 items, each centered in its own sixth of the image, each filling about 60% of its cell.
+- Exactly 6 items, each centered in its own sixth of the image, each filling about 70% of its cell height.
 - VERY WIDE empty white gaps between the items; no item may touch or come near another.
 - No labels, no numbers, no text.
 
-BACKGROUND: plain pure white (#FFFFFF) everywhere, no grid lines, no frame borders, no ground, no shadows, no sticker border, no text, no letters, no numbers, no watermark.
+BACKGROUND: plain pure white (#FFFFFF) everywhere, no grid lines, no frame borders, no ground, no cast shadows, no sticker border, no text, no letters, no numbers, no watermark.
+QUALITY: ultra high resolution, QHD (2560x1440) or higher, crisp clean lines
+```
+### T-② 탑 바닥 무늬 (이어 붙이는 타일) → `tf_floor`
+```
+TASK: one SEAMLESS TILEABLE square ground texture for a top-down 2D game, seen straight from above. When the image is repeated left-right and up-down there must be NO visible seams.
+
+CONTENT: the polished floor of a legendary magic sky tower: large smooth pale lavender and cream marble tiles in a neat grid, thin gold inlay lines between the tiles, small glowing cyan gem dots at some tile corners, a few faint star-shaped gold inlays, soft cloudy marble veins. Elegant and bright but calm, so characters standing on it are easy to see. Even lighting, no big single bright spot, no objects, no characters, no shadows of objects.
+
+STYLE: cartoon fantasy game art, clean shapes, soft cel shading, matching the attached images.
+
+FORMAT: square image, the pattern fills the whole image edge to edge, no border, no frame, no text, no letters, no numbers, no watermark.
+QUALITY: ultra high resolution, QHD (2560x1440) or higher, crisp clean lines
+```
+### T-③ 보스 층 바닥 무늬 (이어 붙이는 타일) → `tf_floor_boss`
+```
+TASK: one SEAMLESS TILEABLE square ground texture for a top-down 2D game, seen straight from above. When the image is repeated left-right and up-down there must be NO visible seams.
+
+CONTENT: the floor of a boss chamber at the top of a magic tower: large dark charcoal-purple stone tiles in a neat grid, thin glowing red-orange lava lines between the tiles, small gold rivets at the tile corners, a few faint carved rune marks. Dark and dramatic but not too dark, so characters standing on it are easy to see. Even lighting, no objects, no characters.
+
+STYLE: cartoon fantasy game art, clean shapes, soft cel shading, matching the attached images.
+
+FORMAT: square image, the pattern fills the whole image edge to edge, no border, no frame, no text, no letters, no numbers, no watermark.
 QUALITY: ultra high resolution, QHD (2560x1440) or higher, crisp clean lines
 ```
