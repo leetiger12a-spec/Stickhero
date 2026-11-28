@@ -11,7 +11,7 @@ const { chromium } = require('/opt/node22/lib/node_modules/playwright');
     let strokes = 0; const f = CanvasRenderingContext2D.prototype.stroke; CanvasRenderingContext2D.prototype.stroke = function () { strokes++; return f.apply(this, arguments); };
     G.st.acc = 8; await new Promise(q => setTimeout(q, 1500)); CanvasRenderingContext2D.prototype.stroke = f;
     const types = [...new Set(G.enemies.filter(e => !e.small).map(e => e.type))]; return { types, n: G.enemies.length, snowW: G.enemies.every(e => e.small || e.snowW), slow: !!(G.st.blizOn > 0), rules: Object.keys(ARENA_RULES).length }; });
-  console.log(JSON.stringify(r)); check(r.n >= 4 && r.types.every(t => t === 'e_snowman' || t === 'e_ginger') && r.snowW, 'only winter monsters'); check(!r.slow && r.rules === 8, 'no slow blizzard, 8 rules');
+  console.log(JSON.stringify(r)); check(r.n >= 4 && r.types.every(t => t === 'e_snowman' || t === 'e_ginger') && r.snowW, 'only winter monsters'); check(!r.slow && r.rules === 9, 'no slow blizzard, 9 rules');
   await page.screenshot({ path: `${OUT}/b394_snowwave.png` });
   await b.close(); console.log('ERRORS:', errors.length); errors.forEach(e => console.log(e)); process.exit(errors.length ? 1 : 0);
 })();
