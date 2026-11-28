@@ -446,3 +446,26 @@ STYLE: cartoon fantasy game art, clean shapes, soft cel shading, matching the at
 FORMAT: no text, no letters, no numbers, no watermark.
 QUALITY: ultra high resolution, QHD (2560x1440) or higher, crisp clean lines
 ```
+
+## 🌪 바람 부채 그림 4개 (픽스버스용) — 첨부 `art/ref/STYLE_MASTER.png` + `img/w_star.webp`·`img/w_star_evo.webp` 묶음(`art/ref/weapon_ref.png`)
+```
+TASK: one game ITEM SPRITE SHEET with exactly 4 separate items arranged in a grid of 2 columns x 2 rows, read left to right, top row first.
+
+LAYOUT (very important): the whole 2x2 grid must sit in the LOWER-LEFT part of the image. Leave a big EMPTY pure white margin along the TOP edge (the top 15% of the image height) and along the RIGHT edge (the right 15% of the image width). The TOP-RIGHT CORNER of the image (the right 30% of the width x the top 20% of the height) must be COMPLETELY EMPTY white, with no part of any item in it. Also leave a thin empty white margin along the left and bottom edges.
+
+STYLE: EXACTLY the same bright cartoon weapon-icon style as the first attached image (the weapon icons): thick clean dark outlines, bold saturated colors, cel shading with strong highlights, shine and a little sparkle glow, chunky cute proportions. Each item is drawn as a standalone game icon, NOT inside a frame or badge.
+
+ITEMS:
+1. (top-left) WIND FAN weapon: a magic folding hand fan opened wide like a half circle, pale mint-green and white paper panels with thin bamboo-brown ribs, a gold handle with a small round emerald gem, three small curly white wind swirls coming off the top edge. Tilted about 30 degrees, handle at the bottom-left.
+2. (top-right) EVOLVED TYPHOON FAN: the same fan shape but bigger and more powerful: deep teal and silver panels with glowing cyan patterns, a gold handle with a big glowing cyan crystal, a strong spiral of cyan wind and tiny leaves swirling around it. Same tilt as item 1.
+3. (bottom-left) WHIRLWIND: a small cute cartoon tornado, a funnel of curved pale mint-green and white wind bands, wide at the top and narrow at the bottom, a few tiny green leaves caught in it. Standing upright.
+4. (bottom-right) BIG TYPHOON: a bigger, stronger cartoon tornado, curved teal and cyan wind bands with glowing cyan edges, small lightning sparks and leaves spinning in it. Standing upright, about 1.3 times taller than item 3.
+
+GRID RULES (strict):
+- Exactly 4 items, each centered in its own quarter of the grid, each filling about 65% of its quarter.
+- VERY WIDE empty white gaps between the items; no item may touch or come near another.
+- No labels, no numbers, no text.
+
+BACKGROUND: plain pure white (#FFFFFF) everywhere, no grid lines, no frame borders, no ground, no cast shadows, no sticker border, no text, no letters, no numbers, no watermark.
+QUALITY: ultra high resolution, QHD (2560x1440) or higher, crisp clean lines
+```
