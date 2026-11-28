@@ -355,3 +355,4 @@ STYLE: bright cartoon fantasy game art matching the attached images: thick clean
 BACKGROUND: plain pure white (#FFFFFF) everywhere, no ground, no cast shadows, no frame, no sticker border, no other objects, no text, no letters, no numbers, no watermark.
 QUALITY: ultra high resolution, QHD (2560x1440) or higher, crisp clean lines
 ```
+#### G2-P 보스 성벽 픽스버스용 — G2-수정의 LAYOUT 문단을 "왼쪽 아래 가운데에 작게, 위 20%·오른쪽 20% 비우고 오른쪽 위 35%×25% 완전히 비움"으로 바꾼 것 (픽스버스 워터마크는 오른쪽 위)
