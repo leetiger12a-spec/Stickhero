@@ -430,3 +430,19 @@ STYLE: cartoon fantasy game art, clean shapes, soft cel shading, matching the at
 FORMAT: no text, no letters, no numbers, no watermark.
 QUALITY: ultra high resolution, QHD (2560x1440) or higher, crisp clean lines
 ```
+
+### T-③-P 보스 층 바닥 (픽스버스용) → `tex_tower_boss` · 첨부: `art/ref/tower_ref.png` + `art/ref/STYLE_MASTER.png` + `art/tf_floor_src.png`(T-② 결과, 칸 모양 기준)
+```
+TASK: one SEAMLESS TILEABLE square ground texture tile for a top-down 2D game, seen straight from above. The square tile itself must repeat left-right and up-down with NO visible seams.
+
+LAYOUT (very important): draw the texture ONLY inside ONE SQUARE placed in the LOWER-LEFT part of the image: the square's side is about 75% of the image height, with a small empty white margin on its left and bottom. Everything outside the square is plain pure white. The TOP-RIGHT CORNER of the image (the right 35% of the width x the top 25% of the height) must be COMPLETELY EMPTY white. The square has straight sharp edges, no rounded corners, no border line, no frame, no shadow, no perspective (perfectly flat, seen straight from above).
+
+SAME LAYOUT AS THE THIRD ATTACHED IMAGE: the same 4 x 4 grid of big rounded square tiles with thin gold lines between them and small round gems where the lines cross, the same tile size. Only the materials and colors change as described below.
+
+CONTENT OF THE SQUARE: the floor of a boss chamber at the top of a magic tower: the tiles alternate between dark charcoal-black obsidian and dark plum-purple stone with faint marble veins, thin glowing red-orange lava lines instead of gold between the tiles, small glowing red gems where the lines cross, a few tiny gold skull-shaped inlays on some tiles. Dark and dramatic but not too dark, so characters standing on it are easy to see. Even lighting, no objects, no characters.
+
+STYLE: cartoon fantasy game art, clean shapes, soft cel shading, matching the attached images.
+
+FORMAT: no text, no letters, no numbers, no watermark.
+QUALITY: ultra high resolution, QHD (2560x1440) or higher, crisp clean lines
+```
