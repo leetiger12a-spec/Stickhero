@@ -211,3 +211,27 @@ GRID RULES (strict):
 BACKGROUND: plain pure white (#FFFFFF) everywhere, no grid lines, no frame borders, no shadows on the ground, no sticker border, no text, no letters, no numbers, no watermark.
 QUALITY: ultra high resolution, QHD (2560x1440) or higher, crisp clean lines
 ```
+
+## 🗼 무한 탑 안 꾸미기 그림 6개 (한 장 시트) — 첨부 `art/ref/tower_ref.png`(탑 지도 그림) + `art/ref/STYLE_MASTER.png` · ChatGPT용 (Build 395 준비)
+넣는 곳: ① `img/tf_merlon.webp` ② `img/tf_merlon_boss.webp` ③ `img/tf_torch.webp` ④ `img/tf_flag.webp` ⑤ `img/tf_flag_boss.webp` ⑥ `img/tf_circle.webp`
+```
+TASK: one game PROP SPRITE SHEET with exactly 6 separate items arranged in a grid of 3 columns x 2 rows, read left to right, top row first. Wide landscape image (3:2). These are decorations for the inside of a magic tower floor in a top-down 2D action game.
+
+STYLE: EXACTLY the same cartoon style as the first attached image (the stone tower pieces): light lavender-gray stone bricks with soft highlights, thick clean dark outlines, bold colors, cel shading, chunky cute proportions. Same stone color and brick size as the attached image.
+
+ITEMS:
+1. (top-left) STONE MERLON BLOCK: one single square battlement block (a crenel tooth) of the same lavender-gray stone bricks, seen from the front and slightly from above (3/4 top-down game view), a lighter top face, 2 rows of bricks, about as wide as it is tall.
+2. (top-middle) BOSS MERLON BLOCK: the same block shape, but made of dark maroon-red stone bricks with a small carved gold skull in the middle of the front face.
+3. (top-right) WALL TORCH: a short iron torch post with a round iron bowl on top holding a bright orange-yellow flame, a small round stone base at the bottom. Standing upright, seen from the front.
+4. (bottom-left) TOWER FLAG: a thin silver flag pole with a small gold ball on top and a purple pennant flag with a white star, waving to the right. Standing upright.
+5. (bottom-middle) BOSS FLAG: the same flag pole with a red pennant flag with a gold crown, waving to the right. Standing upright.
+6. (bottom-right) MAGIC CIRCLE: a flat glowing magic circle seen straight from above (top-down, perfectly round, NOT tilted): two thin bright violet rings, a six-pointed star inside, small rune symbols between the rings, a soft violet glow. Mostly see-through: only the glowing lines, no filled background disc.
+
+GRID RULES (strict):
+- Exactly 6 items, each centered in its own sixth of the image, each filling about 60% of its cell.
+- VERY WIDE empty white gaps between the items; no item may touch or come near another.
+- No labels, no numbers, no text.
+
+BACKGROUND: plain pure white (#FFFFFF) everywhere, no grid lines, no frame borders, no ground, no shadows, no sticker border, no text, no letters, no numbers, no watermark.
+QUALITY: ultra high resolution, QHD (2560x1440) or higher, crisp clean lines
+```
