@@ -338,3 +338,20 @@ STYLE: bright cartoon fantasy game art matching the attached images: thick clean
 BACKGROUND: plain pure white (#FFFFFF) everywhere, no ground, no cast shadows, no frame, no sticker border, no other objects, no text, no letters, no numbers, no watermark.
 QUALITY: ultra high resolution, QHD (2560x1440) or higher, crisp clean lines
 ```
+
+#### G2-수정 (G1 결과 반영: 그림이 꽉 차서 ✦가 아래 금띠에 겹침 → 여백 더 강하게, G1 그림 첨부해서 같은 크기·모양) → `img/tf_wall_boss.webp`
+첨부 3장: `art/ref/tower_ref.png` + `art/ref/STYLE_MASTER.png` + `art/tf_wall_src.png`(G1 결과)
+```
+TASK: ONE single game prop illustration: a BOSS TOWER WALL SEGMENT for the boss floors of a legendary magic sky tower in a top-down 2D action game. Only this one item, centered. Tall portrait image (2:3). Make it look premium, glowing and dramatic, like a high-end mobile RPG.
+
+SAME SHAPE AS THE THIRD ATTACHED IMAGE: exactly the same outline, proportions and layout as the third attached wall segment (crenellated top with gold caps, gold band under the top, a tall arched window in the middle, polished edges on the left and right, a gold band at the bottom). Only the materials and colors change as described below.
+
+LAYOUT (very important): the item is SMALLER than the third attached image: it fills only about 70% of the image height and about 60% of the image width, in the CENTER. Leave a wide EMPTY pure white margin on all four sides (at least 15% of the image at the top and at the bottom). The BOTTOM-RIGHT CORNER of the image (the right 25% of the width x the bottom 20% of the height) must be COMPLETELY EMPTY white, with no part of the item in it.
+
+ITEM: dark obsidian-black stone bricks with glowing red-orange lava cracks between some bricks, polished dark red marble edges on the left and right, thick gold trim bands with gold rivets at the top and bottom, a tall arched stained-glass window glowing red and orange with a gold crown in the middle, a small carved gold skull above the window, two glowing red gems set into the stone, a few tiny embers floating near the window, and a crenellated top with gold caps.
+
+STYLE: bright cartoon fantasy game art matching the attached images: thick clean dark outlines, bold saturated colors, cel shading with strong highlights, lots of shine, gold trim and glowing gems.
+
+BACKGROUND: plain pure white (#FFFFFF) everywhere, no ground, no cast shadows, no frame, no sticker border, no other objects, no text, no letters, no numbers, no watermark.
+QUALITY: ultra high resolution, QHD (2560x1440) or higher, crisp clean lines
+```
