@@ -415,3 +415,18 @@ STYLE: bright fantasy game effect art, crisp clean glowing lines, matching the b
 BACKGROUND: solid pure black (#000000) everywhere, including inside the circle between the lines. No floor, no stone, no texture, no filled disc, no frame, no text, no letters, no numbers, no watermark.
 QUALITY: ultra high resolution, QHD (2560x1440) or higher, crisp clean lines
 ```
+
+### T-②-P 탑 바닥 무늬 (픽스버스용) → `tf_floor` · 첨부: `art/ref/tower_ref.png` + `art/ref/STYLE_MASTER.png`
+워터마크(오른쪽 위)를 피해 흰 바탕 왼쪽 아래에 "정사각형 타일 1장"만 그리게 함 → 받으면 그 정사각형만 잘라 씀
+```
+TASK: one SEAMLESS TILEABLE square ground texture tile for a top-down 2D game, seen straight from above. The square tile itself must repeat left-right and up-down with NO visible seams.
+
+LAYOUT (very important): draw the texture ONLY inside ONE SQUARE placed in the LOWER-LEFT part of the image: the square's side is about 75% of the image height, with a small empty white margin on its left and bottom. Everything outside the square is plain pure white. The TOP-RIGHT CORNER of the image (the right 35% of the width x the top 25% of the height) must be COMPLETELY EMPTY white. The square has straight sharp edges, no rounded corners, no border line, no frame, no shadow, no perspective (perfectly flat, seen straight from above).
+
+CONTENT OF THE SQUARE: the polished floor of a legendary magic sky tower: large smooth pale lavender and cream marble tiles in a neat 4 x 4 grid, thin gold inlay lines between the tiles, small glowing cyan gem dots at some tile corners, a few faint star-shaped gold inlays, soft cloudy marble veins. Elegant and bright but calm, so characters standing on it are easy to see. Even lighting, no big single bright spot, no objects, no characters.
+
+STYLE: cartoon fantasy game art, clean shapes, soft cel shading, matching the attached images.
+
+FORMAT: no text, no letters, no numbers, no watermark.
+QUALITY: ultra high resolution, QHD (2560x1440) or higher, crisp clean lines
+```
