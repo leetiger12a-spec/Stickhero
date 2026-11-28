@@ -356,3 +356,17 @@ BACKGROUND: plain pure white (#FFFFFF) everywhere, no ground, no cast shadows, n
 QUALITY: ultra high resolution, QHD (2560x1440) or higher, crisp clean lines
 ```
 #### G2-P 보스 성벽 픽스버스용 — G2-수정의 LAYOUT 문단을 "왼쪽 아래 가운데에 작게, 위 20%·오른쪽 20% 비우고 오른쪽 위 35%×25% 완전히 비움"으로 바꾼 것 (픽스버스 워터마크는 오른쪽 위)
+
+#### G3-P 마법 수정 화로 (픽스버스용) → `img/tf_brazier.webp` · 첨부 2장: `art/ref/tower_ref.png` + `art/ref/STYLE_MASTER.png` (G1·G2는 첨부 안 함 — G1의 ✦ 표시를 G2가 따라 그렸음)
+```
+TASK: ONE single game prop illustration: a MAGIC CRYSTAL BRAZIER for the inside of a legendary magic sky tower in a top-down 2D action game. Only this one item. Make it look premium, glowing and magical, like a high-end mobile RPG.
+
+LAYOUT (very important): the item is SMALL and sits in the LOWER-LEFT-CENTER part of the image: it fills only about 65% of the image height. Leave a big EMPTY pure white margin along the TOP edge (the top 20% of the image height) and along the RIGHT edge (the right 20% of the image width). The TOP-RIGHT CORNER of the image (the right 35% of the width x the top 25% of the height) must be COMPLETELY EMPTY white, with no part of the item in it. Also leave an empty white margin along the left and bottom edges: the whole item, including its base, must be fully inside the image.
+
+ITEM: a tall ornate standing brazier seen from the front: a round stepped stone base with gold trim, a slim twisted dark-iron and gold pole, and on top a wide gold bowl with small red gems around its rim. In the bowl sits a big glowing violet crystal that burns with a swirling magic flame in purple, pink and cyan, with tiny sparkles and small glowing embers floating up just above the flame. Standing perfectly upright.
+
+STYLE: bright cartoon fantasy game art matching the attached images: thick clean dark outlines, bold saturated colors, cel shading with strong highlights, lots of shine, gold trim and glowing gems, chunky cute proportions.
+
+BACKGROUND: plain pure white (#FFFFFF) everywhere, no ground, no cast shadows, no frame, no sticker border, no other objects, no sparkle marks or star symbols in the corners, no text, no letters, no numbers, no watermark.
+QUALITY: ultra high resolution, QHD (2560x1440) or higher, crisp clean lines
+```
